@@ -120,11 +120,17 @@ like `colors.background` / `colors.greyBackground` /
 `colors.layeredBackground`, DDS separates palette from semantics, and
 components only ever see the semantic layer.
 
-**The brand anchor is the DevsLab homepage (devslab.kr).** AskLinq's teal was
-provisional; the system standardizes on what the homepage actually uses —
-**cyan** (`#06b6d4`, hover `#22d3ee`) and **zinc neutrals** (`#09090b` dark
-background, `#fafafa` light). AskLinq converges on cyan when it moves onto
-tokens in Phase 1.
+**The system anchor is the DevsLab homepage (devslab.kr).** The system
+standardizes on what the homepage actually uses — **cyan** (`#06b6d4`, hover
+`#22d3ee`) and **zinc neutrals** (`#09090b` dark background, `#fafafa` light).
+
+**The system is multi-brand, however (amended 2026-08-13, asklinq D-051).**
+Cyan is the DevsLab **corporate** brand, not every product's brand — the
+owner's ruling: a product wearing the company homepage's color has no
+identity of its own. Products **own their brand hue** (AskLinq = teal, named
+in the product repo's `brand.ts`) while sharing DDS neutrals, status colors,
+rules and structure. The on-brand rule (note below) applies to **every
+filled brand face**, whatever the hue.
 
 **Raw palette — brand & neutral (full scales).**
 
