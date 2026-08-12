@@ -9,17 +9,20 @@
 
 ## P1 — Phase 1: 토큰 파이프라인과 첫 소비자
 
-### 1. 토큰 빌드 파이프라인 (`@devslab-kr/dds-tokens`) — `대기`
+### 1. 토큰 빌드 파이프라인 (`@devslab-kr/dds-tokens`) — `완료` (2026-08-13)
 스펙 §2. 레포를 pnpm 워크스페이스로 전환하고 `packages/dds-tokens` 생성.
 [Style Dictionary](https://styledictionary.com/) v4로 `tokens/*.json`에서
 한 소스 → 전 산출물 생성:
-- [ ] `dist/tokens.css` — CSS 커스텀 프로퍼티 (`--dds-color-bg-brand: …`),
-      라이트 기본 + `[data-theme="dark"]` 다크 매핑
-- [ ] `dist/tailwind/` — Tailwind v4 `@theme` CSS + v3 `preset.js`
-- [ ] `dist/tokens.ts` — TypeScript 상수 (RN·런타임용)
-- [ ] `dist/ionic.css` — Ionic 테마 변수 매핑 (`--ion-color-primary` 등)
-- [ ] CI (GitHub Actions): 빌드 + JSON 스키마 검증 + 문서·토큰 값 불일치 검사
-- 완료 기준: `pnpm build` 한 번으로 4개 산출물이 나오고 CI가 초록색
+- [x] `dist/tokens.css` — CSS 커스텀 프로퍼티 (`--dds-color-bg-brand: …`),
+      라이트 기본 + `[data-theme="dark"]` 다크 매핑 (서브트리 고정 가능 — D-003)
+- [x] `dist/tailwind/` — Tailwind v4 `@theme` CSS + v3 `preset.js`(+`.cjs`)
+      (색 이름은 시맨틱 경로 유지, spacing은 TW 기본 그리드 위임 — D-004)
+- [x] `dist/tokens.ts` — TypeScript 상수 (RN·런타임용, +`tokens.js`/`tokens.d.ts`)
+- [x] `dist/ionic.css` — Ionic 테마 변수 매핑 (`--ion-color-primary` 등)
+- [x] CI (GitHub Actions): 빌드 + JSON 스키마 검증 + 문서·토큰 값 불일치 검사
+      (`pnpm verify` — 라이트/다크 패리티, 참조 해석, docs/preview 드리프트)
+- 완료 기준 충족: `pnpm build` 한 번으로 4개 산출물, CI 초록. 결정 기록
+  D-001~D-005 (`docs/decisions.md`).
 
 ### 2. CSS 컴포넌트 레이어 (`@devslab-kr/dds-css`) Core 6종 — `대기`
 스펙 §2, §4. `preview/index.html`에 프로토타입된 스타일을 클래스 기반
