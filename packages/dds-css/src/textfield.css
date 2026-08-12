@@ -1,0 +1,63 @@
+/* TextField — label + input + help, error via .dds-field--error OR
+ * aria-invalid="true" on the input (markup should set aria-invalid +
+ * aria-describedby; error is never conveyed by border color alone — the
+ * help line carries the message, spec §6). */
+
+.dds-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  font-family: var(--dds-font-family-sans);
+}
+
+.dds-field__label {
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+  color: var(--dds-color-text-primary);
+}
+
+.dds-input {
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  font-weight: var(--dds-typo-body-2-font-weight);
+  height: var(--dds-space-40);
+  padding: 0 var(--dds-space-12);
+  background: var(--dds-color-bg-default);
+  color: var(--dds-color-text-primary);
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-md);
+}
+
+.dds-input::placeholder {
+  color: var(--dds-color-text-muted);
+}
+
+.dds-input:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: 0;
+  border-color: transparent;
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-input[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--dds-color-bg-subtle);
+}
+
+.dds-field__help {
+  font-size: var(--dds-typo-caption-font-size);
+  line-height: var(--dds-typo-caption-line-height);
+  font-weight: var(--dds-typo-caption-font-weight);
+  color: var(--dds-color-text-muted);
+}
+
+.dds-field--error .dds-input,
+.dds-input[aria-invalid="true"] {
+  border-color: var(--dds-color-status-danger);
+}
+.dds-field--error .dds-field__help {
+  color: var(--dds-color-status-danger);
+}

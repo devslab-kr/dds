@@ -1,0 +1,102 @@
+/* Button — spec §4.2: default → hover → pressed → focus-visible → disabled → loading.
+ * Variants: primary / secondary / ghost / danger. Sizes: sm / md(default) / lg.
+ * Control heights come from the spacing scale (32/40/48); type from the typo
+ * scale (label for sm/md, body-1 size for lg). Loading = aria-busy="true" with
+ * a .dds-spinner child. */
+
+.dds-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dds-space-8);
+  height: var(--dds-space-40);
+  padding: 0 var(--dds-space-16);
+  border: 1px solid transparent;
+  border-radius: var(--dds-radius-md);
+  background: none;
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+  color: var(--dds-color-text-primary);
+  cursor: pointer;
+  transition: background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dds-btn:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: var(--dds-space-2);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-btn[disabled],
+.dds-btn[aria-busy="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dds-btn[aria-busy="true"] {
+  pointer-events: none;
+}
+
+/* variants ---------------------------------------------------------------- */
+
+.dds-btn--primary {
+  background: var(--dds-color-bg-brand);
+  color: var(--dds-color-text-on-brand); /* zinc.950, not white — spec §3.1 on-brand note */
+  font-weight: 600;
+}
+.dds-btn--primary:not([disabled]):not([aria-busy="true"]):hover {
+  background: var(--dds-color-bg-brand-hover);
+}
+.dds-btn--primary:not([disabled]):active {
+  background: var(--dds-color-bg-brand-hover);
+  box-shadow: inset 0 0 0 999px var(--dds-color-overlay-pressed-tint);
+}
+
+.dds-btn--secondary {
+  border-color: var(--dds-color-border-strong);
+}
+.dds-btn--secondary:not([disabled]):not([aria-busy="true"]):hover {
+  background: var(--dds-color-overlay-hover-tint);
+}
+.dds-btn--secondary:not([disabled]):active {
+  background: var(--dds-color-overlay-pressed-tint);
+}
+
+.dds-btn--ghost {
+  color: var(--dds-color-text-brand);
+}
+.dds-btn--ghost:not([disabled]):not([aria-busy="true"]):hover {
+  background: var(--dds-color-overlay-hover-tint);
+}
+.dds-btn--ghost:not([disabled]):active {
+  background: var(--dds-color-overlay-pressed-tint);
+}
+
+.dds-btn--danger {
+  background: var(--dds-color-status-danger);
+  color: var(--dds-color-text-on-status);
+  font-weight: 600;
+}
+.dds-btn--danger:not([disabled]):not([aria-busy="true"]):hover {
+  box-shadow: inset 0 0 0 999px var(--dds-color-overlay-hover-tint);
+}
+.dds-btn--danger:not([disabled]):active {
+  box-shadow: inset 0 0 0 999px var(--dds-color-overlay-pressed-tint);
+}
+
+/* sizes ------------------------------------------------------------------- */
+
+.dds-btn--sm {
+  height: var(--dds-space-32);
+  padding: 0 var(--dds-space-12);
+}
+
+.dds-btn--lg {
+  height: var(--dds-space-48);
+  padding: 0 var(--dds-space-20);
+  font-size: var(--dds-typo-body-1-font-size);
+  line-height: var(--dds-typo-body-1-line-height);
+}

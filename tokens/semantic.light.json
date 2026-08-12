@@ -14,6 +14,7 @@
       "secondary": { "$value": "{palette.zinc.600}", "$type": "color" },
       "muted": { "$value": "{palette.zinc.500}", "$type": "color" },
       "on-brand": { "$value": "{palette.zinc.950}", "$type": "color" },
+      "on-status": { "$value": "{palette.white}", "$type": "color" },
       "brand": { "$value": "{palette.cyan.700}", "$type": "color" }
     },
     "border": {

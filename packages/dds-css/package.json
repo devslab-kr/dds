@@ -1,0 +1,26 @@
+{
+  "name": "@devslab-kr/dds-css",
+  "version": "0.1.0",
+  "description": "DDS CSS component layer — class-based, framework-neutral, semantic-token-only (Core 6: Button, TextField, Badge, Spinner/Skeleton, Dialog, Toast)",
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/dds-css"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./dds.css": "./dist/dds.css",
+    "./components/*": "./dist/components/*"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node scripts/check-css.mjs"
+  }
+}
