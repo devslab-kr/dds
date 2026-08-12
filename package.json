@@ -1,0 +1,14 @@
+{
+  "name": "dds-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "check": "pnpm -r run check && node scripts/check-docs-sync.mjs",
+    "verify": "pnpm run build && pnpm run check"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.12.3"
+}
