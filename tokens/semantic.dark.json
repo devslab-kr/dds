@@ -1,0 +1,40 @@
+{
+  "$description": "DDS semantic tokens — dark mapping (toggle theme, matching devslab.kr). Same token names as semantic.light.json; only values differ.",
+  "color": {
+    "bg": {
+      "default": { "$value": "{palette.zinc.950}", "$type": "color" },
+      "subtle": { "$value": "{palette.zinc.900}", "$type": "color" },
+      "elevated": { "$value": "{palette.zinc.900}", "$type": "color" },
+      "brand": { "$value": "{palette.cyan.500}", "$type": "color" },
+      "brand-hover": { "$value": "{palette.cyan.400}", "$type": "color" },
+      "brand-subtle": { "$value": "{palette.cyan.900}", "$type": "color" }
+    },
+    "text": {
+      "primary": { "$value": "{palette.zinc.50}", "$type": "color" },
+      "secondary": { "$value": "{palette.zinc.400}", "$type": "color" },
+      "muted": { "$value": "{palette.zinc.500}", "$type": "color" },
+      "on-brand": { "$value": "{palette.zinc.950}", "$type": "color" },
+      "brand": { "$value": "{palette.cyan.400}", "$type": "color" }
+    },
+    "border": {
+      "default": { "$value": "{palette.zinc.800}", "$type": "color" },
+      "strong": { "$value": "{palette.zinc.700}", "$type": "color" },
+      "focus": { "$value": "{palette.cyan.400}", "$type": "color" }
+    },
+    "status": {
+      "success": { "$value": "{palette.green.400}", "$type": "color" },
+      "success-bg": { "$value": "{palette.green.900}", "$type": "color" },
+      "warning": { "$value": "{palette.amber.400}", "$type": "color" },
+      "warning-bg": { "$value": "{palette.amber.900}", "$type": "color" },
+      "danger": { "$value": "{palette.red.400}", "$type": "color" },
+      "danger-bg": { "$value": "{palette.red.900}", "$type": "color" },
+      "info": { "$value": "{palette.blue.400}", "$type": "color" },
+      "info-bg": { "$value": "{palette.blue.900}", "$type": "color" }
+    },
+    "overlay": {
+      "dim": { "$value": "{palette.alpha.black-25}", "$type": "color" },
+      "hover-tint": { "$value": "{palette.alpha.white-8}", "$type": "color" },
+      "pressed-tint": { "$value": "{palette.alpha.white-8}", "$type": "color" }
+    }
+  }
+}

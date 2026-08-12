@@ -1,0 +1,87 @@
+{
+  "$description": "DDS raw palette — the only place hex values live. Components must reference semantic tokens, never these. Brand anchors extracted from devslab.kr (electric cyan + zinc neutrals).",
+  "palette": {
+    "cyan": {
+      "50": { "$value": "#ecfeff", "$type": "color" },
+      "100": { "$value": "#cffafe", "$type": "color" },
+      "200": { "$value": "#a5f3fc", "$type": "color" },
+      "300": { "$value": "#67e8f9", "$type": "color" },
+      "400": { "$value": "#22d3ee", "$type": "color" },
+      "500": { "$value": "#06b6d4", "$type": "color" },
+      "600": { "$value": "#0891b2", "$type": "color" },
+      "700": { "$value": "#0e7490", "$type": "color" },
+      "800": { "$value": "#155e75", "$type": "color" },
+      "900": { "$value": "#164e63", "$type": "color" }
+    },
+    "zinc": {
+      "50": { "$value": "#fafafa", "$type": "color" },
+      "100": { "$value": "#f4f4f5", "$type": "color" },
+      "200": { "$value": "#e4e4e7", "$type": "color" },
+      "300": { "$value": "#d4d4d8", "$type": "color" },
+      "400": { "$value": "#a1a1aa", "$type": "color" },
+      "500": { "$value": "#71717a", "$type": "color" },
+      "600": { "$value": "#52525b", "$type": "color" },
+      "700": { "$value": "#3f3f46", "$type": "color" },
+      "800": { "$value": "#27272a", "$type": "color" },
+      "900": { "$value": "#18181b", "$type": "color" },
+      "950": { "$value": "#09090b", "$type": "color" }
+    },
+    "red": {
+      "50": { "$value": "#fef2f2", "$type": "color" },
+      "100": { "$value": "#fee2e2", "$type": "color" },
+      "200": { "$value": "#fecaca", "$type": "color" },
+      "300": { "$value": "#fca5a5", "$type": "color" },
+      "400": { "$value": "#f87171", "$type": "color" },
+      "500": { "$value": "#ef4444", "$type": "color" },
+      "600": { "$value": "#dc2626", "$type": "color" },
+      "700": { "$value": "#b91c1c", "$type": "color" },
+      "800": { "$value": "#991b1b", "$type": "color" },
+      "900": { "$value": "#7f1d1d", "$type": "color" }
+    },
+    "amber": {
+      "50": { "$value": "#fffbeb", "$type": "color" },
+      "100": { "$value": "#fef3c7", "$type": "color" },
+      "200": { "$value": "#fde68a", "$type": "color" },
+      "300": { "$value": "#fcd34d", "$type": "color" },
+      "400": { "$value": "#fbbf24", "$type": "color" },
+      "500": { "$value": "#f59e0b", "$type": "color" },
+      "600": { "$value": "#d97706", "$type": "color" },
+      "700": { "$value": "#b45309", "$type": "color" },
+      "800": { "$value": "#92400e", "$type": "color" },
+      "900": { "$value": "#78350f", "$type": "color" }
+    },
+    "green": {
+      "50": { "$value": "#f0fdf4", "$type": "color" },
+      "100": { "$value": "#dcfce7", "$type": "color" },
+      "200": { "$value": "#bbf7d0", "$type": "color" },
+      "300": { "$value": "#86efac", "$type": "color" },
+      "400": { "$value": "#4ade80", "$type": "color" },
+      "500": { "$value": "#22c55e", "$type": "color" },
+      "600": { "$value": "#16a34a", "$type": "color" },
+      "700": { "$value": "#15803d", "$type": "color" },
+      "800": { "$value": "#166534", "$type": "color" },
+      "900": { "$value": "#14532d", "$type": "color" }
+    },
+    "blue": {
+      "50": { "$value": "#eff6ff", "$type": "color" },
+      "100": { "$value": "#dbeafe", "$type": "color" },
+      "200": { "$value": "#bfdbfe", "$type": "color" },
+      "300": { "$value": "#93c5fd", "$type": "color" },
+      "400": { "$value": "#60a5fa", "$type": "color" },
+      "500": { "$value": "#3b82f6", "$type": "color" },
+      "600": { "$value": "#2563eb", "$type": "color" },
+      "700": { "$value": "#1d4ed8", "$type": "color" },
+      "800": { "$value": "#1e40af", "$type": "color" },
+      "900": { "$value": "#1e3a8a", "$type": "color" }
+    },
+    "alpha": {
+      "black-5": { "$value": "#0000000d", "$type": "color" },
+      "black-8": { "$value": "#00000014", "$type": "color" },
+      "black-10": { "$value": "#0000001a", "$type": "color" },
+      "black-25": { "$value": "#00000040", "$type": "color" },
+      "white-8": { "$value": "#ffffff14", "$type": "color" },
+      "white-85": { "$value": "#ffffffd9", "$type": "color" }
+    },
+    "white": { "$value": "#ffffff", "$type": "color" }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "$description": "DDS non-color foundations — typography, spacing, radius, elevation, motion. Web uses px (rem-equivalent at 16px root); RN uses the same numbers as pt.",
+  "font": {
+    "family": {
+      "sans": {
+        "$value": "Geist, Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+        "$type": "fontFamily"
+      },
+      "mono": {
+        "$value": "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        "$type": "fontFamily"
+      }
+    }
+  },
+  "typo": {
+    "display": { "$value": { "fontSize": 32, "lineHeight": 40, "fontWeight": 700 }, "$type": "typography" },
+    "title-1": { "$value": { "fontSize": 24, "lineHeight": 32, "fontWeight": 700 }, "$type": "typography" },
+    "title-2": { "$value": { "fontSize": 20, "lineHeight": 28, "fontWeight": 600 }, "$type": "typography" },
+    "title-3": { "$value": { "fontSize": 17, "lineHeight": 24, "fontWeight": 600 }, "$type": "typography" },
+    "body-1": { "$value": { "fontSize": 16, "lineHeight": 24, "fontWeight": 400 }, "$type": "typography" },
+    "body-2": { "$value": { "fontSize": 14, "lineHeight": 20, "fontWeight": 400 }, "$type": "typography" },
+    "label": { "$value": { "fontSize": 13, "lineHeight": 16, "fontWeight": 500 }, "$type": "typography" },
+    "caption": { "$value": { "fontSize": 12, "lineHeight": 16, "fontWeight": 400 }, "$type": "typography" }
+  },
+  "space": {
+    "0": { "$value": 0, "$type": "dimension" },
+    "2": { "$value": 2, "$type": "dimension" },
+    "4": { "$value": 4, "$type": "dimension" },
+    "8": { "$value": 8, "$type": "dimension" },
+    "12": { "$value": 12, "$type": "dimension" },
+    "16": { "$value": 16, "$type": "dimension" },
+    "20": { "$value": 20, "$type": "dimension" },
+    "24": { "$value": 24, "$type": "dimension" },
+    "32": { "$value": 32, "$type": "dimension" },
+    "40": { "$value": 40, "$type": "dimension" },
+    "48": { "$value": 48, "$type": "dimension" },
+    "64": { "$value": 64, "$type": "dimension" }
+  },
+  "radius": {
+    "sm": { "$value": 4, "$type": "dimension" },
+    "md": { "$value": 8, "$type": "dimension" },
+    "lg": { "$value": 12, "$type": "dimension" },
+    "xl": { "$value": 16, "$type": "dimension" },
+    "full": { "$value": 9999, "$type": "dimension" }
+  },
+  "elevation": {
+    "1": {
+      "$type": "shadow",
+      "$value": { "web": "0 1px 3px rgba(20,22,26,0.08)", "androidElevation": 2, "ios": { "shadowColor": "#14161a", "shadowOpacity": 0.08, "shadowRadius": 3, "shadowOffset": { "width": 0, "height": 1 } } }
+    },
+    "2": {
+      "$type": "shadow",
+      "$value": { "web": "0 4px 12px rgba(20,22,26,0.12)", "androidElevation": 6, "ios": { "shadowColor": "#14161a", "shadowOpacity": 0.12, "shadowRadius": 12, "shadowOffset": { "width": 0, "height": 4 } } }
+    },
+    "3": {
+      "$type": "shadow",
+      "$value": { "web": "0 12px 32px rgba(20,22,26,0.18)", "androidElevation": 12, "ios": { "shadowColor": "#14161a", "shadowOpacity": 0.18, "shadowRadius": 32, "shadowOffset": { "width": 0, "height": 12 } } }
+    }
+  },
+  "motion": {
+    "duration": {
+      "fast": { "$value": "100ms", "$type": "duration" },
+      "base": { "$value": "200ms", "$type": "duration" },
+      "slow": { "$value": "300ms", "$type": "duration" }
+    },
+    "easing": {
+      "standard": { "$value": [0.2, 0, 0, 1], "$type": "cubicBezier" },
+      "enter": { "$value": [0, 0, 0, 1], "$type": "cubicBezier" },
+      "exit": { "$value": [0.3, 0, 1, 1], "$type": "cubicBezier" }
+    }
+  }
+}

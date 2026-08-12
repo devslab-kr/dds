@@ -1,0 +1,40 @@
+{
+  "$description": "DDS semantic tokens — light mapping (default theme, matching devslab.kr). The only layer components may reference.",
+  "color": {
+    "bg": {
+      "default": { "$value": "{palette.white}", "$type": "color" },
+      "subtle": { "$value": "{palette.zinc.50}", "$type": "color" },
+      "elevated": { "$value": "{palette.white}", "$type": "color" },
+      "brand": { "$value": "{palette.cyan.500}", "$type": "color" },
+      "brand-hover": { "$value": "{palette.cyan.400}", "$type": "color" },
+      "brand-subtle": { "$value": "{palette.cyan.50}", "$type": "color" }
+    },
+    "text": {
+      "primary": { "$value": "{palette.zinc.950}", "$type": "color" },
+      "secondary": { "$value": "{palette.zinc.600}", "$type": "color" },
+      "muted": { "$value": "{palette.zinc.500}", "$type": "color" },
+      "on-brand": { "$value": "{palette.zinc.950}", "$type": "color" },
+      "brand": { "$value": "{palette.cyan.700}", "$type": "color" }
+    },
+    "border": {
+      "default": { "$value": "{palette.zinc.200}", "$type": "color" },
+      "strong": { "$value": "{palette.zinc.300}", "$type": "color" },
+      "focus": { "$value": "{palette.cyan.500}", "$type": "color" }
+    },
+    "status": {
+      "success": { "$value": "{palette.green.700}", "$type": "color" },
+      "success-bg": { "$value": "{palette.green.50}", "$type": "color" },
+      "warning": { "$value": "{palette.amber.700}", "$type": "color" },
+      "warning-bg": { "$value": "{palette.amber.50}", "$type": "color" },
+      "danger": { "$value": "{palette.red.700}", "$type": "color" },
+      "danger-bg": { "$value": "{palette.red.50}", "$type": "color" },
+      "info": { "$value": "{palette.blue.700}", "$type": "color" },
+      "info-bg": { "$value": "{palette.blue.50}", "$type": "color" }
+    },
+    "overlay": {
+      "dim": { "$value": "{palette.alpha.black-25}", "$type": "color" },
+      "hover-tint": { "$value": "{palette.alpha.black-5}", "$type": "color" },
+      "pressed-tint": { "$value": "{palette.alpha.black-8}", "$type": "color" }
+    }
+  }
+}
