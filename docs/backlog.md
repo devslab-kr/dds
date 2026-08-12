@@ -46,11 +46,11 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
 소비하도록 전환. 기존 teal(`#14b8a6`)을 cyan으로 수렴.
 - 참고: asklinq `claude/tds-react-native-design-ohuzj0` 브랜치에 이 작업의
   전사(前史)가 있다 (문서는 이 레포로 이동됨, 커밋 `b396978` 참조)
-- [x] **teal → cyan 수렴** (asklinq#195, asklinq D-050 — 프로덕션 배포·실측):
-      vendored `src/dds/tokens.ts` + 시맨틱 `brand.ts`(D-009 모델). 위젯
-      기본색(cyan.700)·관리자/가입 크롬·랜딩/약관·메일 버튼·파비콘(인라인
-      PNG 재렌더, 마크는 on-brand 규칙대로 zinc.950). 테넌트 저장색은 불변.
-      전체 스위트 1132/1132.
+- [x] **토큰 소비 + 브랜드 정리** (asklinq#195 → 같은 날 D-051로 개정):
+      cyan 수렴은 소유자 반려("홈페이지랑 같은 색") → **멀티 브랜드로 확정**
+      (dds D-010, 스펙 3.1 개정) — AskLinq는 제품 teal 유지, 뉴트럴·상태는
+      vendored DDS 토큰에서(관리자/가입/메일 slate→zinc 리테마), 파비콘
+      마크는 on-brand 규칙대로 zinc.950. 테넌트 저장색 불변.
 - `dds-css` 클래스 소비는 미착수 — asklinq 관리자/위젯 CSS는 자체 체계
   (`admin/styles.ts` 등)라 클래스 교체는 별도 리팩토링. 토큰 값 수렴이
   Phase 1의 목적(색 한 소스)이며, 컴포넌트 레이어 전환은 실익이 생길 때.
