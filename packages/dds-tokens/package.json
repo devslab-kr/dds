@@ -1,0 +1,40 @@
+{
+  "name": "@devslab-kr/dds-tokens",
+  "version": "0.1.0",
+  "description": "DDS (DevsLab Design System) design tokens — one JSON source, built for CSS, Tailwind, TypeScript/RN and Ionic",
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/dds-tokens"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    },
+    "./tokens.ts": "./dist/tokens.ts",
+    "./tokens.css": "./dist/tokens.css",
+    "./ionic.css": "./dist/ionic.css",
+    "./tailwind/theme.css": "./dist/tailwind/theme.css",
+    "./tailwind/preset": {
+      "import": "./dist/tailwind/preset.js",
+      "require": "./dist/tailwind/preset.cjs"
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node scripts/validate-tokens.mjs && tsc --noEmit --strict dist/tokens.ts dist/tokens.d.ts"
+  },
+  "devDependencies": {
+    "style-dictionary": "^4.3.0",
+    "typescript": "^5.7.0"
+  }
+}

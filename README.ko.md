@@ -13,7 +13,9 @@ React · Vue · Ionic · React Native 는 소비자다.
 | 경로 | 내용 |
 | --- | --- |
 | [`docs/design-system.ko.md`](docs/design-system.ko.md) | 규칙 명세 (v0): 원칙, 아키텍처, 파운데이션, 컴포넌트 계약, 거버넌스 |
-| [`tokens/`](tokens/) | Phase 0 디자인 토큰 ([W3C 포맷](https://design-tokens.github.io/community-group/format/)): 원시 팔레트, 라이트/다크 시맨틱 매핑, 타이포·간격·라운드·그림자·모션 |
+| [`docs/decisions.md`](docs/decisions.md) | 결정 로그 — 파운데이션·아키텍처 결정과 근거 |
+| [`tokens/`](tokens/) | 디자인 토큰 소스 ([W3C 포맷](https://design-tokens.github.io/community-group/format/)): 원시 팔레트, 라이트/다크 시맨틱 매핑, 타이포·간격·라운드·그림자·모션 |
+| [`packages/dds-tokens/`](packages/dds-tokens/) | `@devslab-kr/dds-tokens` — 토큰 빌드 파이프라인: `tokens.css`, Tailwind v4 `@theme` + v3 preset, `tokens.ts` (RN·런타임), `ionic.css` |
 | [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림) |
 | [`brand/index.html`](brand/index.html) | 브랜드 아이덴티티 가이드: 로고 규정, Electric Cyan, 모티프, 보이스 & 톤 |
 
@@ -25,8 +27,16 @@ React · Vue · Ionic · React Native 는 소비자다.
 - Geist / Geist Mono, 한글은 Pretendard → 시스템 고딕 폴백
 - cyan 면 위 텍스트는 흰색이 아니라 `zinc.950` (WCAG AA: 2.3:1 vs 약 8:1)
 
+## 개발
+
+pnpm 워크스페이스. `pnpm install` 후:
+
+- `pnpm build` — 전 패키지 빌드
+- `pnpm verify` — 빌드 + 토큰 검증 + 문서·preview↔토큰 불일치 검사 (CI와 동일)
+
 ## 로드맵
 
-패키지는 소비자가 생길 때만 만든다 (명세 §8):
-`@devslab-kr/dds-tokens` → `dds-css` → `dds-icons` → 모바일 방향에 따라
-`dds-native` (RN) 또는 Ionic 테마 매핑.
+우선순위는 [`docs/backlog.md`](docs/backlog.md)에. 패키지는 소비자가 생길
+때만 만든다 (명세 §8):
+`@devslab-kr/dds-tokens` (✅ 2026-08-13) → `dds-css` → `dds-icons` → 모바일
+방향에 따라 `dds-native` (RN) 또는 Ionic 테마 매핑.
