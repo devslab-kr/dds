@@ -5,6 +5,25 @@
 
 ---
 
+## D-009 — 미발행 기간의 소비 방식: vendored 사본 (2026-08-13)
+
+**결정.** 패키지 발행(공개 여부·레지스트리)이 결정되기 전까지, 소비자는
+`dds-tokens` 빌드 산출물의 **커밋된 사본**을 든다. 첫 소비자 devslab.kr:
+`src/styles/dds/{tokens.css,preset.cjs,palette.json}` + 동기화 스크립트
+(`scripts/sync-dds-tokens.mjs`) — 토큰 변경 후 스크립트 실행 → diff 리뷰 →
+커밋.
+
+**근거.** devslab.kr은 Cloudflare Workers Build가 GitHub repo만 보고
+빌드한다 — file: 의존은 CI에서 죽고, GitHub Packages 소비는 빌드 환경에
+토큰 시크릿을 요구한다. 발행 방식이 미해결 오너 질문인 상태에서 그 결정을
+소비 시작의 전제로 만들지 않는다.
+
+**트레이드오프.** 사본은 손동기화라 드리프트 가능 — 산출물 헤더의 "do not
+edit" + diff 리뷰가 방어선. 소비자가 늘면 사본도 늘어난다.
+
+**재검토 시점.** 발행이 결정되는 즉시 — 소비자들은 사본을 지우고 의존성으로
+전환한다 (스크립트가 그 목록의 역할).
+
 ## D-008 — Storybook은 html-vite, React 비의존 (2026-08-13)
 
 **결정.** Storybook(v10)을 `@storybook/html-vite` 프레임워크로 도입한다.
