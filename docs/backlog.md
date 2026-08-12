@@ -51,9 +51,17 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
 
 ## P2 — 확장
 
-### 4. 쇼케이스 사이트 — `진행 중` (Storybook 도입 2026-08-13, 배포는 공개 결정 대기)
+### 4. 쇼케이스 사이트 — `완료` (2026-08-13)
 `preview/` + `brand/`를 GitHub Pages(또는 org 허브 devslab-kr.github.io에
-링크)로 배포. 장기적으로 Storybook 도입 검토 (§4.4의 스토리 요구사항).
+링크)로 배포. 장기적으로 Storybook 도입 검토 (스펙 4.4의 스토리 요구사항).
+- [x] **쇼케이스 배포 — GitHub Pages 대신 devslab.kr에 실어서** (devlab.kr#31):
+      repo 공개 없이 공개 URL 확보. `preview/index.html` → devslab.kr/dds/,
+      `preview/components.html` → /dds/components.html (vendored 사본 +
+      sync 스크립트, D-009 모델). brand/는 사이트 자체 /brand 페이지가 대체.
+      /brand의 design system 블록에서 링크. **preview를 고치면
+      devlab.kr에서 `node scripts/sync-dds-showcase.mjs` 재실행 필요.**
+- Storybook 정적 사이트의 공개 배포만 미배포로 남음 — "DDS 공개 여부"
+  결정에 종속(로컬 `pnpm storybook`으로 충분, 소유자 배포 보류 선택).
 - [x] **Storybook 도입** (`pnpm storybook` / `build-storybook`, html-vite —
       React 비의존, D-008): Core 6종 전 variant·size·상태 스토리 +
       Foundations 토큰 표(생성된 tokens.js에서 렌더 — 드리프트 불가) +
