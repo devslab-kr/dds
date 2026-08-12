@@ -22,6 +22,15 @@
   header.site { display: flex; align-items: baseline; gap: var(--dds-space-16); padding: var(--dds-space-40) 0 var(--dds-space-24); }
   header.site h1 { font-size: var(--dds-typo-title-1-font-size); line-height: var(--dds-typo-title-1-line-height); font-weight: var(--dds-typo-title-1-font-weight); margin: 0; }
   header.site .src { font-size: var(--dds-typo-label-font-size); color: var(--dds-color-text-muted); margin-left: auto; font-family: var(--dds-font-family-mono); }
+  header.site nav { display: flex; gap: var(--dds-space-16); flex-basis: 100%; margin-top: var(--dds-space-4); }
+  header.site nav a {
+    font-family: var(--dds-font-family-mono);
+    font-size: var(--dds-typo-label-font-size);
+    line-height: var(--dds-typo-label-line-height);
+    color: var(--dds-color-text-brand);
+    text-decoration: none;
+  }
+  header.site nav a:hover { text-decoration: underline; }
   h2 { font-size: var(--dds-typo-title-2-font-size); line-height: var(--dds-typo-title-2-line-height); font-weight: var(--dds-typo-title-2-font-weight); margin: var(--dds-space-48) 0 var(--dds-space-12); }
   .twin { display: grid; grid-template-columns: 1fr 1fr; gap: var(--dds-space-16); }
   @media (max-width: 760px) { .twin { grid-template-columns: 1fr; } }
@@ -53,6 +62,11 @@
     <h1>DDS 컴포넌트</h1>
     <button class="dds-btn dds-btn--secondary dds-btn--sm" id="themeToggle">테마 전환</button>
     <span class="src">@devslab-kr/dds-css · Core 6</span>
+    <nav aria-label="DDS 쇼케이스">
+      <a href="./index.html">&gt; ./dds --foundation</a>
+      <a href="https://devslab.kr/brand/">&gt; ./brand --guide</a>
+      <a href="https://devslab.kr/">&gt; cd devslab.kr</a>
+    </nav>
   </header>
 
   <!-- ================= Button ================= -->
