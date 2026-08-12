@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevsLab Brand</title>
+<style>
+  /* light default + dark toggle — same policy as devslab.kr */
+  :root {
+    --bg: #ffffff;
+    --bg-2: #fafafa;
+    --bg-3: #f4f4f5;
+    --text: #09090b;
+    --text-2: #52525b;
+    --muted: #71717a;
+    --border: #e4e4e7;
+    --border-2: #d4d4d8;
+    --accent: #0e7490;
+    --accent-strong: #06b6d4;
+    --mark: #09090b;
+    --card-shadow: 0 1px 3px rgba(20, 22, 26, 0.08);
+    --ok: #15803d;
+    --bad: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #09090b;
+      --bg-2: #18181b;
+      --bg-3: #27272a;
+      --text: #fafafa;
+      --text-2: #a1a1aa;
+      --muted: #71717a;
+      --border: #27272a;
+      --border-2: #3f3f46;
+      --accent: #22d3ee;
+      --accent-strong: #06b6d4;
+      --mark: #fafafa;
+      --card-shadow: none;
+      --ok: #4ade80;
+      --bad: #f87171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #09090b;
+    --bg-2: #18181b;
+    --bg-3: #27272a;
+    --text: #fafafa;
+    --text-2: #a1a1aa;
+    --muted: #71717a;
+    --border: #27272a;
+    --border-2: #3f3f46;
+    --accent: #22d3ee;
+    --accent-strong: #06b6d4;
+    --mark: #fafafa;
+    --card-shadow: none;
+    --ok: #4ade80;
+    --bad: #f87171;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Geist, "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo",
+      "Noto Sans KR", "Malgun Gothic", sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono {
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 112px; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 96px 0 88px; border-bottom: 1px solid var(--border); }
+  .hero .mark { width: 88px; height: 88px; color: var(--mark); margin-bottom: 28px; }
+  .hero h1 {
+    margin: 0 0 10px; font-size: clamp(40px, 7vw, 60px); line-height: 1.05;
+    font-weight: 700; letter-spacing: -0.03em;
+  }
+  .hero .tag { font-size: 17px; line-height: 24px; color: var(--text-2); margin: 0 0 30px; }
+  .prompt { font-size: 14px; color: var(--accent); }
+  .prompt .caret {
+    display: inline-block; width: 8px; height: 15px; margin-left: 2px;
+    background: var(--accent); vertical-align: -2px;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .prompt .caret { animation: none; } }
+
+  /* ---------- sections ---------- */
+  section { padding: 72px 0 0; }
+  .idx { font-size: 13px; letter-spacing: 0.06em; color: var(--accent); margin: 0 0 8px; }
+  section > h2 { font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px; text-wrap: balance; }
+  section > .lead { font-size: 15px; line-height: 24px; color: var(--text-2); max-width: 44em; margin: 0 0 32px; }
+  h3.sub { font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin: 40px 0 14px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; box-shadow: var(--card-shadow);
+  }
+  .card .cap { font-size: 12px; color: var(--muted); margin: 14px 0 0; line-height: 17px; }
+  .card .cap b { color: var(--text-2); font-weight: 500; }
+
+  /* ---------- logo section ---------- */
+  .logostage { display: flex; align-items: center; justify-content: center; min-height: 180px; border-radius: 8px; }
+  .logostage svg { color: inherit; }
+  .stage-dark { background: #09090b; color: #fafafa; border: 1px solid #27272a; }
+  .stage-light { background: #ffffff; color: #09090b; border: 1px solid #e4e4e7; }
+  .lockup { display: flex; align-items: center; gap: 14px; }
+  .lockup .wordmark { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+
+  .construction { display: flex; align-items: center; justify-content: center; padding: 20px 0; }
+
+  .dontgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .dont {
+    border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2);
+    padding: 18px 12px 12px; text-align: center;
+  }
+  .dont .box { height: 64px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .dont svg { width: 40px; height: 40px; }
+  .dont .lbl { font-size: 12px; line-height: 16px; color: var(--text-2); }
+  .dont .lbl::before { content: "✕ "; color: #f87171; }
+
+  /* ---------- color section ---------- */
+  .colorhero { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .colorhero { grid-template-columns: 1fr; } }
+  .colorcard { border-radius: 12px; padding: 20px; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--border); }
+  .colorcard .nm { font-weight: 600; font-size: 15px; }
+  .colorcard .val { font-size: 12px; opacity: 0.85; }
+  .ratio { display: flex; height: 40px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .ratio div { display: flex; align-items: center; padding: 0 12px; font-size: 12px; white-space: nowrap; }
+  .zincstrip { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .zincstrip div { flex: 1; height: 44px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; font-size: 10px; }
+
+  .rulecard { border-left: 3px solid var(--accent-strong); background: var(--bg-2); border-radius: 0 12px 12px 0; padding: 18px 22px; margin-top: 16px; }
+  .rulecard p { margin: 0; font-size: 14px; line-height: 21px; color: var(--text-2); }
+  .rulecard p b { color: var(--text); }
+
+  /* ---------- typography ---------- */
+  .typespec { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .typespec .row { padding: 24px; border-bottom: 1px solid var(--border); background: var(--bg-2); }
+  .typespec .row:last-child { border-bottom: none; }
+  .typespec .who { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+  .typespec .who b { color: var(--accent); font-weight: 500; }
+  .spec-display { font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; margin: 0; }
+  .spec-body { font-size: 16px; line-height: 24px; margin: 0; max-width: 40em; }
+  .spec-mono { font-size: 14px; line-height: 20px; margin: 0; color: var(--text-2); }
+  .spec-mono .p { color: var(--accent); }
+
+  /* ---------- motifs ---------- */
+  .motifgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .motif { border: 1px solid var(--border); background: var(--bg-2); border-radius: 12px; padding: 18px; }
+  .motif .demo { font-size: 15px; margin-bottom: 10px; min-height: 24px; }
+  .motif .demo .a { color: var(--accent); }
+  .motif .why { font-size: 12px; line-height: 17px; color: var(--muted); }
+
+  /* ---------- voice ---------- */
+  .voicegrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .voicegrid { grid-template-columns: 1fr; } }
+  .voice { border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: var(--bg-2); }
+  .voice .k { font-size: 12px; letter-spacing: 0.05em; font-weight: 500; margin-bottom: 10px; }
+  .voice.do .k { color: var(--ok); }
+  .voice.dont-v .k { color: var(--bad); }
+  .voice p { margin: 0; font-size: 15px; line-height: 23px; }
+  .voice .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* ---------- applications ---------- */
+  .apps { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; align-items: stretch; }
+  @media (max-width: 720px) { .apps { grid-template-columns: 1fr; } }
+  .bizcard {
+    aspect-ratio: 1.7; border-radius: 12px; background: #09090b; color: #fafafa;
+    border: 1px solid #27272a; padding: 22px; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .bizcard .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .bizcard svg { width: 26px; height: 26px; color: #fafafa; }
+  .bizcard .who { font-size: 13px; font-weight: 600; }
+  .bizcard .who span { display: block; font-weight: 400; font-size: 11px; color: #a1a1aa; margin-top: 2px; }
+  .bizcard .foot { font-size: 11px; color: #71717a; display: flex; justify-content: space-between; }
+  .bizcard .foot .a { color: #22d3ee; }
+  .ogbanner {
+    aspect-ratio: 1.91; border-radius: 12px; background: #09090b; color: #fafafa;
+    border: 1px solid #27272a; padding: 28px; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .ogbanner::after {
+    content: ""; position: absolute; right: -90px; bottom: -120px; width: 300px; height: 300px;
+    border-radius: 50%; background: radial-gradient(circle, rgba(6, 182, 212, 0.3), transparent 70%);
+  }
+  .ogbanner .p { font-size: 12px; color: #22d3ee; margin-bottom: 10px; }
+  .ogbanner h4 { margin: 0 0 6px; font-size: 26px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+  .ogbanner p.d { margin: 0; font-size: 13px; color: #a1a1aa; }
+  .ogbanner .brand { position: absolute; top: 24px; left: 28px; display: flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 600; }
+  .ogbanner .brand svg { width: 18px; height: 18px; color: #fafafa; }
+
+  footer.site {
+    margin-top: 96px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 20px;
+  }
+  footer.site a { color: var(--accent); text-decoration: none; }
+  footer.site a:hover { text-decoration: underline; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="dl-mark" viewBox="0 0 32 32">
+      <path d="M 4 4 L 28 4 L 28 12 L 20 12 L 20 28 L 4 28 Z" fill="currentColor"></path>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="mark" aria-hidden="true"><use href="#dl-mark"/></svg>
+    <h1>DevsLab</h1>
+    <p class="tag">SaaS Development Studio — MVP부터 엔터프라이즈까지, 빠르고 견고하게.</p>
+    <p class="prompt mono">&gt; from idea to launch<span class="caret" aria-hidden="true"></span></p>
+  </div>
+
+  <!-- ============ 01 logo ============ -->
+  <section>
+    <p class="idx mono">[01] logo</p>
+    <h2>마크는 모노크롬, 단 하나의 형태</h2>
+    <p class="lead">
+      데브스랩 마크는 32 그리드 위의 단일 폴리곤입니다 — 블록에서 잘려 나온 ㄱ자 형태는
+      코드 블록을 쌓아 SaaS의 골격을 세우는 아키텍처 설계를 가리킵니다. 마크와 워드마크는
+      언제나 모노크롬(라이트에서 zinc.950, 다크에서 zinc.50)으로만 씁니다.
+    </p>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="logostage stage-light">
+          <div class="lockup">
+            <svg width="44" height="44" aria-hidden="true"><use href="#dl-mark"/></svg>
+            <span class="wordmark">DevsLab</span>
+          </div>
+        </div>
+        <p class="cap"><b>라이트 위 —</b> zinc.950 (#09090B). 기본 테마이자 문서·인쇄물 기본.</p>
+      </div>
+      <div class="card">
+        <div class="logostage stage-dark">
+          <div class="lockup">
+            <svg width="44" height="44" aria-hidden="true"><use href="#dl-mark"/></svg>
+            <span class="wordmark">DevsLab</span>
+          </div>
+        </div>
+        <p class="cap"><b>다크 위 —</b> zinc.50 (#FAFAFA). 다크 테마·발표 자료용.</p>
+      </div>
+    </div>
+
+    <h3 class="sub">구성 — 32 그리드</h3>
+    <div class="grid2">
+      <div class="card">
+        <div class="construction">
+          <svg width="200" height="200" viewBox="-2 -2 36 36" aria-label="로고 구성 그리드">
+            <g stroke="var(--border-2)" stroke-width="0.12">
+              <path d="M0 0H32M0 4H32M0 8H32M0 12H32M0 16H32M0 20H32M0 24H32M0 28H32M0 32H32"/>
+              <path d="M0 0V32M4 0V32M8 0V32M12 0V32M16 0V32M20 0V32M24 0V32M28 0V32M32 0V32"/>
+            </g>
+            <path d="M 4 4 L 28 4 L 28 12 L 20 12 L 20 28 L 4 28 Z" fill="var(--mark)" opacity="0.92"></path>
+            <g stroke="var(--accent-strong)" stroke-width="0.35">
+              <path d="M20 12 L28 12 M20 12 L20 28" fill="none"/>
+            </g>
+          </svg>
+        </div>
+        <p class="cap"><b>비례 —</b> 몸통 24×24, 노치 8×16. 노치의 안쪽 모서리 (20,12) 가 형태의 기준점입니다.</p>
+      </div>
+      <div class="card">
+        <div class="construction">
+          <svg width="200" height="200" viewBox="-10 -10 52 52" aria-label="여백 규정">
+            <rect x="-8" y="-8" width="48" height="48" fill="none" stroke="var(--accent-strong)" stroke-width="0.35" stroke-dasharray="1.6 1.6"/>
+            <path d="M 4 4 L 28 4 L 28 12 L 20 12 L 20 28 L 4 28 Z" fill="var(--mark)" opacity="0.92"></path>
+          </svg>
+        </div>
+        <p class="cap"><b>여백 —</b> 사방으로 노치 너비(8유닛)만큼 비웁니다. 최소 표시 크기 16px.</p>
+      </div>
+    </div>
+
+    <h3 class="sub">금지</h3>
+    <div class="dontgrid">
+      <div class="dont">
+        <div class="box"><svg viewBox="0 0 32 32" style="color:#06b6d4"><use href="#dl-mark"/></svg></div>
+        <span class="lbl">cyan으로 칠하기 — cyan은 액센트지 로고색이 아닙니다</span>
+      </div>
+      <div class="dont">
+        <div class="box"><svg viewBox="0 0 32 32" style="color:var(--mark); transform:scaleX(1.6)"><use href="#dl-mark"/></svg></div>
+        <span class="lbl">비례 왜곡</span>
+      </div>
+      <div class="dont">
+        <div class="box"><svg viewBox="0 0 32 32" style="color:var(--mark); transform:rotate(24deg)"><use href="#dl-mark"/></svg></div>
+        <span class="lbl">회전</span>
+      </div>
+      <div class="dont">
+        <div class="box"><svg viewBox="0 0 32 32" style="color:var(--mark); filter:drop-shadow(3px 4px 3px rgba(6,182,212,.8))"><use href="#dl-mark"/></svg></div>
+        <span class="lbl">그림자·글로우 효과</span>
+      </div>
+      <div class="dont">
+        <div class="box" style="background:#71717a; border-radius:6px;"><svg viewBox="0 0 32 32" style="color:#a1a1aa"><use href="#dl-mark"/></svg></div>
+        <span class="lbl">저대비 배경 위 사용</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 color ============ -->
+  <section>
+    <p class="idx mono">[02] color</p>
+    <h2>Electric Cyan, 아껴 쓰는 한 가지 색</h2>
+    <p class="lead">
+      브랜드 팔레트는 zinc 뉴트럴과 단 하나의 액센트 — 코드베이스에서 <span class="mono">electric</span>이라
+      부르는 cyan — 으로 이루어집니다. 화면의 약 90%는 뉴트럴이고, cyan은 프롬프트·링크·핵심 CTA에만
+      허락됩니다. 아껴 쓸수록 강해지는 색입니다.
+    </p>
+
+    <div class="colorhero">
+      <div class="colorcard" style="background:#06b6d4; color:#09090b; border-color:#06b6d4;">
+        <span class="nm">Electric Cyan</span>
+        <span class="val mono">#06B6D4 · electric.500<br>hover #22D3EE</span>
+      </div>
+      <div class="colorcard" style="background:#09090b; color:#fafafa; border-color:#27272a;">
+        <span class="nm">Zinc 950</span>
+        <span class="val mono">#09090B<br>다크 그라운드</span>
+      </div>
+      <div class="colorcard" style="background:#fafafa; color:#09090b; border-color:#e4e4e7;">
+        <span class="nm">Zinc 50</span>
+        <span class="val mono">#FAFAFA<br>라이트 그라운드</span>
+      </div>
+    </div>
+
+    <h3 class="sub">뉴트럴 스케일 — zinc</h3>
+    <div class="zincstrip" aria-label="zinc 50부터 950까지의 스케일">
+      <div style="background:#fafafa;color:#52525b">50</div>
+      <div style="background:#f4f4f5;color:#52525b">100</div>
+      <div style="background:#e4e4e7;color:#52525b">200</div>
+      <div style="background:#d4d4d8;color:#3f3f46">300</div>
+      <div style="background:#a1a1aa;color:#18181b">400</div>
+      <div style="background:#71717a;color:#fafafa">500</div>
+      <div style="background:#52525b;color:#fafafa">600</div>
+      <div style="background:#3f3f46;color:#fafafa">700</div>
+      <div style="background:#27272a;color:#a1a1aa">800</div>
+      <div style="background:#18181b;color:#a1a1aa">900</div>
+      <div style="background:#09090b;color:#a1a1aa">950</div>
+    </div>
+
+    <h3 class="sub">사용 비율</h3>
+    <div class="ratio" aria-label="색 사용 비율: 뉴트럴 약 90%, cyan 약 10%">
+      <div style="flex:9; background:var(--bg-3); color:var(--text-2)">zinc 뉴트럴 ~90%</div>
+      <div style="flex:1.2; background:#06b6d4; color:#09090b; font-weight:600">cyan</div>
+    </div>
+
+    <div class="rulecard">
+      <p><b>on-brand 규칙.</b> cyan 면 위 텍스트는 흰색이 아니라 zinc.950입니다.
+      흰 텍스트는 대비 2.3:1로 접근성 기준(WCAG AA)에 미달하고, 다크 텍스트는 약 8:1로 통과합니다.
+      전체 토큰 규격은 디자인 시스템 문서(DDS §3.1)를 따릅니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 03 typography ============ -->
+  <section>
+    <p class="idx mono">[03] typography</p>
+    <h2>단단한 산세리프, 말하는 모노스페이스</h2>
+    <p class="lead">
+      라틴·숫자는 Geist, 한글은 시스템 고딕(또는 Pretendard) 폴백 — 타이트한 자간의
+      볼드 헤드라인이 구조를 세웁니다. Geist Mono는 장식이 아니라 브랜드의 목소리입니다:
+      프롬프트, 인덱스 라벨, 경로, 코드가 등장하는 모든 곳에서 개발 스튜디오의 정체성을 드러냅니다.
+    </p>
+    <div class="typespec">
+      <div class="row">
+        <p class="who"><b>display</b> · Geist Bold · letter-spacing −2.5%</p>
+        <p class="spec-display">당신의 SaaS,<br>우리가 만듭니다.</p>
+      </div>
+      <div class="row">
+        <p class="who"><b>body</b> · Geist Regular 16/24 · 한글 폴백</p>
+        <p class="spec-body">MVP부터 엔터프라이즈 SaaS까지 — 아키텍처, 풀스택 · 모바일 개발, AI 통합을 한 팀에서. 빠르고 견고하게 첫 사용자를 만나도록 함께합니다.</p>
+      </div>
+      <div class="row">
+        <p class="who"><b>mono</b> · Geist Mono · 라벨·프롬프트·코드</p>
+        <p class="spec-mono mono"><span class="p">~/your-saas</span> npx create-saas @devslab/starter<br><span class="p">→</span> AI 에이전트 · RAG 통합... <span class="p">✓</span> 견고한 SaaS 기반 완성</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 motifs ============ -->
+  <section>
+    <p class="idx mono">[04] motifs</p>
+    <h2>터미널에서 온 그래픽 언어</h2>
+    <p class="lead">
+      데브스랩의 그래픽 장치는 전부 개발자의 터미널에서 왔습니다. 새 장치를 만들기 전에
+      이 어휘 안에서 먼저 찾습니다.
+    </p>
+    <div class="motifgrid">
+      <div class="motif">
+        <div class="demo mono"><span class="a">&gt;</span> from idea to launch</div>
+        <p class="why">프롬프트 — 헤드라인·태그라인 앞에. cyan.</p>
+      </div>
+      <div class="motif">
+        <div class="demo mono"><span class="a">[01]</span> capabilities</div>
+        <p class="why">인덱스 라벨 — 섹션 눈썹. 실제 순서가 있을 때만.</p>
+      </div>
+      <div class="motif">
+        <div class="demo mono">~/your-saas</div>
+        <p class="why">경로 — 맥락·위치를 나타낼 때.</p>
+      </div>
+      <div class="motif">
+        <div class="demo mono"><span class="a">→</span> 진행 <span class="a" style="margin-left:12px">✓</span> 완료</div>
+        <p class="why">화살표·체크 — 과정과 완료. 이모지는 쓰지 않습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 voice ============ -->
+  <section>
+    <p class="idx mono">[05] voice</p>
+    <h2>짧게 끊어 말하고, 증명으로 잇는다</h2>
+    <p class="lead">
+      선언은 짧게, 근거는 구체적으로. 과장 대신 운영 실적과 스택을 보여줍니다.
+      기술 용어는 억지로 번역하지 않고 영어 그대로 씁니다.
+    </p>
+    <div class="voicegrid">
+      <div class="voice do">
+        <div class="k mono">DO</div>
+        <p>"검증된 스택. 군더더기 없이."</p>
+        <p class="note">짧은 선언 + 마침표. 실제 홈페이지 카피입니다.</p>
+      </div>
+      <div class="voice dont-v">
+        <div class="k mono">DON'T</div>
+        <p>"최고의 혁신적인 차세대 솔루션을 경험해보세요!"</p>
+        <p class="note">최상급·느낌표·수식어 누적은 브랜드 보이스가 아닙니다.</p>
+      </div>
+      <div class="voice do">
+        <div class="k mono">DO</div>
+        <p>"LLM · RAG · 에이전트 워크플로우를 제품에 안전하고 실용적으로 녹입니다."</p>
+        <p class="note">기술 용어는 영어 그대로, 동사는 한국어로 정확하게.</p>
+      </div>
+      <div class="voice dont-v">
+        <div class="k mono">DON'T</div>
+        <p>"인공지능 대규모 언어 모델 검색 증강 생성 기술을 활용하여…"</p>
+        <p class="note">전부 번역하면 오히려 읽히지 않습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 applications ============ -->
+  <section>
+    <p class="idx mono">[06] in use</p>
+    <h2>적용 예시</h2>
+    <p class="lead">규칙이 실제 지면에서 어떻게 작동하는지 — 다크 그라운드, 모노크롬 마크, 한 점의 cyan.</p>
+    <div class="apps">
+      <div class="bizcard">
+        <div class="top">
+          <svg aria-hidden="true"><use href="#dl-mark"/></svg>
+          <div class="who" style="text-align:right">데브스랩<span>SaaS Development Studio</span></div>
+        </div>
+        <div class="foot mono"><span class="a">devslab.kr</span><span>hello@devslab.kr</span></div>
+      </div>
+      <div class="ogbanner">
+        <div class="brand"><svg aria-hidden="true"><use href="#dl-mark"/></svg>DevsLab</div>
+        <p class="p mono">&gt; from idea to launch</p>
+        <h4>당신의 SaaS,<br>우리가 만듭니다.</h4>
+        <p class="d">아키텍처 · 풀스택 · AI 통합을 한 팀에서</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <span class="mono">© 2026 DevsLab</span>
+    <span>토큰 규격: <a href="https://github.com/devslab-kr/asklinq/blob/claude/tds-react-native-design-ohuzj0/docs/design-system.ko.md">DDS 규칙 명세</a></span>
+    <span><a href="https://devslab.kr">devslab.kr</a></span>
+  </footer>
+</div>
+</html>

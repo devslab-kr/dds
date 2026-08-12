@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DDS 파운데이션</title>
+<style>
+  /* ---------- page theme (DDS semantic tokens, light default) ---------- */
+  :root {
+    --bg: #ffffff;
+    --bg-subtle: #fafafa;
+    --text: #09090b;
+    --text-2: #52525b;
+    --muted: #71717a;
+    --border: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --brand: #06b6d4;
+    --brand-hover: #22d3ee;
+    --brand-text: #0e7490;
+    --on-brand: #09090b;
+    --tint: rgba(0, 0, 0, 0.05);
+    --code-bg: #f4f4f5;
+    --shadow-1: 0 1px 3px rgba(20, 22, 26, 0.08);
+    --shadow-2: 0 4px 12px rgba(20, 22, 26, 0.12);
+    --shadow-3: 0 12px 32px rgba(20, 22, 26, 0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #09090b;
+      --bg-subtle: #18181b;
+      --text: #fafafa;
+      --text-2: #a1a1aa;
+      --muted: #71717a;
+      --border: #27272a;
+      --border-strong: #3f3f46;
+      --brand: #06b6d4;
+      --brand-hover: #22d3ee;
+      --brand-text: #22d3ee;
+      --on-brand: #09090b;
+      --tint: rgba(255, 255, 255, 0.08);
+      --code-bg: #18181b;
+      --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.5);
+      --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.55);
+      --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #09090b;
+    --bg-subtle: #18181b;
+    --text: #fafafa;
+    --text-2: #a1a1aa;
+    --muted: #71717a;
+    --border: #27272a;
+    --border-strong: #3f3f46;
+    --brand: #06b6d4;
+    --brand-hover: #22d3ee;
+    --brand-text: #22d3ee;
+    --on-brand: #09090b;
+    --tint: rgba(255, 255, 255, 0.08);
+    --code-bg: #18181b;
+    --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.55);
+    --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Geist, "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo",
+      "Noto Sans KR", "Malgun Gothic", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, .mono {
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* ---------- header ---------- */
+  header.site {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px;
+    padding: 40px 0 12px;
+  }
+  header.site h1 { font-size: 24px; line-height: 32px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  header.site .ver {
+    font-size: 12px; line-height: 16px; font-weight: 500;
+    color: var(--brand-text); border: 1px solid var(--border);
+    padding: 2px 8px; border-radius: 9999px;
+  }
+  header.site .src { font-size: 13px; color: var(--muted); margin-left: auto; }
+  .fontnote { font-size: 12px; line-height: 16px; color: var(--muted); margin: 0 0 40px; }
+
+  /* ---------- hero: the on-brand rule ---------- */
+  .hero {
+    background: #09090b; color: #fafafa;
+    border-radius: 16px; padding: 48px 40px;
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: auto -120px -180px auto;
+    width: 380px; height: 380px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.35), transparent 70%);
+    pointer-events: none;
+  }
+  .hero .eyebrow { color: #22d3ee; }
+  .hero h2 {
+    font-size: 32px; line-height: 40px; font-weight: 700; margin: 8px 0 12px;
+    letter-spacing: -0.015em; text-wrap: balance; max-width: 22em;
+  }
+  .hero h2 em { font-style: normal; color: #22d3ee; }
+  .hero p { font-size: 16px; line-height: 24px; color: #a1a1aa; max-width: 40em; margin: 0 0 28px; }
+  .hero .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; position: relative; }
+  .hero .why {
+    font-size: 12px; line-height: 16px; color: #71717a; margin: 20px 0 0;
+  }
+  .hero .why b { color: #a1a1aa; font-weight: 500; }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 72px; }
+  .eyebrow {
+    font-size: 12px; line-height: 16px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--brand-text); margin: 0 0 6px;
+  }
+  section > h3 { font-size: 20px; line-height: 28px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+  section > .desc { font-size: 14px; line-height: 20px; color: var(--text-2); margin: 0 0 24px; max-width: 46em; }
+  section > .desc code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+  h4.sub { font-size: 13px; line-height: 16px; font-weight: 500; letter-spacing: 0.04em;
+    color: var(--muted); text-transform: uppercase; margin: 32px 0 12px; }
+
+  /* ---------- palette swatches ---------- */
+  .scale { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .scale + .scale-name, .scale-name { font-size: 13px; line-height: 16px; font-weight: 500; margin: 16px 0 8px; }
+  .scale-name .mono { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .scale .step {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; height: 44px; font-size: 13px;
+  }
+  .scale .step .n { font-weight: 600; }
+  .swgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+
+  /* status anchors */
+  .anchors { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+  .anchor { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .anchor .chiprow { display: flex; height: 56px; }
+  .anchor .chiprow div { flex: 1; display: flex; align-items: flex-end; padding: 6px 8px; font-size: 11px; }
+  .anchor .meta { padding: 10px 14px; font-size: 13px; }
+  .anchor .meta .mono { color: var(--muted); font-size: 12px; }
+
+  /* alpha */
+  .alpharow { display: flex; flex-wrap: wrap; gap: 16px; }
+  .alphapanel { flex: 1 1 320px; border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
+  .alphapanel .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+  .alphachip { border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 16px; }
+  .alphapanel .plabel { font-size: 12px; margin: 0 0 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* ---------- semantic token table ---------- */
+  .semwrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table.sem { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13px; }
+  table.sem th {
+    text-align: left; font-weight: 500; color: var(--muted);
+    font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg-subtle);
+  }
+  table.sem td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.sem tr:last-child td { border-bottom: none; }
+  table.sem td.tok { font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; white-space: nowrap; }
+  table.sem td.use { color: var(--text-2); }
+  .chip { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .chip i {
+    width: 22px; height: 22px; border-radius: 6px; display: inline-block;
+    border: 1px solid rgba(128, 128, 128, 0.35); flex: none;
+  }
+  .chip .mono { font-size: 11px; color: var(--muted); }
+
+  /* ---------- typography ---------- */
+  .typerow { display: grid; grid-template-columns: 150px 1fr; gap: 20px; align-items: baseline;
+    padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .typerow:last-child { border-bottom: none; }
+  .typerow .meta { font-size: 12px; line-height: 16px; color: var(--muted); }
+  .typerow .meta b { display: block; color: var(--text); font-size: 13px; font-weight: 600;
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .typerow .sample { margin: 0; overflow-wrap: anywhere; }
+  @media (max-width: 560px) { .typerow { grid-template-columns: 1fr; gap: 4px; } }
+
+  /* ---------- spacing / radius / elevation / motion ---------- */
+  .spacerow { display: flex; align-items: center; gap: 16px; padding: 6px 0; font-size: 13px; }
+  .spacerow .mono { width: 88px; color: var(--muted); flex: none; }
+  .spacerow .bar { height: 16px; background: var(--brand); border-radius: 3px; opacity: 0.9; }
+
+  .radgrid, .elegrid, .motiongrid { display: flex; flex-wrap: wrap; gap: 16px; }
+  .radcard {
+    width: 120px; height: 88px; background: var(--bg-subtle); border: 1px solid var(--border-strong);
+    display: flex; flex-direction: column; justify-content: flex-end; padding: 10px 12px; font-size: 12px;
+  }
+  .radcard b { font-size: 13px; }
+
+  .elestage { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px; display: flex; flex-wrap: wrap; gap: 24px; }
+  .elecard { background: var(--bg); border-radius: 12px; width: 200px; padding: 16px; font-size: 13px; }
+  .elecard .mono { color: var(--muted); font-size: 11px; display: block; margin-top: 4px; }
+
+  .motioncard {
+    flex: 1 1 200px; border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+    font-size: 13px; cursor: pointer; background: var(--bg);
+  }
+  .motioncard .ball { width: 28px; height: 28px; border-radius: 50%; background: var(--brand); margin-bottom: 14px; }
+  .motioncard:hover .ball, .motioncard:focus-visible .ball { transform: translateX(56px); }
+  .motioncard:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .motioncard .mono { color: var(--muted); font-size: 11px; display: block; margin-top: 2px; }
+  .m-fast .ball { transition: transform 100ms cubic-bezier(0.2, 0, 0, 1); }
+  .m-base .ball { transition: transform 200ms cubic-bezier(0.2, 0, 0, 1); }
+  .m-slow .ball { transition: transform 300ms cubic-bezier(0, 0, 0, 1); }
+  @media (prefers-reduced-motion: reduce) {
+    .motioncard .ball { transition: none !important; }
+  }
+
+  /* ---------- twin component panels (fixed themes) ---------- */
+  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .twin { grid-template-columns: 1fr; } }
+  .panel { border-radius: 12px; padding: 24px; border: 1px solid var(--border);
+    background: var(--pbg); color: var(--ptext); }
+  .panel .plabel { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--pmuted); margin: 0 0 18px; font-weight: 500; }
+  .panel--light {
+    --pbg: #ffffff; --pbg-subtle: #fafafa; --ptext: #09090b; --ptext-2: #52525b;
+    --pmuted: #71717a; --pborder: #e4e4e7; --pborder-strong: #d4d4d8;
+    --pbrand: #06b6d4; --pbrand-hover: #22d3ee; --pon-brand: #09090b; --pbrand-text: #0e7490;
+    --ptint: rgba(0, 0, 0, 0.05); --ppress: rgba(0, 0, 0, 0.08);
+    --psuccess: #15803d; --psuccess-bg: #f0fdf4; --pwarning: #b45309; --pwarning-bg: #fffbeb;
+    --pdanger: #b91c1c; --pdanger-bg: #fef2f2; --pinfo: #1d4ed8; --pinfo-bg: #eff6ff;
+    --poverlay: rgba(0, 0, 0, 0.25);
+  }
+  .panel--dark {
+    --pbg: #09090b; --pbg-subtle: #18181b; --ptext: #fafafa; --ptext-2: #a1a1aa;
+    --pmuted: #71717a; --pborder: #27272a; --pborder-strong: #3f3f46;
+    --pbrand: #06b6d4; --pbrand-hover: #22d3ee; --pon-brand: #09090b; --pbrand-text: #22d3ee;
+    --ptint: rgba(255, 255, 255, 0.08); --ppress: rgba(255, 255, 255, 0.12);
+    --psuccess: #4ade80; --psuccess-bg: #14532d; --pwarning: #fbbf24; --pwarning-bg: #78350f;
+    --pdanger: #f87171; --pdanger-bg: #7f1d1d; --pinfo: #60a5fa; --pinfo-bg: #1e3a8a;
+    --poverlay: rgba(0, 0, 0, 0.55);
+  }
+  .prow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+  .prow:last-child { margin-bottom: 0; }
+  .pnote { font-size: 12px; line-height: 16px; color: var(--pmuted); margin: -8px 0 18px; }
+
+  /* buttons (dogfooding DDS component rules) */
+  .btn {
+    appearance: none; border: 1px solid transparent; cursor: pointer;
+    font: 500 13px/16px inherit; font-family: inherit;
+    height: 40px; padding: 0 16px; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: none; color: var(--ptext); transition: background 100ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .btn:focus-visible { outline: 2px solid var(--pbrand); outline-offset: 2px; }
+  .btn--sm { height: 32px; padding: 0 12px; border-radius: 8px; font-size: 12px; }
+  .btn--lg { height: 48px; padding: 0 20px; font-size: 15px; border-radius: 8px; }
+  .btn--primary { background: var(--pbrand); color: var(--pon-brand); font-weight: 600; }
+  .btn--primary:hover { background: var(--pbrand-hover); }
+  .btn--primary:active { background: var(--pbrand-hover); box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.08); }
+  .btn--secondary { border-color: var(--pborder-strong); color: var(--ptext); }
+  .btn--secondary:hover { background: var(--ptint); }
+  .btn--ghost { color: var(--pbrand-text); }
+  .btn--ghost:hover { background: var(--ptint); }
+  .btn--danger { background: var(--pdanger); font-weight: 600; }
+  .panel--light .btn--danger { color: #ffffff; }
+  .panel--dark .btn--danger { color: #09090b; }
+  .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+  .btn .spin {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid currentColor; border-top-color: transparent;
+    animation: spin 700ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .btn .spin { animation: none; } }
+  .btn.demo-hover { background: var(--pbrand-hover); }
+  .btn.demo-press { background: var(--pbrand-hover); box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.08); }
+  .btn.demo-focus { outline: 2px solid var(--pbrand); outline-offset: 2px; }
+  .statecap { font-size: 11px; color: var(--pmuted); display: block; margin-top: 6px; text-align: center; }
+  .statecell { display: flex; flex-direction: column; align-items: center; }
+
+  /* text field */
+  .field { display: flex; flex-direction: column; gap: 6px; max-width: 320px; margin-bottom: 18px; }
+  .field label { font-size: 13px; line-height: 16px; font-weight: 500; }
+  .field input {
+    font: 400 14px/20px inherit; font-family: inherit;
+    background: var(--pbg); color: var(--ptext);
+    border: 1px solid var(--pborder-strong); border-radius: 8px;
+    height: 40px; padding: 0 12px;
+  }
+  .field input::placeholder { color: var(--pmuted); }
+  .field input:focus-visible { outline: 2px solid var(--pbrand); outline-offset: 0; border-color: transparent; }
+  .field .help { font-size: 12px; line-height: 16px; color: var(--pmuted); }
+  .field.is-error input { border-color: var(--pdanger); }
+  .field.is-error .help { color: var(--pdanger); }
+
+  /* badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; line-height: 16px; font-weight: 500;
+    padding: 3px 10px; border-radius: 9999px;
+  }
+  .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .badge--success { color: var(--psuccess); background: var(--psuccess-bg); }
+  .badge--warning { color: var(--pwarning); background: var(--pwarning-bg); }
+  .badge--danger { color: var(--pdanger); background: var(--pdanger-bg); }
+  .badge--info { color: var(--pinfo); background: var(--pinfo-bg); }
+  .badge--brand { color: var(--pbrand-text); background: color-mix(in srgb, var(--pbrand) 14%, transparent); }
+
+  /* card + dialog mock */
+  .democard {
+    background: var(--pbg); border: 1px solid var(--pborder); border-radius: 12px;
+    padding: 16px; max-width: 340px; margin-bottom: 18px;
+  }
+  .panel--light .democard { box-shadow: 0 1px 3px rgba(20, 22, 26, 0.08); }
+  .democard h5 { margin: 0 0 4px; font-size: 17px; line-height: 24px; font-weight: 600; }
+  .democard p { margin: 0 0 12px; font-size: 14px; line-height: 20px; color: var(--ptext-2); }
+  .dialogstage {
+    position: relative; border-radius: 12px; overflow: hidden;
+    background: var(--pbg-subtle); border: 1px solid var(--pborder);
+    padding: 32px 20px; display: flex; justify-content: center;
+  }
+  .dialogstage::before { content: ""; position: absolute; inset: 0; background: var(--poverlay); }
+  .dialog {
+    position: relative; background: var(--pbg); border-radius: 12px;
+    padding: 20px; max-width: 300px; box-shadow: 0 12px 32px rgba(20, 22, 26, 0.18);
+  }
+  .dialog h5 { margin: 0 0 6px; font-size: 20px; line-height: 28px; font-weight: 600; }
+  .dialog p { margin: 0 0 16px; font-size: 14px; line-height: 20px; color: var(--ptext-2); }
+  .dialog .prow { margin: 0; justify-content: flex-end; }
+
+  footer.site {
+    margin-top: 88px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-size: 12px; line-height: 16px; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 4px 20px;
+  }
+  footer.site a { color: var(--brand-text); text-decoration: none; }
+  footer.site a:hover { text-decoration: underline; }
+</style>
+
+<div class="wrap">
+  <header class="site">
+    <h1>DDS 파운데이션</h1>
+    <span class="ver">v0 스펙 미리보기</span>
+    <span class="src mono">docs/design-system.ko.md</span>
+  </header>
+  <p class="fontnote">
+    폰트는 라틴 Geist + 한글 Pretendard/시스템 폴백 기준이며, 이 미리보기는 폴백 폰트로 표시될 수 있습니다.
+    수치(크기·행간·굵기)는 스펙 값 그대로입니다.
+  </p>
+
+  <div class="hero">
+    <p class="eyebrow">§3.1 · on-brand 규칙</p>
+    <h2>브랜드 면 위 텍스트는 흰색이 아니라 <em>다크</em>다</h2>
+    <p>
+      데브스랩 브랜드 cyan(#06B6D4)은 밝은 색상이라 흰 텍스트의 대비가 2.3:1로 WCAG AA에
+      미달합니다. 그래서 DDS의 primary 버튼은 색 배경 + 흰 글자 관성을 버리고
+      zinc.950 텍스트(대비 약 8:1)를 올립니다 — 홈페이지의 다크 배경 + cyan 액센트와 같은 무드입니다.
+    </p>
+    <div class="row panel--dark" style="display:flex; flex-wrap:wrap; gap:12px;">
+      <button class="btn btn--primary">지금 시작하기</button>
+      <button class="btn btn--secondary">문서 보기</button>
+      <button class="btn btn--ghost">더 알아보기</button>
+    </div>
+    <p class="why"><b>비교:</b> 흰 텍스트 on cyan.500 = 2.3:1 (실패) · zinc.950 on cyan.500 ≈ 8:1 (통과)</p>
+  </div>
+
+  <!-- ============ palette ============ -->
+  <section>
+    <p class="eyebrow">§3.1 · 컬러</p>
+    <h3>원시 팔레트</h3>
+    <p class="desc">
+      TDS 구조를 차용한 3층 컬러: 원시 팔레트(50–900) → 알파 스케일 → 시맨틱 토큰.
+      브랜드 기준색은 데브스랩 홈페이지(devslab.kr)에서 추출한 <code>cyan</code>과
+      <code>zinc</code> 뉴트럴입니다. 컴포넌트는 이 팔레트를 직접 참조하지 않습니다.
+    </p>
+    <div class="swgrid" id="brandScales"></div>
+
+    <h4 class="sub">상태색 (기준값)</h4>
+    <div class="anchors" id="statusAnchors"></div>
+
+    <h4 class="sub">알파 스케일 — 오버레이·틴트는 알파로만</h4>
+    <div class="alpharow">
+      <div class="alphapanel panel--light" style="background:var(--pbg); border-color:var(--pborder);">
+        <p class="plabel" style="color:var(--pmuted)">라이트 위에서</p>
+        <div class="chips" id="alphaLight"></div>
+      </div>
+      <div class="alphapanel panel--dark" style="background:var(--pbg); border-color:var(--pborder);">
+        <p class="plabel" style="color:var(--pmuted)">다크 위에서</p>
+        <div class="chips" id="alphaDark"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ semantic ============ -->
+  <section>
+    <p class="eyebrow">§3.1 · 컬러</p>
+    <h3>시맨틱 토큰</h3>
+    <p class="desc">
+      컴포넌트가 참조하는 유일한 레이어. 라이트/다크 매핑이 처음부터 1급으로 함께 정의됩니다 —
+      다크 모드는 이 매핑 교체만으로 얻고, 컴포넌트에 <code>if (dark)</code> 분기가 생기면 토큰 설계가 잘못된 것입니다.
+    </p>
+    <div class="semwrap">
+      <table class="sem" aria-label="시맨틱 컬러 토큰: 라이트/다크 매핑">
+        <thead>
+          <tr><th>토큰</th><th>라이트</th><th>다크</th><th>용도</th></tr>
+        </thead>
+        <tbody id="semRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ typography ============ -->
+  <section>
+    <p class="eyebrow">§3.2 · 타이포그래피</p>
+    <h3>타입 스케일</h3>
+    <p class="desc">
+      8단계 고정 세트 — 크기와 행간은 분리해서 조정하지 않습니다. 웹은 px(=rem 환산), RN은 같은 숫자를 pt로 씁니다.
+      스케일 밖의 크기가 필요하면 스케일에 추가하는 PR이 먼저입니다.
+    </p>
+    <div id="typeRows"></div>
+  </section>
+
+  <!-- ============ spacing ============ -->
+  <section>
+    <p class="eyebrow">§3.3 · 간격</p>
+    <h3>4px 그리드</h3>
+    <p class="desc">허용값 12개. 홀수·임의 값이 필요해 보이면 디자인을 스케일에 맞춥니다 — 스케일을 디자인에 맞추지 않습니다.</p>
+    <div id="spaceRows"></div>
+  </section>
+
+  <!-- ============ radius ============ -->
+  <section>
+    <p class="eyebrow">§3.4 · 라운드</p>
+    <h3>Radius</h3>
+    <div class="radgrid" id="radGrid"></div>
+  </section>
+
+  <!-- ============ elevation ============ -->
+  <section>
+    <p class="eyebrow">§3.5 · 그림자</p>
+    <h3>Elevation — 3레벨</h3>
+    <p class="desc">웹 box-shadow와 RN elevation 값을 토큰이 함께 정의합니다. 플랫폼별로 따로 만들지 않습니다.</p>
+    <div class="elestage panel--light">
+      <div class="elecard" style="box-shadow: 0 1px 3px rgba(20,22,26,.08);">elevation.1 — 카드<span class="mono">0 1px 3px 8% · RN 2</span></div>
+      <div class="elecard" style="box-shadow: 0 4px 12px rgba(20,22,26,.12);">elevation.2 — 드롭다운<span class="mono">0 4px 12px 12% · RN 6</span></div>
+      <div class="elecard" style="box-shadow: 0 12px 32px rgba(20,22,26,.18);">elevation.3 — 모달<span class="mono">0 12px 32px 18% · RN 12</span></div>
+    </div>
+  </section>
+
+  <!-- ============ motion ============ -->
+  <section>
+    <p class="eyebrow">§3.6 · 모션</p>
+    <h3>Duration × Easing</h3>
+    <p class="desc">카드에 마우스를 올리거나 키보드 포커스를 주면 해당 토큰의 속도로 움직입니다. OS의 모션 감소 설정을 켜면 즉시 완료됩니다.</p>
+    <div class="motiongrid">
+      <div class="motioncard m-fast" tabindex="0">
+        <div class="ball"></div>
+        duration.fast — 100ms<span class="mono">hover/press 피드백 · easing.standard</span>
+      </div>
+      <div class="motioncard m-base" tabindex="0">
+        <div class="ball"></div>
+        duration.base — 200ms<span class="mono">전환·페이드·토스트 · easing.standard</span>
+      </div>
+      <div class="motioncard m-slow" tabindex="0">
+        <div class="ball"></div>
+        duration.slow — 300ms<span class="mono">시트·모달 진입 · easing.enter</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ components ============ -->
+  <section>
+    <p class="eyebrow">§4 · 컴포넌트</p>
+    <h3>Core 컴포넌트 — 라이트/다크 동시 렌더</h3>
+    <p class="desc">
+      아래 두 패널은 페이지 테마와 무관하게 각각 라이트/다크 시맨틱 매핑에 고정되어 있습니다.
+      같은 컴포넌트 코드가 토큰 교체만으로 두 테마를 얻는 것을 보여줍니다.
+    </p>
+
+    <h4 class="sub">Button — variant</h4>
+    <div class="twin">
+      <div class="panel panel--light">
+        <p class="plabel">Light</p>
+        <div class="prow">
+          <button class="btn btn--primary">저장</button>
+          <button class="btn btn--secondary">취소</button>
+          <button class="btn btn--ghost">자세히</button>
+          <button class="btn btn--danger">삭제</button>
+        </div>
+        <div class="prow">
+          <button class="btn btn--primary btn--sm">작게</button>
+          <button class="btn btn--primary">보통</button>
+          <button class="btn btn--primary btn--lg">크게</button>
+        </div>
+      </div>
+      <div class="panel panel--dark">
+        <p class="plabel">Dark</p>
+        <div class="prow">
+          <button class="btn btn--primary">저장</button>
+          <button class="btn btn--secondary">취소</button>
+          <button class="btn btn--ghost">자세히</button>
+          <button class="btn btn--danger">삭제</button>
+        </div>
+        <div class="prow">
+          <button class="btn btn--primary btn--sm">작게</button>
+          <button class="btn btn--primary">보통</button>
+          <button class="btn btn--primary btn--lg">크게</button>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="sub">Button — 상태 (§4.2: 모든 인터랙티브 컴포넌트가 전 상태를 정의)</h4>
+    <div class="panel panel--light">
+      <div class="prow" style="gap:16px;">
+        <span class="statecell"><button class="btn btn--primary">기본</button><span class="statecap">default</span></span>
+        <span class="statecell"><button class="btn btn--primary demo-hover">호버</button><span class="statecap">hover (웹)</span></span>
+        <span class="statecell"><button class="btn btn--primary demo-press">눌림</button><span class="statecap">pressed</span></span>
+        <span class="statecell"><button class="btn btn--primary demo-focus">포커스</button><span class="statecap">focus-visible</span></span>
+        <span class="statecell"><button class="btn btn--primary" disabled>비활성</button><span class="statecap">disabled</span></span>
+        <span class="statecell"><button class="btn btn--primary" disabled><span class="spin" aria-hidden="true"></span>저장 중</button><span class="statecap">loading</span></span>
+      </div>
+    </div>
+
+    <h4 class="sub">TextField · Badge</h4>
+    <div class="twin">
+      <div class="panel panel--light">
+        <p class="plabel">Light</p>
+        <div class="field">
+          <label for="f1">회사 이름</label>
+          <input id="f1" type="text" placeholder="데브스랩" />
+          <span class="help">visitors에게 표시되는 이름입니다.</span>
+        </div>
+        <div class="field is-error">
+          <label for="f2">이메일</label>
+          <input id="f2" type="text" value="hello@devslab" />
+          <span class="help">이메일 형식이 아닙니다. 예: hello@devslab.kr</span>
+        </div>
+        <div class="prow">
+          <span class="badge badge--brand">Beta</span>
+          <span class="badge badge--success">연결됨</span>
+          <span class="badge badge--warning">확인 필요</span>
+          <span class="badge badge--danger">실패</span>
+          <span class="badge badge--info">안내</span>
+        </div>
+      </div>
+      <div class="panel panel--dark">
+        <p class="plabel">Dark</p>
+        <div class="field">
+          <label for="f3">회사 이름</label>
+          <input id="f3" type="text" placeholder="데브스랩" />
+          <span class="help">visitors에게 표시되는 이름입니다.</span>
+        </div>
+        <div class="field is-error">
+          <label for="f4">이메일</label>
+          <input id="f4" type="text" value="hello@devslab" />
+          <span class="help">이메일 형식이 아닙니다. 예: hello@devslab.kr</span>
+        </div>
+        <div class="prow">
+          <span class="badge badge--brand">Beta</span>
+          <span class="badge badge--success">연결됨</span>
+          <span class="badge badge--warning">확인 필요</span>
+          <span class="badge badge--danger">실패</span>
+          <span class="badge badge--info">안내</span>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="sub">Card · Dialog</h4>
+    <div class="twin">
+      <div class="panel panel--light">
+        <p class="plabel">Light</p>
+        <div class="democard">
+          <h5>이번 주 질문 128건</h5>
+          <p>방문자가 가장 많이 물어본 주제는 채용 절차였습니다.</p>
+          <button class="btn btn--secondary btn--sm">대시보드 열기</button>
+        </div>
+        <div class="dialogstage">
+          <div class="dialog">
+            <h5>자료를 다시 색인할까요?</h5>
+            <p>수정된 회사 소개 문서가 즉시 답변에 반영됩니다.</p>
+            <div class="prow">
+              <button class="btn btn--ghost btn--sm">나중에</button>
+              <button class="btn btn--primary btn--sm">색인하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel--dark">
+        <p class="plabel">Dark</p>
+        <div class="democard">
+          <h5>이번 주 질문 128건</h5>
+          <p>방문자가 가장 많이 물어본 주제는 채용 절차였습니다.</p>
+          <button class="btn btn--secondary btn--sm">대시보드 열기</button>
+        </div>
+        <div class="dialogstage">
+          <div class="dialog">
+            <h5>자료를 다시 색인할까요?</h5>
+            <p>수정된 회사 소개 문서가 즉시 답변에 반영됩니다.</p>
+            <div class="prow">
+              <button class="btn btn--ghost btn--sm">나중에</button>
+              <button class="btn btn--primary btn--sm">색인하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <span>DevsLab Design System v0 — 규칙 명세는 <a href="https://github.com/devslab-kr/asklinq/blob/claude/tds-react-native-design-ohuzj0/docs/design-system.ko.md">docs/design-system.ko.md</a></span>
+    <span>구조 참조: <a href="https://tossmini-docs.toss.im/tds-react-native/">TDS React Native</a></span>
+  </footer>
+</div>
+
+<script>
+  // luminance-based label color for swatches
+  function labelOn(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return lum > 0.55 ? "#09090b" : "#fafafa";
+  }
+
+  const scales = [
+    { name: "cyan", label: "브랜드", steps: {
+      50:"#ecfeff",100:"#cffafe",200:"#a5f3fc",300:"#67e8f9",400:"#22d3ee",
+      500:"#06b6d4",600:"#0891b2",700:"#0e7490",800:"#155e75",900:"#164e63" } },
+    { name: "zinc", label: "뉴트럴", steps: {
+      50:"#fafafa",100:"#f4f4f5",200:"#e4e4e7",300:"#d4d4d8",400:"#a1a1aa",
+      500:"#71717a",600:"#52525b",700:"#3f3f46",800:"#27272a",900:"#18181b",950:"#09090b" } },
+  ];
+  const brandEl = document.getElementById("brandScales");
+  scales.forEach(s => {
+    const col = document.createElement("div");
+    let html = `<p class="scale-name">${s.label} <span class="mono">palette.${s.name}</span></p><div class="scale">`;
+    for (const [step, hex] of Object.entries(s.steps)) {
+      html += `<div class="step" style="background:${hex};color:${labelOn(hex)}">
+        <span class="n">${step}</span><span class="mono">${hex}</span></div>`;
+    }
+    col.innerHTML = html + "</div>";
+    brandEl.appendChild(col);
+  });
+
+  const status = [
+    { name: "red", use: "위험 · 오류", a: ["#fef2f2","#ef4444","#b91c1c"] },
+    { name: "amber", use: "경고", a: ["#fffbeb","#f59e0b","#b45309"] },
+    { name: "green", use: "성공", a: ["#f0fdf4","#22c55e","#15803d"] },
+    { name: "blue", use: "정보 · 링크", a: ["#eff6ff","#3b82f6","#1d4ed8"] },
+  ];
+  document.getElementById("statusAnchors").innerHTML = status.map(s => `
+    <div class="anchor">
+      <div class="chiprow">
+        ${[50,500,700].map((step,i) => `<div style="background:${s.a[i]};color:${labelOn(s.a[i])}">${step}</div>`).join("")}
+      </div>
+      <div class="meta">${s.use}<br><span class="mono">palette.${s.name}.50–900</span></div>
+    </div>`).join("");
+
+  const alphaL = [
+    ["alpha.black.5","#0000000d","hover 틴트"],
+    ["alpha.black.8","#00000014","pressed 틴트"],
+    ["alpha.black.10","#0000001a","구분선·딤 보더"],
+    ["alpha.black.25","#00000040","딤 오버레이"],
+  ];
+  const alphaD = [
+    ["alpha.white.8","#ffffff14","hover/pressed 틴트"],
+    ["alpha.white.85","#ffffffd9","반투명 텍스트"],
+    ["alpha.black.25","#00000040","딤 오버레이"],
+  ];
+  document.getElementById("alphaLight").innerHTML = alphaL.map(([t,v,u]) =>
+    `<div class="alphachip" style="background:${v};color:#09090b"><span class="mono">${t}</span><br>${u}</div>`).join("");
+  document.getElementById("alphaDark").innerHTML = alphaD.map(([t,v,u]) =>
+    `<div class="alphachip" style="background:${v};color:${t.includes("white.85") ? "#09090b" : "#fafafa"}"><span class="mono">${t}</span><br>${u}</div>`).join("");
+
+  const sem = [
+    ["color.bg.default","#ffffff","#09090b","기본 화면 배경"],
+    ["color.bg.subtle","#fafafa","#18181b","섹션·카드 구분 배경"],
+    ["color.bg.brand","#06b6d4","#06b6d4","브랜드 강조 면"],
+    ["color.bg.brand-hover","#22d3ee","#22d3ee","브랜드 면 hover"],
+    ["color.bg.brand-subtle","#ecfeff","#164e63","브랜드 옅은 배경"],
+    ["color.text.primary","#09090b","#fafafa","본문·제목"],
+    ["color.text.secondary","#52525b","#a1a1aa","보조 설명"],
+    ["color.text.muted","#71717a","#71717a","비활성·플레이스홀더"],
+    ["color.text.on-brand","#09090b","#09090b","브랜드 면 위 텍스트"],
+    ["color.text.brand","#0e7490","#22d3ee","브랜드 텍스트·링크"],
+    ["color.border.default","#e4e4e7","#27272a","기본 보더"],
+    ["color.border.strong","#d4d4d8","#3f3f46","입력 필드 보더"],
+    ["color.border.focus","#06b6d4","#22d3ee","포커스 링"],
+    ["color.status.success","#15803d","#4ade80","성공 (bg: green.50 / green.900)"],
+    ["color.status.warning","#b45309","#fbbf24","경고 (bg: amber.50 / amber.900)"],
+    ["color.status.danger","#b91c1c","#f87171","위험·오류 (bg: red.50 / red.900)"],
+    ["color.status.info","#1d4ed8","#60a5fa","정보 (bg: blue.50 / blue.900)"],
+  ];
+  document.getElementById("semRows").innerHTML = sem.map(([t,l,d,u]) => `
+    <tr>
+      <td class="tok">${t}</td>
+      <td><span class="chip"><i style="background:${l}"></i><span class="mono">${l}</span></span></td>
+      <td><span class="chip"><i style="background:${d}"></i><span class="mono">${d}</span></span></td>
+      <td class="use">${u}</td>
+    </tr>`).join("");
+
+  const type = [
+    ["typo.display",32,40,700,"랜딩 히어로, 큰 숫자"],
+    ["typo.title-1",24,32,700,"페이지 제목"],
+    ["typo.title-2",20,28,600,"섹션·다이얼로그 제목"],
+    ["typo.title-3",17,24,600,"카드 제목, 리스트 강조 행"],
+    ["typo.body-1",16,24,400,"기본 본문 (채팅 메시지 포함)"],
+    ["typo.body-2",14,20,400,"밀도 높은 본문, 대시보드 셀"],
+    ["typo.label",13,16,500,"버튼·입력 라벨·탭"],
+    ["typo.caption",12,16,400,"타임스탬프, 보조 정보"],
+  ];
+  document.getElementById("typeRows").innerHTML = type.map(([t,s,lh,w,u]) => `
+    <div class="typerow">
+      <div class="meta"><b>${t.replace("typo.","")}</b>${s} / ${lh} · ${w}<br>${u}</div>
+      <p class="sample" style="font-size:${s}px;line-height:${lh}px;font-weight:${w}">
+        회사에 대해 무엇이든 물어보세요 0123456789</p>
+    </div>`).join("");
+
+  const spaces = [0,2,4,8,12,16,20,24,32,40,48,64];
+  document.getElementById("spaceRows").innerHTML = spaces.map(v => `
+    <div class="spacerow"><span class="mono">space.${v}</span>
+      <div class="bar" style="width:${Math.max(v*3,2)}px"></div><span style="color:var(--muted)">${v}px</span></div>`).join("");
+
+  const radii = [["radius.sm",4,"체크박스·태그"],["radius.md",8,"버튼·입력·카드"],["radius.lg",12,"다이얼로그"],["radius.xl",16,"바텀시트"],["radius.full",9999,"필·아바타"]];
+  document.getElementById("radGrid").innerHTML = radii.map(([t,v,u]) => `
+    <div class="radcard" style="border-radius:${v === 9999 ? "9999px" : v + "px"}">
+      <b>${t.replace("radius.","")} ${v === 9999 ? "" : "· " + v}</b><span style="color:var(--muted)">${u}</span></div>`).join("");
+</script>
+</html>
