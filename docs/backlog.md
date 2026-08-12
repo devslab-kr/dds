@@ -58,6 +58,8 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
       React 비의존, D-008): Core 6종 전 variant·size·상태 스토리 +
       Foundations 토큰 표(생성된 tokens.js에서 렌더 — 드리프트 불가) +
       테마 툴바(data-theme 스위치). CI가 storybook build를 검증.
+      매니저 UI는 DDS 브랜드 테마(zinc 다크 크롬 + cyan, `.storybook/manager.js`
+      — 값은 tokens.js에서, 선택 하이라이트는 on-brand 규칙 준용 cyan.700).
 - [ ] **배포 보류** — GitHub Pages는 private repo에서 플랜 제한으로 거부됨
       (editor-ruler에서 실증). "DDS 공개 여부"(아래 미해결 질문)가 정해져야
       진행. 공개 전환 시: pages.yml 추가 + storybook-static 배포 + org 허브
