@@ -5,6 +5,23 @@
 
 ---
 
+## D-008 — Storybook은 html-vite, React 비의존 (2026-08-13)
+
+**결정.** Storybook(v10)을 `@storybook/html-vite` 프레임워크로 도입한다.
+스토리는 dds-css 클래스 마크업(HTML 문자열/DOM 노드)이고, Foundations
+스토리는 생성된 `tokens.js`를 임포트해 렌더한다. 테마는 툴바 스위치가
+`data-theme`을 바꾸는 것으로 — 소비자 앱과 같은 메커니즘.
+
+**근거.** 스펙 §2 "코어는 CSS, 프레임워크는 소비자" — React 프레임워크로
+스토리를 쓰면 쇼케이스가 곧 React 바인딩이 되어 규칙을 스스로 어긴다.
+tokens.js에서 렌더하면 Foundations 문서가 산출물과 어긋날 수 없다.
+
+**트레이드오프.** args 컨트롤이 React 대비 수동(render 함수 직접 작성).
+docgen 자동화 없음 — 컴포넌트 계약 문서는 `docs/components.md`가 정본.
+
+**재검토 시점.** dds에 React 바인딩 패키지가 실제로 생기면 (그때도 코어
+스토리는 html 유지).
+
 ## D-007 — dds-css 컴포넌트 규약 (2026-08-13)
 
 **결정.** ① 클래스 네임스페이스 `dds-` (BEM 변형: `.dds-btn--primary`,

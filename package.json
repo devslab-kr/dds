@@ -5,10 +5,17 @@
   "scripts": {
     "build": "pnpm -r run build",
     "check": "pnpm -r run check && node scripts/check-docs-sync.mjs",
-    "verify": "pnpm run build && pnpm run check"
+    "verify": "pnpm run build && pnpm run check",
+    "storybook": "pnpm run build && storybook dev -p 6006",
+    "build-storybook": "pnpm run build && storybook build"
   },
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@9.12.3"
+  "packageManager": "pnpm@9.12.3",
+  "devDependencies": {
+    "@storybook/html-vite": "^10.5.7",
+    "storybook": "^10.5.7",
+    "vite": "^8.2.1"
+  }
 }
