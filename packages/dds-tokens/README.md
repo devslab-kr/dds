@@ -19,9 +19,10 @@ DDS design tokens, built from the single source at the repo root
 - **Load order.** `tokens.css` first; `theme.css` / `ionic.css` reference its
   variables. Tailwind color utilities resolve through `var(--dds-*)`, so they
   follow the theme at runtime.
-- **Dark mode.** Set `data-theme="dark"` on `<html>` (or any subtree — panels
-  can be pinned to a theme). No media query is emitted; auto-follow is the
-  consumer's call, same as devslab.kr's toggle.
+- **Dark mode.** Set `data-theme="dark"` on `<html>` (or any subtree —
+  `data-theme="light"` pins a subtree back, so panels can be fixed to either
+  theme). No media query is emitted; auto-follow is the consumer's call,
+  same as devslab.kr's toggle.
 - **The raw palette is not in the CSS.** Components may only use semantic
   tokens (spec §3.1); what the CSS doesn't ship can't be hardcoded against.
   Palette values are available from `tokens.ts` for mapping-definition code.

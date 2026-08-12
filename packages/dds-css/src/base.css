@@ -1,0 +1,6 @@
+/* dds-css shared plumbing. Components reference ONLY semantic tokens
+ * (var(--dds-*)) — tokens.css must be loaded first. */
+[class^="dds-"],
+[class*=" dds-"] {
+  box-sizing: border-box;
+}

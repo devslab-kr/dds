@@ -111,11 +111,13 @@ function cssDecls(tokens, indent) {
 
 // The raw palette is deliberately NOT emitted: components may only reference
 // semantic tokens (spec §3.1), and what tokens.css doesn't ship can't be used.
-// The dark block is [data-theme="dark"] (not :root[...]) so a subtree can be
-// pinned to a theme (twin panels, theme-fixed embeds) with the same file.
+// Theme blocks are attribute selectors (not :root[...]) so any subtree can be
+// pinned to either theme (twin panels, theme-fixed embeds) with the same file;
+// nesting works because an element only ever matches its own data-theme value.
 const tokensCss = `${HEADER}
 
-:root {
+:root,
+[data-theme="light"] {
   color-scheme: light;
 ${cssDecls(lightTokens.filter((t) => !isPalette(t)), "  ")}
 }

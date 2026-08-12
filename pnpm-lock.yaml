@@ -8,6 +8,8 @@ importers:
 
   .: {}
 
+  packages/dds-css: {}
+
   packages/dds-tokens:
     devDependencies:
       style-dictionary:

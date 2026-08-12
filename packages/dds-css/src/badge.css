@@ -1,0 +1,47 @@
+/* Badge — brand + the four status pairs. Status colors always ship as
+ * foreground + -bg pair (spec §3.1); the leading dot repeats the state so
+ * color is not the only signal (spec §6). Dot size 6px is glyph geometry,
+ * not spacing (same 6px as the toast dot — keep them identical). */
+
+.dds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dds-space-4);
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+  padding: var(--dds-space-2) var(--dds-space-8);
+  border-radius: var(--dds-radius-full);
+  white-space: nowrap;
+}
+
+.dds-badge::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--dds-radius-full);
+  background: currentColor;
+}
+
+.dds-badge--brand {
+  color: var(--dds-color-text-brand);
+  background: var(--dds-color-bg-brand-subtle);
+}
+.dds-badge--success {
+  color: var(--dds-color-status-success);
+  background: var(--dds-color-status-success-bg);
+}
+.dds-badge--warning {
+  color: var(--dds-color-status-warning);
+  background: var(--dds-color-status-warning-bg);
+}
+.dds-badge--danger {
+  color: var(--dds-color-status-danger);
+  background: var(--dds-color-status-danger-bg);
+}
+.dds-badge--info {
+  color: var(--dds-color-status-info);
+  background: var(--dds-color-status-info-bg);
+}
