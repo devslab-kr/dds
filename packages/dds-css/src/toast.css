@@ -1,0 +1,72 @@
+/* Toast — transient notice. Region markup:
+ *   .dds-toast-region[role="status"] (polite) — use role="alert" per-toast
+ *   only for danger. Toasts stack bottom-end; entry animates with
+ *   duration.base + easing.enter and respects reduced motion. The status
+ *   dot repeats the tone so color is not the only signal (spec §6) — same
+ *   6px dot as the badge. */
+
+.dds-toast-region {
+  position: fixed;
+  z-index: 1100;
+  inset-block-end: var(--dds-space-16);
+  inset-inline-end: var(--dds-space-16);
+  display: grid;
+  gap: var(--dds-space-8);
+  justify-items: end;
+  pointer-events: none;
+}
+
+.dds-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-8);
+  background: var(--dds-color-bg-elevated);
+  color: var(--dds-color-text-primary);
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  font-weight: var(--dds-typo-body-2-font-weight);
+  border: 1px solid var(--dds-color-border-default);
+  border-radius: var(--dds-radius-md);
+  box-shadow: var(--dds-elevation-2);
+  padding: var(--dds-space-12) var(--dds-space-16);
+  max-width: min(360px, calc(100vw - var(--dds-space-32)));
+  animation: dds-toast-in var(--dds-motion-duration-base) var(--dds-motion-easing-enter);
+}
+
+.dds-toast--success::before,
+.dds-toast--warning::before,
+.dds-toast--danger::before,
+.dds-toast--info::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--dds-radius-full);
+}
+.dds-toast--success::before {
+  background: var(--dds-color-status-success);
+}
+.dds-toast--warning::before {
+  background: var(--dds-color-status-warning);
+}
+.dds-toast--danger::before {
+  background: var(--dds-color-status-danger);
+}
+.dds-toast--info::before {
+  background: var(--dds-color-status-info);
+}
+
+@keyframes dds-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--dds-space-8));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dds-toast {
+    animation: none;
+  }
+}

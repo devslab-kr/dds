@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DDS 컴포넌트 — dds-css Core 6종</title>
+<!-- Built artifacts: run `pnpm build` at the repo root first. -->
+<link rel="stylesheet" href="../packages/dds-tokens/dist/tokens.css">
+<link rel="stylesheet" href="../packages/dds-css/dist/dds.css">
+<style>
+  /* Page chrome only — components come 100% from dds.css.
+   * Everything here uses the same --dds-* tokens (dogfooding). */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--dds-color-bg-default);
+    color: var(--dds-color-text-primary);
+    font-family: var(--dds-font-family-sans);
+    font-size: var(--dds-typo-body-1-font-size);
+    line-height: var(--dds-typo-body-1-line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 0 var(--dds-space-24) var(--dds-space-64); }
+  header.site { display: flex; align-items: baseline; gap: var(--dds-space-16); padding: var(--dds-space-40) 0 var(--dds-space-24); }
+  header.site h1 { font-size: var(--dds-typo-title-1-font-size); line-height: var(--dds-typo-title-1-line-height); font-weight: var(--dds-typo-title-1-font-weight); margin: 0; }
+  header.site .src { font-size: var(--dds-typo-label-font-size); color: var(--dds-color-text-muted); margin-left: auto; font-family: var(--dds-font-family-mono); }
+  h2 { font-size: var(--dds-typo-title-2-font-size); line-height: var(--dds-typo-title-2-line-height); font-weight: var(--dds-typo-title-2-font-weight); margin: var(--dds-space-48) 0 var(--dds-space-12); }
+  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: var(--dds-space-16); }
+  @media (max-width: 760px) { .twin { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--dds-color-bg-default);
+    color: var(--dds-color-text-primary);
+    border: 1px solid var(--dds-color-border-default);
+    border-radius: var(--dds-radius-lg);
+    padding: var(--dds-space-24);
+  }
+  .panel .plabel {
+    font-size: var(--dds-typo-caption-font-size); line-height: var(--dds-typo-caption-line-height);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--dds-color-text-muted); margin: 0 0 var(--dds-space-16); font-weight: 500;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: var(--dds-space-8); align-items: center; margin: 0 0 var(--dds-space-16); }
+  .row:last-child { margin-bottom: 0; }
+  .cap { font-size: var(--dds-typo-caption-font-size); line-height: var(--dds-typo-caption-line-height); color: var(--dds-color-text-muted); display: block; margin-top: var(--dds-space-4); text-align: center; }
+  .cell { display: flex; flex-direction: column; align-items: center; }
+  /* demo stages: un-fix the fixed-position components so they render inline */
+  .stage { position: relative; min-height: 180px; border-radius: var(--dds-radius-lg); overflow: hidden; border: 1px solid var(--dds-color-border-default); background: var(--dds-color-bg-subtle); }
+  .stage .dds-dialog-overlay, .stage .dds-toast-region { position: absolute; }
+  .skrow { display: flex; gap: var(--dds-space-12); align-items: center; }
+  .skcol { flex: 1; display: grid; gap: var(--dds-space-8); }
+</style>
+
+<div class="wrap">
+  <header class="site">
+    <h1>DDS 컴포넌트</h1>
+    <button class="dds-btn dds-btn--secondary dds-btn--sm" id="themeToggle">테마 전환</button>
+    <span class="src">@devslab-kr/dds-css · Core 6</span>
+  </header>
+
+  <!-- ================= Button ================= -->
+  <h2>Button — variant × size × 상태</h2>
+  <div class="twin">
+    <div class="panel" data-theme="light">
+      <p class="plabel">Light</p>
+      <div class="row">
+        <button class="dds-btn dds-btn--primary">저장</button>
+        <button class="dds-btn dds-btn--secondary">취소</button>
+        <button class="dds-btn dds-btn--ghost">자세히</button>
+        <button class="dds-btn dds-btn--danger">삭제</button>
+      </div>
+      <div class="row">
+        <button class="dds-btn dds-btn--primary dds-btn--sm">작게</button>
+        <button class="dds-btn dds-btn--primary">보통</button>
+        <button class="dds-btn dds-btn--primary dds-btn--lg">크게</button>
+      </div>
+      <div class="row">
+        <span class="cell"><button class="dds-btn dds-btn--primary" disabled>비활성</button><span class="cap">disabled</span></span>
+        <span class="cell"><button class="dds-btn dds-btn--primary" aria-busy="true"><span class="dds-spinner" aria-hidden="true"></span>저장 중</button><span class="cap">loading</span></span>
+        <span class="cell"><button class="dds-btn dds-btn--danger" disabled>비활성</button><span class="cap">danger disabled</span></span>
+      </div>
+    </div>
+    <div class="panel" data-theme="dark">
+      <p class="plabel">Dark (data-theme 스코프 고정)</p>
+      <div class="row">
+        <button class="dds-btn dds-btn--primary">저장</button>
+        <button class="dds-btn dds-btn--secondary">취소</button>
+        <button class="dds-btn dds-btn--ghost">자세히</button>
+        <button class="dds-btn dds-btn--danger">삭제</button>
+      </div>
+      <div class="row">
+        <button class="dds-btn dds-btn--primary dds-btn--sm">작게</button>
+        <button class="dds-btn dds-btn--primary">보통</button>
+        <button class="dds-btn dds-btn--primary dds-btn--lg">크게</button>
+      </div>
+      <div class="row">
+        <span class="cell"><button class="dds-btn dds-btn--primary" disabled>비활성</button><span class="cap">disabled</span></span>
+        <span class="cell"><button class="dds-btn dds-btn--primary" aria-busy="true"><span class="dds-spinner" aria-hidden="true"></span>저장 중</button><span class="cap">loading</span></span>
+        <span class="cell"><button class="dds-btn dds-btn--danger" disabled>비활성</button><span class="cap">danger disabled</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TextField ================= -->
+  <h2>TextField — 기본 · 에러 · 비활성</h2>
+  <div class="twin">
+    <div class="panel" data-theme="light">
+      <p class="plabel">Light</p>
+      <div class="dds-field" style="max-width:320px; margin-bottom: var(--dds-space-16)">
+        <label class="dds-field__label" for="lf1">회사 이름</label>
+        <input class="dds-input" id="lf1" type="text" placeholder="데브스랩">
+        <span class="dds-field__help" id="lf1h">방문자에게 표시되는 이름입니다.</span>
+      </div>
+      <div class="dds-field dds-field--error" style="max-width:320px; margin-bottom: var(--dds-space-16)">
+        <label class="dds-field__label" for="lf2">이메일</label>
+        <input class="dds-input" id="lf2" type="text" value="hello@devslab" aria-invalid="true" aria-describedby="lf2h">
+        <span class="dds-field__help" id="lf2h">이메일 형식이 아닙니다. 예: hello@devslab.kr</span>
+      </div>
+      <div class="dds-field" style="max-width:320px">
+        <label class="dds-field__label" for="lf3">사업자 번호</label>
+        <input class="dds-input" id="lf3" type="text" value="000-00-00000" disabled>
+        <span class="dds-field__help">가입 후에는 바꿀 수 없습니다.</span>
+      </div>
+    </div>
+    <div class="panel" data-theme="dark">
+      <p class="plabel">Dark</p>
+      <div class="dds-field" style="max-width:320px; margin-bottom: var(--dds-space-16)">
+        <label class="dds-field__label" for="df1">회사 이름</label>
+        <input class="dds-input" id="df1" type="text" placeholder="데브스랩">
+        <span class="dds-field__help">방문자에게 표시되는 이름입니다.</span>
+      </div>
+      <div class="dds-field dds-field--error" style="max-width:320px; margin-bottom: var(--dds-space-16)">
+        <label class="dds-field__label" for="df2">이메일</label>
+        <input class="dds-input" id="df2" type="text" value="hello@devslab" aria-invalid="true" aria-describedby="df2h">
+        <span class="dds-field__help" id="df2h">이메일 형식이 아닙니다. 예: hello@devslab.kr</span>
+      </div>
+      <div class="dds-field" style="max-width:320px">
+        <label class="dds-field__label" for="df3">사업자 번호</label>
+        <input class="dds-input" id="df3" type="text" value="000-00-00000" disabled>
+        <span class="dds-field__help">가입 후에는 바꿀 수 없습니다.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Badge · Spinner · Skeleton ================= -->
+  <h2>Badge · Spinner · Skeleton</h2>
+  <div class="twin">
+    <div class="panel" data-theme="light">
+      <p class="plabel">Light</p>
+      <div class="row">
+        <span class="dds-badge dds-badge--brand">Beta</span>
+        <span class="dds-badge dds-badge--success">연결됨</span>
+        <span class="dds-badge dds-badge--warning">확인 필요</span>
+        <span class="dds-badge dds-badge--danger">실패</span>
+        <span class="dds-badge dds-badge--info">안내</span>
+      </div>
+      <div class="row">
+        <span class="dds-spinner" role="status" aria-label="불러오는 중"></span>
+        <span class="dds-spinner dds-spinner--lg" role="status" aria-label="불러오는 중"></span>
+        <span style="color: var(--dds-color-text-brand)"><span class="dds-spinner" role="status" aria-label="불러오는 중"></span></span>
+      </div>
+      <div class="skrow" aria-busy="true">
+        <span class="dds-skeleton dds-skeleton--circle" aria-hidden="true" style="width:40px;height:40px"></span>
+        <div class="skcol">
+          <span class="dds-skeleton dds-skeleton--text" aria-hidden="true" style="width:60%"></span>
+          <span class="dds-skeleton dds-skeleton--text" aria-hidden="true" style="width:90%"></span>
+        </div>
+      </div>
+    </div>
+    <div class="panel" data-theme="dark">
+      <p class="plabel">Dark</p>
+      <div class="row">
+        <span class="dds-badge dds-badge--brand">Beta</span>
+        <span class="dds-badge dds-badge--success">연결됨</span>
+        <span class="dds-badge dds-badge--warning">확인 필요</span>
+        <span class="dds-badge dds-badge--danger">실패</span>
+        <span class="dds-badge dds-badge--info">안내</span>
+      </div>
+      <div class="row">
+        <span class="dds-spinner" role="status" aria-label="불러오는 중"></span>
+        <span class="dds-spinner dds-spinner--lg" role="status" aria-label="불러오는 중"></span>
+        <span style="color: var(--dds-color-text-brand)"><span class="dds-spinner" role="status" aria-label="불러오는 중"></span></span>
+      </div>
+      <div class="skrow" aria-busy="true">
+        <span class="dds-skeleton dds-skeleton--circle" aria-hidden="true" style="width:40px;height:40px"></span>
+        <div class="skcol">
+          <span class="dds-skeleton dds-skeleton--text" aria-hidden="true" style="width:60%"></span>
+          <span class="dds-skeleton dds-skeleton--text" aria-hidden="true" style="width:90%"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Dialog ================= -->
+  <h2>Dialog — 딤 오버레이 + elevation.3</h2>
+  <div class="twin">
+    <div class="panel" data-theme="light">
+      <p class="plabel">Light</p>
+      <div class="stage">
+        <div class="dds-dialog-overlay">
+          <div class="dds-dialog" role="dialog" aria-modal="true" aria-labelledby="ld-t">
+            <h5 class="dds-dialog__title" id="ld-t">자료를 다시 색인할까요?</h5>
+            <p class="dds-dialog__body">수정된 회사 소개 문서가 즉시 답변에 반영됩니다.</p>
+            <div class="dds-dialog__actions">
+              <button class="dds-btn dds-btn--ghost dds-btn--sm">나중에</button>
+              <button class="dds-btn dds-btn--primary dds-btn--sm">색인하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" data-theme="dark">
+      <p class="plabel">Dark</p>
+      <div class="stage">
+        <div class="dds-dialog-overlay">
+          <div class="dds-dialog" role="dialog" aria-modal="true" aria-labelledby="dd-t">
+            <h5 class="dds-dialog__title" id="dd-t">자료를 다시 색인할까요?</h5>
+            <p class="dds-dialog__body">수정된 회사 소개 문서가 즉시 답변에 반영됩니다.</p>
+            <div class="dds-dialog__actions">
+              <button class="dds-btn dds-btn--ghost dds-btn--sm">나중에</button>
+              <button class="dds-btn dds-btn--primary dds-btn--sm">색인하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Toast ================= -->
+  <h2>Toast — bg.elevated + elevation.2, 상태 도트</h2>
+  <div class="twin">
+    <div class="panel" data-theme="light">
+      <p class="plabel">Light</p>
+      <div class="stage" style="min-height:220px">
+        <div class="dds-toast-region" role="status">
+          <div class="dds-toast">설정을 저장했습니다.</div>
+          <div class="dds-toast dds-toast--success">자료 색인이 끝났습니다.</div>
+          <div class="dds-toast dds-toast--warning">크롤 결과가 부족합니다.</div>
+          <div class="dds-toast dds-toast--danger" role="alert">메일 발송에 실패했습니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" data-theme="dark">
+      <p class="plabel">Dark</p>
+      <div class="stage" style="min-height:220px">
+        <div class="dds-toast-region" role="status">
+          <div class="dds-toast">설정을 저장했습니다.</div>
+          <div class="dds-toast dds-toast--success">자료 색인이 끝났습니다.</div>
+          <div class="dds-toast dds-toast--warning">크롤 결과가 부족합니다.</div>
+          <div class="dds-toast dds-toast--danger" role="alert">메일 발송에 실패했습니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Root theme toggle — the dark twin panels stay pinned via their own
+  // data-theme attribute regardless of the root theme (D-003).
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const root = document.documentElement;
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  });
+</script>
+</html>

@@ -1,0 +1,32 @@
+/* Skeleton — loading placeholder. The fill is an alpha tint (spec §3.1:
+ * overlays/tints are alpha-only) so it sits naturally on default and subtle
+ * backgrounds in both themes. Size is the consumer's job (width/height on
+ * the element); --text matches a line of the surrounding font. Mark the
+ * loading region with aria-busy="true" and keep skeletons aria-hidden. */
+
+.dds-skeleton {
+  display: block;
+  background: var(--dds-color-overlay-pressed-tint);
+  border-radius: var(--dds-radius-sm);
+  animation: dds-skeleton-pulse 1600ms var(--dds-motion-easing-standard) infinite;
+}
+
+.dds-skeleton--text {
+  height: 1em;
+}
+
+.dds-skeleton--circle {
+  border-radius: var(--dds-radius-full);
+}
+
+@keyframes dds-skeleton-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dds-skeleton {
+    animation: none;
+  }
+}

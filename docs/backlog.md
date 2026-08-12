@@ -24,16 +24,22 @@
 - 완료 기준 충족: `pnpm build` 한 번으로 4개 산출물, CI 초록. 결정 기록
   D-001~D-005 (`docs/decisions.md`).
 
-### 2. CSS 컴포넌트 레이어 (`@devslab-kr/dds-css`) Core 6종 — `대기`
+### 2. CSS 컴포넌트 레이어 (`@devslab-kr/dds-css`) Core 6종 — `완료` (2026-08-13)
 스펙 §2, §4. `preview/index.html`에 프로토타입된 스타일을 클래스 기반
-패키지로 정식화. 토큰 CSS 변수만 참조(하드코딩 금지).
-- [ ] Button (primary/secondary/ghost/danger × sm/md/lg × 전 상태 §4.2)
-- [ ] TextField (라벨·헬프·에러)
-- [ ] Badge (brand + 상태 4종)
-- [ ] Spinner / Skeleton
-- [ ] Dialog (+ 딤 오버레이)
-- [ ] Toast
-- [ ] 각 컴포넌트 접근성 체크 (§6) + do/don't 문서 (§4.4)
+패키지로 정식화. 토큰 CSS 변수만 참조(하드코딩 금지 — `check-css.mjs`가
+hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
+- [x] Button (primary/secondary/ghost/danger × sm/md/lg × 전 상태 §4.2 —
+      loading은 `aria-busy`, danger 텍스트는 신규 `color.text.on-status` D-006)
+- [x] TextField (라벨·헬프·에러 — `aria-invalid` 훅 포함)
+- [x] Badge (brand + 상태 4종, 색 단독 신호 방지 도트)
+- [x] Spinner / Skeleton (모션 감소 대응 — 스피너는 감속, 스켈레톤은 정지)
+- [x] Dialog (+ 딤 오버레이, 네이티브 `<dialog>`/`::backdrop` 겸용)
+- [x] Toast (리전 + 상태 도트 + 진입 모션)
+- [x] 각 컴포넌트 접근성 체크 (§6) + do/don't 문서 (§4.4) —
+      `docs/components.md` + `.ko.md`
+- 시각검증: `preview/components.html` (라이트/다크 트윈 + 루트 토글 —
+  `[data-theme="light"]` 되고정은 D-003 개정) 브라우저 실측 — variant·size·
+  상태·hover(brand-hover 실측)·focus 링(2px/offset 2px)·테마 고정 확인.
 
 ### 3. AskLinq에 적용 (첫 소비자) — `대기`
 스펙 §8 Phase 1. asklinq 레포의 위젯·SSR 페이지가 `dds-tokens`/`dds-css`를

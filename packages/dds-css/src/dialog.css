@@ -1,0 +1,58 @@
+/* Dialog — overlay + panel. Two markup shapes are supported:
+ *   1. div pattern: .dds-dialog-overlay > .dds-dialog[role="dialog"][aria-modal="true"]
+ *   2. native <dialog class="dds-dialog"> (backdrop styled via ::backdrop)
+ * Behavior contract (spec §5): closes on outside tap and Esc; focus is
+ * trapped while open and returns to the opener on close — that is the
+ * opener JS's job, this file only owns the look. Label the panel with
+ * aria-labelledby pointing at the title. */
+
+.dds-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: var(--dds-space-16);
+  background: var(--dds-color-overlay-dim);
+}
+
+.dds-dialog {
+  background: var(--dds-color-bg-elevated);
+  color: var(--dds-color-text-primary);
+  font-family: var(--dds-font-family-sans);
+  border-radius: var(--dds-radius-lg);
+  box-shadow: var(--dds-elevation-3);
+  padding: var(--dds-space-20);
+  width: 100%;
+  max-width: 400px; /* layout default, not a token — override per product */
+}
+
+/* native <dialog> resets */
+dialog.dds-dialog {
+  border: none;
+  margin: auto;
+}
+dialog.dds-dialog::backdrop {
+  background: var(--dds-color-overlay-dim);
+}
+
+.dds-dialog__title {
+  margin: 0 0 var(--dds-space-8);
+  font-size: var(--dds-typo-title-2-font-size);
+  line-height: var(--dds-typo-title-2-line-height);
+  font-weight: var(--dds-typo-title-2-font-weight);
+}
+
+.dds-dialog__body {
+  margin: 0 0 var(--dds-space-16);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  font-weight: var(--dds-typo-body-2-font-weight);
+  color: var(--dds-color-text-secondary);
+}
+
+.dds-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--dds-space-8);
+}

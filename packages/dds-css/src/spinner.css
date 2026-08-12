@@ -1,0 +1,34 @@
+/* Spinner — indeterminate progress. Inherits color via currentColor so it
+ * reads correctly on any surface (inside a primary button it spins in
+ * on-brand). The rotation is a continuous state indicator, not a transition,
+ * so its period is not a motion token; under reduced motion it slows down
+ * instead of freezing (a stopped spinner reads as a hang — the motion IS the
+ * state, spec §3.6). Standalone spinners need role="status" + aria-label. */
+
+.dds-spinner {
+  display: inline-block;
+  flex: none;
+  width: var(--dds-space-16);
+  height: var(--dds-space-16);
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--dds-radius-full);
+  animation: dds-spin 800ms linear infinite;
+}
+
+.dds-spinner--lg {
+  width: var(--dds-space-24);
+  height: var(--dds-space-24);
+}
+
+@keyframes dds-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dds-spinner {
+    animation-duration: 1600ms;
+  }
+}

@@ -181,6 +181,7 @@ toggle**; both mappings are first-class from day one.
 | `color.text.secondary` | `zinc.600` | `zinc.400` | supporting copy |
 | `color.text.muted` | `zinc.500` | `zinc.500` | disabled, placeholders |
 | `color.text.on-brand` | `zinc.950` | `zinc.950` | **text on brand surfaces (note below)** |
+| `color.text.on-status` | `white` | `zinc.950` | text on filled status surfaces (danger buttons) |
 | `color.text.brand` | `cyan.700` | `cyan.400` | brand text & links |
 | `color.border.default` | `zinc.200` | `zinc.800` | default borders |
 | `color.border.strong` | `zinc.300` | `zinc.700` | emphasized borders (inputs) |
