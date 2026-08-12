@@ -35,6 +35,8 @@ pnpm workspace. `pnpm install`, then:
 - `pnpm build` — build all packages
 - `pnpm verify` — build + token validation + docs/preview↔token drift check
   (what CI runs)
+- `pnpm storybook` — component/foundation stories at :6006 (theme switch in
+  the toolbar); `pnpm build-storybook` for the static site (also CI-checked)
 
 ## Roadmap
 

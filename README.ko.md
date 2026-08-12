@@ -34,6 +34,8 @@ pnpm 워크스페이스. `pnpm install` 후:
 
 - `pnpm build` — 전 패키지 빌드
 - `pnpm verify` — 빌드 + 토큰 검증 + 문서·preview↔토큰 불일치 검사 (CI와 동일)
+- `pnpm storybook` — 컴포넌트·파운데이션 스토리 (:6006, 툴바에서 테마 전환);
+  정적 사이트는 `pnpm build-storybook` (CI에서도 빌드 검증)
 
 ## 로드맵
 

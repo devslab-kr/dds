@@ -51,9 +51,17 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
 
 ## P2 — 확장
 
-### 4. 쇼케이스 사이트 — `대기`
+### 4. 쇼케이스 사이트 — `진행 중` (Storybook 도입 2026-08-13, 배포는 공개 결정 대기)
 `preview/` + `brand/`를 GitHub Pages(또는 org 허브 devslab-kr.github.io에
 링크)로 배포. 장기적으로 Storybook 도입 검토 (§4.4의 스토리 요구사항).
+- [x] **Storybook 도입** (`pnpm storybook` / `build-storybook`, html-vite —
+      React 비의존, D-008): Core 6종 전 variant·size·상태 스토리 +
+      Foundations 토큰 표(생성된 tokens.js에서 렌더 — 드리프트 불가) +
+      테마 툴바(data-theme 스위치). CI가 storybook build를 검증.
+- [ ] **배포 보류** — GitHub Pages는 private repo에서 플랜 제한으로 거부됨
+      (editor-ruler에서 실증). "DDS 공개 여부"(아래 미해결 질문)가 정해져야
+      진행. 공개 전환 시: pages.yml 추가 + storybook-static 배포 + org 허브
+      링크.
 
 ### 5. 다크모드 토글 표준화 — `대기`
 devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴을
