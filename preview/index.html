@@ -366,7 +366,7 @@
   </p>
 
   <div class="hero">
-    <p class="eyebrow">§3.1 · on-brand 규칙</p>
+    <p class="eyebrow">3.1 · on-brand 규칙</p>
     <h2>브랜드 면 위 텍스트는 흰색이 아니라 <em>다크</em>다</h2>
     <p>
       데브스랩 브랜드 cyan(#06B6D4)은 밝은 색상이라 흰 텍스트의 대비가 2.3:1로 WCAG AA에
@@ -383,10 +383,10 @@
 
   <!-- ============ palette ============ -->
   <section>
-    <p class="eyebrow">§3.1 · 컬러</p>
+    <p class="eyebrow">3.1 · 컬러</p>
     <h3>원시 팔레트</h3>
     <p class="desc">
-      TDS 구조를 차용한 3층 컬러: 원시 팔레트(50–900) → 알파 스케일 → 시맨틱 토큰.
+      3층 컬러 구조: 원시 팔레트(50–900) → 알파 스케일 → 시맨틱 토큰.
       브랜드 기준색은 데브스랩 홈페이지(devslab.kr)에서 추출한 <code>cyan</code>과
       <code>zinc</code> 뉴트럴입니다. 컴포넌트는 이 팔레트를 직접 참조하지 않습니다.
     </p>
@@ -410,7 +410,7 @@
 
   <!-- ============ semantic ============ -->
   <section>
-    <p class="eyebrow">§3.1 · 컬러</p>
+    <p class="eyebrow">3.1 · 컬러</p>
     <h3>시맨틱 토큰</h3>
     <p class="desc">
       컴포넌트가 참조하는 유일한 레이어. 라이트/다크 매핑이 처음부터 1급으로 함께 정의됩니다 —
@@ -428,7 +428,7 @@
 
   <!-- ============ typography ============ -->
   <section>
-    <p class="eyebrow">§3.2 · 타이포그래피</p>
+    <p class="eyebrow">3.2 · 타이포그래피</p>
     <h3>타입 스케일</h3>
     <p class="desc">
       8단계 고정 세트 — 크기와 행간은 분리해서 조정하지 않습니다. 웹은 px(=rem 환산), RN은 같은 숫자를 pt로 씁니다.
@@ -439,7 +439,7 @@
 
   <!-- ============ spacing ============ -->
   <section>
-    <p class="eyebrow">§3.3 · 간격</p>
+    <p class="eyebrow">3.3 · 간격</p>
     <h3>4px 그리드</h3>
     <p class="desc">허용값 12개. 홀수·임의 값이 필요해 보이면 디자인을 스케일에 맞춥니다 — 스케일을 디자인에 맞추지 않습니다.</p>
     <div id="spaceRows"></div>
@@ -447,14 +447,14 @@
 
   <!-- ============ radius ============ -->
   <section>
-    <p class="eyebrow">§3.4 · 라운드</p>
+    <p class="eyebrow">3.4 · 라운드</p>
     <h3>Radius</h3>
     <div class="radgrid" id="radGrid"></div>
   </section>
 
   <!-- ============ elevation ============ -->
   <section>
-    <p class="eyebrow">§3.5 · 그림자</p>
+    <p class="eyebrow">3.5 · 그림자</p>
     <h3>Elevation — 3레벨</h3>
     <p class="desc">웹 box-shadow와 RN elevation 값을 토큰이 함께 정의합니다. 플랫폼별로 따로 만들지 않습니다.</p>
     <div class="elestage panel--light">
@@ -466,7 +466,7 @@
 
   <!-- ============ motion ============ -->
   <section>
-    <p class="eyebrow">§3.6 · 모션</p>
+    <p class="eyebrow">3.6 · 모션</p>
     <h3>Duration × Easing</h3>
     <p class="desc">카드에 마우스를 올리거나 키보드 포커스를 주면 해당 토큰의 속도로 움직입니다. OS의 모션 감소 설정을 켜면 즉시 완료됩니다.</p>
     <div class="motiongrid">
@@ -487,7 +487,7 @@
 
   <!-- ============ components ============ -->
   <section>
-    <p class="eyebrow">§4 · 컴포넌트</p>
+    <p class="eyebrow">4 · 컴포넌트</p>
     <h3>Core 컴포넌트 — 라이트/다크 동시 렌더</h3>
     <p class="desc">
       아래 두 패널은 페이지 테마와 무관하게 각각 라이트/다크 시맨틱 매핑에 고정되어 있습니다.
@@ -526,7 +526,7 @@
       </div>
     </div>
 
-    <h4 class="sub">Button — 상태 (§4.2: 모든 인터랙티브 컴포넌트가 전 상태를 정의)</h4>
+    <h4 class="sub">Button — 상태 (스펙 4.2: 모든 인터랙티브 컴포넌트가 전 상태를 정의)</h4>
     <div class="panel panel--light">
       <div class="prow" style="gap:16px;">
         <span class="statecell"><button class="btn btn--primary">기본</button><span class="statecap">default</span></span>
@@ -624,8 +624,8 @@
   </section>
 
   <footer class="site">
-    <span>DevsLab Design System v0 — 규칙 명세는 <a href="https://github.com/devslab-kr/asklinq/blob/claude/tds-react-native-design-ohuzj0/docs/design-system.ko.md">docs/design-system.ko.md</a></span>
-    <span>구조 참조: <a href="https://tossmini-docs.toss.im/tds-react-native/">TDS React Native</a></span>
+    <span>DDS — DevsLab Design System v0 · 규칙 명세: devslab-kr/dds의 docs/design-system.ko.md</span>
+    <span><a href="https://devslab.kr/brand/">브랜드 가이드</a> · <a href="https://devslab.kr/">devslab.kr</a></span>
   </footer>
 </div>
 
