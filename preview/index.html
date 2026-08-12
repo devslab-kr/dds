@@ -92,6 +92,12 @@
     padding: 2px 8px; border-radius: 9999px;
   }
   header.site .src { font-size: 13px; color: var(--muted); margin-left: auto; }
+  header.site nav { display: flex; gap: 16px; flex-basis: 100%; margin-top: 4px; }
+  header.site nav a {
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px; line-height: 16px; color: var(--brand-text); text-decoration: none;
+  }
+  header.site nav a:hover { text-decoration: underline; }
   .fontnote { font-size: 12px; line-height: 16px; color: var(--muted); margin: 0 0 40px; }
 
   /* ---------- hero: the on-brand rule ---------- */
@@ -348,6 +354,11 @@
     <h1>DDS 파운데이션</h1>
     <span class="ver">v0 스펙 미리보기</span>
     <span class="src mono">docs/design-system.ko.md</span>
+    <nav aria-label="DDS 쇼케이스">
+      <a href="./components.html">&gt; ./dds --components</a>
+      <a href="https://devslab.kr/brand/">&gt; ./brand --guide</a>
+      <a href="https://devslab.kr/">&gt; cd devslab.kr</a>
+    </nav>
   </header>
   <p class="fontnote">
     폰트는 라틴 Geist + 한글 Pretendard/시스템 폴백 기준이며, 이 미리보기는 폴백 폰트로 표시될 수 있습니다.
