@@ -78,11 +78,18 @@ devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴�
 Select/Textarea, Chip, Avatar, Card, Divider, Tooltip(웹), EmptyState,
 Modal(웹)↔BottomSheet(네이티브) 역할 매핑.
 
-### 8. 홈페이지 /brand 페이지 마무리 — `대기`
+### 8. 홈페이지 /brand 페이지 마무리 — `완료` (2026-08-13)
 `jlc488/devlab.kr`의 `claude/brand-page` 브랜치(별도 세션이 작업)를 리뷰.
 `brand/index.html` 시안과 대조 — 특히 로고 설명 문구가 구버전("건축 도면")
 이면 "코드 블록을 쌓아 SaaS의 골격을 세우는 아키텍처 설계"로 교체 확인.
 장기적으로 devslab.kr 자체도 `dds-tokens`를 소비하도록 전환.
+- [x] 브랜치 리뷰·머지 (devlab.kr#29) — **로고 문구가 실제로 구버전이었고
+      ko/en 모두 교체.** 실제 명함 앞면 4종(2인×2테마) 추가, 뒷면은
+      직통 번호+vCard QR이라 공개 웹 미게재(소유자 요청 반영, 개인정보).
+- [x] devslab.kr의 `dds-tokens` 소비 전환 (devlab.kr#30, D-009 — vendored
+      사본 + sync 스크립트): body·electric 스케일·시맨틱 유틸리티가 토큰
+      한 소스, ThemeProvider가 class+data-theme 동시 스위치, ::selection
+      on-brand 규칙 적용(기존 흰 글자 2.3:1 수정).
 
 ### 9. 폰트 전략 확정 — `대기`
 Geist/Geist Mono 셀프호스팅 여부, Pretendard 서브셋, RN 번들 전략.
