@@ -1,0 +1,32 @@
+{
+  "name": "@devslab-kr/dds-icons",
+  "version": "0.1.0",
+  "description": "DDS icon set — one SVG source (24 grid, currentColor), shipped as files, a sprite and a path-data map",
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/dds-icons"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/icons.js",
+  "types": "./dist/icons.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/icons.d.ts",
+      "default": "./dist/icons.js"
+    },
+    "./icons.svg": "./dist/icons.svg",
+    "./svg/*": "./dist/svg/*"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node scripts/check-icons.mjs"
+  }
+}
