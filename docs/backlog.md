@@ -73,6 +73,8 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
       sync 스크립트, D-009 모델). brand/는 사이트 자체 /brand 페이지가 대체.
       /brand의 design system 블록에서 링크. **preview를 고치면
       devlab.kr에서 `node scripts/sync-dds-showcase.mjs` 재실행 필요.**
+      (2026-08-15 devlab.kr#34로 `icons.html` 추가 — sync 스크립트가 이제
+      페이지·에셋·rewrite 배열 구조라 페이지가 늘어도 배열만 고치면 된다.)
 - Storybook 정적 사이트의 공개 배포만 미배포로 남음 — "DDS 공개 여부"
   결정에 종속(로컬 `pnpm storybook`으로 충분, 소유자 배포 보류 선택).
 - [x] **Storybook 도입** (`pnpm storybook` / `build-storybook`, html-vite —
@@ -105,8 +107,12 @@ devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴�
 - [x] `preview/icons.html` 갤러리(라이트/다크 트윈, 24 그리드 상자 표시,
       16·20·24·32 크기) 실측.
 - 프레임워크 컴포넌트 codegen은 **미착수(의도)** — 스펙 §2대로 그 프레임워크
-  제품이 생길 때. **`preview/icons.html`은 devslab.kr 쇼케이스에 아직
-  미배포** — devlab.kr의 `sync-dds-showcase.mjs`에 페이지 추가 필요.
+  제품이 생길 때.
+- [x] **쇼케이스 배포 완료** (2026-08-15, devlab.kr#34):
+      https://devslab.kr/dds/icons.html 라이브. sync 스크립트를 페이지·에셋·
+      rewrite 배열 구조로 바꿔 `icons.html` + `dist/icons.js`를 싣고,
+      /brand의 design system 블록에 `> ./dds --icons` 링크 추가(ko·en).
+      세 쇼케이스 페이지는 서로 상호 링크(#15).
 
 ### 7. Composite 컴포넌트 확충 — `완료` (2026-08-15)
 스펙 §4.3 v1 인벤토리의 나머지 13종을 `dds-css`에 반영 (업스트림 시안
