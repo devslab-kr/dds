@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DDS 아이콘 — dds-icons</title>
+<!-- Built artifacts: run `pnpm build` at the repo root first. -->
+<link rel="stylesheet" href="../packages/dds-tokens/dist/tokens.css">
+<link rel="stylesheet" href="../packages/dds-css/dist/dds.css">
+<style>
+  /* Page chrome only — icons come 100% from dds-icons. */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--dds-color-bg-default);
+    color: var(--dds-color-text-primary);
+    font-family: var(--dds-font-family-sans);
+    font-size: var(--dds-typo-body-1-font-size);
+    line-height: var(--dds-typo-body-1-line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 0 var(--dds-space-24) var(--dds-space-64); }
+  header.site { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--dds-space-16); padding: var(--dds-space-40) 0 var(--dds-space-24); }
+  header.site h1 { font-size: var(--dds-typo-title-1-font-size); line-height: var(--dds-typo-title-1-line-height); font-weight: var(--dds-typo-title-1-font-weight); margin: 0; }
+  header.site .src { font-size: var(--dds-typo-label-font-size); color: var(--dds-color-text-muted); margin-left: auto; font-family: var(--dds-font-family-mono); }
+  header.site nav { display: flex; gap: var(--dds-space-16); flex-basis: 100%; margin-top: var(--dds-space-4); }
+  header.site nav a { font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-label-font-size); color: var(--dds-color-text-brand); text-decoration: none; }
+  header.site nav a:hover { text-decoration: underline; }
+  h2 { font-size: var(--dds-typo-title-2-font-size); line-height: var(--dds-typo-title-2-line-height); font-weight: var(--dds-typo-title-2-font-weight); margin: var(--dds-space-48) 0 var(--dds-space-4); }
+  p.note { font-size: var(--dds-typo-body-2-font-size); line-height: var(--dds-typo-body-2-line-height); color: var(--dds-color-text-secondary); margin: 0 0 var(--dds-space-16); max-width: 60em; }
+  .twin { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--dds-space-16); }
+  @media (max-width: 760px) { .twin { grid-template-columns: minmax(0, 1fr); } }
+  .panel { background: var(--dds-color-bg-default); color: var(--dds-color-text-primary); border: 1px solid var(--dds-color-border-default); border-radius: var(--dds-radius-lg); padding: var(--dds-space-24); }
+  .panel .plabel { font-size: var(--dds-typo-caption-font-size); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dds-color-text-muted); margin: 0 0 var(--dds-space-16); font-weight: 500; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--dds-space-12); }
+  .item { display: flex; flex-direction: column; align-items: center; gap: var(--dds-space-4); padding: var(--dds-space-8) var(--dds-space-4); border-radius: var(--dds-radius-md); }
+  .item:hover { background: var(--dds-color-overlay-hover-tint); }
+  .item .nm { font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-caption-font-size); line-height: var(--dds-typo-caption-line-height); color: var(--dds-color-text-muted); text-align: center; overflow-wrap: anywhere; }
+  /* the 24 grid, drawn: every icon must sit inside the same box */
+  .box { display: grid; place-items: center; width: var(--dds-space-32); height: var(--dds-space-32); outline: 1px dashed var(--dds-color-border-default); }
+  .sizes { display: flex; align-items: flex-end; gap: var(--dds-space-16); }
+  .sizes .cell { display: flex; flex-direction: column; align-items: center; gap: var(--dds-space-4); font-size: var(--dds-typo-caption-font-size); color: var(--dds-color-text-muted); }
+</style>
+
+<div class="wrap">
+  <header class="site">
+    <h1>DDS 아이콘</h1>
+    <button class="dds-btn dds-btn--secondary dds-btn--sm" id="themeToggle">테마 전환</button>
+    <span class="src">@devslab-kr/dds-icons</span>
+    <nav aria-label="DDS 쇼케이스">
+      <a href="./index.html">&gt; ./dds --foundation</a>
+      <a href="./components.html">&gt; ./dds --components</a>
+      <a href="https://devslab.kr/">&gt; cd devslab.kr</a>
+    </nav>
+  </header>
+
+  <h2>코어 세트 — 24 그리드 · 1.6 스트로크 · currentColor</h2>
+  <p class="note">
+    점선은 32×32 상자다 — 모든 아이콘이 같은 상자 안에서 같은 시각 무게를
+    가져야 한다. 색은 상속(<code>currentColor</code>)이므로 아래 두 패널은
+    같은 파일이 테마만 바꿔 그려진 것이다.
+  </p>
+  <div class="twin" id="coreTwin"></div>
+
+  <h2>site 세트 — devslab.kr 전용 · 1.8 스트로크</h2>
+  <p class="note">
+    마케팅 표면에서 32–40px로 크게 쓰이는 세트라 스트로크가 굵다(D-013).
+    제품 UI에서는 코어 세트를 쓴다.
+  </p>
+  <div class="twin" id="siteTwin"></div>
+
+  <h2>크기 — 16 · 20 · 24 · 32</h2>
+  <p class="note">아이콘은 컨트롤 안에서 16–24px, 단독 일러스트 자리에서 32px.</p>
+  <div class="twin" id="sizeTwin"></div>
+</div>
+
+<script type="module">
+  import { icons } from "../packages/dds-icons/dist/icons.js";
+
+  const svgFor = (name, size = 24) => {
+    const i = icons[name];
+    return `<svg width="${size}" height="${size}" viewBox="${i.viewBox}" fill="none" stroke="currentColor"
+      stroke-width="${i.strokeWidth}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${i.body}</svg>`;
+  };
+
+  const panel = (theme, label, inner) => `
+    <div class="panel" data-theme="${theme}">
+      <p class="plabel">${label}</p>${inner}
+    </div>`;
+
+  const gallery = (set) => `<div class="grid">${Object.keys(icons)
+    .filter((n) => icons[n].set === set)
+    .map((n) => `<span class="item"><span class="box">${svgFor(n, 24)}</span><span class="nm">${n}</span></span>`)
+    .join("")}</div>`;
+
+  const sizes = `<div class="sizes">${[16, 20, 24, 32]
+    .map((s) => `<span class="cell">${svgFor("search", s)}${s}</span>`)
+    .join("")}</div>`;
+
+  for (const [id, inner] of [
+    ["coreTwin", gallery("core")],
+    ["siteTwin", gallery("site")],
+    ["sizeTwin", sizes],
+  ]) {
+    document.getElementById(id).innerHTML =
+      panel("light", "Light", inner) + panel("dark", "Dark (data-theme 스코프 고정)", inner);
+  }
+
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const root = document.documentElement;
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  });
+</script>
+</html>

@@ -17,7 +17,8 @@ React · Vue · Ionic · React Native 는 소비자다.
 | [`tokens/`](tokens/) | 디자인 토큰 소스 ([W3C 포맷](https://design-tokens.github.io/community-group/format/)): 원시 팔레트, 라이트/다크 시맨틱 매핑, 타이포·간격·라운드·그림자·모션 |
 | [`packages/dds-tokens/`](packages/dds-tokens/) | `@devslab-kr/dds-tokens` — 토큰 빌드 파이프라인: `tokens.css`, Tailwind v4 `@theme` + v3 preset, `tokens.ts` (RN·런타임), `ionic.css` |
 | [`packages/dds-css/`](packages/dds-css/) | `@devslab-kr/dds-css` — CSS 컴포넌트 레이어, 스펙 §4.3 v1 인벤토리 (Button, IconButton, TextField, Textarea, Select, Checkbox/Radio, Switch, Badge, Chip, Avatar, Spinner/Skeleton, Divider, Card, ListRow, Tabs, Dialog, Toast, Tooltip, EmptyState); 가이드는 [`docs/components.ko.md`](docs/components.ko.md) |
-| [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림) |
+| [`packages/dds-icons/`](packages/dds-icons/) | `@devslab-kr/dds-icons` — 아이콘 세트: 코어 40종(24 그리드·1.6 스트로크) + devslab.kr `site-` 7종. SVG 파일·스프라이트·path 데이터 맵 3형태 출하 |
+| [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림 — `components.html`, `icons.html`도 함께) |
 | [`brand/index.html`](brand/index.html) | 브랜드 아이덴티티 가이드: 로고 규정, Electric Cyan, 모티프, 보이스 & 톤 |
 
 ## 브랜드 기준
@@ -42,5 +43,5 @@ pnpm 워크스페이스. `pnpm install` 후:
 우선순위는 [`docs/backlog.md`](docs/backlog.md)에. 패키지는 소비자가 생길
 때만 만든다 (명세 §8):
 `@devslab-kr/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 인벤토리 (Core 6종 ✅ 2026-08-13, +13종 ✅ 2026-08-15) →
-AskLinq 적용 → `dds-icons` → 모바일 방향에 따라 `dds-native` (RN) 또는 Ionic
+AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → 모바일 방향에 따라 `dds-native` (RN) 또는 Ionic
 테마 매핑.
