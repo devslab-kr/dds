@@ -1,0 +1,63 @@
+/* IconButton — a Button whose only content is an icon (spec §4.3 v1 inventory).
+ * Same state set and sizes as .dds-btn (32/40/48 from the spacing scale) so an
+ * icon button never lands a few px off the text button next to it — the row
+ * misalignment this house rejects. The icon inherits currentColor.
+ * Markup MUST carry an accessible name: aria-label (spec §6). */
+
+.dds-iconbtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--dds-space-40);
+  height: var(--dds-space-40);
+  border: 1px solid transparent;
+  border-radius: var(--dds-radius-md);
+  background: none;
+  color: var(--dds-color-text-primary);
+  cursor: pointer;
+  transition: background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dds-iconbtn:not([disabled]):hover {
+  background: var(--dds-color-overlay-hover-tint);
+}
+.dds-iconbtn:not([disabled]):active {
+  background: var(--dds-color-overlay-pressed-tint);
+}
+.dds-iconbtn:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: var(--dds-space-2);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-iconbtn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* variants ---------------------------------------------------------------- */
+
+.dds-iconbtn--secondary {
+  border-color: var(--dds-color-border-strong);
+}
+
+.dds-iconbtn--danger {
+  color: var(--dds-color-status-danger);
+}
+
+/* sizes ------------------------------------------------------------------- */
+
+/* --sm is 32×32: still above the 24×24 web floor, but below the 44×44 mobile
+ * target — on touch surfaces keep the default size (spec §6). */
+.dds-iconbtn--sm {
+  width: var(--dds-space-32);
+  height: var(--dds-space-32);
+}
+
+.dds-iconbtn--lg {
+  width: var(--dds-space-48);
+  height: var(--dds-space-48);
+}

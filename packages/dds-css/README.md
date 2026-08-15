@@ -3,8 +3,11 @@
 🌐 [한국어](README.ko.md)
 
 DDS CSS component layer — class-based and framework-neutral (spec §2: the
-core is CSS; React/Vue/Ionic/SSR are consumers). Core 6: **Button,
-TextField, Badge, Spinner/Skeleton, Dialog, Toast**.
+core is CSS; React/Vue/Ionic/SSR are consumers). The spec §4.3 v1
+inventory: **Button, IconButton, TextField, Textarea, Select,
+Checkbox/Radio, Switch, Badge, Chip, Avatar, Spinner, Skeleton, Divider,
+Card, ListRow, Tabs, Dialog, Toast, Tooltip, EmptyState** (BottomSheet is
+the native counterpart of Dialog — Phase 3).
 
 ```html
 <link rel="stylesheet" href=".../dds-tokens/tokens.css"> <!-- first -->

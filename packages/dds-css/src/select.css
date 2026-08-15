@@ -1,0 +1,66 @@
+/* Select — native <select> with the native arrow replaced. Leaving the OS
+ * arrow in place is a rejection criterion in this house: the same control
+ * then looks different on every platform and never matches the input next to
+ * it. The wrapper owns the chevron so the element stays a real <select>
+ * (keyboard, mobile pickers, form semantics all free).
+ *
+ * Markup: <span class="dds-select"><select class="dds-select__input">…
+ * Lives inside .dds-field like .dds-input, so label/help/error come for free. */
+
+.dds-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+}
+
+.dds-select__input {
+  appearance: none;
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  font-weight: var(--dds-typo-body-2-font-weight);
+  width: 100%;
+  height: var(--dds-space-40);
+  /* right padding leaves the chevron lane free */
+  padding: 0 var(--dds-space-32) 0 var(--dds-space-12);
+  background: var(--dds-color-bg-default);
+  color: var(--dds-color-text-primary);
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-md);
+  cursor: pointer;
+}
+
+.dds-select__input:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: 0;
+  border-color: transparent;
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-select__input[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--dds-color-bg-subtle);
+}
+
+.dds-field--error .dds-select__input,
+.dds-select__input[aria-invalid="true"] {
+  border-color: var(--dds-color-status-danger);
+}
+
+/* Chevron glyph geometry (8px box, 1.6px stroke) is drawn, not spaced — the
+ * same allowance as the 6px badge dot. translateY(-70%) centers the drawn
+ * corner, which sits below the box center once rotated. */
+.dds-select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: var(--dds-space-12);
+  width: 8px;
+  height: 8px;
+  border-right: 1.6px solid var(--dds-color-text-muted);
+  border-bottom: 1.6px solid var(--dds-color-text-muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}

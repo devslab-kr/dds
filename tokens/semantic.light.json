@@ -7,7 +7,8 @@
       "elevated": { "$value": "{palette.white}", "$type": "color" },
       "brand": { "$value": "{palette.cyan.500}", "$type": "color" },
       "brand-hover": { "$value": "{palette.cyan.400}", "$type": "color" },
-      "brand-subtle": { "$value": "{palette.cyan.50}", "$type": "color" }
+      "brand-subtle": { "$value": "{palette.cyan.50}", "$type": "color" },
+      "inverse": { "$value": "{palette.zinc.900}", "$type": "color" }
     },
     "text": {
       "primary": { "$value": "{palette.zinc.950}", "$type": "color" },
@@ -15,6 +16,7 @@
       "muted": { "$value": "{palette.zinc.500}", "$type": "color" },
       "on-brand": { "$value": "{palette.zinc.950}", "$type": "color" },
       "on-status": { "$value": "{palette.white}", "$type": "color" },
+      "on-inverse": { "$value": "{palette.zinc.50}", "$type": "color" },
       "brand": { "$value": "{palette.cyan.700}", "$type": "color" }
     },
     "border": {

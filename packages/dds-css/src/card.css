@@ -1,0 +1,38 @@
+/* Card — a grouped surface. Border + elevated background carry the grouping;
+ * elevation.1 is the lift. The same shadow token ships in both themes (as it
+ * does for Dialog and Toast): on a zinc.950 page it resolves to almost
+ * nothing, which is the intended dark look — a component may not branch on
+ * theme (spec §3.1: dark is a mapping swap, never an `if (dark)`).
+ *
+ * --subtle is the flat variant for cards inside an already elevated surface
+ * (a card in a dialog), where a second shadow reads as noise. */
+
+.dds-card {
+  background: var(--dds-color-bg-elevated);
+  color: var(--dds-color-text-primary);
+  font-family: var(--dds-font-family-sans);
+  border: 1px solid var(--dds-color-border-default);
+  border-radius: var(--dds-radius-lg);
+  box-shadow: var(--dds-elevation-1);
+  padding: var(--dds-space-16);
+}
+
+.dds-card--subtle {
+  background: var(--dds-color-bg-subtle);
+  box-shadow: none;
+}
+
+.dds-card__title {
+  margin: 0 0 var(--dds-space-4);
+  font-size: var(--dds-typo-title-3-font-size);
+  line-height: var(--dds-typo-title-3-line-height);
+  font-weight: var(--dds-typo-title-3-font-weight);
+}
+
+.dds-card__body {
+  margin: 0;
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  font-weight: var(--dds-typo-body-2-font-weight);
+  color: var(--dds-color-text-secondary);
+}

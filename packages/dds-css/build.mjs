@@ -12,15 +12,30 @@ const pkgDir = dirname(fileURLToPath(import.meta.url));
 
 // Fixed order: base first; the rest is alphabetical-by-role and order-independent
 // (every selector is namespaced, no cross-file overrides).
+// Order follows the spec §4.3 v1 inventory (controls → inputs → indicators →
+// surfaces → overlays), which is also the docs order.
 export const FILES = [
   "base.css",
   "button.css",
+  "iconbutton.css",
   "textfield.css",
+  "textarea.css",
+  "select.css",
+  "checkbox-radio.css",
+  "switch.css",
   "badge.css",
+  "chip.css",
+  "avatar.css",
   "spinner.css",
   "skeleton.css",
+  "divider.css",
+  "card.css",
+  "listrow.css",
+  "tabs.css",
   "dialog.css",
   "toast.css",
+  "tooltip.css",
+  "emptystate.css",
 ];
 
 const banner = `/* @devslab-kr/dds-css — generated bundle, do not edit. Source: src/*.css

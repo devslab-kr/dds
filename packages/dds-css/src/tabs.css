@@ -1,0 +1,59 @@
+/* Tabs — ink-underline tabs (the shell the admin surfaces converged on).
+ * Markup is the ARIA tabs pattern: .dds-tabs[role="tablist"] >
+ * .dds-tab[role="tab"][aria-selected] each controlling a [role="tabpanel"].
+ * Selection is aria-selected, never a class alone — the state has to be
+ * announced, and color is not the only signal (the underline carries it too).
+ *
+ * The button border-radius reset is deliberate: a shared radius reset leaking
+ * into the underline bows its ends — this house has shipped that bug once. */
+
+.dds-tabs {
+  display: flex;
+  gap: var(--dds-space-4);
+  border-bottom: 1px solid var(--dds-color-border-default);
+  font-family: var(--dds-font-family-sans);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dds-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.dds-tab {
+  appearance: none;
+  flex: none;
+  padding: var(--dds-space-12);
+  background: none;
+  border: none;
+  border-radius: 0;
+  border-bottom: var(--dds-space-2) solid transparent;
+  /* the underline sits on the tablist's own 1px rule */
+  margin-bottom: -1px;
+  font-family: inherit;
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+  color: var(--dds-color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+}
+
+.dds-tab:not([disabled]):hover {
+  color: var(--dds-color-text-primary);
+}
+.dds-tab:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: calc(var(--dds-space-2) * -1);
+}
+
+.dds-tab[aria-selected="true"] {
+  color: var(--dds-color-text-brand);
+  border-bottom-color: var(--dds-color-bg-brand);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-tab[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

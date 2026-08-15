@@ -183,11 +183,13 @@ toggle**; both mappings are first-class from day one.
 | `color.bg.brand` | `cyan.500` | `cyan.500` | brand surfaces (primary buttons etc.) |
 | `color.bg.brand-hover` | `cyan.400` | `cyan.400` | brand surface hover (homepage idiom) |
 | `color.bg.brand-subtle` | `cyan.50` | `cyan.900` | soft brand backgrounds |
+| `color.bg.inverse` | `zinc.900` | `zinc.50` | surfaces that invert against the page (tooltip bubble) |
 | `color.text.primary` | `zinc.950` | `zinc.50` | body & headings |
 | `color.text.secondary` | `zinc.600` | `zinc.400` | supporting copy |
 | `color.text.muted` | `zinc.500` | `zinc.500` | disabled, placeholders |
 | `color.text.on-brand` | `zinc.950` | `zinc.950` | **text on brand surfaces (note below)** |
 | `color.text.on-status` | `white` | `zinc.950` | text on filled status surfaces (danger buttons) |
+| `color.text.on-inverse` | `zinc.50` | `zinc.950` | text on `bg.inverse` |
 | `color.text.brand` | `cyan.700` | `cyan.400` | brand text & links |
 | `color.border.default` | `zinc.200` | `zinc.800` | default borders |
 | `color.border.strong` | `zinc.300` | `zinc.700` | emphasized borders (inputs) |
