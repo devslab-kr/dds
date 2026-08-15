@@ -207,6 +207,51 @@ Granite 에 종속된다 — 우리는 그 종속을 만들지 않는다).
 - 오버레이·pressed·hover 틴트는 알파 스케일로만 처리한다. `opacity` 속성으로
   때우는 것은 disabled 상태에만 허용 (§4.2 와 동일).
 
+**멀티브랜드 — `data-brand` 규약 (D-012).** 브랜드 색은 제품 소유이므로
+(D-010) DDS 는 제품 브랜드 값을 **출하하지 않는다**. 대신 규약을 출하한다:
+제품이 시맨틱 레이어의 **브랜드 조각**만 `[data-brand="…"]` 셀렉터 아래에서
+재매핑하는 작은 CSS 파일을 소유하고, `<html>` 이나 임의 서브트리에 붙이며
+`data-theme` 과 자유롭게 조합한다.
+
+브랜드 조각은 정확히 여섯 토큰이다 — 그 밖의 것은 덮을 수 없다 (뉴트럴·
+상태색·타이포·간격은 시스템의 것):
+
+| 토큰 | 제품이 정하는 것 |
+| --- | --- |
+| `color.bg.brand` | 채워진 브랜드 면 |
+| `color.bg.brand-hover` | 그 hover |
+| `color.bg.brand-subtle` | 옅은 브랜드 배경 |
+| `color.text.on-brand` | 그 면 **위**의 텍스트·마크 (on-brand 규칙) |
+| `color.text.brand` | 브랜드 텍스트·링크 |
+| `color.border.focus` | 포커스 링 |
+
+```css
+/* 제품 레포 — 예: asklinq apps/api/src/dds/brand.ts, booklinq app.css */
+[data-brand="asklinq"] {
+  --dds-color-bg-brand: #14b8a6;         /* teal.500 */
+  --dds-color-bg-brand-hover: #2dd4bf;
+  --dds-color-bg-brand-subtle: #f0fdfa;
+  --dds-color-text-on-brand: #09090b;    /* zinc.950 — teal.500 위에서 약 8:1 */
+  --dds-color-text-brand: #0f766e;
+  --dds-color-border-focus: #14b8a6;
+}
+[data-theme="dark"] [data-brand="asklinq"],
+[data-brand="asklinq"][data-theme="dark"] {
+  --dds-color-bg-brand-subtle: #134e4a;
+  --dds-color-text-brand: #2dd4bf;
+  --dds-color-border-focus: #2dd4bf;
+}
+```
+
+모든 컴포넌트가 이 여섯 변수만으로 재착색된다 — 다크 모드를 매핑 교체로
+얻는 것과 같은 성질이다.
+
+> **on-brand 는 색이 아니라 규칙이다.** BookLinq 는 `teal.700`(`#0f766e`)로
+> 채우고 그 위에 **흰색**을 올린다. 이건 예외가 아니다 — teal.700 위의 흰색은
+> 약 5.5:1 로 AA 를 여유 있게 통과한다. 규칙은 "채워진 브랜드 면 위의 텍스트는
+> 4.5:1 을 넘어야 한다"이고, cyan 처럼 밝은 색조에서는 그 규칙이 `zinc.950` 을
+> 강제할 뿐이다. 어두운 브랜드 색을 가진 제품은 같은 규칙을 흰색으로 만족한다.
+
 ### 3.2 타이포그래피
 
 **폰트.** 홈페이지 (devslab.kr) 와 동일하게 라틴·숫자는
