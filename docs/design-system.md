@@ -348,11 +348,16 @@ instantly instead.
 
 ### 3.7 Icons
 
-- One set, 24px grid, 1.5px stroke, color inherited via `currentColor`.
+- 24px grid, color inherited via `currentColor`, round caps and joins.
+- **Stroke 1.6px for the core (product) set, 1.8px for the devslab.kr `site-`
+  set** (amended 2026-08-15, D-013 — the original "1.5px" was written before
+  the assets existed; the shipped set is 1.6, and the marketing set is drawn
+  heavier because it renders at 32–40px).
 - Names follow a `function-variant` pattern (`chevron-down`, `check-circle`).
   Brand logos are separate assets, not part of the icon set.
 - Web and RN components are code-generated from the same SVG source. Never
-  hand-maintain two copies.
+  hand-maintain two copies. Until a framework's product exists, the shipped
+  form is the source itself plus a path-data map (`@devslab-kr/dds-icons`).
 
 ---
 

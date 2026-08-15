@@ -90,9 +90,23 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
 devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴을
 `dds-css`의 공식 스니펫으로 문서화 (허브 README에 기존 구현 있음).
 
-### 6. 아이콘 파이프라인 (`@devslab-kr/dds-icons`) — `대기`
-스펙 §3.7. 단일 SVG 소스 → 웹/RN 컴포넌트 codegen. 24px 그리드,
-1.5px 스트로크, `currentColor`.
+### 6. 아이콘 파이프라인 (`@devslab-kr/dds-icons`) — `완료` (2026-08-15)
+스펙 §3.7(D-013으로 개정). 단일 SVG 소스 → 파일·스프라이트·path 데이터 맵.
+- [x] `packages/dds-icons` 신설. 코어 40종(업스트림 22 + 내비 글리프 18종
+      신규 제작: chevron/arrow 4+2, close, search, plus, minus, menu,
+      more-horizontal, trash, edit, download, upload, external-link,
+      refresh) + devslab.kr 전용 `site-` 7종(`svg/site/`).
+- [x] `scripts/check-icons.mjs` — 24 그리드·`currentColor`·라운드 캡·세트별
+      스트로크(1.6/1.8)·색 리터럴 금지·body의 stroke/fill 오버라이드 금지·
+      kebab 이름·dist 드리프트를 CI에서 기계 차단. (실제로 site-mobile·
+      site-sun의 중복 stroke 속성을 잡아냈다.)
+- [x] 스펙 §3.7 개정 — 스트로크 1.5 → **1.6 코어 / 1.8 site**(D-013).
+      이름은 AskLinq 위젯 키와 1:1이라 변경 금지.
+- [x] `preview/icons.html` 갤러리(라이트/다크 트윈, 24 그리드 상자 표시,
+      16·20·24·32 크기) 실측.
+- 프레임워크 컴포넌트 codegen은 **미착수(의도)** — 스펙 §2대로 그 프레임워크
+  제품이 생길 때. **`preview/icons.html`은 devslab.kr 쇼케이스에 아직
+  미배포** — devlab.kr의 `sync-dds-showcase.mjs`에 페이지 추가 필요.
 
 ### 7. Composite 컴포넌트 확충 — `완료` (2026-08-15)
 스펙 §4.3 v1 인벤토리의 나머지 13종을 `dds-css`에 반영 (업스트림 시안
