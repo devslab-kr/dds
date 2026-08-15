@@ -51,6 +51,11 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
       (dds D-010, 스펙 3.1 개정) — AskLinq는 제품 teal 유지, 뉴트럴·상태는
       vendored DDS 토큰에서(관리자/가입/메일 slate→zinc 리테마), 파비콘
       마크는 on-brand 규칙대로 zinc.950. 테넌트 저장색 불변.
+- [x] **멀티브랜드 CSS 규약 확정** (2026-08-15, **D-012**): 제품이 매핑
+      CSS 를 소유하고 dds 는 `data-brand` 규약 + "덮어도 되는 여섯 토큰"만
+      문서화(스펙 §3.1). `preview/components.html` 에 asklinq·booklinq ×
+      라이트·다크 4조합 실측 패널 — booklinq 의 흰 전경은 on-brand 규칙의
+      예외가 아니라 적용례(teal.700 위 약 5.5:1).
 - `dds-css` 클래스 소비는 미착수 — asklinq 관리자/위젯 CSS는 자체 체계
   (`admin/styles.ts` 등)라 클래스 교체는 별도 리팩토링. 토큰 값 수렴이
   Phase 1의 목적(색 한 소스)이며, 컴포넌트 레이어 전환은 실익이 생길 때.

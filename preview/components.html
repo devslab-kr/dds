@@ -55,6 +55,38 @@
   /* demo stages: un-fix the fixed-position components so they render inline */
   .stage { position: relative; min-height: 180px; border-radius: var(--dds-radius-lg); overflow: hidden; border: 1px solid var(--dds-color-border-default); background: var(--dds-color-bg-subtle); }
   .stage .dds-dialog-overlay, .stage .dds-toast-region { position: absolute; }
+  .note { font-size: var(--dds-typo-body-2-font-size); line-height: var(--dds-typo-body-2-line-height); color: var(--dds-color-text-secondary); margin: 0 0 var(--dds-space-16); max-width: 60em; }
+  .brandgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--dds-space-16); }
+  @media (max-width: 760px) { .brandgrid { grid-template-columns: minmax(0, 1fr); } }
+  /* Product-owned brand mappings — example values, NOT a dds artifact.
+     asklinq: teal.500 + zinc.950 foreground · booklinq: teal.700 + white
+     (both clear AA on their own fill — spec §3.1 on-brand rule). */
+  [data-brand="asklinq"] {
+    --dds-color-bg-brand: #14b8a6;
+    --dds-color-bg-brand-hover: #2dd4bf;
+    --dds-color-bg-brand-subtle: #f0fdfa;
+    --dds-color-text-on-brand: #09090b;
+    --dds-color-text-brand: #0f766e;
+    --dds-color-border-focus: #14b8a6;
+  }
+  [data-brand="asklinq"][data-theme="dark"] {
+    --dds-color-bg-brand-subtle: #134e4a;
+    --dds-color-text-brand: #2dd4bf;
+    --dds-color-border-focus: #2dd4bf;
+  }
+  [data-brand="booklinq"] {
+    --dds-color-bg-brand: #0f766e;
+    --dds-color-bg-brand-hover: #0d9488;
+    --dds-color-bg-brand-subtle: #f0fdfa;
+    --dds-color-text-on-brand: #ffffff;
+    --dds-color-text-brand: #0f766e;
+    --dds-color-border-focus: #0f766e;
+  }
+  [data-brand="booklinq"][data-theme="dark"] {
+    --dds-color-bg-brand-subtle: #134e4a;
+    --dds-color-text-brand: #2dd4bf;
+    --dds-color-border-focus: #2dd4bf;
+  }
   .skrow { display: flex; gap: var(--dds-space-12); align-items: center; }
   .skcol { flex: 1; display: grid; gap: var(--dds-space-8); }
 </style>
@@ -422,6 +454,29 @@
       </div>
     </div>
   </div>
+  <!-- ================= 멀티브랜드 (data-brand) ================= -->
+  <h2>멀티브랜드 — <code>data-brand</code> × <code>data-theme</code></h2>
+  <p class="note">
+    아래 매핑은 <strong>DDS 산출물이 아니라 제품이 소유하는 예시</strong>다
+    (D-010·D-012). 여섯 토큰만 덮으면 컴포넌트는 한 줄도 바뀌지 않고
+    재착색된다 — 다크 모드가 매핑 교체인 것과 같은 성질.
+  </p>
+  <div class="brandgrid" id="brandGrid"></div>
+  <template id="tpl-brand">
+    <div class="row">
+      <button class="dds-btn dds-btn--primary">저장</button>
+      <button class="dds-btn dds-btn--ghost">자세히</button>
+      <span class="dds-badge dds-badge--brand">Beta</span>
+      <button class="dds-chip" aria-pressed="true">선택됨</button>
+    </div>
+    <div class="row">
+      <label class="dds-switch"><input class="dds-switch__input" type="checkbox" role="switch" checked>알림</label>
+      <label class="dds-check"><input class="dds-check__input" type="checkbox" checked>동의</label>
+      <span class="dds-avatar dds-avatar--sm" aria-hidden="true">DL</span>
+      <input class="dds-input" value="포커스 링" style="width:120px" aria-label="포커스 링 확인">
+    </div>
+  </template>
+
   <!-- ================= Tooltip · EmptyState ================= -->
   <h2>Tooltip · EmptyState</h2>
   <div class="twin" data-twin="tpl-tip-empty"></div>
@@ -468,6 +523,31 @@
           el.setAttribute(attr, `${el.getAttribute(attr)}-${theme}`);
       panel.append(plabel, body);
       host.append(panel);
+    }
+  }
+
+  // Multi-brand grid: the same markup under the four data-brand × data-theme
+  // combinations. If a component ever hardcodes a brand value, one of these
+  // four panels stops matching the others — that is the point of the panel.
+  const brandTpl = document.getElementById("tpl-brand");
+  const grid = document.getElementById("brandGrid");
+  for (const brand of ["asklinq", "booklinq"]) {
+    for (const theme of ["light", "dark"]) {
+      const panel = document.createElement("div");
+      panel.className = "panel";
+      panel.dataset.brand = brand;
+      panel.dataset.theme = theme;
+      const plabel = document.createElement("p");
+      plabel.className = "plabel";
+      plabel.textContent = `${brand} · ${theme}`;
+      const body = brandTpl.content.cloneNode(true);
+      const suffix = `${brand}-${theme}`;
+      for (const el of body.querySelectorAll("[id]")) el.id = `${el.id}-${suffix}`;
+      for (const attr of IDREFS)
+        for (const el of body.querySelectorAll(`[${attr}]`))
+          el.setAttribute(attr, `${el.getAttribute(attr)}-${suffix}`);
+      panel.append(plabel, body);
+      grid.append(panel);
     }
   }
 
