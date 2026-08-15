@@ -229,6 +229,11 @@ const byPath = (tokens, path) => {
 // values are per-hex, so they use build-time palette values (brand is the
 // same hex in both themes; the shade is the mapping's own choice, which is
 // where raw palette references are allowed).
+//
+// The status -contrast variables use text.on-status (D-006), the token that
+// exists precisely for text on a filled status surface — not the matching
+// `-bg` tint, which is a *background* for dark status text and inverts the
+// pair's contract when used as a foreground.
 const ionicCss = `${HEADER}
 /* Ionic theme mapping. Import AFTER tokens.css. */
 :root {
@@ -240,13 +245,26 @@ const ionicCss = `${HEADER}
   --ion-color-primary-tint: var(--dds-color-bg-brand-hover);
 
   --ion-color-success: var(--dds-color-status-success);
+  --ion-color-success-contrast: var(--dds-color-text-on-status);
   --ion-color-warning: var(--dds-color-status-warning);
+  --ion-color-warning-contrast: var(--dds-color-text-on-status);
   --ion-color-danger: var(--dds-color-status-danger);
+  --ion-color-danger-contrast: var(--dds-color-text-on-status);
 
   --ion-background-color: var(--dds-color-bg-default);
   --ion-text-color: var(--dds-color-text-primary);
   --ion-border-color: var(--dds-color-border-default);
   --ion-font-family: var(--dds-font-family-sans);
+
+  /* app chrome: items, toolbar and tab bar sit on the page background and
+     are separated by the border, not by a second surface color —
+     bg.elevated is reserved for modals/popovers/sheets (spec §3.1). */
+  --ion-item-background: var(--dds-color-bg-default);
+  --ion-toolbar-background: var(--dds-color-bg-default);
+  --ion-toolbar-border-color: var(--dds-color-border-default);
+  --ion-tab-bar-background: var(--dds-color-bg-default);
+  --ion-tab-bar-border-color: var(--dds-color-border-default);
+  --ion-card-background: var(--dds-color-bg-elevated);
 }
 `;
 
