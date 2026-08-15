@@ -3,8 +3,10 @@
 🌐 [English](README.md)
 
 DDS CSS 컴포넌트 레이어 — 클래스 기반, 프레임워크 중립 (스펙 §2: 코어는 CSS,
-React/Vue/Ionic/SSR은 소비자). Core 6종: **Button, TextField, Badge,
-Spinner/Skeleton, Dialog, Toast**.
+React/Vue/Ionic/SSR은 소비자). 스펙 §4.3 v1 인벤토리: **Button, IconButton,
+TextField, Textarea, Select, Checkbox/Radio, Switch, Badge, Chip, Avatar,
+Spinner, Skeleton, Divider, Card, ListRow, Tabs, Dialog, Toast, Tooltip,
+EmptyState** (BottomSheet은 Dialog의 네이티브 짝 — Phase 3).
 
 ```html
 <link rel="stylesheet" href=".../dds-tokens/tokens.css"> <!-- 먼저 -->

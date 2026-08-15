@@ -1,0 +1,18 @@
+/* Divider — a rule between sections. Use <hr class="dds-divider"> when the
+ * split is meaningful; when it is purely decorative next to text that already
+ * separates the groups, add role="presentation".
+ * The vertical variant needs a stretchable parent (flex row / grid cell). */
+
+.dds-divider {
+  border: none;
+  border-top: 1px solid var(--dds-color-border-default);
+  margin: var(--dds-space-16) 0;
+}
+
+.dds-divider--vertical {
+  width: 0;
+  align-self: stretch;
+  border-top: none;
+  border-left: 1px solid var(--dds-color-border-default);
+  margin: 0 var(--dds-space-16);
+}

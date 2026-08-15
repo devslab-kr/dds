@@ -1,0 +1,91 @@
+/* Checkbox / Radio — one class for both; the input's own type decides the
+ * shape (square + tick vs circle + dot), so markup never has to declare the
+ * shape twice. The control stays a real <input> (keyboard, form data, AT
+ * roles); only its box is redrawn.
+ *
+ * Box 18px, tick 10×6, dot 8px: glyph geometry, not spacing (same allowance
+ * as the 6px badge dot). The 18px box sits inside a label whose hit area is
+ * the whole row — keep the label text clickable rather than growing the box. */
+
+.dds-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dds-space-8);
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  color: var(--dds-color-text-primary);
+  cursor: pointer;
+}
+
+.dds-check__input {
+  appearance: none;
+  flex: none;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-sm);
+  background: var(--dds-color-bg-default);
+  cursor: inherit;
+  transition: background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+}
+
+.dds-check__input[type="radio"] {
+  border-radius: var(--dds-radius-full);
+}
+
+.dds-check__input:not([disabled]):hover {
+  border-color: var(--dds-color-text-muted);
+}
+
+.dds-check__input:checked {
+  background: var(--dds-color-bg-brand);
+  border-color: var(--dds-color-bg-brand);
+}
+
+/* the mark is on-brand (zinc.950), never white — spec §3.1 on-brand note */
+.dds-check__input[type="checkbox"]:checked::before {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--dds-color-text-on-brand);
+  border-bottom: 2px solid var(--dds-color-text-on-brand);
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+.dds-check__input[type="checkbox"]:indeterminate::before {
+  content: "";
+  width: 10px;
+  height: 2px;
+  background: var(--dds-color-text-on-brand);
+}
+.dds-check__input[type="checkbox"]:indeterminate {
+  background: var(--dds-color-bg-brand);
+  border-color: var(--dds-color-bg-brand);
+}
+
+.dds-check__input[type="radio"]:checked::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--dds-radius-full);
+  background: var(--dds-color-text-on-brand);
+}
+
+.dds-check__input:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: var(--dds-space-2);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) — it goes on the label so
+ * the box and its text dim once, not twice (nested opacity compounds). */
+.dds-check:has(.dds-check__input[disabled]) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dds-check__input[disabled] {
+  cursor: not-allowed;
+}

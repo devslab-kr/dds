@@ -1,7 +1,7 @@
 {
   "name": "@devslab-kr/dds-css",
   "version": "0.1.0",
-  "description": "DDS CSS component layer — class-based, framework-neutral, semantic-token-only (Core 6: Button, TextField, Badge, Spinner/Skeleton, Dialog, Toast)",
+  "description": "DDS CSS component layer — class-based, framework-neutral, semantic-token-only (spec §4.3 v1 inventory, 20 components)",
   "type": "module",
   "license": "UNLICENSED",
   "repository": {
