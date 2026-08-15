@@ -174,11 +174,13 @@ Granite 에 종속된다 — 우리는 그 종속을 만들지 않는다).
 | `color.bg.brand` | `cyan.500` | `cyan.500` | 브랜드 강조 면 (주요 버튼 등) |
 | `color.bg.brand-hover` | `cyan.400` | `cyan.400` | 브랜드 면 hover (홈피 관용) |
 | `color.bg.brand-subtle` | `cyan.50` | `cyan.900` | 브랜드 옅은 배경 |
+| `color.bg.inverse` | `zinc.900` | `zinc.50` | 페이지와 반전되는 면 (툴팁 버블) |
 | `color.text.primary` | `zinc.950` | `zinc.50` | 본문·제목 |
 | `color.text.secondary` | `zinc.600` | `zinc.400` | 보조 설명 |
 | `color.text.muted` | `zinc.500` | `zinc.500` | 비활성·플레이스홀더 |
 | `color.text.on-brand` | `zinc.950` | `zinc.950` | **브랜드 면 위 텍스트 (아래 노트)** |
 | `color.text.on-status` | `white` | `zinc.950` | 상태색 채움 면 위 텍스트 (danger 버튼 등) |
+| `color.text.on-inverse` | `zinc.50` | `zinc.950` | `bg.inverse` 면 위 텍스트 |
 | `color.text.brand` | `cyan.700` | `cyan.400` | 브랜드 텍스트·링크 |
 | `color.border.default` | `zinc.200` | `zinc.800` | 기본 보더 |
 | `color.border.strong` | `zinc.300` | `zinc.700` | 입력 필드 등 강조 보더 |

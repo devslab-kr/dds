@@ -1,0 +1,74 @@
+/* Switch — an immediate on/off (a checkbox that applies itself). Use a
+ * checkbox when the value only takes effect on submit.
+ * Markup: <input type="checkbox" role="switch" class="dds-switch__input">
+ *
+ * Track 36×20 and knob 16px are glyph geometry, not spacing. The knob is
+ * on-brand (zinc.950) when the track is brand-filled — the same rule that
+ * keeps white off cyan (spec §3.1) — and an elevated surface when off, so it
+ * reads as a raised knob in both themes. */
+
+.dds-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dds-space-8);
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  color: var(--dds-color-text-primary);
+  cursor: pointer;
+}
+
+.dds-switch__input {
+  appearance: none;
+  position: relative;
+  flex: none;
+  margin: 0;
+  width: 36px;
+  height: 20px;
+  border-radius: var(--dds-radius-full);
+  background: var(--dds-color-text-muted);
+  cursor: inherit;
+  transition: background-color var(--dds-motion-duration-base) var(--dds-motion-easing-standard);
+}
+
+.dds-switch__input::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--dds-radius-full);
+  background: var(--dds-color-bg-elevated);
+  box-shadow: var(--dds-elevation-1);
+  transition: transform var(--dds-motion-duration-base) var(--dds-motion-easing-standard);
+}
+
+.dds-switch__input:checked {
+  background: var(--dds-color-bg-brand);
+}
+.dds-switch__input:checked::before {
+  background: var(--dds-color-text-on-brand);
+  transform: translateX(16px);
+}
+
+.dds-switch__input:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: var(--dds-space-2);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) — on the label, once */
+.dds-switch:has(.dds-switch__input[disabled]) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dds-switch__input[disabled] {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dds-switch__input,
+  .dds-switch__input::before {
+    transition: none;
+  }
+}

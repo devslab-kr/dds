@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DDS 컴포넌트 — dds-css Core 6종</title>
+<title>DDS 컴포넌트 — dds-css v1 인벤토리</title>
 <!-- Built artifacts: run `pnpm build` at the repo root first. -->
 <link rel="stylesheet" href="../packages/dds-tokens/dist/tokens.css">
 <link rel="stylesheet" href="../packages/dds-css/dist/dds.css">
@@ -32,8 +32,10 @@
   }
   header.site nav a:hover { text-decoration: underline; }
   h2 { font-size: var(--dds-typo-title-2-font-size); line-height: var(--dds-typo-title-2-line-height); font-weight: var(--dds-typo-title-2-font-weight); margin: var(--dds-space-48) 0 var(--dds-space-12); }
-  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: var(--dds-space-16); }
-  @media (max-width: 760px) { .twin { grid-template-columns: 1fr; } }
+  /* minmax(0,1fr): grid items default to min-width:auto, so a nowrap
+     ellipsizing child (ListRow title) would widen the column past the page. */
+  .twin { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--dds-space-16); }
+  @media (max-width: 760px) { .twin { grid-template-columns: minmax(0, 1fr); } }
   .panel {
     background: var(--dds-color-bg-default);
     color: var(--dds-color-text-primary);
@@ -61,7 +63,7 @@
   <header class="site">
     <h1>DDS 컴포넌트</h1>
     <button class="dds-btn dds-btn--secondary dds-btn--sm" id="themeToggle">테마 전환</button>
-    <span class="src">@devslab-kr/dds-css · Core 6</span>
+    <span class="src">@devslab-kr/dds-css · v1 인벤토리 20종</span>
     <nav aria-label="DDS 쇼케이스">
       <a href="./index.html">&gt; ./dds --foundation</a>
       <a href="https://devslab.kr/brand/">&gt; ./brand --guide</a>
@@ -112,6 +114,26 @@
     </div>
   </div>
 
+  <!-- ================= IconButton ================= -->
+  <!-- v1 인벤토리 확장분은 템플릿 하나를 라이트/다크 두 패널에 복제한다
+       (아래 스크립트) — 트윈이 손편집으로 어긋나는 일을 구조적으로 막는다. -->
+  <h2>IconButton — variant × size (버튼과 같은 높이)</h2>
+  <div class="twin" data-twin="tpl-iconbtn"></div>
+  <template id="tpl-iconbtn">
+    <div class="row">
+      <span class="cell"><button class="dds-iconbtn" aria-label="닫기"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="cap">ghost</span></span>
+      <span class="cell"><button class="dds-iconbtn dds-iconbtn--secondary" aria-label="수정"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button><span class="cap">secondary</span></span>
+      <span class="cell"><button class="dds-iconbtn dds-iconbtn--danger" aria-label="자료 삭제"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button><span class="cap">danger</span></span>
+      <span class="cell"><button class="dds-iconbtn" aria-label="닫기" disabled><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="cap">disabled</span></span>
+    </div>
+    <div class="row" style="align-items:flex-end">
+      <span class="cell"><button class="dds-iconbtn dds-iconbtn--sm dds-iconbtn--secondary" aria-label="수정"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button><span class="cap">sm 32</span></span>
+      <span class="cell"><button class="dds-iconbtn dds-iconbtn--secondary" aria-label="수정"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button><span class="cap">md 40</span></span>
+      <span class="cell"><button class="dds-iconbtn dds-iconbtn--secondary dds-iconbtn--lg" aria-label="수정"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button><span class="cap">lg 48</span></span>
+      <span class="cell"><button class="dds-btn dds-btn--secondary">텍스트 버튼</button><span class="cap">높이 대조</span></span>
+    </div>
+  </template>
+
   <!-- ================= TextField ================= -->
   <h2>TextField — 기본 · 에러 · 비활성</h2>
   <div class="twin">
@@ -152,6 +174,59 @@
       </div>
     </div>
   </div>
+
+  <!-- ================= Textarea · Select ================= -->
+  <h2>Textarea · Select — 같은 .dds-field 안에서</h2>
+  <div class="twin" data-twin="tpl-ta-select"></div>
+  <template id="tpl-ta-select">
+    <div class="row" style="align-items:flex-start">
+      <div class="dds-field" style="flex:1;min-width:0">
+        <label class="dds-field__label" for="ta1">회사 소개</label>
+        <textarea class="dds-textarea" id="ta1" rows="3" aria-describedby="ta1-help">데브스랩은 SaaS 제품을 만드는 1인 개발 스튜디오입니다.</textarea>
+        <span class="dds-field__help" id="ta1-help">방문자에게 표시됩니다.</span>
+      </div>
+    </div>
+    <div class="row" style="align-items:flex-start">
+      <div class="dds-field" style="flex:1;min-width:0">
+        <label class="dds-field__label" for="sel1">기본 언어</label>
+        <span class="dds-select"><select class="dds-select__input" id="sel1"><option>한국어</option><option>English</option><option>日本語</option></select></span>
+      </div>
+      <div class="dds-field" style="flex:1;min-width:0">
+        <label class="dds-field__label" for="sel2">알림 주기</label>
+        <span class="dds-select"><select class="dds-select__input" id="sel2" disabled><option>매일</option></select></span>
+        <span class="dds-field__help">disabled</span>
+      </div>
+    </div>
+    <div class="row" style="align-items:flex-start">
+      <div class="dds-field dds-field--error" style="flex:1;min-width:0">
+        <label class="dds-field__label" for="ta2">답변 추가 지시</label>
+        <textarea class="dds-textarea" id="ta2" rows="2" aria-invalid="true" aria-describedby="ta2-help">가격은 절대 말하지 마</textarea>
+        <span class="dds-field__help" id="ta2-help">지시문은 200자를 넘을 수 없습니다.</span>
+      </div>
+    </div>
+  </template>
+
+  <!-- ================= Checkbox · Radio · Switch ================= -->
+  <h2>Checkbox · Radio · Switch</h2>
+  <div class="twin" data-twin="tpl-check"></div>
+  <template id="tpl-check">
+    <div class="row">
+      <label class="dds-check"><input class="dds-check__input" type="checkbox" checked>주간 다이제스트</label>
+      <label class="dds-check"><input class="dds-check__input" type="checkbox">즉시 알림</label>
+      <label class="dds-check"><input class="dds-check__input" type="checkbox" id="cb-ind">일부 선택</label>
+      <label class="dds-check"><input class="dds-check__input" type="checkbox" checked disabled>고정됨</label>
+    </div>
+    <div class="row">
+      <label class="dds-check"><input class="dds-check__input" type="radio" name="cad" checked>매일</label>
+      <label class="dds-check"><input class="dds-check__input" type="radio" name="cad">매주</label>
+      <label class="dds-check"><input class="dds-check__input" type="radio" name="cad" disabled>사용 안 함</label>
+    </div>
+    <div class="row">
+      <label class="dds-switch"><input class="dds-switch__input" type="checkbox" role="switch" checked>문의 알림</label>
+      <label class="dds-switch"><input class="dds-switch__input" type="checkbox" role="switch">방문자 이어보기</label>
+      <label class="dds-switch"><input class="dds-switch__input" type="checkbox" role="switch" checked disabled>베타 모드</label>
+    </div>
+  </template>
 
   <!-- ================= Badge · Spinner · Skeleton ================= -->
   <h2>Badge · Spinner · Skeleton</h2>
@@ -201,6 +276,90 @@
       </div>
     </div>
   </div>
+
+  <!-- ================= Chip · Avatar ================= -->
+  <h2>Chip · Avatar</h2>
+  <div class="twin" data-twin="tpl-chip-avatar"></div>
+  <template id="tpl-chip-avatar">
+    <div class="row">
+      <button class="dds-chip" aria-pressed="true">미답변</button>
+      <button class="dds-chip">웹페이지</button>
+      <button class="dds-chip">파일</button>
+      <button class="dds-chip" disabled>보관됨</button>
+    </div>
+    <div class="row" style="align-items:flex-end">
+      <span class="cell"><span class="dds-avatar dds-avatar--sm" aria-hidden="true">강신</span><span class="cap">sm 32</span></span>
+      <span class="cell"><span class="dds-avatar" aria-hidden="true">민수</span><span class="cap">md 40</span></span>
+      <span class="cell"><span class="dds-avatar dds-avatar--lg" aria-hidden="true">DL</span><span class="cap">lg 48</span></span>
+      <span class="cell"><span class="dds-avatar dds-avatar--square" aria-hidden="true">DL</span><span class="cap">square</span></span>
+    </div>
+  </template>
+
+  <!-- ================= Divider · Card ================= -->
+  <h2>Divider · Card</h2>
+  <div class="twin" data-twin="tpl-card"></div>
+  <template id="tpl-card">
+    <section class="dds-card">
+      <h5 class="dds-card__title">재크롤 일정</h5>
+      <p class="dds-card__body">매일 04:00(KST)에 등록된 자료를 다시 읽습니다.</p>
+    </section>
+    <hr class="dds-divider">
+    <section class="dds-card dds-card--subtle">
+      <h5 class="dds-card__title">--subtle</h5>
+      <p class="dds-card__body">이미 떠 있는 면 안에서 쓰는 납작한 변형.</p>
+    </section>
+    <div class="row" style="margin-top:var(--dds-space-16)">
+      <span>왼쪽</span><hr class="dds-divider dds-divider--vertical" style="height:20px"><span>오른쪽</span>
+    </div>
+  </template>
+
+  <!-- ================= ListRow ================= -->
+  <h2>ListRow — 자기완결형 행 (leading · body · actions)</h2>
+  <div class="twin" data-twin="tpl-listrow"></div>
+  <template id="tpl-listrow">
+    <ul style="list-style:none;margin:0;padding:0;border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-lg);overflow:hidden">
+      <li><button class="dds-listrow dds-listrow--interactive">
+        <span class="dds-avatar dds-avatar--sm" aria-hidden="true">강신</span>
+        <span class="dds-listrow__body">
+          <span class="dds-listrow__title">강신</span>
+          <span class="dds-listrow__sub">대표 · 오늘 접속</span>
+        </span>
+        <span class="dds-badge dds-badge--success">활성</span>
+      </button></li>
+      <li><button class="dds-listrow dds-listrow--interactive">
+        <span class="dds-avatar dds-avatar--sm" aria-hidden="true">민수</span>
+        <span class="dds-listrow__body">
+          <span class="dds-listrow__title">김민수 · 영업팀 · 아주 긴 이름은 말줄임으로 잘립니다</span>
+          <span class="dds-listrow__sub">초대함 · 7일 후 만료</span>
+        </span>
+        <span class="dds-badge dds-badge--warning">대기</span>
+      </button></li>
+      <li><div class="dds-listrow">
+        <span class="dds-avatar dds-avatar--sm" aria-hidden="true">지현</span>
+        <span class="dds-listrow__body">
+          <span class="dds-listrow__title">박지현</span>
+          <span class="dds-listrow__sub">비활성</span>
+        </span>
+        <span class="dds-listrow__actions">
+          <button class="dds-iconbtn dds-iconbtn--sm" aria-label="수정"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
+          <button class="dds-iconbtn dds-iconbtn--sm dds-iconbtn--danger" aria-label="삭제"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button>
+        </span>
+      </div></li>
+    </ul>
+  </template>
+
+  <!-- ================= Tabs ================= -->
+  <h2>Tabs — 잉크 언더라인, aria-selected</h2>
+  <div class="twin" data-twin="tpl-tabs"></div>
+  <template id="tpl-tabs">
+    <div class="dds-tabs" role="tablist">
+      <button class="dds-tab" role="tab" aria-selected="true" aria-controls="tp-a" id="tb-a">자료</button>
+      <button class="dds-tab" role="tab" aria-selected="false" aria-controls="tp-b" id="tb-b">방문자 질문</button>
+      <button class="dds-tab" role="tab" aria-selected="false" aria-controls="tp-c" id="tb-c">알림</button>
+      <button class="dds-tab" role="tab" aria-selected="false" disabled>API 연동</button>
+    </div>
+    <div role="tabpanel" id="tp-a" aria-labelledby="tb-a" style="padding:var(--dds-space-16) 0;font-size:var(--dds-typo-body-2-font-size);color:var(--dds-color-text-secondary)">선택된 탭의 패널.</div>
+  </template>
 
   <!-- ================= Dialog ================= -->
   <h2>Dialog — 딤 오버레이 + elevation.3</h2>
@@ -263,9 +422,58 @@
       </div>
     </div>
   </div>
+  <!-- ================= Tooltip · EmptyState ================= -->
+  <h2>Tooltip · EmptyState</h2>
+  <div class="twin" data-twin="tpl-tip-empty"></div>
+  <template id="tpl-tip-empty">
+    <div class="row" style="padding-top:var(--dds-space-32)">
+      <span class="dds-tooltip">
+        <button class="dds-iconbtn dds-iconbtn--secondary" aria-label="재크롤" aria-describedby="tip1"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></button>
+        <span class="dds-tooltip__bubble" role="tooltip" id="tip1">지금 다시 읽기</span>
+      </span>
+      <span class="cap" style="text-align:start">hover · focus 양쪽에서 열림 (Tab으로 확인)</span>
+    </div>
+    <div class="dds-empty" style="margin-top:var(--dds-space-16)">
+      <p class="dds-empty__title">등록된 자료가 없습니다</p>
+      <p class="dds-empty__desc">웹페이지 주소나 PDF를 추가하면 AI가 그 내용으로 답합니다.</p>
+      <div class="dds-empty__actions">
+        <button class="dds-btn dds-btn--primary dds-btn--sm">자료 추가</button>
+        <button class="dds-btn dds-btn--ghost dds-btn--sm">직접 입력</button>
+      </div>
+    </div>
+  </template>
 </div>
 
 <script>
+  // Twin panels for the v1-inventory additions: one template, cloned into a
+  // light and a dark panel. Hand-copied twins drift; a clone cannot.
+  // ids inside a template would collide across the two clones, so every id
+  // and every attribute that points at one is suffixed per theme. `name` is
+  // suffixed for the same reason: without it the two panels share one radio
+  // group and the dark clone silently unchecks the light one (observed).
+  const IDREFS = ["for", "aria-describedby", "aria-labelledby", "aria-controls", "name"];
+  for (const host of document.querySelectorAll("[data-twin]")) {
+    const tpl = document.getElementById(host.dataset.twin);
+    for (const [theme, label] of [["light", "Light"], ["dark", "Dark (data-theme 스코프 고정)"]]) {
+      const panel = document.createElement("div");
+      panel.className = "panel";
+      panel.dataset.theme = theme;
+      const plabel = document.createElement("p");
+      plabel.className = "plabel";
+      plabel.textContent = label;
+      const body = tpl.content.cloneNode(true);
+      for (const el of body.querySelectorAll("[id]")) el.id = `${el.id}-${theme}`;
+      for (const attr of IDREFS)
+        for (const el of body.querySelectorAll(`[${attr}]`))
+          el.setAttribute(attr, `${el.getAttribute(attr)}-${theme}`);
+      panel.append(plabel, body);
+      host.append(panel);
+    }
+  }
+
+  // Indeterminate is a property, not an attribute — set it after cloning.
+  for (const el of document.querySelectorAll('[id^="cb-ind"]')) el.indeterminate = true;
+
   // Root theme toggle — the dark twin panels stay pinned via their own
   // data-theme attribute regardless of the root theme (D-003).
   document.getElementById("themeToggle").addEventListener("click", () => {

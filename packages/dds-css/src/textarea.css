@@ -1,0 +1,42 @@
+/* Textarea — the multi-line member of the TextField family: it lives in the
+ * same .dds-field wrapper and shares label/help/error behavior with .dds-input.
+ * Row rule from the house UI discipline: a textarea gets its own row, never a
+ * row shared with single-line controls (their heights can't be reconciled).
+ * min-height is two control heights so an empty textarea already reads as
+ * multi-line. */
+
+.dds-textarea {
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  font-weight: var(--dds-typo-body-2-font-weight);
+  min-height: calc(var(--dds-space-40) * 2);
+  padding: var(--dds-space-8) var(--dds-space-12);
+  background: var(--dds-color-bg-default);
+  color: var(--dds-color-text-primary);
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-md);
+  resize: vertical;
+}
+
+.dds-textarea::placeholder {
+  color: var(--dds-color-text-muted);
+}
+
+.dds-textarea:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: 0;
+  border-color: transparent;
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-textarea[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--dds-color-bg-subtle);
+}
+
+.dds-field--error .dds-textarea,
+.dds-textarea[aria-invalid="true"] {
+  border-color: var(--dds-color-status-danger);
+}

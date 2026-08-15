@@ -16,7 +16,7 @@ React Native are consumers.
 | [`docs/decisions.md`](docs/decisions.md) | Decision log — foundation/architecture decisions with rationale |
 | [`tokens/`](tokens/) | Design token source ([W3C format](https://design-tokens.github.io/community-group/format/)): raw palette, light/dark semantic mappings, typography/spacing/radius/elevation/motion |
 | [`packages/dds-tokens/`](packages/dds-tokens/) | `@devslab-kr/dds-tokens` — token build pipeline: `tokens.css`, Tailwind v4 `@theme` + v3 preset, `tokens.ts` (RN/runtime), `ionic.css` |
-| [`packages/dds-css/`](packages/dds-css/) | `@devslab-kr/dds-css` — CSS component layer, Core 6 (Button, TextField, Badge, Spinner/Skeleton, Dialog, Toast); guide in [`docs/components.md`](docs/components.md) |
+| [`packages/dds-css/`](packages/dds-css/) | `@devslab-kr/dds-css` — CSS component layer, the spec §4.3 v1 inventory (Button, IconButton, TextField, Textarea, Select, Checkbox/Radio, Switch, Badge, Chip, Avatar, Spinner/Skeleton, Divider, Card, ListRow, Tabs, Dialog, Toast, Tooltip, EmptyState); guide in [`docs/components.md`](docs/components.md) |
 | [`preview/index.html`](preview/index.html) | Self-contained foundations & components preview — open in a browser |
 | [`brand/index.html`](brand/index.html) | Brand identity guide: logo rules, Electric Cyan, motifs, voice & tone |
 
@@ -42,6 +42,6 @@ pnpm workspace. `pnpm install`, then:
 
 Priorities live in [`docs/backlog.md`](docs/backlog.md). Packages are created
 only when a consumer exists (spec §8):
-`@devslab-kr/dds-tokens` (✅ 2026-08-13) → `dds-css` Core 6 (✅ 2026-08-13) →
+`@devslab-kr/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 inventory (Core 6 ✅ 2026-08-13, +13 ✅ 2026-08-15) →
 AskLinq adoption → `dds-icons` → `dds-native` (RN) or an Ionic theme mapping,
 depending on how mobile goes.

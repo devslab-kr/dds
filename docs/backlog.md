@@ -89,10 +89,26 @@ devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴�
 스펙 §3.7. 단일 SVG 소스 → 웹/RN 컴포넌트 codegen. 24px 그리드,
 1.5px 스트로크, `currentColor`.
 
-### 7. Composite 컴포넌트 확충 — `대기`
-스펙 §4.3 v1 인벤토리의 나머지: Tabs, ListRow, Checkbox/Radio/Switch,
-Select/Textarea, Chip, Avatar, Card, Divider, Tooltip(웹), EmptyState,
-Modal(웹)↔BottomSheet(네이티브) 역할 매핑.
+### 7. Composite 컴포넌트 확충 — `완료` (2026-08-15)
+스펙 §4.3 v1 인벤토리의 나머지 13종을 `dds-css`에 반영 (업스트림 시안
+`upstream/dds-css/src/` 기반, 하우스 스타일로 재작성).
+- [x] IconButton, Textarea, Select, Checkbox/Radio, Switch, Chip, Avatar,
+      Divider, Card, ListRow, Tabs, Tooltip(웹), EmptyState — 총 20종
+      (`dds.css` 번들 21파일). 문서 `docs/components(.ko).md` 19섹션,
+      `preview/components.html` 라이트/다크 트윈, 스토리 4파일 추가.
+- [x] 시안 대비 교정: ① Card의 `[data-theme="dark"]` 분기 제거(컴포넌트는
+      테마로 분기하지 않는다 — Dialog/Toast와 같이 elevation 토큰 그대로),
+      ② Tooltip이 `text.primary`를 배경으로 쓰던 것을 신규 시맨틱 페어
+      `bg.inverse`/`text.on-inverse`로 교체(**D-011**), ③ 체크박스 disabled가
+      라벨·박스 양쪽에서 opacity를 곱해 두 번 흐려지던 것 수정,
+      ④ ListRow 제목/부제에 `display:block`(span 마크업에서 한 줄로 붙던
+      실버그 — 브라우저 실측이 발견), ⑤ Select 셰브론 수직 정렬을
+      flex 정렬 의존에서 `top:50%` 기준으로.
+- **BottomSheet은 의도적 제외** (지시서 2번): 웹 Modal ↔ 네이티브
+  BottomSheet 역할 매핑만 문서화하고 네이티브 구현은 Phase 3(네이티브
+  소비자가 생길 때).
+- 시각검증: 1280·375 양 폭에서 라이트/다크 트윈 실측 — 포커스 링(키보드
+  Tab), 행 높이 균일(60px), 긴 제목 말줄임, 가로 오버플로 0.
 
 ### 8. 홈페이지 /brand 페이지 마무리 — `완료` (2026-08-13)
 `jlc488/devlab.kr`의 `claude/brand-page` 브랜치(별도 세션이 작업)를 리뷰.

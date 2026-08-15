@@ -1,0 +1,81 @@
+/* ListRow — one item in a list: leading slot, body (title + sub), trailing
+ * slot. House rule this encodes: rows are self-contained and rich — if the
+ * information fits in the row, it does not get deferred to a detail page.
+ *
+ * --interactive is for rows that are themselves a button/link (use a real
+ * <button> or <a> so keyboard and AT get it for free). The focus ring is
+ * inset because a full-bleed row has no outer margin to draw into. */
+
+.dds-listrow {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-12);
+  width: 100%;
+  padding: var(--dds-space-12) var(--dds-space-16);
+  background: none;
+  border: none;
+  text-align: start;
+  font-family: var(--dds-font-family-sans);
+  color: var(--dds-color-text-primary);
+}
+
+.dds-listrow + .dds-listrow {
+  border-top: 1px solid var(--dds-color-border-default);
+}
+
+.dds-listrow__body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* display:block so the two lines stack whether the markup uses <p> or <span>
+ * (a <span> title and sub otherwise render on one line) */
+.dds-listrow__title {
+  display: block;
+  margin: 0;
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+  /* long titles truncate rather than reflowing the row height */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dds-listrow__sub {
+  display: block;
+  margin: 0;
+  font-size: var(--dds-typo-caption-font-size);
+  line-height: var(--dds-typo-caption-line-height);
+  color: var(--dds-color-text-secondary);
+}
+
+.dds-listrow__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-4);
+  flex: none;
+}
+
+/* interactive ------------------------------------------------------------- */
+
+.dds-listrow--interactive {
+  cursor: pointer;
+  transition: background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+}
+.dds-listrow--interactive:not([disabled]):hover {
+  background: var(--dds-color-overlay-hover-tint);
+}
+.dds-listrow--interactive:not([disabled]):active {
+  background: var(--dds-color-overlay-pressed-tint);
+}
+.dds-listrow--interactive:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: calc(var(--dds-space-2) * -1);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-listrow[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

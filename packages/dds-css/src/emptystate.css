@@ -1,0 +1,47 @@
+/* EmptyState — what a list shows when it has nothing yet. House rule: the
+ * empty view keeps the same skeleton as the filled one (summary chips and
+ * filters stay put) — the empty state replaces the rows, not the screen.
+ *
+ * Layout note for consumers: give the element `display: none`'s job to
+ * [hidden] and never override it with a display rule that lacks a
+ * `[hidden]` guard — a shared .empty that did exactly that once painted
+ * "no results" on top of a populated table. */
+
+.dds-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dds-space-8);
+  padding: var(--dds-space-40) var(--dds-space-24);
+  border: 1px dashed var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-lg);
+  text-align: center;
+  font-family: var(--dds-font-family-sans);
+  color: var(--dds-color-text-secondary);
+}
+
+.dds-empty[hidden] {
+  display: none;
+}
+
+.dds-empty__title {
+  margin: 0;
+  font-size: var(--dds-typo-title-3-font-size);
+  line-height: var(--dds-typo-title-3-line-height);
+  font-weight: var(--dds-typo-title-3-font-weight);
+  color: var(--dds-color-text-primary);
+}
+
+.dds-empty__desc {
+  margin: 0;
+  max-width: 36em;
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+}
+
+.dds-empty__actions {
+  display: flex;
+  gap: var(--dds-space-8);
+  margin-top: var(--dds-space-8);
+}

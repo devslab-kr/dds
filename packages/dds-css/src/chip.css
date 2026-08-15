@@ -1,0 +1,51 @@
+/* Chip — a small interactive control: filter toggle, suggested question,
+ * removable tag. Badge and Chip are different components on purpose: a badge
+ * is state you read, a chip is something you press. Never restyle one into
+ * the other (the duplicated-.chip collision this house has already paid for).
+ *
+ * Selected state is carried by aria-pressed="true" (toggle chips) so the
+ * state is announced, not only colored; --selected exists for markup that
+ * can't use aria-pressed (e.g. a link chip). */
+
+.dds-chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dds-space-4);
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+  padding: var(--dds-space-4) var(--dds-space-12);
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-full);
+  background: none;
+  color: var(--dds-color-text-primary);
+  cursor: pointer;
+  transition: background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dds-chip:not([disabled]):hover {
+  background: var(--dds-color-overlay-hover-tint);
+}
+.dds-chip:not([disabled]):active {
+  background: var(--dds-color-overlay-pressed-tint);
+}
+.dds-chip:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: var(--dds-space-2);
+}
+
+.dds-chip[aria-pressed="true"],
+.dds-chip--selected {
+  background: var(--dds-color-bg-brand-subtle);
+  border-color: var(--dds-color-bg-brand);
+  color: var(--dds-color-text-brand);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-chip[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

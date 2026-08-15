@@ -1,0 +1,43 @@
+/* Tooltip (web only — spec §4.3; on native the same information goes in a
+ * label or a sheet). A supplementary hint on an inverse surface, shown on
+ * hover AND focus-within so it is reachable from the keyboard.
+ *
+ * Contract: the tooltip may never carry information that is required to use
+ * the control — an icon button still needs its own aria-label, and the bubble
+ * is referenced with aria-describedby, not aria-label (a describedby bubble
+ * that never opens still reaches AT; a hover-only one does not). */
+
+.dds-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+
+.dds-tooltip__bubble {
+  position: absolute;
+  bottom: calc(100% + var(--dds-space-8));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200; /* above dialog (1000) and toast (1100) */
+  padding: var(--dds-space-4) var(--dds-space-8);
+  border-radius: var(--dds-radius-sm);
+  background: var(--dds-color-bg-inverse);
+  color: var(--dds-color-text-on-inverse);
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-caption-font-size);
+  line-height: var(--dds-typo-caption-line-height);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+}
+
+.dds-tooltip:hover .dds-tooltip__bubble,
+.dds-tooltip:focus-within .dds-tooltip__bubble {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dds-tooltip__bubble {
+    transition: none;
+  }
+}
