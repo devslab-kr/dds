@@ -216,6 +216,53 @@ toggle**; both mappings are first-class from day one.
 - Overlays and hover/pressed tints use the alpha scale only. Faking them with
   the `opacity` property is allowed for disabled states only (same as §4.2).
 
+**Multi-brand: the `data-brand` convention (D-012).** Since the brand hue
+belongs to the product (D-010), DDS does **not** ship product brand values.
+It ships the convention instead: a product owns a small CSS file that
+re-maps the brand slice of the semantic layer under a `[data-brand="…"]`
+selector, applied to `<html>` or any subtree and freely combined with
+`data-theme`.
+
+The brand slice is exactly six tokens — nothing else may be overridden
+(neutrals, status colors, type and spacing stay the system's):
+
+| Token | What the product decides |
+| --- | --- |
+| `color.bg.brand` | the filled brand surface |
+| `color.bg.brand-hover` | its hover |
+| `color.bg.brand-subtle` | the soft brand background |
+| `color.text.on-brand` | text/marks **on** that surface (the on-brand rule) |
+| `color.text.brand` | brand text and links |
+| `color.border.focus` | the focus ring |
+
+```css
+/* product repo — e.g. asklinq apps/api/src/dds/brand.ts, booklinq app.css */
+[data-brand="asklinq"] {
+  --dds-color-bg-brand: #14b8a6;         /* teal.500 */
+  --dds-color-bg-brand-hover: #2dd4bf;
+  --dds-color-bg-brand-subtle: #f0fdfa;
+  --dds-color-text-on-brand: #09090b;    /* zinc.950 — ~8:1 on teal.500 */
+  --dds-color-text-brand: #0f766e;
+  --dds-color-border-focus: #14b8a6;
+}
+[data-theme="dark"] [data-brand="asklinq"],
+[data-brand="asklinq"][data-theme="dark"] {
+  --dds-color-bg-brand-subtle: #134e4a;
+  --dds-color-text-brand: #2dd4bf;
+  --dds-color-border-focus: #2dd4bf;
+}
+```
+
+Every component re-tints from these six variables with no component change —
+the same property that makes dark mode a mapping swap.
+
+> **On-brand is a rule, not a color.** BookLinq fills with `teal.700`
+> (`#0f766e`) and puts **white** on it. That is not an exception: white on
+> teal.700 is ~5.5:1, comfortably past AA. The rule is "text on a filled
+> brand surface must clear 4.5:1", and on a light hue like cyan that forces
+> `zinc.950` — a product with a dark brand hue satisfies the same rule with
+> white.
+
 ### 3.2 Typography
 
 **Font.** Matching the homepage (devslab.kr): Latin and numerals use
