@@ -18,6 +18,7 @@ React · Vue · Ionic · React Native 는 소비자다.
 | [`packages/dds-tokens/`](packages/dds-tokens/) | `@devslab/dds-tokens` — 토큰 빌드 파이프라인: `tokens.css`, Tailwind v4 `@theme` + v3 preset, `tokens.ts` (RN·런타임), `ionic.css` |
 | [`packages/dds-css/`](packages/dds-css/) | `@devslab/dds-css` — CSS 컴포넌트 레이어, 스펙 §4.3 v1 인벤토리 (Button, IconButton, TextField, Textarea, Select, Checkbox/Radio, Switch, Badge, Chip, Avatar, Spinner/Skeleton, Divider, Card, ListRow, Tabs, Dialog, Toast, Tooltip, EmptyState); 가이드는 [`docs/components.ko.md`](docs/components.ko.md) |
 | [`packages/dds-icons/`](packages/dds-icons/) | `@devslab/dds-icons` — 아이콘 세트: 코어 40종(24 그리드·1.6 스트로크) + devslab.kr `site-` 7종. SVG 파일·스프라이트·path 데이터 맵 3형태 출하 |
+| [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — controlled/uncontrolled 상태, SSR·hydration, 키보드, 포커스, 수명주기 계약을 갖춘 SolidJS 2 접근성 primitive |
 | [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림 — `components.html`, `icons.html`도 함께) |
 | [`brand/index.html`](brand/index.html) | 브랜드 아이덴티티 가이드: 로고 규정, Electric Cyan, 모티프, 보이스 & 톤 |
 
@@ -42,6 +43,8 @@ pnpm 워크스페이스. `pnpm install` 후:
   200% 확대, 고대비 모드, 모션 감소, 터치 타깃, axe 브라우저 검사
 - `pnpm verify:release` — 패키지를 실제로 묶어 임시 신규 소비자에서 불러오고
   `npm publish --dry-run`까지 검증
+- `pnpm verify:solid:test`, `verify:solid:a11y`, `verify:solid:release` — Solid
+  동작·타입·빌드, axe, SSR·hydration, 패키징, 신규 소비자, publish dry-run 게이트
 
 세 파운데이션 패키지는 restricted internal 패키지이며 Changesets의 lockstep 그룹으로 릴리스한다. 방향성
 아이콘에는 `dds-icon--directional`을 사용하며 mirror/유지 목록은

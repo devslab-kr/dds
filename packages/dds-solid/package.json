@@ -1,0 +1,46 @@
+{
+  "name": "@devslab/dds-solid",
+  "version": "0.1.0",
+  "description": "Accessible SolidJS 2 primitives for the DevsLab Design System",
+  "type": "module",
+  "license": "UNLICENSED",
+  "sideEffects": ["./styles.css"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/dds-solid"
+  },
+  "publishConfig": { "registry": "https://registry.npmjs.org/", "access": "restricted" },
+  "files": ["dist", "styles.css", "README.md", "README.ko.md"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./styles.css": "./styles.css"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:a11y": "vitest run --config vitest.config.ts src/__tests__/a11y.test.tsx"
+  },
+  "dependencies": {
+    "@devslab/dds-css": "0.1.0",
+    "@devslab/dds-icons": "0.1.0",
+    "@devslab/dds-tokens": "0.1.0"
+  },
+  "peerDependencies": {
+    "@solidjs/web": "2.0.0-rc.3",
+    "solid-js": "2.0.0-rc.3"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.32",
+    "@solidjs/web": "2.0.0-rc.3",
+    "axe-core": "4.13.0",
+    "jsdom": "30.0.1",
+    "solid-js": "2.0.0-rc.3",
+    "typescript": "7.0.2",
+    "vite": "8.2.1",
+    "vitest": "4.1.1"
+  }
+}

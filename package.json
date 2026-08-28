@@ -16,6 +16,9 @@
     "verify:foundation:core": "node --test tests/foundation-contracts.test.mjs && node packages/dds-tokens/build.mjs && node packages/dds-tokens/scripts/validate-tokens.mjs && node --test tests/token-build.test.mjs && node packages/dds-css/build.mjs && node packages/dds-css/scripts/check-css.mjs && node packages/dds-icons/build.mjs && node packages/dds-icons/scripts/check-icons.mjs",
     "verify:foundation": "pnpm run verify:foundation:core && pnpm run build-storybook && playwright test --config playwright.foundation.config.ts",
     "verify:release": "node scripts/verify-release.mjs",
+    "verify:solid:test": "node --test tests/dds-solid-contracts.test.mjs && pnpm --filter @devslab/dds-solid run test && pnpm --filter @devslab/dds-solid run check && pnpm --filter @devslab/dds-solid run build",
+    "verify:solid:a11y": "pnpm --filter @devslab/dds-solid run test:a11y",
+    "verify:solid:release": "pnpm run verify:foundation:core && pnpm --filter @devslab/dds-solid run build && node scripts/verify-solid-release.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

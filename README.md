@@ -18,6 +18,7 @@ React Native are consumers.
 | [`packages/dds-tokens/`](packages/dds-tokens/) | `@devslab/dds-tokens` — token build pipeline: `tokens.css`, Tailwind v4 `@theme` + v3 preset, `tokens.ts` (RN/runtime), `ionic.css` |
 | [`packages/dds-css/`](packages/dds-css/) | `@devslab/dds-css` — CSS component layer, the spec §4.3 v1 inventory (Button, IconButton, TextField, Textarea, Select, Checkbox/Radio, Switch, Badge, Chip, Avatar, Spinner/Skeleton, Divider, Card, ListRow, Tabs, Dialog, Toast, Tooltip, EmptyState); guide in [`docs/components.md`](docs/components.md) |
 | [`packages/dds-icons/`](packages/dds-icons/) | `@devslab/dds-icons` — the icon set: 40 core (24 grid, 1.6 stroke) + 7 devslab.kr `site-` icons, shipped as SVG files, a sprite and a path-data map |
+| [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — SolidJS 2 accessible primitives with controlled/uncontrolled state, SSR/hydration, keyboard, focus, and lifecycle contracts |
 | [`preview/index.html`](preview/index.html) | Self-contained foundations & components preview — open in a browser (`components.html`, `icons.html` alongside) |
 | [`brand/index.html`](brand/index.html) | Brand identity guide: logo rules, Electric Cyan, motifs, voice & tone |
 
@@ -43,6 +44,8 @@ pnpm workspace. `pnpm install`, then:
   200% zoom, forced-colors, reduced-motion, touch-target, and axe browser checks
 - `pnpm verify:release` — build artifacts are packed, exercised from a fresh
   temporary consumer, and passed through `npm publish --dry-run`
+- `pnpm verify:solid:test`, `verify:solid:a11y`, `verify:solid:release` — Solid
+  behavior/type/build, axe, SSR/hydration, pack, fresh-consumer and publish dry-run gates
 
 The three restricted, internal foundation packages release in lockstep through Changesets. Directional
 icons use `dds-icon--directional`; the authoritative mirror/keep lists ship as

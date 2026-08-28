@@ -32,7 +32,7 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.equal(root.devDependencies?.["@changesets/cli"], "2.29.7");
 
   const config = await json(".changeset/config.json");
-  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons"]]);
+  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid"]]);
 });
 
 test("buttons preserve readable CJK labels and expose 44px touch targets", async () => {

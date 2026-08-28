@@ -3,7 +3,7 @@
   "changelog": false,
   "commit": false,
   "fixed": [
-    ["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons"]
+    ["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid"]
   ],
   "linked": [],
   "access": "restricted",
