@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
 import { assertCleanDiagnostics } from "../src/canary-contracts.mjs";
+import { withSecretSentinels } from "./secret-sentinels.mjs";
 
 const [binary, ...args] = process.argv.slice(2);
 if (!binary) throw new Error("usage: run-clean.mjs <binary> [...args]");
@@ -9,7 +10,7 @@ if (!binary) throw new Error("usage: run-clean.mjs <binary> [...args]");
 const executable = resolve("node_modules", ".bin", process.platform === "win32" ? `${binary}.cmd` : binary);
 const child = spawn(executable, args, {
   cwd: process.cwd(),
-  env: process.env,
+  env: withSecretSentinels(process.env),
   shell: process.platform === "win32",
   stdio: ["inherit", "pipe", "pipe"],
 });

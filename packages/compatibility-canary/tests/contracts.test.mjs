@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   assertCleanDiagnostics,
+  assertNoLikelySecrets,
   createCanaryServerFunction,
   renderCanaryDocument,
   routeRequest,
@@ -60,9 +61,18 @@ test("diagnostic gate rejects hydration warnings, peer overrides, route leaks, a
     "WARN Issues with peer dependencies found",
     "No route matches URL /missing",
     "CLOUDFLARE_API_TOKEN=super-secret-value",
+    '{"CLOUDFLARE_API_TOKEN":"abcdefghijklmnop"}',
   ]) {
     assert.throws(() => assertCleanDiagnostics(diagnostic), /canary verification rejected/i);
   }
 
   assert.doesNotThrow(() => assertCleanDiagnostics("canary preview ready on local workerd"));
+});
+
+test("secret gate rejects a high-entropy sentinel even when its key was removed", () => {
+  const sentinel = "dds_sentinel_7VYk9qL2mN4pR8tW6xZ1cF3h";
+  assert.throws(
+    () => assertNoLikelySecrets(`compiled value: ${sentinel}`, "fixture", [sentinel]),
+    /likely secret/i,
+  );
 });

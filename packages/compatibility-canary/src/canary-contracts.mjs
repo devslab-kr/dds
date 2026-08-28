@@ -75,10 +75,13 @@ export function assertCleanDiagnostics(output) {
 
 const likelySecrets = [
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
-  /(?:CLOUDFLARE_API_TOKEN|API[_-]?TOKEN|CLIENT[_-]?SECRET|PASSWORD|PRIVATE[_-]?KEY)\s*[:=]\s*["']?[A-Za-z0-9_+\/.=-]{12,}/i,
+  /["']?(?:CLOUDFLARE_API_TOKEN|API[_-]?TOKEN|CLIENT[_-]?SECRET|PASSWORD|PRIVATE[_-]?KEY)["']?\s*[:=]\s*["']?[A-Za-z0-9_+\/.=-]{12,}/i,
 ];
 
-export function assertNoLikelySecrets(content, label = "content") {
+export function assertNoLikelySecrets(content, label = "content", sentinels = []) {
   const matched = likelySecrets.find((pattern) => pattern.test(content));
-  if (matched) throw new Error(`Canary verification rejected likely secret in ${label}`);
+  const leakedSentinel = sentinels.find((sentinel) => content.includes(sentinel));
+  if (matched || leakedSentinel) {
+    throw new Error(`Canary verification rejected likely secret in ${label}`);
+  }
 }

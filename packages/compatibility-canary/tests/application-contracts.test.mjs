@@ -41,11 +41,13 @@ test("actual TanStack application sources carry every canary contract", async ()
 });
 
 test("actual verification entry points generate routes, inspect install output, and scan artifacts", async () => {
-  const [manifestText, installGate, previewSmoke, artifactScan] = await Promise.all([
+  const [manifestText, installGate, previewSmoke, artifactScan, cleanRunner, sentinels] = await Promise.all([
     source("package.json"),
     source("scripts/verify-install.mjs"),
     source("scripts/preview-smoke.mjs"),
     source("scripts/scan-build.mjs"),
+    source("scripts/run-clean.mjs"),
+    source("scripts/secret-sentinels.mjs"),
   ]);
   const manifest = JSON.parse(manifestText);
 
@@ -56,5 +58,9 @@ test("actual verification entry points generate routes, inspect install output, 
   assert.match(installGate, /assertCleanDiagnostics/);
   assert.match(previewSmoke, /initialHtml/);
   assert.match(previewSmoke, /assertNoLikelySecrets\(initialHtml/);
+  assert.match(previewSmoke, /withSecretSentinels/);
   assert.match(artifactScan, /assertNoLikelySecrets/);
+  assert.match(artifactScan, /CANARY_SECRET_SENTINELS/);
+  assert.match(cleanRunner, /withSecretSentinels/);
+  assert.match(sentinels, /DDS_CANARY_SECRET_SENTINEL/);
 });
