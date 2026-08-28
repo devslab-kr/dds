@@ -11,15 +11,24 @@
     "verify:canary:dependencies": "pnpm --filter @devslab/compatibility-canary run verify:dependencies",
     "verify:canary:test": "pnpm --filter @devslab/compatibility-canary run test",
     "verify:canary:build": "pnpm --filter @devslab/compatibility-canary run typecheck && pnpm --filter @devslab/compatibility-canary run build",
-    "verify:canary:preview": "pnpm --filter @devslab/compatibility-canary run preview:smoke"
+    "verify:canary:preview": "pnpm --filter @devslab/compatibility-canary run preview:smoke",
+    "verify:names": "node scripts/verify-package-names.mjs",
+    "verify:foundation:core": "node --test tests/foundation-contracts.test.mjs && node packages/dds-tokens/build.mjs && node packages/dds-tokens/scripts/validate-tokens.mjs && node --test tests/token-build.test.mjs && node packages/dds-css/build.mjs && node packages/dds-css/scripts/check-css.mjs && node packages/dds-icons/build.mjs && node packages/dds-icons/scripts/check-icons.mjs",
+    "verify:foundation": "pnpm run verify:foundation:core && pnpm run build-storybook && playwright test --config playwright.foundation.config.ts",
+    "verify:release": "node scripts/verify-release.mjs",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
   },
-  "engines": {
-    "node": ">=20"
-  },
+  "engines": { "node": ">=20" },
   "packageManager": "pnpm@9.12.3",
   "devDependencies": {
-    "@storybook/html-vite": "^10.5.7",
-    "storybook": "^10.5.7",
-    "vite": "^8.2.1"
+    "@axe-core/playwright": "4.13.0",
+    "@changesets/cli": "2.29.7",
+    "@playwright/test": "1.62.1",
+    "@storybook/html-vite": "10.5.7",
+    "storybook": "10.5.7",
+    "typescript": "7.0.2",
+    "vite": "8.2.1"
   }
 }

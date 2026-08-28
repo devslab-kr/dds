@@ -4,3 +4,28 @@
 [class*=" dds-"] {
   box-sizing: border-box;
 }
+
+[dir="rtl"] .dds-icon--directional {
+  transform: scaleX(-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class^="dds-"],
+  [class*=" dds-"] {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+  }
+}
+
+@media (forced-colors: active) {
+  [class^="dds-"],
+  [class*=" dds-"] {
+    forced-color-adjust: auto;
+  }
+
+  :is([class^="dds-"], [class*=" dds-"]):focus-visible {
+    outline-color: Highlight;
+  }
+}

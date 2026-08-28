@@ -10,8 +10,8 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: var(--dds-space-40);
-  height: var(--dds-space-40);
+  inline-size: var(--dds-space-40);
+  block-size: var(--dds-space-40);
   border: 1px solid transparent;
   border-radius: var(--dds-radius-md);
   background: none;
@@ -53,11 +53,19 @@
 /* --sm is 32×32: still above the 24×24 web floor, but below the 44×44 mobile
  * target — on touch surfaces keep the default size (spec §6). */
 .dds-iconbtn--sm {
-  width: var(--dds-space-32);
-  height: var(--dds-space-32);
+  inline-size: var(--dds-space-32);
+  block-size: var(--dds-space-32);
 }
 
 .dds-iconbtn--lg {
-  width: var(--dds-space-48);
-  height: var(--dds-space-48);
+  inline-size: var(--dds-space-48);
+  block-size: var(--dds-space-48);
+}
+
+@media (pointer: coarse) {
+  .dds-iconbtn,
+  .dds-iconbtn--sm {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
 }

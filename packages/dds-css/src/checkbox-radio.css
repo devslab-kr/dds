@@ -51,8 +51,8 @@
   content: "";
   width: 10px;
   height: 6px;
-  border-left: 2px solid var(--dds-color-text-on-brand);
-  border-bottom: 2px solid var(--dds-color-text-on-brand);
+  border-inline-start: 2px solid var(--dds-color-text-on-brand);
+  border-block-end: 2px solid var(--dds-color-text-on-brand);
   transform: translateY(-1px) rotate(-45deg);
 }
 

@@ -22,8 +22,8 @@
   font-weight: var(--dds-typo-body-2-font-weight);
   width: 100%;
   height: var(--dds-space-40);
-  /* right padding leaves the chevron lane free */
-  padding: 0 var(--dds-space-32) 0 var(--dds-space-12);
+  padding-block: 0;
+  padding-inline: var(--dds-space-12) var(--dds-space-32);
   background: var(--dds-color-bg-default);
   color: var(--dds-color-text-primary);
   border: 1px solid var(--dds-color-border-strong);
@@ -55,12 +55,12 @@
 .dds-select::after {
   content: "";
   position: absolute;
-  top: 50%;
-  right: var(--dds-space-12);
+  inset-block-start: 50%;
+  inset-inline-end: var(--dds-space-12);
   width: 8px;
   height: 8px;
-  border-right: 1.6px solid var(--dds-color-text-muted);
-  border-bottom: 1.6px solid var(--dds-color-text-muted);
+  border-inline-end: 1.6px solid var(--dds-color-text-muted);
+  border-block-end: 1.6px solid var(--dds-color-text-muted);
   transform: translateY(-70%) rotate(45deg);
   pointer-events: none;
 }

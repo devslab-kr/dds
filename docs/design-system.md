@@ -48,10 +48,10 @@ Three layers. The lower, the more platform-neutral.
 
 | Package | Contents | Consumers |
 | --- | --- | --- |
-| `@devslab-kr/dds-tokens` | Token JSON + build outputs (table below) | everywhere |
-| `@devslab-kr/dds-css` | CSS component layer (class-based, framework-agnostic) | SSR pages, vanilla widget, Vue, React, Ionic |
-| `@devslab-kr/dds-native` | React Native components | mobile apps (if RN is chosen) |
-| `@devslab-kr/dds-icons` | Icons (single SVG source → per-platform codegen) | everywhere |
+| `@devslab/dds-tokens` | Token JSON + build outputs (table below) | everywhere |
+| `@devslab/dds-css` | CSS component layer (class-based, framework-agnostic) | SSR pages, vanilla widget, Vue, React, Ionic |
+| `@devslab/dds-native` | React Native components | mobile apps (if RN is chosen) |
+| `@devslab/dds-icons` | Icons (single SVG source → per-platform codegen) | everywhere |
 
 Token builds use a [Style Dictionary](https://styledictionary.com/)-class tool
 to generate every platform output **from one source**. The moment web and
@@ -357,7 +357,7 @@ instantly instead.
   Brand logos are separate assets, not part of the icon set.
 - Web and RN components are code-generated from the same SVG source. Never
   hand-maintain two copies. Until a framework's product exists, the shipped
-  form is the source itself plus a path-data map (`@devslab-kr/dds-icons`).
+  form is the source itself plus a path-data map (`@devslab/dds-icons`).
 
 ---
 

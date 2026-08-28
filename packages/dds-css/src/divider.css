@@ -13,6 +13,6 @@
   width: 0;
   align-self: stretch;
   border-top: none;
-  border-left: 1px solid var(--dds-color-border-default);
+  border-inline-start: 1px solid var(--dds-color-border-default);
   margin: 0 var(--dds-space-16);
 }
