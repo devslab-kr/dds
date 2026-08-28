@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 import { chromium } from "@playwright/test";
 
-import { assertCleanDiagnostics } from "../src/canary-contracts.mjs";
+import { assertCleanDiagnostics, assertNoLikelySecrets } from "../src/canary-contracts.mjs";
 
 const port = 4179;
 const origin = `http://127.0.0.1:${port}`;
@@ -16,10 +16,21 @@ let diagnostics = "";
 for (const stream of [server.stdout, server.stderr]) stream.on("data", (chunk) => { diagnostics += chunk; });
 
 try {
+  let initialResponse;
   for (let attempt = 0; attempt < 50; attempt += 1) {
-    try { if ((await fetch(origin)).ok) break; } catch {}
+    try {
+      initialResponse = await fetch(origin);
+      if (initialResponse.ok) break;
+    } catch {}
     await new Promise((resolveWait) => setTimeout(resolveWait, 100));
   }
+  assert.equal(initialResponse?.status, 200);
+  const initialHtml = await initialResponse.text();
+  assert.match(initialHtml, /<title[^>]*>DDS 호환성 카나리<\/title>/);
+  assert.match(initialHtml, /DDS 호환성 카나리/);
+  assert.match(initialHtml, /local-request-context/);
+  assert.match(initialHtml, /service-binding-ok/);
+  assertNoLikelySecrets(initialHtml, "SSR response");
 
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   try {

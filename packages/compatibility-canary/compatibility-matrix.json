@@ -3,7 +3,7 @@
   "status": "registry-install-not-verified",
   "verifiedAt": null,
   "runtime": {
-    "solid-js": "2.0.0-rc.1",
+    "solid-js": "2.0.0-rc.3",
     "@solidjs/web": "2.0.0-rc.3",
     "@tanstack/solid-start": "2.0.0-rc.3",
     "@tanstack/solid-router": "2.0.0-rc.3",

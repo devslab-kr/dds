@@ -31,7 +31,7 @@ export function renderCanaryDocument({ locale = "en", requestId, serviceMessage 
 export function createCanaryServerFunction(context) {
   return async (message) => {
     const response = await context.services.CANARY_SERVICE.fetch(
-      new Request(`https://canary-service.invalid/${encodeURIComponent(message)}`),
+      new Request(`https://canary-service.invalid/?message=${encodeURIComponent(message)}`),
     );
     const payload = await response.json();
 
@@ -59,15 +59,26 @@ export async function routeRequest(request, context) {
 }
 
 const rejectedDiagnostics = [
-  /hydration.*(?:mismatch|warning|failed)/i,
+  /warning:[^\n]*hydration|hydration[^\n]*(?:warn|mismatch|fail|unclaimed)/i,
   /(?:peer dependenc|peer override|overrid.*peer)/i,
   /no route matches|unhandled route/i,
   /(?:api[_-]?token|secret|password|private[_-]?key)\s*[:=]\s*\S+/i,
 ];
 
 export function assertCleanDiagnostics(output) {
+  assertNoLikelySecrets(output, "diagnostics");
   const matched = rejectedDiagnostics.find((pattern) => pattern.test(output));
   if (matched) {
     throw new Error(`Canary verification rejected diagnostic matching ${matched}`);
   }
+}
+
+const likelySecrets = [
+  /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
+  /(?:CLOUDFLARE_API_TOKEN|API[_-]?TOKEN|CLIENT[_-]?SECRET|PASSWORD|PRIVATE[_-]?KEY)\s*[:=]\s*["']?[A-Za-z0-9_+\/.=-]{12,}/i,
+];
+
+export function assertNoLikelySecrets(content, label = "content") {
+  const matched = likelySecrets.find((pattern) => pattern.test(content));
+  if (matched) throw new Error(`Canary verification rejected likely secret in ${label}`);
 }

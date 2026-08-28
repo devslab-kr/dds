@@ -30,7 +30,7 @@ test("server function reads request context and service-binding-shaped interface
     services: {
       CANARY_SERVICE: {
         fetch: async (request) =>
-          Response.json({ message: new URL(request.url).pathname.slice(1) }),
+          Response.json({ message: new URL(request.url).searchParams.get("message") }),
       },
     },
   });
@@ -56,6 +56,7 @@ test("unknown routes return a custom 404 instead of falling through", async () =
 test("diagnostic gate rejects hydration warnings, peer overrides, route leaks, and secrets", () => {
   for (const diagnostic of [
     "Hydration completed but contains mismatches",
+    "Hydration completed with 1 unclaimed server-rendered node(s)",
     "WARN Issues with peer dependencies found",
     "No route matches URL /missing",
     "CLOUDFLARE_API_TOKEN=super-secret-value",

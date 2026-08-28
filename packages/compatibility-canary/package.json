@@ -4,19 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/run-clean.mjs vite build",
+    "build": "pnpm run generate:routes && node scripts/run-clean.mjs vite build && node scripts/scan-build.mjs",
+    "generate:routes": "node scripts/generate-route-tree.mjs",
     "preview": "vite preview",
     "preview:smoke": "node scripts/preview-smoke.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "typecheck": "node scripts/run-clean.mjs tsc --noEmit",
-    "verify:dependencies": "node scripts/verify-dependencies.mjs"
+    "test": "node --test tests/contracts.test.mjs tests/application-contracts.test.mjs",
+    "typecheck": "pnpm run generate:routes && node scripts/run-clean.mjs tsc --noEmit",
+    "verify:dependencies": "node scripts/verify-install.mjs && node scripts/verify-dependencies.mjs"
   },
   "dependencies": {
     "@solidjs/web": "2.0.0-rc.3",
     "@tanstack/solid-query": "6.0.0-rc.0",
     "@tanstack/solid-router": "2.0.0-rc.3",
     "@tanstack/solid-start": "2.0.0-rc.3",
-    "solid-js": "2.0.0-rc.1"
+    "solid-js": "2.0.0-rc.3"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.54.1",

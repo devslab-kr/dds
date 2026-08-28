@@ -28,9 +28,8 @@ function RootDocument(props: { children: JSX.Element }) {
 
   return (
     <html lang="ko">
-      <head><HydrationScript /></head>
+      <head><HydrationScript /><HeadContent /></head>
       <body>
-        <HeadContent />
         <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
         <Scripts />
       </body>

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/solid-start";
 import { getRequest } from "@tanstack/solid-start/server";
+import { createCanaryServerFunction } from "./canary-contracts.mjs";
 
 export interface ServiceBinding {
   fetch(request: Request): Promise<Response>;
@@ -15,10 +16,9 @@ const localServiceBinding: ServiceBinding = {
 export const readCanaryContext = createServerFn({ method: "GET" }).handler(async () => {
   const request = getRequest();
   const requestId = request.headers.get("x-request-id") ?? "local-request-context";
-  const response = await localServiceBinding.fetch(
-    new Request("https://service-binding.invalid/?message=service-binding-ok"),
-  );
-  const payload = (await response.json()) as { message: string };
-
-  return { requestId, serviceMessage: payload.message };
+  const invokeBinding = createCanaryServerFunction({
+    requestId,
+    services: { CANARY_SERVICE: localServiceBinding },
+  });
+  return invokeBinding("service-binding-ok");
 });
