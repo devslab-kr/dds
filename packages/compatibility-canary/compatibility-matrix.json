@@ -1,0 +1,42 @@
+{
+  "$schema": "./compatibility-matrix.schema.json",
+  "status": "registry-install-not-verified",
+  "verifiedAt": null,
+  "runtime": {
+    "solid-js": "2.0.0-rc.1",
+    "@solidjs/web": "2.0.0-rc.3",
+    "@tanstack/solid-start": "2.0.0-rc.3",
+    "@tanstack/solid-router": "2.0.0-rc.3",
+    "@tanstack/solid-query": "6.0.0-rc.0"
+  },
+  "toolchain": {
+    "@solidjs/vite-plugin": "3.0.0-next.32",
+    "@cloudflare/vite-plugin": "1.54.1",
+    "vite": "8.2.1",
+    "wrangler": "4.123.0",
+    "typescript": "7.0.2",
+    "@playwright/test": "1.62.1"
+  },
+  "limitations": [
+    {
+      "id": "solid2-rc",
+      "severity": "high",
+      "summary": "SolidJS 2, its web runtime, and the TanStack Solid 2 adapter are prerelease lines and must be advanced together through this canary."
+    },
+    {
+      "id": "head-script-hydration",
+      "severity": "high",
+      "summary": "TanStack Solid Start 2.0.0-rc.0 reported unclaimed hydration nodes for head().scripts; this canary avoids that API and treats every hydration warning as a failure."
+    },
+    {
+      "id": "typescript-programmatic-api",
+      "severity": "medium",
+      "summary": "TypeScript 7.0.2 is the native project compiler and does not expose the legacy JavaScript programmatic compiler API. No TypeScript 6 alias is currently used."
+    },
+    {
+      "id": "offline-verification",
+      "severity": "blocking",
+      "summary": "The authoring environment had no cached Solid/TanStack/Cloudflare packages and denied registry access, so install, framework build, and workerd preview remain unverified."
+    }
+  ]
+}

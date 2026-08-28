@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status", "runtime", "toolchain", "limitations"],
+  "properties": {
+    "status": { "type": "string" },
+    "verifiedAt": { "type": ["string", "null"] },
+    "runtime": { "type": "object", "additionalProperties": { "type": "string" } },
+    "toolchain": { "type": "object", "additionalProperties": { "type": "string" } },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "summary"]
+      }
+    }
+  }
+}

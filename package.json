@@ -7,7 +7,11 @@
     "check": "pnpm -r run check && node scripts/check-docs-sync.mjs",
     "verify": "pnpm run build && pnpm run check",
     "storybook": "pnpm run build && storybook dev -p 6006",
-    "build-storybook": "pnpm run build && storybook build"
+    "build-storybook": "pnpm run build && storybook build",
+    "verify:canary:dependencies": "pnpm --filter @devslab/compatibility-canary run verify:dependencies",
+    "verify:canary:test": "pnpm --filter @devslab/compatibility-canary run test",
+    "verify:canary:build": "pnpm --filter @devslab/compatibility-canary run typecheck && pnpm --filter @devslab/compatibility-canary run build",
+    "verify:canary:preview": "pnpm --filter @devslab/compatibility-canary run preview:smoke"
   },
   "engines": {
     "node": ">=20"

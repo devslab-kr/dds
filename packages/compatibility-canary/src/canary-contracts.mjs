@@ -1,0 +1,73 @@
+const localizedHead = {
+  en: {
+    title: "DDS compatibility canary",
+    description: "Solid 2 compatibility verification",
+  },
+  ko: {
+    title: "DDS 호환성 카나리",
+    description: "Solid 2 호환성 검증",
+  },
+};
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function serializeHydrationState(value) {
+  return JSON.stringify(value).replaceAll("<", "\\u003c");
+}
+
+export function renderCanaryDocument({ locale = "en", requestId, serviceMessage }) {
+  const head = localizedHead[locale] ?? localizedHead.en;
+  const state = { requestId, serviceMessage };
+
+  return `<!doctype html><html lang="${escapeHtml(locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${head.title}</title><meta name="description" content="${head.description}"><link rel="icon" href="/canary.svg"></head><body><main id="canary-root" data-hydration-key="canary-root"><h1>${head.title}</h1><p data-service-message>${escapeHtml(serviceMessage)}</p></main><script id="canary-state" type="application/json">${serializeHydrationState(state)}</script></body></html>`;
+}
+
+export function createCanaryServerFunction(context) {
+  return async (message) => {
+    const response = await context.services.CANARY_SERVICE.fetch(
+      new Request(`https://canary-service.invalid/${encodeURIComponent(message)}`),
+    );
+    const payload = await response.json();
+
+    return {
+      requestId: context.requestId,
+      serviceMessage: payload.message,
+    };
+  };
+}
+
+export async function routeRequest(request, context) {
+  const url = new URL(request.url);
+
+  if (url.pathname === "/") {
+    const result = await createCanaryServerFunction(context)("binding-ok");
+    return new Response(renderCanaryDocument({ locale: "ko", ...result }), {
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  }
+
+  return new Response("<!doctype html><title>Not found</title><h1>DDS canary route not found</h1>", {
+    status: 404,
+    headers: { "content-type": "text/html; charset=utf-8" },
+  });
+}
+
+const rejectedDiagnostics = [
+  /hydration.*(?:mismatch|warning|failed)/i,
+  /(?:peer dependenc|peer override|overrid.*peer)/i,
+  /no route matches|unhandled route/i,
+  /(?:api[_-]?token|secret|password|private[_-]?key)\s*[:=]\s*\S+/i,
+];
+
+export function assertCleanDiagnostics(output) {
+  const matched = rejectedDiagnostics.find((pattern) => pattern.test(output));
+  if (matched) {
+    throw new Error(`Canary verification rejected diagnostic matching ${matched}`);
+  }
+}
