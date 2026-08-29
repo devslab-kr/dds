@@ -45,10 +45,10 @@ Granite 에 종속된다 — 우리는 그 종속을 만들지 않는다).
 
 | 패키지 | 내용 | 소비자 |
 | --- | --- | --- |
-| `@devslab/dds-tokens` | 토큰 JSON + 빌드 산출물 (아래 표) | 모든 곳 |
-| `@devslab/dds-css` | CSS 컴포넌트 레이어 (클래스 기반, 프레임워크 무관) | SSR 페이지, 바닐라 위젯, Vue, React, Ionic |
+| `@devslab-kr/dds-tokens` | 토큰 JSON + 빌드 산출물 (아래 표) | 모든 곳 |
+| `@devslab-kr/dds-css` | CSS 컴포넌트 레이어 (클래스 기반, 프레임워크 무관) | SSR 페이지, 바닐라 위젯, Vue, React, Ionic |
 | `@devslab/dds-native` | React Native 컴포넌트 | 모바일 앱 (RN 선택 시) |
-| `@devslab/dds-icons` | 아이콘 (SVG 단일 소스 → 플랫폼별 코드 생성) | 모든 곳 |
+| `@devslab-kr/dds-icons` | 아이콘 (SVG 단일 소스 → 플랫폼별 코드 생성) | 모든 곳 |
 
 토큰 빌드는 [Style Dictionary](https://styledictionary.com/) 계열 도구로
 **한 소스에서** 모든 플랫폼 산출물을 생성한다. 웹과 네이티브가 각자 값을 들고
@@ -339,7 +339,7 @@ RN 은 같은 숫자를 pt 로 쓴다. 숫자가 같으므로 표는 하나다.
   아이콘 세트가 아니라 별도 에셋으로 관리.
 - 웹·RN 컴포넌트는 같은 SVG 소스에서 코드 생성한다. 손으로 두 벌 만들지 않는다.
   해당 프레임워크의 제품이 생기기 전까지 출하 형태는 소스 자체 + path 데이터
-  맵이다 (`@devslab/dds-icons`).
+  맵이다 (`@devslab-kr/dds-icons`).
 
 ---
 

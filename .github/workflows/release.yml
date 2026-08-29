@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  packages: write
 
 jobs:
   publish:
@@ -18,7 +18,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
+          registry-url: https://npm.pkg.github.com
+          scope: "@devslab-kr"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
@@ -37,4 +38,17 @@ jobs:
       - run: pnpm run verify:site-kit:release
       - run: pnpm release
         env:
-          NPM_CONFIG_PROVENANCE: "false"
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check package visibility
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          packages=(dds-tokens dds-css dds-icons dds-solid site-kit)
+          for package in "${packages[@]}"; do
+            visibility="$(gh api "orgs/devslab-kr/packages/npm/${package}" --jq '.visibility')"
+            if [[ "${visibility}" != "internal" ]]; then
+              echo "::warning title=Package visibility::@devslab-kr/${package} is ${visibility}; change it to Internal in package settings."
+              echo "- [ ] Set \`@devslab-kr/${package}\` visibility to **Internal**: https://github.com/orgs/devslab-kr/packages/npm/${package}/settings" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done

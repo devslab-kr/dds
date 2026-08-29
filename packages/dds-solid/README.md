@@ -1,8 +1,8 @@
-# @devslab/dds-solid
+# @devslab-kr/dds-solid
 
-Restricted internal SolidJS 2 primitives for DDS. Import `@devslab/dds-solid/styles.css`
+Restricted internal SolidJS 2 primitives for DDS. Import `@devslab-kr/dds-solid/styles.css`
 once in the application shell, then consume the native-semantic components from
-`@devslab/dds-solid`.
+`@devslab-kr/dds-solid`.
 
 Stateful components accept both controlled (`value`/`open`/`checked`) and
 uncontrolled (`defaultValue`/`defaultOpen`/`defaultChecked`) forms. Dialog owns

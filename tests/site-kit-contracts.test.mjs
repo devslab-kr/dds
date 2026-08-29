@@ -7,7 +7,7 @@ const json = async (path) => JSON.parse(await read(path));
 
 test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundaries", async () => {
   const manifest = await json("packages/site-kit/package.json");
-  assert.equal(manifest.name, "@devslab/site-kit");
+  assert.equal(manifest.name, "@devslab-kr/site-kit");
   assert.equal(manifest.publishConfig.access, "restricted");
   for (const path of [".", "./solid", "./tanstack-start", "./styles.css"]) assert.ok(manifest.exports[path]);
   assert.equal(manifest.exports["./solid"].types, "./dist/index.d.ts");
@@ -71,7 +71,7 @@ test("Worker and browser fixtures consume adapters and prove hydration plus Arab
     read(".github/workflows/ci.yml"),
     json("package.json"),
   ]);
-  assert.match(worker, /@devslab\/site-kit\/solid/);
+  assert.match(worker, /@devslab-kr\/site-kit\/solid/);
   assert.match(worker, /toTanStackHead/);
   assert.match(worker, /renderToString/);
   assert.match(worker, /data-site-hydration/);

@@ -26,7 +26,7 @@ Acceptance: clean offline-or-normal install, test, typecheck, build, and workerd
 
 Repository: implementation/dds
 
-Rename the existing packages to @devslab/dds-tokens, @devslab/dds-css, and @devslab/dds-icons before first publish. Add changesets, lockstep versioning, pack and fresh-consumer verification, publish dry-run, and TypeScript 7.0.2. Fix CJK button wrapping, 44x44 touch targets, logical RTL properties, forced-colors, reduced motion, and direction-aware icon policy. Preserve framework neutrality.
+Rename the existing packages to @devslab-kr/dds-tokens, @devslab-kr/dds-css, and @devslab-kr/dds-icons before first publish. Add changesets, lockstep versioning, pack and fresh-consumer verification, publish dry-run, and TypeScript 7.0.2. Fix CJK button wrapping, 44x44 touch targets, logical RTL properties, forced-colors, reduced motion, and direction-aware icon policy. Preserve framework neutrality.
 
 Acceptance: verify, Storybook, pack, fresh consumer, long-label/CJK, Arabic RTL, keyboard, axe, zoom, forced-colors, and package-name scans pass.
 
@@ -34,7 +34,7 @@ Acceptance: verify, Storybook, pack, fresh consumer, long-label/CJK, Arabic RTL,
 
 Repository: implementation/dds
 
-Create @devslab/dds-solid using the exact canary matrix. Implement accessible Solid primitives for Button, IconButton, Field, Select, Checkbox, Radio, Switch, Dialog, Tabs, Toast, Tooltip, and Icon. Consume existing token/CSS contracts. Cover controlled/uncontrolled state, native semantics, accessible naming, keyboard behavior, focus trap/return, lifecycle, SSR, and hydration.
+Create @devslab-kr/dds-solid using the exact canary matrix. Implement accessible Solid primitives for Button, IconButton, Field, Select, Checkbox, Radio, Switch, Dialog, Tabs, Toast, Tooltip, and Icon. Consume existing token/CSS contracts. Cover controlled/uncontrolled state, native semantics, accessible naming, keyboard behavior, focus trap/return, lifecycle, SSR, and hydration.
 
 Acceptance: red-green tests, typecheck, build, package dry-run, fresh consumer SSR/hydration, keyboard and axe checks all pass.
 
@@ -42,7 +42,7 @@ Acceptance: red-green tests, typecheck, build, package dry-run, fresh consumer S
 
 Repository: implementation/dds
 
-Create @devslab/site-kit with runtime-neutral core and explicit Solid/TanStack Start adapter. Implement the exact 14-locale manifest, resolver precedence, html lang/dir, strict catalog key and placeholder validation, locale-aware metadata, canonical, hreflang plus x-default, sitemap, robots policy, fact-validated JSON-LD, SiteHeader, LocaleMenu, ThemeToggle, marketing shells, SiteFooter, LegalLayout, StatusBanner, RequestAccessForm shell, and not-found/error layouts. Product copy and facts are injected.
+Create @devslab-kr/site-kit with runtime-neutral core and explicit Solid/TanStack Start adapter. Implement the exact 14-locale manifest, resolver precedence, html lang/dir, strict catalog key and placeholder validation, locale-aware metadata, canonical, hreflang plus x-default, sitemap, robots policy, fact-validated JSON-LD, SiteHeader, LocaleMenu, ThemeToggle, marketing shells, SiteFooter, LegalLayout, StatusBanner, RequestAccessForm shell, and not-found/error layouts. Product copy and facts are injected.
 
 Acceptance: missing/extra/placeholder mismatch tests fail correctly; all 14 locale fixtures pass; Arabic RTL desktop/mobile, metadata/schema snapshots, SSR/hydration, accessibility, and Worker fixture pass.
 

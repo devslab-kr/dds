@@ -1,6 +1,6 @@
 {
-  "name": "@devslab/dds-solid",
-  "version": "0.2.3",
+  "name": "@devslab-kr/dds-solid",
+  "version": "0.2.4",
   "description": "Accessible SolidJS primitives for the DevsLab Design System",
   "type": "module",
   "license": "UNLICENSED",
@@ -13,7 +13,7 @@
     "directory": "packages/dds-solid"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
+    "registry": "https://npm.pkg.github.com",
     "access": "restricted",
     "provenance": false
   },
@@ -42,9 +42,9 @@
     "test:a11y": "vitest run --config vitest.config.ts src/__tests__/a11y.test.tsx"
   },
   "dependencies": {
-    "@devslab/dds-css": "workspace:0.2.3",
-    "@devslab/dds-icons": "workspace:0.2.3",
-    "@devslab/dds-tokens": "workspace:0.2.3"
+    "@devslab-kr/dds-css": "workspace:0.2.4",
+    "@devslab-kr/dds-icons": "workspace:0.2.4",
+    "@devslab-kr/dds-tokens": "workspace:0.2.4"
   },
   "peerDependencies": {
     "solid-js": "1.9.15"

@@ -1,8 +1,8 @@
-# @devslab/dds-solid
+# @devslab-kr/dds-solid
 
 DDS의 restricted internal SolidJS 2 primitive 패키지다. 애플리케이션 셸에서
-`@devslab/dds-solid/styles.css`를 한 번 불러오고, 컴포넌트는
-`@devslab/dds-solid`에서 사용한다.
+`@devslab-kr/dds-solid/styles.css`를 한 번 불러오고, 컴포넌트는
+`@devslab-kr/dds-solid`에서 사용한다.
 
 상태형 컴포넌트는 controlled(`value`/`open`/`checked`)와
 uncontrolled(`defaultValue`/`defaultOpen`/`defaultChecked`) 방식을 모두
