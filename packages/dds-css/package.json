@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-css",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "DDS CSS component layer — class-based, framework-neutral, semantic-token-only (spec §4.3 v1 inventory, 20 components)",
   "type": "module",
   "license": "UNLICENSED",
@@ -12,7 +12,7 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "restricted",
-    "provenance": true
+    "provenance": false
   },
   "files": [
     "dist"
