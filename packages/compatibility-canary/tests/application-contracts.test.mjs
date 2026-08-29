@@ -64,3 +64,22 @@ test("actual verification entry points generate routes, inspect install output, 
   assert.match(cleanRunner, /withSecretSentinels/);
   assert.match(sentinels, /DDS_CANARY_SECRET_SENTINEL/);
 });
+
+test("Wrangler fixture binds the canary to a sibling Worker service", async () => {
+  const [gatewayConfig, gatewaySource, siblingConfig, siblingSource, readme] = await Promise.all([
+    source("fixtures/binding-gateway/wrangler.jsonc"),
+    source("fixtures/binding-gateway/src/index.mjs"),
+    source("fixtures/binding-service/wrangler.jsonc"),
+    source("fixtures/binding-service/src/index.mjs"),
+    source("README.md"),
+  ]);
+
+  assert.match(gatewayConfig, /"binding"\s*:\s*"CANARY_SERVICE"/);
+  assert.match(gatewayConfig, /"service"\s*:\s*"dds-canary-binding-service"/);
+  assert.match(gatewaySource, /env\.CANARY_SERVICE/);
+  assert.match(gatewaySource, /content-security-policy/i);
+  assert.match(siblingConfig, /"name"\s*:\s*"dds-canary-binding-service"/);
+  assert.match(siblingSource, /Response\.json/);
+  assert.match(readme, /binding-gateway/);
+  assert.match(readme, /CSP nonce/i);
+});

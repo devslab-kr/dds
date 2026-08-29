@@ -21,11 +21,20 @@ function serializeHydrationState(value) {
   return JSON.stringify(value).replaceAll("<", "\\u003c");
 }
 
-export function renderCanaryDocument({ locale = "en", requestId, serviceMessage }) {
+export function createCspNonce(value = crypto.randomUUID()) {
+  return String(value).replaceAll("-", "");
+}
+
+export function contentSecurityPolicy(nonce) {
+  return `default-src 'self'; script-src 'self' 'nonce-${nonce}'; object-src 'none'; base-uri 'none'`;
+}
+
+export function renderCanaryDocument({ locale = "en", requestId, serviceMessage, nonce }) {
   const head = localizedHead[locale] ?? localizedHead.en;
   const state = { requestId, serviceMessage };
+  const nonceAttribute = nonce ? ` nonce="${escapeHtml(nonce)}"` : "";
 
-  return `<!doctype html><html lang="${escapeHtml(locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${head.title}</title><meta name="description" content="${head.description}"><link rel="icon" href="/canary.svg"></head><body><main id="canary-root" data-hydration-key="canary-root"><h1>${head.title}</h1><p data-service-message>${escapeHtml(serviceMessage)}</p></main><script id="canary-state" type="application/json">${serializeHydrationState(state)}</script></body></html>`;
+  return `<!doctype html><html lang="${escapeHtml(locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${head.title}</title><meta name="description" content="${head.description}"><link rel="icon" href="/canary.svg"></head><body><main id="canary-root" data-hydration-key="canary-root"><h1>${head.title}</h1><p data-service-message>${escapeHtml(serviceMessage)}</p></main><script id="canary-state" type="application/json"${nonceAttribute}>${serializeHydrationState(state)}</script></body></html>`;
 }
 
 export function createCanaryServerFunction(context) {
@@ -47,8 +56,12 @@ export async function routeRequest(request, context) {
 
   if (url.pathname === "/") {
     const result = await createCanaryServerFunction(context)("binding-ok");
-    return new Response(renderCanaryDocument({ locale: "ko", ...result }), {
-      headers: { "content-type": "text/html; charset=utf-8" },
+    const nonce = context.nonce ?? createCspNonce();
+    return new Response(renderCanaryDocument({ locale: "ko", nonce, ...result }), {
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "content-security-policy": contentSecurityPolicy(nonce),
+      },
     });
   }
 

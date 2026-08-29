@@ -54,6 +54,22 @@ test("unknown routes return a custom 404 instead of falling through", async () =
   assert.match(await response.text(), /DDS canary route not found/);
 });
 
+test("Worker response propagates one CSP nonce into every executable script", async () => {
+  const response = await routeRequest(new Request("https://canary.invalid/"), {
+    requestId: "req-test-nonce",
+    nonce: "nonce-test-value",
+    services: {
+      CANARY_SERVICE: { fetch: async () => Response.json({ message: "binding-ok" }) },
+    },
+  });
+
+  const policy = response.headers.get("content-security-policy");
+  assert.match(policy, /script-src 'self' 'nonce-nonce-test-value'/);
+  const html = await response.text();
+  assert.match(html, /<script[^>]+nonce="nonce-test-value"/);
+  assert.doesNotMatch(html, /<script(?![^>]+nonce="nonce-test-value")[^>]*>/);
+});
+
 test("diagnostic gate rejects hydration warnings, peer overrides, route leaks, and secrets", () => {
   for (const diagnostic of [
     "Hydration completed but contains mismatches",

@@ -2,7 +2,7 @@
 
 This private workspace package is the admission gate for the SolidJS 2 RC web stack. The exact candidate matrix and upstream constraints live in `compatibility-matrix.json`; the package manifest must match it byte-for-byte at the version level.
 
-The fixture covers TanStack Start SSR/client hydration, a server function reading its request, a local `fetch(Request): Promise<Response>` service-binding-shaped interface, TanStack Router with a custom 404, TanStack Query hydration state, Korean head metadata, a static SVG, and Cloudflare Vite/workerd preview.
+The fixture covers TanStack Start SSR/client hydration, a server function reading its request, TanStack Router with a custom 404, TanStack Query hydration state, Korean head metadata, a static SVG, and Cloudflare Vite/workerd preview. The `fixtures/binding-gateway` Worker binds `CANARY_SERVICE` to the test-only `fixtures/binding-service` sibling Worker through Wrangler configuration; its response also proves CSP nonce propagation from the response policy into serialized script state.
 
 Run from the repository root:
 

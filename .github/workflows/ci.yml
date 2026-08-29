@@ -6,7 +6,18 @@ on:
   pull_request:
 
 jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm run verify:source:stage1-2
+
   verify:
+    needs: source-contracts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,6 +27,12 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run verify:canary:dependencies
+      - run: pnpm run verify:canary:test
+      - run: pnpm run verify:canary:build
+      - run: pnpm run verify:canary:preview
+      - run: pnpm run verify:foundation
+      - run: pnpm run verify:release
       # build all packages, then validate token JSON + docs/preview sync
       - run: pnpm run verify
       # stories must keep building against the current CSS/tokens

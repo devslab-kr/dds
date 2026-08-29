@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../../node_modules/wrangler/config-schema.json",
+  "name": "dds-canary-binding-gateway",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-29",
+  "services": [
+    {
+      "binding": "CANARY_SERVICE",
+      "service": "dds-canary-binding-service"
+    }
+  ]
+}

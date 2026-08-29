@@ -35,6 +35,23 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit"]]);
 });
 
+test("CI keeps source-only gates separate and runs dependency-backed Stage 1-2 gates", async () => {
+  const root = await json("package.json");
+  const workflow = await read(".github/workflows/ci.yml");
+  assert.equal(typeof root.scripts?.["verify:source:stage1-2"], "string");
+  assert.doesNotMatch(root.scripts["verify:source:stage1-2"], /token-build|\bdist\b/, "source-only gate cannot require ignored build artifacts");
+  assert.match(workflow, /source-contracts:/);
+  assert.match(workflow, /pnpm run verify:source:stage1-2/);
+  for (const gate of [
+    "verify:canary:dependencies",
+    "verify:canary:test",
+    "verify:canary:build",
+    "verify:canary:preview",
+    "verify:foundation",
+    "verify:release",
+  ]) assert.match(workflow, new RegExp(`pnpm run ${gate.replaceAll(":", "\\:")}`), `${gate} must gate CI`);
+});
+
 test("buttons preserve readable CJK labels and expose 44px touch targets", async () => {
   const button = await read("packages/dds-css/src/button.css");
   const iconButton = await read("packages/dds-css/src/iconbutton.css");
@@ -64,4 +81,15 @@ test("icons publish an explicit direction policy", async () => {
   assert.ok(policy.mirrorInRtl.includes("arrow-left"));
   assert.ok(policy.mirrorInRtl.includes("arrow-right"));
   assert.ok(policy.keepDirection.includes("external-link"));
+});
+
+test("foundation browser source asserts themes, long European labels, and media policies", async () => {
+  const browser = await read("tests/browser/foundation.spec.ts");
+  assert.match(browser, /data-theme/);
+  assert.match(browser, /Deutsch/);
+  assert.match(browser, /Portugu[eê]s/);
+  assert.match(browser, /colorScheme/);
+  assert.match(browser, /forcedColorAdjust/);
+  assert.match(browser, /transitionDuration/);
+  assert.match(browser, /animationDuration/);
 });

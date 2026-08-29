@@ -6,6 +6,7 @@
     "build": "pnpm -r run build",
     "check": "pnpm -r run check && node scripts/check-docs-sync.mjs",
     "verify": "pnpm run build && pnpm run check",
+    "verify:source:stage1-2": "node --test packages/compatibility-canary/tests/contracts.test.mjs packages/compatibility-canary/tests/application-contracts.test.mjs tests/foundation-contracts.test.mjs",
     "storybook": "pnpm run build && storybook dev -p 6006",
     "build-storybook": "pnpm run build && storybook build",
     "verify:canary:dependencies": "pnpm --filter @devslab/compatibility-canary run verify:dependencies",
