@@ -5,5 +5,5 @@
     "exactOptionalPropertyTypes": true, "noUncheckedIndexedAccess": true,
     "allowJs": true, "checkJs": false, "isolatedModules": true, "skipLibCheck": false, "types": []
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.mts", "vite.config.ts", "vitest.config.ts"]
 }

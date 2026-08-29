@@ -35,6 +35,28 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit"]]);
 });
 
+test("unpublished DDS packages bootstrap from this workspace", async () => {
+  const internalDependencies = {
+    "packages/dds-solid/package.json": [
+      "@devslab/dds-css",
+      "@devslab/dds-icons",
+      "@devslab/dds-tokens",
+    ],
+    "packages/site-kit/package.json": ["@devslab/dds-solid"],
+  };
+
+  for (const [path, names] of Object.entries(internalDependencies)) {
+    const manifest = await json(path);
+    for (const name of names) {
+      assert.equal(
+        manifest.dependencies?.[name],
+        "workspace:0.2.0",
+        `${path} must resolve unpublished ${name} from the local release workspace`,
+      );
+    }
+  }
+});
+
 test("CI keeps source-only gates separate and runs dependency-backed Stage 1-2 gates", async () => {
   const root = await json("package.json");
   const workflow = await read(".github/workflows/ci.yml");

@@ -4,8 +4,9 @@ import { readFile } from "node:fs/promises";
 
 const tokens = await readFile(new URL("../../packages/dds-tokens/dist/tokens.css", import.meta.url), "utf8");
 const css = await readFile(new URL("../../packages/dds-css/dist/dds.css", import.meta.url), "utf8");
-const fixture = `<!doctype html><html lang="ar" dir="rtl" data-theme="light"><head><meta charset="utf-8"><style>${tokens}\n${css}</style></head><body>
+const fixture = `<!doctype html><html lang="ar" dir="rtl" data-theme="light"><head><meta charset="utf-8"><title>DDS foundation accessibility fixture</title><style>${tokens}\n${css}</style></head><body>
 <main style="inline-size:min(100%,320px)">
+  <h1>DDS foundation accessibility fixture</h1>
   <button class="dds-btn dds-btn--primary" data-reflow>아주 긴 한국어 버튼 레이블도 잘리거나 한 줄에 억지로 고정되지 않습니다</button>
   <button class="dds-btn dds-btn--secondary" data-reflow lang="de">Deutsch: Diese ausführliche Schaltflächenbeschriftung muss vollständig lesbar umbrechen</button>
   <button class="dds-btn dds-btn--secondary" data-reflow lang="pt-BR">Português: esta descrição extensa do botão deve quebrar sem ocultar nenhuma palavra</button>
@@ -44,8 +45,9 @@ test("light and dark themes resolve distinct semantic surfaces", async ({ page }
 
 test("Arabic RTL mirrors directional icons and keyboard focus remains visible", async ({ page }) => {
   await page.keyboard.press("Tab");
-  await expect(page.locator(".dds-btn")).toBeFocused();
-  expect(await page.locator(".dds-btn").evaluate((element) => getComputedStyle(element).outlineStyle)).toBe("solid");
+  const firstButton = page.locator(".dds-btn").first();
+  await expect(firstButton).toBeFocused();
+  expect(await firstButton.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe("solid");
   expect(await page.locator(".dds-icon--directional").evaluate((element) => getComputedStyle(element).transform)).not.toBe("none");
 });
 

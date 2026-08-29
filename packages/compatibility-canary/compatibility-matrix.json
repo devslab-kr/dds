@@ -1,19 +1,19 @@
 {
   "$schema": "./compatibility-matrix.schema.json",
-  "status": "registry-install-not-verified",
-  "verifiedAt": null,
+  "status": "registry-and-runtime-verified",
+  "verifiedAt": "2026-08-29T05:17:49.2786420Z",
   "runtime": {
-    "solid-js": "2.0.0-rc.3",
-    "@solidjs/web": "2.0.0-rc.3",
-    "@tanstack/solid-start": "2.0.0-rc.3",
-    "@tanstack/solid-router": "2.0.0-rc.3",
-    "@tanstack/solid-query": "6.0.0-rc.0"
+    "solid-js": "1.9.15",
+    "@tanstack/solid-start": "1.168.47",
+    "@tanstack/solid-router": "1.170.30",
+    "@tanstack/solid-query": "5.102.8"
   },
   "toolchain": {
-    "@solidjs/vite-plugin": "3.0.0-next.32",
     "@cloudflare/vite-plugin": "1.54.1",
+    "@tanstack/router-cli": "1.167.33",
     "vite": "8.2.1",
-    "wrangler": "4.123.0",
+    "vite-plugin-solid": "2.11.14",
+    "wrangler": "4.127.1",
     "typescript": "7.0.2",
     "@playwright/test": "1.62.1"
   },
@@ -21,22 +21,12 @@
     {
       "id": "solid2-rc",
       "severity": "high",
-      "summary": "SolidJS 2, its web runtime, and the TanStack Solid 2 adapter are prerelease lines and must be advanced together through this canary."
-    },
-    {
-      "id": "head-script-hydration",
-      "severity": "high",
-      "summary": "TanStack Solid Start 2.0.0-rc.0 reported unclaimed hydration nodes for head().scripts; this canary avoids that API and treats every hydration warning as a failure."
+      "summary": "SolidJS 2.0.0-rc.4 removes the solid-js/web export while @tanstack/solid-router 2.0.0-rc.4 declarations still import it. Production stays on the verified Solid 1 line until the public RC packages converge and pass this canary."
     },
     {
       "id": "typescript-programmatic-api",
       "severity": "medium",
       "summary": "TypeScript 7.0.2 is the native project compiler and does not expose the legacy JavaScript programmatic compiler API. No TypeScript 6 alias is currently used."
-    },
-    {
-      "id": "offline-verification",
-      "severity": "blocking",
-      "summary": "The authoring environment had no cached Solid/TanStack/Cloudflare packages and denied registry access, so install, framework build, and workerd preview remain unverified."
     }
   ]
 }

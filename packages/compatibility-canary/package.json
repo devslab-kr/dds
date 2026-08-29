@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run generate:routes && node scripts/run-clean.mjs vite build && node scripts/scan-build.mjs",
-    "generate:routes": "node scripts/generate-route-tree.mjs",
+    "generate:routes": "tsr generate",
     "preview": "vite preview",
     "preview:framework:smoke": "node scripts/preview-smoke.mjs",
     "binding:smoke": "node scripts/binding-smoke.mjs",
@@ -15,18 +15,18 @@
     "verify:dependencies": "node scripts/verify-install.mjs && node scripts/verify-dependencies.mjs"
   },
   "dependencies": {
-    "@solidjs/web": "2.0.0-rc.3",
-    "@tanstack/solid-query": "6.0.0-rc.0",
-    "@tanstack/solid-router": "2.0.0-rc.3",
-    "@tanstack/solid-start": "2.0.0-rc.3",
-    "solid-js": "2.0.0-rc.3"
+    "@tanstack/solid-query": "5.102.8",
+    "@tanstack/solid-router": "1.170.30",
+    "@tanstack/solid-start": "1.168.47",
+    "solid-js": "1.9.15"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.54.1",
     "@playwright/test": "1.62.1",
-    "@solidjs/vite-plugin": "3.0.0-next.32",
+    "@tanstack/router-cli": "1.167.33",
     "typescript": "7.0.2",
     "vite": "8.2.1",
-    "wrangler": "4.123.0"
+    "vite-plugin-solid": "2.11.14",
+    "wrangler": "4.127.1"
   }
 }

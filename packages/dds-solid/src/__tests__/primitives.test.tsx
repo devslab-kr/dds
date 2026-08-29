@@ -1,4 +1,4 @@
-import { render } from "@solidjs/web";
+import { render } from "solid-js/web";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -84,7 +84,9 @@ describe("native control behavior", () => {
     buttons[0]?.focus();
     buttons[1]?.focus();
     await Promise.resolve();
-    expect(host.querySelectorAll('[role="tooltip"]:not([hidden])')).toHaveLength(2);
+    const visibleTooltips = host.querySelectorAll('[role="tooltip"]:not([hidden])');
+    expect(visibleTooltips).toHaveLength(1);
+    expect(visibleTooltips[0]?.textContent).toBe("Controlled help");
     expect(controlled()).toBe(true);
   });
 

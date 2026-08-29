@@ -18,7 +18,7 @@ test("SSR output carries localized head, static asset, and hydration state", () 
 
   assert.match(html, /^<!doctype html><html lang="ko">/);
   assert.match(html, /<title>DDS 호환성 카나리<\/title>/);
-  assert.match(html, /<meta name="description" content="Solid 2 호환성 검증">/);
+  assert.match(html, /<meta name="description" content="Solid 및 TanStack 호환성 검증">/);
   assert.match(html, /<link rel="icon" href="\/canary\.svg">/);
   assert.match(html, /data-hydration-key="canary-root"/);
   assert.match(html, /"requestId":"req-test-001"/);

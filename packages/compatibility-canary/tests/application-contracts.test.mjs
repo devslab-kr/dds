@@ -21,8 +21,8 @@ test("actual TanStack application sources carry every canary contract", async ()
   const manifest = JSON.parse(manifestText);
   const matrix = JSON.parse(matrixText);
 
-  assert.equal(manifest.dependencies["solid-js"], "2.0.0-rc.3");
-  assert.equal(matrix.runtime["solid-js"], "2.0.0-rc.3");
+  assert.equal(manifest.dependencies["solid-js"], "1.9.15");
+  assert.equal(matrix.runtime["solid-js"], "1.9.15");
 
   const head = rootRoute.slice(rootRoute.indexOf("<head>"), rootRoute.indexOf("</head>") + 7);
   assert.match(head, /<HydrationScript\s*\/>/);
@@ -41,8 +41,9 @@ test("actual TanStack application sources carry every canary contract", async ()
 });
 
 test("actual verification entry points generate routes, inspect install output, and scan artifacts", async () => {
-  const [manifestText, installGate, previewSmoke, artifactScan, cleanRunner, sentinels] = await Promise.all([
+  const [manifestText, routerConfigText, installGate, previewSmoke, artifactScan, cleanRunner, sentinels] = await Promise.all([
     source("package.json"),
+    source("tsr.config.json"),
     source("scripts/verify-install.mjs"),
     source("scripts/preview-smoke.mjs"),
     source("scripts/scan-build.mjs"),
@@ -50,8 +51,12 @@ test("actual verification entry points generate routes, inspect install output, 
     source("scripts/secret-sentinels.mjs"),
   ]);
   const manifest = JSON.parse(manifestText);
+  const routerConfig = JSON.parse(routerConfigText);
 
   assert.match(manifest.scripts.typecheck, /generate:routes/);
+  assert.equal(manifest.scripts["generate:routes"], "tsr generate");
+  assert.equal(manifest.devDependencies["@tanstack/router-cli"], "1.167.33");
+  assert.equal(routerConfig.target, "solid");
   assert.match(manifest.scripts.build, /scan-build/);
   assert.match(manifest.scripts["verify:dependencies"], /verify-install/);
   assert.match(installGate, /strict-peer-dependencies/);

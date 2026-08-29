@@ -4,10 +4,13 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [solid({ ssr: true })],
   build: {
-    lib: { entry: "src/index.ts", formats: ["es"], fileName: "index" },
+    ssr: "src/index.ts",
+    outDir: "dist",
+    emptyOutDir: false,
     sourcemap: true,
     rollupOptions: {
-      external: [/^solid-js(?:\/|$)/, /^@solidjs\/web(?:\/|$)/, /^@devslab\//],
+      external: [/^solid-js(?:\/|$)/, /^@devslab\//],
+      output: { entryFileNames: "server.js" },
     },
   },
 });

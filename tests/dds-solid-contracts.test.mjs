@@ -9,10 +9,14 @@ test("dds-solid is a restricted exact-version package with stable exports", asyn
   const manifest = await json("packages/dds-solid/package.json");
   assert.equal(manifest.name, "@devslab/dds-solid");
   assert.equal(manifest.publishConfig.access, "restricted");
-  assert.equal(manifest.peerDependencies["solid-js"], "2.0.0-rc.3");
-  assert.equal(manifest.devDependencies["@solidjs/web"], "2.0.0-rc.3");
+  assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
+  assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
+  assert.equal(manifest.devDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies.typescript, "7.0.2");
   assert.equal(manifest.sideEffects.includes("./styles.css"), true);
+  assert.equal(manifest.exports["."].browser, "./dist/index.js");
+  assert.equal(manifest.exports["."].worker, "./dist/server.js");
+  assert.equal(manifest.exports["."].node, "./dist/server.js");
 
   const entry = await read("packages/dds-solid/src/index.ts");
   for (const symbol of [

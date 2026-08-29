@@ -1,11 +1,11 @@
 const localizedHead = {
   en: {
     title: "DDS compatibility canary",
-    description: "Solid 2 compatibility verification",
+    description: "Solid and TanStack compatibility verification",
   },
   ko: {
     title: "DDS 호환성 카나리",
-    description: "Solid 2 호환성 검증",
+    description: "Solid 및 TanStack 호환성 검증",
   },
 };
 

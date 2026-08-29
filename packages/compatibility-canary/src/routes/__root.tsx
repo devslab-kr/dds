@@ -5,7 +5,7 @@ import {
   Scripts,
   createRootRoute,
 } from "@tanstack/solid-router";
-import { HydrationScript } from "@solidjs/web";
+import { HydrationScript } from "solid-js/web";
 import type { JSX } from "solid-js";
 
 export const Route = createRootRoute({
@@ -14,7 +14,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "DDS 호환성 카나리" },
-      { name: "description", content: "Solid 2 호환성 검증" },
+      { name: "description", content: "Solid 및 TanStack 호환성 검증" },
     ],
     links: [{ rel: "icon", href: "/canary.svg", type: "image/svg+xml" }],
   }),

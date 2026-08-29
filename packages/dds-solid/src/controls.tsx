@@ -84,7 +84,7 @@ export function Field(props: FieldProps) {
     "aria-required": props.required ? "true" : undefined,
   });
   return (
-    <div class={classes("dds-field", props.error && "dds-field--error", props.class)}>
+    <div class={classes("dds-field", props.error ? "dds-field--error" : undefined, props.class)}>
       <label class="dds-field__label" for={id()}>{props.label}{props.required && <span aria-hidden="true"> *</span>}</label>
       {typeof props.children === "function" ? props.children(control()) : props.children}
       {props.helpText && <div id={helpId()} class="dds-field__help">{props.helpText}</div>}
@@ -109,7 +109,7 @@ export function Select(props: ParentProps<SelectProps>) {
   );
 }
 
-interface CheckableProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "checked" | "class" | "onChange" | "type"> {
+interface CheckableProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "checked" | "class" | "onChange" | "role" | "type"> {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;

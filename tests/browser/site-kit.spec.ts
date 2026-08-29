@@ -18,8 +18,19 @@ for (const width of [1280, 375]) {
     await page.setViewportSize({ width, height: 812 });
     await page.setContent(fixture);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(overflow).toBeLessThanOrEqual(0);
+    const overflow = await page.evaluate(() => {
+      const viewport = document.documentElement.clientWidth;
+      return {
+        amount: document.documentElement.scrollWidth - viewport,
+        offenders: [...document.querySelectorAll("*")].flatMap((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.left < -0.5 || rect.right > viewport + 0.5
+            ? [{ element: element.tagName.toLowerCase(), className: element.className, left: rect.left, right: rect.right }]
+            : [];
+        }),
+      };
+    });
+    expect(overflow.amount, JSON.stringify(overflow.offenders)).toBeLessThanOrEqual(0);
     if (width === 375) {
       const menu = page.getByRole("button", { name: "فتح القائمة" });
       await menu.focus();

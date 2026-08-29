@@ -18,8 +18,8 @@ React Native are consumers.
 | [`packages/dds-tokens/`](packages/dds-tokens/) | `@devslab/dds-tokens` — token build pipeline: `tokens.css`, Tailwind v4 `@theme` + v3 preset, `tokens.ts` (RN/runtime), `ionic.css` |
 | [`packages/dds-css/`](packages/dds-css/) | `@devslab/dds-css` — CSS component layer, the spec §4.3 v1 inventory (Button, IconButton, TextField, Textarea, Select, Checkbox/Radio, Switch, Badge, Chip, Avatar, Spinner/Skeleton, Divider, Card, ListRow, Tabs, Dialog, Toast, Tooltip, EmptyState); guide in [`docs/components.md`](docs/components.md) |
 | [`packages/dds-icons/`](packages/dds-icons/) | `@devslab/dds-icons` — the icon set: 40 core (24 grid, 1.6 stroke) + 7 devslab.kr `site-` icons, shipped as SVG files, a sprite and a path-data map |
-| [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — SolidJS 2 accessible primitives with controlled/uncontrolled state, SSR/hydration, keyboard, focus, and lifecycle contracts |
-| [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — restricted public-site infrastructure: strict 14-locale i18n, SEO/GEO builders, TanStack Start metadata adapter, and accessible SolidJS 2 shared shells |
+| [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — SolidJS accessible primitives with controlled/uncontrolled state, SSR/hydration, keyboard, focus, and lifecycle contracts |
+| [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — restricted public-site infrastructure: strict 14-locale i18n, SEO/GEO builders, TanStack Start metadata adapter, and accessible SolidJS shared shells |
 | [`preview/index.html`](preview/index.html) | Self-contained foundations & components preview — open in a browser (`components.html`, `icons.html` alongside) |
 | [`brand/index.html`](brand/index.html) | Brand identity guide: logo rules, Electric Cyan, motifs, voice & tone |
 

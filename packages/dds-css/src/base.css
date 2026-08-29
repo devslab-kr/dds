@@ -10,8 +10,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [class^="dds-"],
-  [class*=" dds-"] {
+  :root [class^="dds-"],
+  :root [class*=" dds-"] {
     animation-duration: 0.01ms;
     animation-iteration-count: 1;
     scroll-behavior: auto;

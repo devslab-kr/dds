@@ -7,6 +7,8 @@ import { spawnSync } from "node:child_process";
 const workspace = resolve(new URL("..", import.meta.url).pathname.replace(/^\/(?:([A-Za-z]:))/, "$1"));
 const temp = await mkdtemp(join(tmpdir(), "dds-solid-release-"));
 const npmCli = join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
+const pnpmCli = process.platform === "win32" ? process.execPath : "pnpm";
+const pnpmPrefix = process.platform === "win32" ? [join(dirname(process.execPath), "node_modules", "corepack", "dist", "pnpm.js")] : [];
 const run = (args, cwd) => {
   const result = spawnSync(process.execPath, [npmCli, ...args], {
     cwd,
@@ -14,6 +16,15 @@ const run = (args, cwd) => {
     env: { ...process.env, NPM_CONFIG_CACHE: join(temp, ".npm-cache") },
   });
   if (result.status !== 0) throw new Error(`${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
+  return result.stdout;
+};
+const runPnpm = (args, cwd) => {
+  const result = spawnSync(pnpmCli, [...pnpmPrefix, ...args], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, NO_COLOR: "1" },
+  });
+  if (result.status !== 0) throw new Error(`pnpm ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
   return result.stdout;
 };
 const runNode = (args, cwd) => {
@@ -26,48 +37,47 @@ try {
   const packageNames = ["dds-tokens", "dds-css", "dds-icons", "dds-solid"];
   const tarballs = [];
   let solidTarball = "";
-  let solidFiles = [];
   for (const packageName of packageNames) {
     const packageRoot = join(workspace, "packages", packageName);
-    const [{ filename, files }] = JSON.parse(run(["pack", "--json", "--pack-destination", temp], packageRoot));
-    const tarball = join(temp, filename);
+    const manifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
+    runPnpm(["pack", "--pack-destination", temp], packageRoot);
+    const tarball = join(temp, `${manifest.name.replace(/^@/, "").replace("/", "-")}-${manifest.version}.tgz`);
     tarballs.push(tarball);
-    if (packageName === "dds-solid") {
-      solidTarball = tarball;
-      solidFiles = files;
-    }
+    if (packageName === "dds-solid") solidTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "dds-solid");
-  const files = solidFiles;
+  const published = JSON.parse(run(["publish", solidTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot));
+  const files = published.files;
   assert.ok(files.some(({ path }) => path === "dist/index.js"));
+  assert.ok(files.some(({ path }) => path === "dist/server.js"));
   assert.ok(files.some(({ path }) => path === "dist/index.d.ts"));
   assert.ok(files.some(({ path }) => path === "styles.css"));
-  const published = JSON.parse(run(["publish", solidTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot));
   assert.equal(published.name, "@devslab/dds-solid");
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
-  run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@2.0.0-rc.3", "@solidjs/web@2.0.0-rc.3", "jsdom@30.0.1"], temp);
+  run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
   const manifest = JSON.parse(await readFile(join(temp, "node_modules", "@devslab", "dds-solid", "package.json"), "utf8"));
-  assert.equal(manifest.peerDependencies["solid-js"], "2.0.0-rc.3");
+  assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   const ssrScript = join(temp, "consumer-ssr.mjs");
   await writeFile(ssrScript, `
-import { renderToString } from "@solidjs/web";
+import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
 import { Button, Icon } from "@devslab/dds-solid";
 const html = renderToString(() => createComponent(Button, { get children() { return ["Fresh consumer ", createComponent(Icon, { name: "check", label: "Complete" })]; } }));
 if (!html.includes("Fresh consumer") || !html.includes("aria-label=\\"Complete\\"")) throw new Error("fresh consumer SSR failed");
-process.stdout.write(html);
+process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html }));
 `, "utf8");
-  const ssrHtml = runNode([ssrScript], temp);
-  await writeFile(join(temp, "ssr.html"), ssrHtml, "utf8");
+  const ssrPayload = runNode([ssrScript], temp);
+  await writeFile(join(temp, "ssr.json"), ssrPayload, "utf8");
   const hydrationScript = join(temp, "consumer-hydrate.mjs");
   await writeFile(hydrationScript, `
 import { readFile } from "node:fs/promises";
 import { JSDOM } from "jsdom";
-const dom = new JSDOM('<div id="root"></div>');
+const { bootstrap, html } = JSON.parse(await readFile(new URL("./ssr.json", import.meta.url), "utf8"));
+const dom = new JSDOM('<!doctype html><html><head>' + bootstrap + '</head><body><div id="root">' + html + '</div></body></html>', { runScripts: "dangerously" });
 for (const key of ["window", "document", "Node", "HTMLElement", "SVGElement", "MutationObserver", "navigator"]) Object.defineProperty(globalThis, key, { value: dom.window[key], configurable: true, writable: true });
+Object.defineProperty(globalThis, "_$HY", { value: dom.window._$HY, configurable: true, writable: true });
 const host = document.querySelector("#root");
-host.innerHTML = await readFile(new URL("./ssr.html", import.meta.url), "utf8");
-const { hydrate } = await import("@solidjs/web");
+const { hydrate } = await import("solid-js/web");
 const { createComponent } = await import("solid-js");
 const { Button, Icon } = await import("@devslab/dds-solid");
 const diagnostics = [];

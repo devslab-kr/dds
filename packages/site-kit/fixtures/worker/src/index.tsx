@@ -1,4 +1,4 @@
-import { renderToString } from "@solidjs/web";
+import { renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
 
 import { buildMetadata, type SiteLocale } from "@devslab/site-kit";

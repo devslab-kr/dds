@@ -10,7 +10,9 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
   assert.equal(manifest.name, "@devslab/site-kit");
   assert.equal(manifest.publishConfig.access, "restricted");
   for (const path of [".", "./solid", "./tanstack-start", "./styles.css"]) assert.ok(manifest.exports[path]);
-  assert.equal(manifest.peerDependencies["solid-js"], "2.0.0-rc.3");
+  assert.equal(manifest.exports["./solid"].types, "./dist/index.d.ts");
+  assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
+  assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies.typescript, "7.0.2");
 });
 
@@ -60,10 +62,11 @@ test("shared styles use logical properties and include RTL/mobile policies", asy
 });
 
 test("Worker and browser fixtures consume adapters and prove hydration plus Arabic RTL", async () => {
-  const [worker, browser, ssr, workflow, root] = await Promise.all([
+  const [worker, browser, ssr, release, workflow, root] = await Promise.all([
     read("packages/site-kit/fixtures/worker/src/index.tsx"),
     read("tests/browser/site-kit.spec.ts"),
     read("packages/site-kit/src/solid/__tests__/ssr.test.tsx"),
+    read("scripts/verify-solid-release.mjs"),
     read(".github/workflows/ci.yml"),
     json("package.json"),
   ]);
@@ -72,7 +75,9 @@ test("Worker and browser fixtures consume adapters and prove hydration plus Arab
   assert.match(worker, /renderToString/);
   assert.match(worker, /data-site-hydration/);
   assert.doesNotMatch(worker, /escapeHtml\(JSON\.stringify/, "hydration JSON must remain parseable script data");
-  assert.match(ssr, /hydrate/);
+  assert.match(ssr, /renderToString/);
+  assert.match(release, /hydrate/);
+  assert.match(release, /diagnostics\.length/);
   assert.match(browser, /375/);
   assert.match(browser, /1280/);
   assert.match(browser, /dir="rtl"/);

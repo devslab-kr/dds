@@ -1,6 +1,5 @@
 import {
   For,
-  Show,
   createContext,
   createSignal,
   onCleanup,
@@ -62,14 +61,14 @@ export function ToastProvider(props: ToastProviderProps) {
         <For each={toasts()}>{(toast) => (
           <div class={classes("dds-toast", `dds-toast--${toast.tone ?? "info"}`)} role={toast.tone === "danger" ? "alert" : "status"}>
             <span>{toast.message}</span>
-            <Show when={props.dismissLabel}>{() => (
+            {props.dismissLabel ? (
               <button
                 type="button"
                 class="dds-iconbtn dds-iconbtn--sm"
                 aria-label={typeof props.dismissLabel === "function" ? props.dismissLabel(toast) : props.dismissLabel}
                 onClick={() => dismiss(toast.id)}
               >×</button>
-            )}</Show>
+            ) : null}
           </div>
         )}</For>
       </div>

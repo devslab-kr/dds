@@ -1,5 +1,5 @@
 import axe from "axe-core";
-import { render } from "@solidjs/web";
+import { render } from "solid-js/web";
 import { afterEach, expect, it } from "vitest";
 
 import { MarketingShell } from "../index";

@@ -1,4 +1,4 @@
-import { render } from "@solidjs/web";
+import { render } from "solid-js/web";
 import { afterEach, expect, it, vi } from "vitest";
 
 import { MarketingShell, NotFoundLayout, RequestAccessForm } from "../index";

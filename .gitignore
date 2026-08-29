@@ -1,5 +1,9 @@
 node_modules/
 packages/*/dist/
 storybook-static/
+test-results/
+playwright-report/
+.wrangler/
+dist-worker/
 *storybook.log
 *.log
