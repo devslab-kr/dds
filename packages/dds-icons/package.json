@@ -1,6 +1,6 @@
 {
   "name": "@devslab-kr/dds-icons",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "DDS icon set — one SVG source (24 grid, currentColor), shipped as files, a sprite and a path-data map",
   "type": "module",
   "license": "UNLICENSED",
