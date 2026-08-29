@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const packages = ["dds-tokens", "dds-css", "dds-icons", "dds-solid"];
+const packages = ["dds-tokens", "dds-css", "dds-icons", "dds-solid", "site-kit"];
 for (const packageName of packages) {
   const manifest = JSON.parse(
     await readFile(new URL(`../packages/${packageName}/package.json`, import.meta.url), "utf8"),

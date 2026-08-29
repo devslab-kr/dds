@@ -8,6 +8,7 @@ export {
   Select,
   Switch,
   type ButtonProps,
+  type ButtonTone,
   type CheckboxProps,
   type FieldControlProps,
   type FieldProps,
@@ -15,6 +16,7 @@ export {
   type RadioProps,
   type SelectProps,
   type SwitchProps,
+  type ControlSize,
 } from "./controls";
 export { Dialog, type DialogProps } from "./dialog";
 export { Icon, type IconProps } from "./icon";
