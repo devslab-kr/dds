@@ -13,6 +13,7 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
   assert.equal(manifest.exports["./solid"].types, "./dist/index.d.ts");
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
+  assert.equal(manifest.devDependencies["@types/node"], "26.3.0");
   assert.equal(manifest.devDependencies.typescript, "7.0.2");
 });
 

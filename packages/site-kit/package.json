@@ -34,6 +34,7 @@
     "@tanstack/solid-start": { "optional": true }
   },
   "devDependencies": {
+    "@types/node": "26.3.0",
     "@tanstack/solid-router": "1.170.30",
     "@tanstack/solid-start": "1.168.47",
     "axe-core": "4.13.0",

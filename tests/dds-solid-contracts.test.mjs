@@ -12,6 +12,7 @@ test("dds-solid is a restricted exact-version package with stable exports", asyn
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies["@solidjs/web"], undefined);
+  assert.equal(manifest.devDependencies["@types/node"], "26.3.0");
   assert.equal(manifest.devDependencies.typescript, "7.0.2");
   assert.equal(manifest.sideEffects.includes("./styles.css"), true);
   assert.equal(manifest.exports["."].browser, "./dist/index.js");
