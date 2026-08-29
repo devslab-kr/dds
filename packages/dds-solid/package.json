@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-solid",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Accessible SolidJS 2 primitives for the DevsLab Design System",
   "type": "module",
   "license": "UNLICENSED",
@@ -25,9 +25,9 @@
     "test:a11y": "vitest run --config vitest.config.ts src/__tests__/a11y.test.tsx"
   },
   "dependencies": {
-    "@devslab/dds-css": "0.1.0",
-    "@devslab/dds-icons": "0.1.0",
-    "@devslab/dds-tokens": "0.1.0"
+    "@devslab/dds-css": "0.2.0",
+    "@devslab/dds-icons": "0.2.0",
+    "@devslab/dds-tokens": "0.2.0"
   },
   "peerDependencies": {
     "@solidjs/web": "2.0.0-rc.3",

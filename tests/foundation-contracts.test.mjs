@@ -15,7 +15,7 @@ test("foundation packages use the final @devslab names and TypeScript 7", async 
   for (const [path, name] of Object.entries(expected)) {
     const manifest = await json(path);
     assert.equal(manifest.name, name);
-    assert.equal(manifest.version, "0.1.0");
+    assert.equal(manifest.version, "0.2.0");
     assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org/");
     assert.equal(manifest.publishConfig?.access, "restricted");
   }
