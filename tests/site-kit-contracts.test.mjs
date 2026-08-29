@@ -64,7 +64,7 @@ test("TanStack adapter maps metadata without owning product facts", async () => 
 
 test("shared styles use logical properties and include RTL/mobile policies", async () => {
   const styles = await read("packages/site-kit/styles.css");
-  assert.match(styles, /margin-inline-start/);
+  assert.match(styles, /inline-size/);
   assert.match(styles, /border-inline-start/);
   assert.match(styles, /@media \(max-width:/);
   assert.doesNotMatch(styles, /\b(?:margin|padding|border)-(?:left|right)\b/);
