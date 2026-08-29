@@ -53,8 +53,9 @@ try {
     }
     const tarball = join(temp, basename(filename));
     tarballs.push(tarball);
-    const dryRun = JSON.parse(run(npm, [...npmPrefix, "publish", tarball, "--dry-run", "--json", "--ignore-scripts"], cwd));
-    assert.equal(dryRun.name, `@devslab/${directory}`);
+    const dryRunOutput = JSON.parse(run(npm, [...npmPrefix, "publish", tarball, "--dry-run", "--json", "--ignore-scripts"], cwd));
+    const dryRun = Array.isArray(dryRunOutput) ? dryRunOutput[0] : dryRunOutput;
+    assert.equal(dryRun?.name, `@devslab/${directory}`);
   }
 
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true }), "utf8");
