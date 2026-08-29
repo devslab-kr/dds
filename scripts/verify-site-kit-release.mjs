@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -43,16 +43,15 @@ try {
     if (packageName === "site-kit") siteKitTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "site-kit");
-  const published = JSON.parse(run(["publish", siteKitTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot));
-  const siteKitFiles = published.files;
-  for (const path of ["dist/solid.js", "dist/index.d.ts", "src/core/index.mjs", "src/core/index.d.mts", "src/tanstack-start.mjs", "src/tanstack-start.d.mts", "styles.css"]) {
-    assert.ok(siteKitFiles.some((file) => file.path === path), `${path} missing from package`);
-  }
-  assert.equal(published.name, "@devslab/site-kit");
+  run(["publish", siteKitTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs], temp);
   const installedRoot = join(temp, "node_modules", "@devslab", "site-kit");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
+  assert.equal(manifest.name, "@devslab/site-kit");
+  for (const path of ["dist/solid.js", "dist/index.d.ts", "src/core/index.mjs", "src/core/index.d.mts", "src/tanstack-start.mjs", "src/tanstack-start.d.mts", "styles.css"]) {
+    await access(join(installedRoot, path));
+  }
   assert.equal(manifest.publishConfig.access, "restricted");
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   const core = await import(pathToFileURL(join(installedRoot, "src", "core", "index.mjs")));

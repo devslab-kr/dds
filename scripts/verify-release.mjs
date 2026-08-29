@@ -45,7 +45,8 @@ try {
   for (const directory of packageDirs) {
     const cwd = join(workspace, "packages", directory);
     const output = run(npm, [...npmPrefix, "pack", "--json", "--pack-destination", temp], cwd);
-    const [{ filename, files }] = JSON.parse(output);
+    const [{ filename, files, name }] = JSON.parse(output);
+    assert.equal(name, `@devslab/${directory}`);
     assert.ok(files.some(({ path }) => path === "package.json"));
     assert.ok(files.some(({ path }) => path.startsWith("dist/")), `${directory} must pack dist`);
     if (directory === "dds-icons") {
@@ -53,9 +54,7 @@ try {
     }
     const tarball = join(temp, basename(filename));
     tarballs.push(tarball);
-    const dryRunOutput = JSON.parse(run(npm, [...npmPrefix, "publish", tarball, "--dry-run", "--json", "--ignore-scripts"], cwd));
-    const dryRun = Array.isArray(dryRunOutput) ? dryRunOutput[0] : dryRunOutput;
-    assert.equal(dryRun?.name, `@devslab/${directory}`);
+    run(npm, [...npmPrefix, "publish", tarball, "--dry-run", "--json", "--ignore-scripts"], cwd);
   }
 
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true }), "utf8");
