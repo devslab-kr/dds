@@ -10,9 +10,14 @@ const origin = `http://127.0.0.1:${port}`;
 const gatewayConfig = resolve("fixtures/binding-gateway/wrangler.jsonc");
 const serviceConfig = resolve("fixtures/binding-service/wrangler.jsonc");
 const wrangler = resolve("node_modules/wrangler/bin/wrangler.js");
-const startWorker = (config, workerPort) => spawn(
+const startWorker = (config, workerPort, inspectorPort) => spawn(
   process.execPath,
-  [wrangler, "dev", "-c", config, "--ip", "127.0.0.1", "--port", String(workerPort)],
+  [
+    wrangler, "dev", "-c", config,
+    "--ip", "127.0.0.1",
+    "--port", String(workerPort),
+    "--inspector-port", String(inspectorPort),
+  ],
   { cwd: process.cwd(), env: process.env, stdio: ["ignore", "pipe", "pipe"] },
 );
 let diagnostics = "";
@@ -28,7 +33,7 @@ const waitForReady = async (workerOrigin, server, label) => {
   for (let attempt = 0; attempt < 50; attempt += 1) {
     if (server.exitCode !== null) throw new Error(`${label} exited with ${server.exitCode}\n${diagnostics}`);
     try {
-      const response = await fetch(workerOrigin);
+      const response = await fetch(workerOrigin, { signal: AbortSignal.timeout(500) });
       if (response.ok) return response;
       await response.body?.cancel();
     } catch {}
@@ -46,10 +51,10 @@ const stopWorker = async (server) => {
 };
 
 try {
-  const service = trackWorker(startWorker(serviceConfig, 4182));
+  const service = trackWorker(startWorker(serviceConfig, 4182, 9230));
   const serviceResponse = await waitForReady("http://127.0.0.1:4182", service, "binding service");
   await serviceResponse.body?.cancel();
-  const gateway = trackWorker(startWorker(gatewayConfig, port));
+  const gateway = trackWorker(startWorker(gatewayConfig, port, 9231));
   const response = await waitForReady(origin, gateway, "binding gateway");
   assert.equal(response?.status, 200, diagnostics);
   const policy = response.headers.get("content-security-policy");
