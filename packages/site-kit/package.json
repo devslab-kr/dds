@@ -1,19 +1,46 @@
 {
   "name": "@devslab/site-kit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Strict i18n, SEO/GEO, and Solid public-site shells for DevsLab products",
   "type": "module",
   "license": "UNLICENSED",
-  "sideEffects": ["./styles.css"],
-  "repository": { "type": "git", "url": "https://github.com/devslab-kr/dds.git", "directory": "packages/site-kit" },
-  "publishConfig": { "registry": "https://registry.npmjs.org/", "access": "restricted", "provenance": true },
-  "files": ["dist", "src/core", "src/tanstack-start.mjs", "src/tanstack-start.d.mts", "styles.css", "README.md", "README.ko.md"],
+  "sideEffects": [
+    "./styles.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/site-kit"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "restricted",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "src/core",
+    "src/tanstack-start.mjs",
+    "src/tanstack-start.d.mts",
+    "styles.css",
+    "README.md",
+    "README.ko.md"
+  ],
   "main": "./src/core/index.mjs",
   "types": "./src/core/index.d.mts",
   "exports": {
-    ".": { "types": "./src/core/index.d.mts", "import": "./src/core/index.mjs" },
-    "./solid": { "types": "./dist/index.d.ts", "import": "./dist/solid.js" },
-    "./tanstack-start": { "types": "./src/tanstack-start.d.mts", "import": "./src/tanstack-start.mjs" },
+    ".": {
+      "types": "./src/core/index.d.mts",
+      "import": "./src/core/index.mjs"
+    },
+    "./solid": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/solid.js"
+    },
+    "./tanstack-start": {
+      "types": "./src/tanstack-start.d.mts",
+      "import": "./src/tanstack-start.mjs"
+    },
     "./styles.css": "./styles.css"
   },
   "scripts": {
@@ -23,15 +50,21 @@
     "test:a11y": "vitest run --config vitest.config.ts src/solid/__tests__/a11y.test.tsx",
     "test:worker": "wrangler deploy --dry-run --config fixtures/worker/wrangler.jsonc --outdir dist-worker"
   },
-  "dependencies": { "@devslab/dds-solid": "workspace:0.2.0" },
+  "dependencies": {
+    "@devslab/dds-solid": "workspace:0.2.1"
+  },
   "peerDependencies": {
     "@tanstack/solid-router": "1.170.30",
     "@tanstack/solid-start": "1.168.47",
     "solid-js": "1.9.15"
   },
   "peerDependenciesMeta": {
-    "@tanstack/solid-router": { "optional": true },
-    "@tanstack/solid-start": { "optional": true }
+    "@tanstack/solid-router": {
+      "optional": true
+    },
+    "@tanstack/solid-start": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "26.3.0",

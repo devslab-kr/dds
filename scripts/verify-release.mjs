@@ -13,14 +13,17 @@ const packageDirs = ["dds-tokens", "dds-css", "dds-icons"];
 const temp = await mkdtemp(join(tmpdir(), "dds-release-"));
 
 function run(command, args, cwd) {
+  const env = {
+    ...process.env,
+    NPM_CONFIG_CACHE: join(temp, ".npm-cache"),
+    NPM_CONFIG_OFFLINE: "true",
+  };
+  delete env.NODE_AUTH_TOKEN;
+  delete env.NPM_CONFIG_USERCONFIG;
   const result = spawnSync(command, args, {
     cwd,
     encoding: "utf8",
-    env: {
-      ...process.env,
-      NPM_CONFIG_CACHE: join(temp, ".npm-cache"),
-      NPM_CONFIG_OFFLINE: "true",
-    },
+    env,
   });
   if (result.status !== 0) {
     throw new Error(`${command} ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);

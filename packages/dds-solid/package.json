@@ -1,17 +1,28 @@
 {
   "name": "@devslab/dds-solid",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Accessible SolidJS primitives for the DevsLab Design System",
   "type": "module",
   "license": "UNLICENSED",
-  "sideEffects": ["./styles.css"],
+  "sideEffects": [
+    "./styles.css"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/devslab-kr/dds.git",
     "directory": "packages/dds-solid"
   },
-  "publishConfig": { "registry": "https://registry.npmjs.org/", "access": "restricted", "provenance": true },
-  "files": ["dist", "styles.css", "README.md", "README.ko.md"],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "restricted",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "styles.css",
+    "README.md",
+    "README.ko.md"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -31,11 +42,13 @@
     "test:a11y": "vitest run --config vitest.config.ts src/__tests__/a11y.test.tsx"
   },
   "dependencies": {
-    "@devslab/dds-css": "workspace:0.2.0",
-    "@devslab/dds-icons": "workspace:0.2.0",
-    "@devslab/dds-tokens": "workspace:0.2.0"
+    "@devslab/dds-css": "workspace:0.2.1",
+    "@devslab/dds-icons": "workspace:0.2.1",
+    "@devslab/dds-tokens": "workspace:0.2.1"
   },
-  "peerDependencies": { "solid-js": "1.9.15" },
+  "peerDependencies": {
+    "solid-js": "1.9.15"
+  },
   "devDependencies": {
     "@types/node": "26.3.0",
     "axe-core": "4.13.0",
