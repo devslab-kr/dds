@@ -14,6 +14,10 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
   assert.equal(manifest.exports["./solid"].browser, "./dist/solid.js");
   assert.equal(manifest.exports["./solid"].worker, "./dist/solid.server.js");
   assert.equal(manifest.exports["./solid"].node, "./dist/solid.server.js");
+  assert.ok(
+    Object.keys(manifest.exports["./solid"]).indexOf("worker") < Object.keys(manifest.exports["./solid"]).indexOf("browser"),
+    "Worker SSR must win when a resolver activates both worker and browser conditions",
+  );
   assert.match(manifest.scripts.build, /vite build --config vite\.server\.config\.ts/);
   assert.match(await read("packages/site-kit/vite.server.config.ts"), /solid\.server\.js/);
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
