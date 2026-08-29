@@ -29,6 +29,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "worker": "./dist/server.js",
+      "workerd": "./dist/server.js",
       "node": "./dist/server.js",
       "browser": "./dist/index.js",
       "default": "./dist/index.js"
