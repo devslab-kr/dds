@@ -43,9 +43,15 @@ it("renders shared chrome and opens the mobile navigation", () => {
     footer={{ brand: { name: "VisionLinq", href: "/" }, links: [{ href: "/privacy", label: "Privacy" }], copyright: "2026 DevsLab", messages }}
   ><h1>Document intelligence</h1></MarketingShell>, host);
   const toggle = host.querySelector<HTMLButtonElement>(".site-menu-button")!;
+  const navigation = host.querySelector<HTMLElement>("#site-navigation")!;
+  const controls = host.querySelector<HTMLElement>(".site-header__controls")!;
+  expect(navigation.contains(controls)).toBe(false);
+  expect(controls.parentElement).toBe(navigation.parentElement);
+  expect(controls.dataset.open).toBe("false");
   expect(toggle.getAttribute("aria-expanded")).toBe("false");
   toggle.click();
   expect(toggle.getAttribute("aria-expanded")).toBe("true");
+  expect(controls.dataset.open).toBe("true");
   expect(host.querySelector("#main-content h1")?.textContent).toBe("Document intelligence");
 });
 

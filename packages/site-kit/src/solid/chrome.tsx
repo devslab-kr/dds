@@ -107,16 +107,16 @@ export function SiteHeader(props: SiteHeaderProps) {
         </Button>
         <nav id="site-navigation" class="site-nav" data-open={String(menuOpen())} aria-label={props.messages.navigationLabel}>
           <ul class="site-nav__list"><For each={props.navigation}>{(item) => <li><a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noreferrer" : undefined}>{item.label}</a></li>}</For></ul>
-          <div class="site-header__controls">
-            <LocaleMenu
-              state={props.locale}
-              messages={props.messages}
-              {...(props.onLocaleChange ? { onLocaleChange: props.onLocaleChange } : {})}
-            />
-            {props.theme && <ThemeToggle {...props.theme} messages={props.messages} />}
-            {props.actions}
-          </div>
         </nav>
+        <div class="site-header__controls" data-open={String(menuOpen())}>
+          <LocaleMenu
+            state={props.locale}
+            messages={props.messages}
+            {...(props.onLocaleChange ? { onLocaleChange: props.onLocaleChange } : {})}
+          />
+          {props.theme && <ThemeToggle {...props.theme} messages={props.messages} />}
+          {props.actions}
+        </div>
       </div>
     </header>
   );
