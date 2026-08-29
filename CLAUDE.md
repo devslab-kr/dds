@@ -38,6 +38,11 @@ AskLinq, BookLinq, FlowLinq, 이후의 모바일 앱)이 공유하는 디자인 
   asklinq의 Decision Log 형식)에 결정 기록을 남긴다.
 - 패키지가 생기면 lockstep semver (tokens/css/native 같은 버전 트레인).
   토큰 이름 변경·삭제 = breaking.
+- **토큰을 바꿨으면 소비자 사본까지가 그 작업이다.** D-009로 소비자는
+  커밋 사본을 들고 있으므로, 여기서 값이 바뀌면 asklinq·devslab이 낡는다.
+  `pnpm run check`가 `scripts/check-consumers.mjs`로 이를 잡는다(로컬 전용 —
+  체크아웃이 없는 소비자는 실패가 아니라 skip). 걸리면 해당 레포에서
+  재동기화하고 **거기서 커밋**한다.
 - main 직접 푸시는 문서·토큰 수정까지만. 빌드 파이프라인 등 구조 변경은
   브랜치 + PR로.
 
