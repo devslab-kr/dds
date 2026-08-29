@@ -1,11 +1,39 @@
 import { render } from "solid-js/web";
 import { afterEach, expect, it, vi } from "vitest";
 
-import { MarketingShell, NotFoundLayout, RequestAccessForm } from "../index";
+import { MarketingShell, NotFoundLayout, RequestAccessForm, ThemeToggle } from "../index";
 import { locale, messages } from "./fixtures";
 
 let dispose: (() => void) | undefined;
-afterEach(() => { dispose?.(); dispose = undefined; document.body.replaceChildren(); });
+afterEach(() => {
+  dispose?.();
+  dispose = undefined;
+  document.body.replaceChildren();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+});
+
+it("renders an icon-only two-state theme action with an accessible name", () => {
+  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: false })));
+  const host = document.body.appendChild(document.createElement("div"));
+  dispose = render(() => <ThemeToggle messages={messages} storageKey="test-theme" />, host);
+
+  const toggle = host.querySelector<HTMLButtonElement>(".site-theme-toggle")!;
+  expect(toggle.textContent).toBe("");
+  expect(toggle.getAttribute("aria-label")).toBe("Theme: Dark");
+  expect(toggle.querySelector("svg")?.getAttribute("data-icon")).toBe("site-moon");
+
+  toggle.click();
+  expect(document.documentElement.dataset.theme).toBe("dark");
+  expect(document.documentElement.dataset.themePreference).toBe("dark");
+  expect(localStorage.getItem("test-theme")).toBe("dark");
+  expect(toggle.getAttribute("aria-label")).toBe("Theme: Light");
+  expect(toggle.querySelector("svg")?.getAttribute("data-icon")).toBe("site-sun");
+
+  toggle.click();
+  expect(document.documentElement.dataset.theme).toBe("light");
+  expect(document.documentElement.dataset.themePreference).toBe("light");
+});
 
 it("renders shared chrome and opens the mobile navigation", () => {
   const host = document.body.appendChild(document.createElement("div"));
