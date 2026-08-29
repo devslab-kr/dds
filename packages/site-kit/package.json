@@ -1,6 +1,6 @@
 {
   "name": "@devslab-kr/site-kit",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Strict i18n, SEO/GEO, and Solid public-site shells for DevsLab products",
   "type": "module",
   "license": "UNLICENSED",
@@ -55,7 +55,7 @@
     "test:worker": "wrangler deploy --dry-run --config fixtures/worker/wrangler.jsonc --outdir dist-worker"
   },
   "dependencies": {
-    "@devslab-kr/dds-solid": "workspace:0.2.6"
+    "@devslab-kr/dds-solid": "workspace:0.2.7"
   },
   "peerDependencies": {
     "@tanstack/solid-router": "1.170.30",

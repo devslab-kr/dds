@@ -1,4 +1,4 @@
-import { Button } from "@devslab-kr/dds-solid";
+import { Button, Icon, IconButton } from "@devslab-kr/dds-solid";
 import { For, createSignal, onMount, type JSX } from "solid-js";
 
 import { LOCALES, type SiteLocale } from "../core/locales.mjs";
@@ -44,12 +44,15 @@ export interface ThemeToggleProps {
 export function ThemeToggle(props: ThemeToggleProps) {
   const order: ThemePreference[] = ["system", "light", "dark"];
   const [internal, setInternal] = createSignal<ThemePreference>(props.defaultValue ?? "system");
+  const [resolved, setResolved] = createSignal<"light" | "dark">("light");
   const value = () => props.value ?? internal();
-  const label = () => ({ system: props.messages.themeSystem, light: props.messages.themeLight, dark: props.messages.themeDark })[value()];
+  const nextTheme = () => resolved() === "dark" ? "light" : "dark";
+  const nextLabel = () => nextTheme() === "dark" ? props.messages.themeDark : props.messages.themeLight;
   const apply = (theme: ThemePreference) => {
     const resolved = theme === "system"
       ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
       : theme;
+    setResolved(resolved);
     document.documentElement.dataset.theme = resolved;
     document.documentElement.dataset.themePreference = theme;
   };
@@ -65,11 +68,20 @@ export function ThemeToggle(props: ThemeToggleProps) {
     apply(props.value ?? stored ?? internal());
   });
   return (
-    <Button
+    <IconButton
+      class="site-theme-toggle"
       tone="ghost"
-      aria-label={`${props.messages.themeLabel}: ${label()}`}
-      onClick={() => update(order[(order.indexOf(value()) + 1) % order.length]!)}
-    >{label()}</Button>
+      aria-label={`${props.messages.themeLabel}: ${nextLabel()}`}
+      title={`${props.messages.themeLabel}: ${nextLabel()}`}
+      onClick={() => update(nextTheme())}
+    >
+      <Icon
+        class="site-theme-toggle__icon"
+        name={nextTheme() === "dark" ? "site-moon" : "site-sun"}
+        data-icon={nextTheme() === "dark" ? "site-moon" : "site-sun"}
+        size={20}
+      />
+    </IconButton>
   );
 }
 
