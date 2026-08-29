@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "cssClass": "dds-icon--directional",
+  "mirrorInRtl": [
+    "arrow-left",
+    "arrow-right",
+    "chevron-left",
+    "chevron-right"
+  ],
+  "keepDirection": [
+    "external-link",
+    "download",
+    "upload"
+  ]
+}

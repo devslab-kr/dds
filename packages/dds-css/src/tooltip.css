@@ -14,8 +14,8 @@
 
 .dds-tooltip__bubble {
   position: absolute;
-  bottom: calc(100% + var(--dds-space-8));
-  left: 50%;
+  inset-block-end: calc(100% + var(--dds-space-8));
+  inset-inline-start: 50%;
   transform: translateX(-50%);
   z-index: 1200; /* above dialog (1000) and toast (1100) */
   padding: var(--dds-space-4) var(--dds-space-8);

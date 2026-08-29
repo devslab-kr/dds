@@ -61,6 +61,10 @@ if (sprite && map) {
     if (!sprite.includes(`id="dds-${icon.name}"`)) errors.push(`dist/icons.svg is stale: ${icon.name} missing`);
     if (!map.includes(`${JSON.stringify(icon.name)}:`)) errors.push(`dist/icons.js is stale: ${icon.name} missing`);
   }
+  if (!map.includes("export const directionPolicy")) errors.push("dist/icons.js is stale: directionPolicy missing");
+  for (const name of ["arrow-left", "arrow-right", "external-link"]) {
+    if (!map.includes(JSON.stringify(name))) errors.push(`dist/icons.js directionPolicy is missing ${name}`);
+  }
 }
 
 if (errors.length) {

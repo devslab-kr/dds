@@ -1,10 +1,10 @@
-# DDS 컴포넌트 — v1 인벤토리 (`@devslab-kr/dds-css`)
+# DDS 컴포넌트 — v1 인벤토리 (`@devslab/dds-css`)
 
 🌐 [English](components.md)
 
 클래스 기반·프레임워크 중립 CSS 컴포넌트. 전부 시맨틱 토큰(`var(--dds-*)`)만
-참조합니다 — `@devslab-kr/dds-tokens/tokens.css`를 먼저 로드하고
-`@devslab-kr/dds-css/dds.css`(또는 `components/`의 개별 파일)를 로드하세요.
+참조합니다 — `@devslab/dds-tokens/tokens.css`를 먼저 로드하고
+`@devslab/dds-css/dds.css`(또는 `components/`의 개별 파일)를 로드하세요.
 다크 모드에 컴포넌트 변경은 없습니다: `<html>` 또는 임의 서브트리에
 `data-theme="dark"` (`data-theme="light"`로 되고정 가능).
 

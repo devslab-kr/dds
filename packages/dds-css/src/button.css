@@ -10,8 +10,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--dds-space-8);
-  height: var(--dds-space-40);
-  padding: 0 var(--dds-space-16);
+  min-block-size: var(--dds-space-40);
+  padding-block: var(--dds-space-8);
+  padding-inline: var(--dds-space-16);
   border: 1px solid transparent;
   border-radius: var(--dds-radius-md);
   background: none;
@@ -23,6 +24,8 @@
   cursor: pointer;
   transition: background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
   -webkit-tap-highlight-color: transparent;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .dds-btn:focus-visible {
@@ -90,13 +93,22 @@
 /* sizes ------------------------------------------------------------------- */
 
 .dds-btn--sm {
-  height: var(--dds-space-32);
-  padding: 0 var(--dds-space-12);
+  min-block-size: var(--dds-space-32);
+  padding-block: var(--dds-space-4);
+  padding-inline: var(--dds-space-12);
 }
 
 .dds-btn--lg {
-  height: var(--dds-space-48);
-  padding: 0 var(--dds-space-20);
+  min-block-size: var(--dds-space-48);
+  padding-block: var(--dds-space-12);
+  padding-inline: var(--dds-space-20);
   font-size: var(--dds-typo-body-1-font-size);
   line-height: var(--dds-typo-body-1-line-height);
+}
+
+@media (pointer: coarse) {
+  .dds-btn,
+  .dds-btn--sm {
+    min-block-size: 44px;
+  }
 }
