@@ -8,9 +8,10 @@ const fixture = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="u
 <div class="site-shell"><header class="site-header"><div class="site-header__inner">
 <a class="site-brand" href="/ar">لينك</a>
 <button type="button" class="dds-btn dds-btn--ghost site-menu-button" aria-expanded="false" aria-controls="site-navigation">فتح القائمة</button>
-<nav id="site-navigation" class="site-nav" data-open="false" aria-label="التنقل الرئيسي"><ul class="site-nav__list"><li><a href="/docs">الوثائق</a></li></ul><div class="site-header__controls"><label><span class="dds-sr-only">اللغة</span><select class="dds-select__input" aria-label="اللغة"><option>العربية</option></select></label><a class="dds-btn dds-btn--primary" href="/access">طلب الوصول</a></div></nav>
+<nav id="site-navigation" class="site-nav" data-open="false" aria-label="التنقل الرئيسي"><ul class="site-nav__list"><li><a href="/docs">الوثائق</a></li></ul></nav>
+<div class="site-header__controls" data-open="false"><label><span class="dds-sr-only">اللغة</span><select class="dds-select__input" aria-label="اللغة"><option>العربية</option></select></label><a class="dds-btn dds-btn--primary" href="/access">طلب الوصول</a></div>
 </div></header><main id="main-content" class="site-main"><h1>واجهة عربية طويلة لا ينبغي أن تتجاوز عرض الشاشة</h1></main></div>
-<script>document.querySelector('.site-menu-button').addEventListener('click', (event) => { const button=event.currentTarget; const open=button.getAttribute('aria-expanded')!=='true'; button.setAttribute('aria-expanded', String(open)); document.querySelector('#site-navigation').dataset.open=String(open); });</script>
+<script>document.querySelector('.site-menu-button').addEventListener('click', (event) => { const button=event.currentTarget; const open=button.getAttribute('aria-expanded')!=='true'; button.setAttribute('aria-expanded', String(open)); document.querySelector('#site-navigation').dataset.open=String(open); document.querySelector('.site-header__controls').dataset.open=String(open); });</script>
 </body></html>`;
 
 function channel(value: number) {
@@ -40,6 +41,21 @@ test("header primary action keeps readable button colors in light and dark theme
     });
     expect(contrast(colors.foreground, colors.background), `${theme} theme`).toBeGreaterThanOrEqual(4.5);
   }
+});
+
+test("desktop navigation remains centered when localized controls change width", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.setContent(fixture);
+  const center = () => page.locator(".site-nav").evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.left + rect.width / 2;
+  });
+  const initial = await center();
+  await page.locator(".site-header__controls .dds-btn--primary").evaluate((element) => {
+    element.textContent = "Demander l’accès à la plateforme";
+  });
+  expect(Math.abs((await center()) - initial)).toBeLessThanOrEqual(0.5);
+  expect(Math.abs(initial - 720)).toBeLessThanOrEqual(0.5);
 });
 
 for (const width of [1280, 375]) {
