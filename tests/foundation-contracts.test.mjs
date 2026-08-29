@@ -15,7 +15,7 @@ test("private foundation packages use the final @devslab-kr names and TypeScript
   for (const [path, name] of Object.entries(expected)) {
     const manifest = await json(path);
     assert.equal(manifest.name, name);
-    assert.equal(manifest.version, "0.2.6");
+    assert.equal(manifest.version, "0.2.7");
     assert.equal(manifest.publishConfig?.registry, "https://npm.pkg.github.com");
     assert.equal(manifest.publishConfig?.access, "restricted");
   }
@@ -50,7 +50,7 @@ test("unpublished DDS packages bootstrap from this workspace", async () => {
     for (const name of names) {
       assert.equal(
         manifest.dependencies?.[name],
-        "workspace:0.2.6",
+        "workspace:0.2.7",
         `${path} must resolve unpublished ${name} from the local release workspace`,
       );
     }

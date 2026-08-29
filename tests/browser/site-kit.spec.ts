@@ -8,10 +8,39 @@ const fixture = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="u
 <div class="site-shell"><header class="site-header"><div class="site-header__inner">
 <a class="site-brand" href="/ar">لينك</a>
 <button type="button" class="dds-btn dds-btn--ghost site-menu-button" aria-expanded="false" aria-controls="site-navigation">فتح القائمة</button>
-<nav id="site-navigation" class="site-nav" data-open="false" aria-label="التنقل الرئيسي"><ul class="site-nav__list"><li><a href="/docs">الوثائق</a></li></ul><label><span class="dds-sr-only">اللغة</span><select class="dds-select__input" aria-label="اللغة"><option>العربية</option></select></label></nav>
+<nav id="site-navigation" class="site-nav" data-open="false" aria-label="التنقل الرئيسي"><ul class="site-nav__list"><li><a href="/docs">الوثائق</a></li></ul><div class="site-header__controls"><label><span class="dds-sr-only">اللغة</span><select class="dds-select__input" aria-label="اللغة"><option>العربية</option></select></label><a class="dds-btn dds-btn--primary" href="/access">طلب الوصول</a></div></nav>
 </div></header><main id="main-content" class="site-main"><h1>واجهة عربية طويلة لا ينبغي أن تتجاوز عرض الشاشة</h1></main></div>
 <script>document.querySelector('.site-menu-button').addEventListener('click', (event) => { const button=event.currentTarget; const open=button.getAttribute('aria-expanded')!=='true'; button.setAttribute('aria-expanded', String(open)); document.querySelector('#site-navigation').dataset.open=String(open); });</script>
 </body></html>`;
+
+function channel(value: number) {
+  const normalized = value / 255;
+  return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+}
+
+function contrast(foreground: string, background: string) {
+  const parse = (color: string) => color.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+  const luminance = (color: string) => {
+    const [red, green, blue] = parse(color);
+    return 0.2126 * channel(red!) + 0.7152 * channel(green!) + 0.0722 * channel(blue!);
+  };
+  const light = Math.max(luminance(foreground), luminance(background));
+  const dark = Math.min(luminance(foreground), luminance(background));
+  return (light + 0.05) / (dark + 0.05);
+}
+
+test("header primary action keeps readable button colors in light and dark themes", async ({ page }) => {
+  await page.setContent(fixture);
+  const action = page.locator('.site-header__controls .dds-btn--primary');
+  for (const theme of ["light", "dark"] as const) {
+    await page.locator("html").evaluate((element, value) => { element.dataset.theme = value; }, theme);
+    const colors = await action.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { foreground: style.color, background: style.backgroundColor };
+    });
+    expect(contrast(colors.foreground, colors.background), `${theme} theme`).toBeGreaterThanOrEqual(4.5);
+  }
+});
 
 for (const width of [1280, 375]) {
   test(`Arabic RTL navigation remains usable without overflow at ${width}px`, async ({ page }) => {
