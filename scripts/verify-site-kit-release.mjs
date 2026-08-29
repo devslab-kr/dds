@@ -43,6 +43,8 @@ try {
     if (packageName === "site-kit") siteKitTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "site-kit");
+  const bundle = await readFile(join(packageRoot, "dist", "solid.js"), "utf8");
+  assert.match(bundle, /from\s+["']@devslab-kr\/dds-solid["']/, "site-kit must externalize dds-solid");
   run(["publish", siteKitTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs], temp);

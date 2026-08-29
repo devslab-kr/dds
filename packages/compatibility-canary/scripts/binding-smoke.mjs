@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { resolve } from "node:path";
 
 import { assertCleanDiagnostics } from "../src/canary-contracts.mjs";
@@ -14,24 +15,42 @@ const startWorker = (config, workerPort) => spawn(
   [wrangler, "dev", "-c", config, "--ip", "127.0.0.1", "--port", String(workerPort)],
   { cwd: process.cwd(), env: process.env, stdio: ["ignore", "pipe", "pipe"] },
 );
-const service = startWorker(serviceConfig, 4182);
-const gateway = startWorker(gatewayConfig, port);
 let diagnostics = "";
-for (const server of [service, gateway]) {
+const servers = [];
+const trackWorker = (server) => {
+  servers.push(server);
   for (const stream of [server.stdout, server.stderr]) {
     stream.on("data", (chunk) => { diagnostics += chunk.toString(); });
   }
-}
-
-try {
-  let response;
+  return server;
+};
+const waitForReady = async (workerOrigin, server, label) => {
   for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (server.exitCode !== null) throw new Error(`${label} exited with ${server.exitCode}\n${diagnostics}`);
     try {
-      response = await fetch(origin);
-      if (response.ok) break;
+      const response = await fetch(workerOrigin);
+      if (response.ok) return response;
+      await response.body?.cancel();
     } catch {}
     await new Promise((resolveWait) => setTimeout(resolveWait, 100));
   }
+  throw new Error(`${label} did not become ready\n${diagnostics}`);
+};
+const stopWorker = async (server) => {
+  if (server.exitCode !== null) return;
+  server.kill();
+  await Promise.race([
+    once(server, "exit"),
+    new Promise((resolveWait) => setTimeout(resolveWait, 5_000)),
+  ]);
+};
+
+try {
+  const service = trackWorker(startWorker(serviceConfig, 4182));
+  const serviceResponse = await waitForReady("http://127.0.0.1:4182", service, "binding service");
+  await serviceResponse.body?.cancel();
+  const gateway = trackWorker(startWorker(gatewayConfig, port));
+  const response = await waitForReady(origin, gateway, "binding gateway");
   assert.equal(response?.status, 200, diagnostics);
   const policy = response.headers.get("content-security-policy");
   const nonce = policy?.match(/'nonce-([^']+)'/)?.[1];
@@ -42,6 +61,5 @@ try {
   assertCleanDiagnostics(diagnostics);
   console.log("Wrangler multi-config service binding and CSP nonce smoke passed");
 } finally {
-  gateway.kill();
-  service.kill();
+  await Promise.all(servers.reverse().map(stopWorker));
 }

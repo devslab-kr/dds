@@ -47,6 +47,10 @@ try {
     if (packageName === "dds-solid") solidTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "dds-solid");
+  for (const bundle of ["dist/index.js", "dist/server.js"]) {
+    const source = await readFile(join(packageRoot, bundle), "utf8");
+    assert.match(source, /from\s+["']@devslab-kr\/dds-icons["']/, `${bundle} must externalize dds-icons`);
+  }
   run(["publish", solidTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
