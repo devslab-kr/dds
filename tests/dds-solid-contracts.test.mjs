@@ -18,6 +18,10 @@ test("dds-solid is a restricted exact-version package with stable exports", asyn
   assert.equal(manifest.exports["."].browser, "./dist/index.js");
   assert.equal(manifest.exports["."].worker, "./dist/server.js");
   assert.equal(manifest.exports["."].node, "./dist/server.js");
+  assert.ok(
+    Object.keys(manifest.exports["."]).indexOf("worker") < Object.keys(manifest.exports["."]).indexOf("browser"),
+    "Worker SSR must win when a resolver activates both worker and browser conditions",
+  );
 
   const entry = await read("packages/dds-solid/src/index.ts");
   for (const symbol of [
