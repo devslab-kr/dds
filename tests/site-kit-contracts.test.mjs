@@ -11,6 +11,11 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
   assert.equal(manifest.publishConfig.access, "restricted");
   for (const path of [".", "./solid", "./tanstack-start", "./styles.css"]) assert.ok(manifest.exports[path]);
   assert.equal(manifest.exports["./solid"].types, "./dist/index.d.ts");
+  assert.equal(manifest.exports["./solid"].browser, "./dist/solid.js");
+  assert.equal(manifest.exports["./solid"].worker, "./dist/solid.server.js");
+  assert.equal(manifest.exports["./solid"].node, "./dist/solid.server.js");
+  assert.match(manifest.scripts.build, /vite build --config vite\.server\.config\.ts/);
+  assert.match(await read("packages/site-kit/vite.server.config.ts"), /solid\.server\.js/);
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies["@types/node"], "26.3.0");
