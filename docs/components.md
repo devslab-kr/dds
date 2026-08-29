@@ -1,10 +1,10 @@
-# DDS Components — v1 inventory (`@devslab-kr/dds-css`)
+# DDS Components — v1 inventory (`@devslab/dds-css`)
 
 🌐 [한국어](components.ko.md)
 
 Class-based, framework-neutral CSS components. Everything references semantic
 tokens only (`var(--dds-*)`) — load
-`@devslab-kr/dds-tokens/tokens.css` first, then `@devslab-kr/dds-css/dds.css`
+`@devslab/dds-tokens/tokens.css` first, then `@devslab/dds-css/dds.css`
 (or per-component files from `components/`). Dark mode needs no component
 change: set `data-theme="dark"` on `<html>` or any subtree
 (`data-theme="light"` pins a subtree back).

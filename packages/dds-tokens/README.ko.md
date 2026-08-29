@@ -1,4 +1,4 @@
-# @devslab-kr/dds-tokens
+# @devslab/dds-tokens
 
 🌐 [English](README.md)
 
@@ -7,11 +7,11 @@
 
 | 산출물 | 임포트 | 소비자 |
 | --- | --- | --- |
-| `dist/tokens.css` | `@devslab-kr/dds-tokens/tokens.css` | 모든 웹 표면. `--dds-*` 커스텀 프로퍼티 — 라이트는 `:root`, 다크는 `[data-theme="dark"]` |
-| `dist/tailwind/theme.css` | `@devslab-kr/dds-tokens/tailwind/theme.css` | Tailwind v4 (`@theme`) |
-| `dist/tailwind/preset.js` / `.cjs` | `@devslab-kr/dds-tokens/tailwind/preset` | Tailwind v3 (`presets: [...]`) |
-| `dist/tokens.ts` (+ `tokens.js` / `tokens.d.ts`) | `@devslab-kr/dds-tokens` | RN·런타임 코드 — 단위 없는 숫자 (웹 px, RN pt) |
-| `dist/ionic.css` | `@devslab-kr/dds-tokens/ionic.css` | Ionic 앱 — `--ion-*`를 `--dds-*`에 매핑: 브랜드색(`primary` + `-rgb`/`-shade`/`-tint`/`-contrast`), 상태색 3종 + 각 `-contrast`, 페이지 배경·텍스트·보더, 폰트, 앱 크롬(`item`·`toolbar`·`tab-bar`·`card`) |
+| `dist/tokens.css` | `@devslab/dds-tokens/tokens.css` | 모든 웹 표면. `--dds-*` 커스텀 프로퍼티 — 라이트는 `:root`, 다크는 `[data-theme="dark"]` |
+| `dist/tailwind/theme.css` | `@devslab/dds-tokens/tailwind/theme.css` | Tailwind v4 (`@theme`) |
+| `dist/tailwind/preset.js` / `.cjs` | `@devslab/dds-tokens/tailwind/preset` | Tailwind v3 (`presets: [...]`) |
+| `dist/tokens.ts` (+ `tokens.js` / `tokens.d.ts`) | `@devslab/dds-tokens` | RN·런타임 코드 — 단위 없는 숫자 (웹 px, RN pt) |
+| `dist/ionic.css` | `@devslab/dds-tokens/ionic.css` | Ionic 앱 — `--ion-*`를 `--dds-*`에 매핑: 브랜드색(`primary` + `-rgb`/`-shade`/`-tint`/`-contrast`), 상태색 3종 + 각 `-contrast`, 페이지 배경·텍스트·보더, 폰트, 앱 크롬(`item`·`toolbar`·`tab-bar`·`card`) |
 
 ## 사용 노트
 
