@@ -28,6 +28,7 @@ test("public chrome requires injected copy and keeps forms native", async () => 
   const form = await read("packages/site-kit/src/solid/request-access.tsx");
   assert.match(chrome, /messages:\s*SiteMessages/);
   assert.match(layouts, /messages:\s*SiteMessages/);
+  assert.match(layouts, /id="main-content"[^>]*tabIndex=\{-1\}/, "skip target must accept programmatic focus");
   assert.match(form, /<form/);
   assert.match(form, /type="email"/);
   assert.match(form, /aria-live/);
@@ -53,6 +54,7 @@ test("shared styles use logical properties and include RTL/mobile policies", asy
   assert.match(styles, /border-inline-start/);
   assert.match(styles, /@media \(max-width:/);
   assert.doesNotMatch(styles, /\b(?:margin|padding|border)-(?:left|right)\b/);
+  assert.match(styles, /\.dds-sr-only:focus/);
   const worker = await read("packages/site-kit/fixtures/worker/src/index.mjs");
   assert.match(worker, /environment: "preview"/);
 });

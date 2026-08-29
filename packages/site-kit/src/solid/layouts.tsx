@@ -12,7 +12,7 @@ export interface MarketingShellProps {
 }
 
 export function MarketingShell(props: MarketingShellProps) {
-  return <div class="site-shell"><SiteHeader {...props.header} /><main id="main-content" class="site-main">{props.children}</main><SiteFooter {...props.footer} /></div>;
+  return <div class="site-shell"><SiteHeader {...props.header} /><main id="main-content" class="site-main" tabIndex={-1}>{props.children}</main><SiteFooter {...props.footer} /></div>;
 }
 
 export interface LegalLayoutProps {
