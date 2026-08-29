@@ -1,0 +1,40 @@
+name: Release restricted packages
+
+on:
+  push:
+    tags:
+      - "dds-v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run verify
+      - run: pnpm run verify:canary:dependencies
+      - run: pnpm run verify:canary:test
+      - run: pnpm run verify:canary:build
+      - run: pnpm run verify:canary:preview
+      - run: pnpm run verify:foundation
+      - run: pnpm run verify:release
+      - run: pnpm run verify:solid:test
+      - run: pnpm run verify:solid:a11y
+      - run: pnpm run verify:solid:release
+      - run: pnpm run verify:site-kit:ui
+      - run: pnpm run verify:site-kit:browser
+      - run: pnpm run verify:site-kit:release
+      - run: pnpm release
+        env:
+          NPM_CONFIG_PROVENANCE: "true"

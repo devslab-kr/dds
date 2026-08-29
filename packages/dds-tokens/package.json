@@ -11,7 +11,8 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
-    "access": "restricted"
+    "access": "restricted",
+    "provenance": true
   },
   "files": [
     "dist"

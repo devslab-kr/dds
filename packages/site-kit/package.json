@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "sideEffects": ["./styles.css"],
   "repository": { "type": "git", "url": "https://github.com/devslab-kr/dds.git", "directory": "packages/site-kit" },
-  "publishConfig": { "registry": "https://registry.npmjs.org/", "access": "restricted" },
+  "publishConfig": { "registry": "https://registry.npmjs.org/", "access": "restricted", "provenance": true },
   "files": ["dist", "src/core", "src/tanstack-start.mjs", "src/tanstack-start.d.ts", "styles.css", "README.md", "README.ko.md"],
   "main": "./src/core/index.mjs",
   "types": "./src/core/index.d.ts",
