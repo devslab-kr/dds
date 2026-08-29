@@ -10,3 +10,9 @@ DevsLab 제품의 공개 웹사이트를 위한 restricted internal 인프라 �
 - `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일
 
 카탈로그 생성은 의도적으로 엄격하다. 14개 로케일 모두 동일한 키와 이름 기반 placeholder를 가져야 하며 런타임 문구 폴백은 없다.
+
+사이트맵은 14개 로케일 alternate와 `x-default`를 출력한다.
+`buildVerifiedJsonLd`는 검토된 schema type과 claim allowlist만 허용하고 모든
+claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. `buildRobots`의
+기존 environment-only 출력은 유지되며, 선택적 `policies`로 검색 인덱싱,
+인용 crawler, 모델 학습 crawler를 각각 제어할 수 있다.

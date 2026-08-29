@@ -9,7 +9,11 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
     if (url.pathname === "/robots.txt") {
-      return new Response(buildRobots({ baseUrl: url.origin, environment: "preview" }), {
+      return new Response(buildRobots({
+        baseUrl: url.origin,
+        environment: "preview",
+        policies: { search: "disallow", citation: "disallow", modelTraining: "disallow" },
+      }), {
         headers: { "content-type": "text/plain; charset=utf-8" },
       });
     }

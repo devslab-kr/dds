@@ -15,6 +15,7 @@ jobs:
         with:
           node-version: 22
       - run: pnpm run verify:source:stage1-2
+      - run: pnpm run verify:source:stage3-4
 
   verify:
     needs: source-contracts
@@ -27,12 +28,21 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run verify:canary:dependencies
       - run: pnpm run verify:canary:test
       - run: pnpm run verify:canary:build
       - run: pnpm run verify:canary:preview
       - run: pnpm run verify:foundation
       - run: pnpm run verify:release
+      - run: pnpm run verify:solid:test
+      - run: pnpm run verify:solid:a11y
+      - run: pnpm run verify:solid:release
+      - run: pnpm run verify:site-kit:i18n
+      - run: pnpm run verify:site-kit:ui
+      - run: pnpm run verify:site-kit:seo
+      - run: pnpm run verify:site-kit:browser
+      - run: pnpm run verify:site-kit:release
       # build all packages, then validate token JSON + docs/preview sync
       - run: pnpm run verify
       # stories must keep building against the current CSS/tokens

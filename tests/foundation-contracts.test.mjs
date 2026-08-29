@@ -42,6 +42,9 @@ test("CI keeps source-only gates separate and runs dependency-backed Stage 1-2 g
   assert.doesNotMatch(root.scripts["verify:source:stage1-2"], /token-build|\bdist\b/, "source-only gate cannot require ignored build artifacts");
   assert.match(workflow, /source-contracts:/);
   assert.match(workflow, /pnpm run verify:source:stage1-2/);
+  assert.match(workflow, /playwright install --with-deps chromium/);
+  const foundationConfig = await read("playwright.foundation.config.ts");
+  assert.doesNotMatch(foundationConfig, /channel:\s*["']chrome["']/);
   for (const gate of [
     "verify:canary:dependencies",
     "verify:canary:test",

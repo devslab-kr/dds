@@ -10,3 +10,9 @@ Restricted internal public-site infrastructure for DevsLab products. It provides
 - `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles.
 
 Catalog construction is intentionally strict: all 14 locales must have exactly the same keys and named placeholders. There is no runtime copy fallback.
+
+Sitemaps emit 14 locale alternates plus `x-default`. `buildVerifiedJsonLd`
+accepts only the reviewed schema-type and claim allowlists, and every claim leaf
+still references the verified-fact registry. `buildRobots` keeps its legacy
+environment-only output, while an optional `policies` object can independently
+control search indexing, citation crawlers, and model-training crawlers.

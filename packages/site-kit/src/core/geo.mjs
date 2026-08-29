@@ -1,4 +1,13 @@
 const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+const schemaClaims = new Map([
+  ["Organization", new Set(["description", "sameAs", "contactPoint", "areaServed"])],
+  ["WebSite", new Set(["description", "inLanguage", "publisher"])],
+  ["SoftwareApplication", new Set(["description", "applicationCategory", "operatingSystem", "featureList", "offers"])],
+  ["Product", new Set(["description", "category", "brand", "offers"])],
+  ["BreadcrumbList", new Set(["itemListElement"])],
+  ["FAQPage", new Set(["mainEntity"])],
+  ["TechArticle", new Set(["headline", "description", "datePublished", "dateModified", "author", "about"])],
+]);
 
 export class VerifiedFactRegistry {
   #facts = new Map();
@@ -36,6 +45,11 @@ function resolveClaim(value, registry) {
 export function buildVerifiedJsonLd({ type, id, identity, claims = {} }, registry) {
   if (!(registry instanceof VerifiedFactRegistry)) throw new TypeError("A VerifiedFactRegistry is required");
   if (!type || !id || !identity?.name || !identity?.url) throw new TypeError("Schema type, id, identity.name, and identity.url are required");
+  const allowedClaims = schemaClaims.get(type);
+  if (!allowedClaims) throw new TypeError(`Unsupported schema type: ${type}`);
+  for (const claim of Object.keys(claims)) {
+    if (!allowedClaims.has(claim)) throw new TypeError(`Unsupported claim ${claim} for schema type ${type}`);
+  }
   return {
     "@context": "https://schema.org",
     "@type": type,

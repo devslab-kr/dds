@@ -48,7 +48,10 @@ export function buildSitemap({ baseUrl, routes, defaultLocale, lastModified }) {
   return routes.flatMap((path) => LOCALES.map(({ code }) => ({
     loc: localizedUrl(baseUrl, path, code, defaultLocale),
     locale: code,
-    alternates: LOCALES.map(({ code: alternate }) => ({ hreflang: alternate, href: localizedUrl(baseUrl, path, alternate, defaultLocale) })),
+    alternates: [
+      ...LOCALES.map(({ code: alternate }) => ({ hreflang: alternate, href: localizedUrl(baseUrl, path, alternate, defaultLocale) })),
+      { hreflang: "x-default", href: localizedUrl(baseUrl, path, defaultLocale, defaultLocale) },
+    ],
     ...(lastModified ? { lastmod: lastModified } : {}),
   })));
 }
@@ -59,7 +62,27 @@ export function renderSitemapXml(entries) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`;
 }
 
-export function buildRobots({ baseUrl, environment }) {
+export const ROBOTS_USER_AGENTS = Object.freeze({
+  citation: Object.freeze(["OAI-SearchBot", "PerplexityBot"]),
+  modelTraining: Object.freeze(["GPTBot", "Google-Extended", "ClaudeBot"]),
+});
+
+const robotsDirective = (policy) => {
+  if (policy === "allow") return "Allow: /";
+  if (policy === "disallow") return "Disallow: /";
+  throw new RangeError(`Unsupported robots policy: ${policy}`);
+};
+
+export function buildRobots({ baseUrl, environment, policies }) {
+  if (policies) {
+    const groups = [
+      `User-agent: *\n${robotsDirective(policies.search)}`,
+      `${ROBOTS_USER_AGENTS.citation.map((agent) => `User-agent: ${agent}`).join("\n")}\n${robotsDirective(policies.citation)}`,
+      `${ROBOTS_USER_AGENTS.modelTraining.map((agent) => `User-agent: ${agent}`).join("\n")}\n${robotsDirective(policies.modelTraining)}`,
+    ];
+    if (environment === "production") groups.push(`Sitemap: ${cleanBase(baseUrl)}/sitemap.xml`);
+    return `${groups.join("\n\n")}\n`;
+  }
   if (environment !== "production") return "User-agent: *\nDisallow: /\n";
   return `User-agent: *\nAllow: /\nSitemap: ${cleanBase(baseUrl)}/sitemap.xml\n`;
 }

@@ -7,7 +7,9 @@
     "build": "pnpm run generate:routes && node scripts/run-clean.mjs vite build && node scripts/scan-build.mjs",
     "generate:routes": "node scripts/generate-route-tree.mjs",
     "preview": "vite preview",
-    "preview:smoke": "node scripts/preview-smoke.mjs",
+    "preview:framework:smoke": "node scripts/preview-smoke.mjs",
+    "binding:smoke": "node scripts/binding-smoke.mjs",
+    "preview:smoke": "pnpm run preview:framework:smoke && pnpm run binding:smoke",
     "test": "node --test tests/contracts.test.mjs tests/application-contracts.test.mjs",
     "typecheck": "pnpm run generate:routes && node scripts/run-clean.mjs tsc --noEmit",
     "verify:dependencies": "node scripts/verify-install.mjs && node scripts/verify-dependencies.mjs"

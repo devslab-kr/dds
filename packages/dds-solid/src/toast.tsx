@@ -1,5 +1,6 @@
 import {
   For,
+  Show,
   createContext,
   createSignal,
   onCleanup,
@@ -23,6 +24,8 @@ const ToastContext = createContext<ToastApi>();
 export interface ToastProviderProps {
   children: JSX.Element;
   defaultDuration?: number;
+  /** Localized accessible name for the optional manual dismiss control. */
+  dismissLabel?: string | ((toast: ToastRecord) => string);
   class?: string;
 }
 
@@ -59,7 +62,14 @@ export function ToastProvider(props: ToastProviderProps) {
         <For each={toasts()}>{(toast) => (
           <div class={classes("dds-toast", `dds-toast--${toast.tone ?? "info"}`)} role={toast.tone === "danger" ? "alert" : "status"}>
             <span>{toast.message}</span>
-            <button type="button" class="dds-iconbtn dds-iconbtn--sm" aria-label="Dismiss notification" onClick={() => dismiss(toast.id)}>×</button>
+            <Show when={props.dismissLabel}>{() => (
+              <button
+                type="button"
+                class="dds-iconbtn dds-iconbtn--sm"
+                aria-label={typeof props.dismissLabel === "function" ? props.dismissLabel(toast) : props.dismissLabel}
+                onClick={() => dismiss(toast.id)}
+              >×</button>
+            )}</Show>
           </div>
         )}</For>
       </div>

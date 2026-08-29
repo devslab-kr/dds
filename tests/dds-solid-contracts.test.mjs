@@ -72,3 +72,29 @@ test("Icon and style adapters consume DDS framework-neutral contracts", async ()
   assert.match(styles, /@devslab\/dds-tokens\/tokens\.css/);
   assert.match(styles, /@devslab\/dds-css\/dds\.css/);
 });
+
+test("runtime suites cover every primitive, both state modes, focus lifecycle, a11y, and hydration", async () => {
+  const [primitives, a11y, ssr, release] = await Promise.all([
+    read("packages/dds-solid/src/__tests__/primitives.test.tsx"),
+    read("packages/dds-solid/src/__tests__/a11y.test.tsx"),
+    read("packages/dds-solid/src/__tests__/ssr.test.tsx"),
+    read("scripts/verify-solid-release.mjs"),
+  ]);
+  for (const symbol of ["IconButton", "Field", "Select", "Radio", "Switch", "Tooltip", "ToastProvider", "Icon"]) {
+    assert.match(primitives, new RegExp(`\\b${symbol}\\b`), `${symbol} needs runtime coverage`);
+  }
+  assert.match(primitives, /controlled and uncontrolled/i);
+  assert.match(primitives, /focus trap cycle/i);
+  assert.match(primitives, /timer lifecycle/i);
+  for (const symbol of ["Dialog", "Tabs", "Tooltip", "ToastProvider", "Radio", "IconButton"]) assert.match(a11y, new RegExp(`\\b${symbol}\\b`));
+  for (const symbol of ["Dialog", "Tabs", "Tooltip", "ToastProvider", "Checkbox", "Radio", "Switch", "Select", "Field", "IconButton"]) assert.match(ssr, new RegExp(`\\b${symbol}\\b`));
+  assert.match(release, /renderToString/);
+  assert.match(release, /hydrate/);
+  assert.match(release, /@devslab\/dds-solid/);
+});
+
+test("Toast dismiss control has an injected localized accessible name without an English fallback", async () => {
+  const toast = await read("packages/dds-solid/src/toast.tsx");
+  assert.match(toast, /dismissLabel/);
+  assert.doesNotMatch(toast, /Dismiss notification/);
+});

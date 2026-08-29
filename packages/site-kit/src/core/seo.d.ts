@@ -10,6 +10,8 @@ export interface SiteMetadata {
 export declare function localizedPath(path: string, locale: SiteLocale, defaultLocale: SiteLocale): string;
 export declare function localizedUrl(baseUrl: string, path: string, locale: SiteLocale, defaultLocale: SiteLocale): string;
 export declare function buildMetadata(input: MetadataInput): SiteMetadata;
-export declare function buildSitemap(input: { baseUrl: string; routes: string[]; defaultLocale: SiteLocale; lastModified?: string }): Array<{ loc: string; locale: SiteLocale; alternates: Array<{ hreflang: SiteLocale; href: string }>; lastmod?: string }>;
+export declare function buildSitemap(input: { baseUrl: string; routes: string[]; defaultLocale: SiteLocale; lastModified?: string }): Array<{ loc: string; locale: SiteLocale; alternates: Array<{ hreflang: SiteLocale | "x-default"; href: string }>; lastmod?: string }>;
 export declare function renderSitemapXml(entries: ReturnType<typeof buildSitemap>): string;
-export declare function buildRobots(input: { baseUrl: string; environment: "production" | "preview" | "development" }): string;
+export type RobotsPolicy = "allow" | "disallow";
+export declare const ROBOTS_USER_AGENTS: { readonly citation: readonly string[]; readonly modelTraining: readonly string[] };
+export declare function buildRobots(input: { baseUrl: string; environment: "production" | "preview" | "development"; policies?: { search: RobotsPolicy; citation: RobotsPolicy; modelTraining: RobotsPolicy } }): string;

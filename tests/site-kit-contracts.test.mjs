@@ -58,3 +58,29 @@ test("shared styles use logical properties and include RTL/mobile policies", asy
   const worker = await read("packages/site-kit/fixtures/worker/src/index.mjs");
   assert.match(worker, /environment: "preview"/);
 });
+
+test("Worker and browser fixtures consume adapters and prove hydration plus Arabic RTL", async () => {
+  const [worker, browser, ssr, workflow, root] = await Promise.all([
+    read("packages/site-kit/fixtures/worker/src/index.tsx"),
+    read("tests/browser/site-kit.spec.ts"),
+    read("packages/site-kit/src/solid/__tests__/ssr.test.tsx"),
+    read(".github/workflows/ci.yml"),
+    json("package.json"),
+  ]);
+  assert.match(worker, /@devslab\/site-kit\/solid/);
+  assert.match(worker, /toTanStackHead/);
+  assert.match(worker, /renderToString/);
+  assert.match(worker, /data-site-hydration/);
+  assert.doesNotMatch(worker, /escapeHtml\(JSON\.stringify/, "hydration JSON must remain parseable script data");
+  assert.match(ssr, /hydrate/);
+  assert.match(browser, /375/);
+  assert.match(browser, /1280/);
+  assert.match(browser, /dir="rtl"/);
+  assert.match(browser, /scrollWidth/);
+  assert.match(browser, /toBeFocused/);
+  assert.match(browser, /aria-expanded/);
+  assert.equal(typeof root.scripts?.["verify:site-kit:browser"], "string");
+  for (const gate of ["verify:source:stage3-4", "verify:solid:test", "verify:solid:a11y", "verify:solid:release", "verify:site-kit:ui", "verify:site-kit:browser", "verify:site-kit:release"]) {
+    assert.match(workflow, new RegExp(gate.replaceAll(":", "\\:")), `${gate} must gate CI`);
+  }
+});

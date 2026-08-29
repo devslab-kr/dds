@@ -65,6 +65,23 @@ test("actual verification entry points generate routes, inspect install output, 
   assert.match(sentinels, /DDS_CANARY_SECRET_SENTINEL/);
 });
 
+test("preview gate runs framework hydration and Wrangler multi-config binding smokes", async () => {
+  const [manifestText, frameworkSmoke, bindingSmoke] = await Promise.all([
+    source("package.json"),
+    source("scripts/preview-smoke.mjs"),
+    source("scripts/binding-smoke.mjs"),
+  ]);
+  const scripts = JSON.parse(manifestText).scripts;
+  assert.match(scripts["preview:smoke"], /preview:framework:smoke/);
+  assert.match(scripts["preview:smoke"], /binding:smoke/);
+  assert.doesNotMatch(frameworkSmoke, /channel:\s*["']chrome["']/);
+  assert.match(bindingSmoke, /wrangler/);
+  assert.match(bindingSmoke, /binding-gateway\/wrangler\.jsonc/);
+  assert.match(bindingSmoke, /binding-service\/wrangler\.jsonc/);
+  assert.match(bindingSmoke, /content-security-policy/);
+  assert.match(bindingSmoke, /data-service-message/);
+});
+
 test("Wrangler fixture binds the canary to a sibling Worker service", async () => {
   const [gatewayConfig, gatewaySource, siblingConfig, siblingSource, readme] = await Promise.all([
     source("fixtures/binding-gateway/wrangler.jsonc"),

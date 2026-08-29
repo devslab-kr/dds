@@ -33,7 +33,7 @@ try {
   assert.match(initialHtml, /service-binding-ok/);
   assertNoLikelySecrets(initialHtml, "SSR response", CANARY_SECRET_SENTINELS);
 
-  const browser = await chromium.launch({ channel: "chrome", headless: true });
+  const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
     page.on("console", (message) => {
@@ -51,7 +51,7 @@ try {
   } finally {
     await browser.close();
   }
-  console.log("workerd preview SSR, hydration, binding, asset, and 404 smoke passed");
+  console.log("framework Vite preview SSR, hydration, asset, and 404 smoke passed");
 } finally {
   server.kill();
 }

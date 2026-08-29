@@ -77,9 +77,22 @@ test("metadata emits localized canonical, all hreflang entries, and x-default", 
 test("sitemap and robots distinguish public production from preview", () => {
   const sitemap = buildSitemap({ baseUrl: "https://example.com", routes: ["/", "/pricing"], defaultLocale: "ko" });
   assert.equal(sitemap.length, 28);
+  assert.equal(sitemap[0].alternates.length, 15);
+  assert.equal(sitemap[0].alternates.at(-1).hreflang, "x-default");
   assert.match(sitemap[0].loc, /^https:\/\/example\.com/);
   assert.match(buildRobots({ baseUrl: "https://example.com", environment: "production" }), /Sitemap: https:\/\/example\.com\/sitemap\.xml/);
   assert.match(buildRobots({ baseUrl: "https://preview.example.com", environment: "preview" }), /Disallow: \//);
+});
+
+test("robots can separate search, citation, and model-training policy", () => {
+  const robots = buildRobots({
+    baseUrl: "https://example.com",
+    environment: "production",
+    policies: { search: "allow", citation: "allow", modelTraining: "disallow" },
+  });
+  assert.match(robots, /User-agent: \*/);
+  assert.match(robots, /User-agent: OAI-SearchBot[\s\S]*Allow: \//);
+  assert.match(robots, /User-agent: GPTBot[\s\S]*Disallow: \//);
 });
 
 test("GEO output accepts only sourced, current facts", () => {
@@ -95,5 +108,8 @@ test("GEO output accepts only sourced, current facts", () => {
   assert.equal(schema.featureList, "14 locales");
   assert.equal(schema["@context"], "https://schema.org");
   assert.match(renderLlmsTxt({ title: "Example", summary: "Product", canonicalUrl: "https://example.com", facts: registry }), /14 locales/);
-  assert.throws(() => buildVerifiedJsonLd({ type: "Thing", id: "x", identity: { name: "x", url: "https://example.com" }, claims: { claim: { factId: "missing" } } }, registry), /unverified fact/i);
+  assert.throws(() => buildVerifiedJsonLd({ type: "SoftwareApplication", id: "x", identity: { name: "x", url: "https://example.com" }, claims: { description: { factId: "missing" } } }, registry), /unverified fact/i);
+  assert.throws(() => buildVerifiedJsonLd({ type: "Thing", id: "x", identity: { name: "x", url: "https://example.com" }, claims: {} }, registry), /unsupported schema type/i);
+  assert.throws(() => buildVerifiedJsonLd({ type: "toString", id: "x", identity: { name: "x", url: "https://example.com" }, claims: {} }, registry), /unsupported schema type/i);
+  assert.throws(() => buildVerifiedJsonLd({ type: "SoftwareApplication", id: "x", identity: { name: "x", url: "https://example.com" }, claims: { aggregateRating: { factId: "coverage" } } }, registry), /unsupported claim/i);
 });

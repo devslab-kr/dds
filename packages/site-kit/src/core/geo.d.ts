@@ -5,5 +5,6 @@ export declare class VerifiedFactRegistry {
   all(): Array<Readonly<VerifiedFact>>;
 }
 export type FactClaim = { factId: string } | FactClaim[] | { [key: string]: FactClaim };
-export declare function buildVerifiedJsonLd(input: { type: string; id: string; identity: { name: string; url: string; logo?: string }; claims?: Record<string, FactClaim> }, registry: VerifiedFactRegistry): Record<string, unknown>;
+export type VerifiedSchemaType = "Organization" | "WebSite" | "SoftwareApplication" | "Product" | "BreadcrumbList" | "FAQPage" | "TechArticle";
+export declare function buildVerifiedJsonLd(input: { type: VerifiedSchemaType; id: string; identity: { name: string; url: string; logo?: string }; claims?: Record<string, FactClaim> }, registry: VerifiedFactRegistry): Record<string, unknown>;
 export declare function renderLlmsTxt(input: { title: string; summary: string; canonicalUrl: string; facts: VerifiedFactRegistry }): string;

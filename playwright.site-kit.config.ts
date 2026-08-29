@@ -1,10 +1,11 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/browser",
+  testMatch: "site-kit.spec.ts",
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,
   reporter: "line",
-  use: { ...devices["Pixel 7"], headless: true },
+  use: { headless: true },
 });
