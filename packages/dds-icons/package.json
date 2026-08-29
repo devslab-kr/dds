@@ -1,6 +1,6 @@
 {
-  "name": "@devslab/dds-icons",
-  "version": "0.2.3",
+  "name": "@devslab-kr/dds-icons",
+  "version": "0.2.4",
   "description": "DDS icon set — one SVG source (24 grid, currentColor), shipped as files, a sprite and a path-data map",
   "type": "module",
   "license": "UNLICENSED",
@@ -10,7 +10,7 @@
     "directory": "packages/dds-icons"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
+    "registry": "https://npm.pkg.github.com",
     "access": "restricted",
     "provenance": false
   },

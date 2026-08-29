@@ -50,9 +50,9 @@ try {
   run(["publish", solidTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
-  const installedRoot = join(temp, "node_modules", "@devslab", "dds-solid");
+  const installedRoot = join(temp, "node_modules", "@devslab-kr", "dds-solid");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
-  assert.equal(manifest.name, "@devslab/dds-solid");
+  assert.equal(manifest.name, "@devslab-kr/dds-solid");
   for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts", "styles.css"]) {
     await access(join(installedRoot, path));
   }
@@ -61,7 +61,7 @@ try {
   await writeFile(ssrScript, `
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
-import { Button, Icon } from "@devslab/dds-solid";
+import { Button, Icon } from "@devslab-kr/dds-solid";
 const html = renderToString(() => createComponent(Button, { get children() { return ["Fresh consumer ", createComponent(Icon, { name: "check", label: "Complete" })]; } }));
 if (!html.includes("Fresh consumer") || !html.includes("aria-label=\\"Complete\\"")) throw new Error("fresh consumer SSR failed");
 process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html }));
@@ -79,7 +79,7 @@ Object.defineProperty(globalThis, "_$HY", { value: dom.window._$HY, configurable
 const host = document.querySelector("#root");
 const { hydrate } = await import("solid-js/web");
 const { createComponent } = await import("solid-js");
-const { Button, Icon } = await import("@devslab/dds-solid");
+const { Button, Icon } = await import("@devslab-kr/dds-solid");
 const diagnostics = [];
 const warn = console.warn; const error = console.error;
 console.warn = (...values) => diagnostics.push(values.join(" "));

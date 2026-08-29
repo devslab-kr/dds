@@ -46,9 +46,9 @@ try {
   run(["publish", siteKitTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs], temp);
-  const installedRoot = join(temp, "node_modules", "@devslab", "site-kit");
+  const installedRoot = join(temp, "node_modules", "@devslab-kr", "site-kit");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
-  assert.equal(manifest.name, "@devslab/site-kit");
+  assert.equal(manifest.name, "@devslab-kr/site-kit");
   for (const path of ["dist/solid.js", "dist/index.d.ts", "src/core/index.mjs", "src/core/index.d.mts", "src/tanstack-start.mjs", "src/tanstack-start.d.mts", "styles.css"]) {
     await access(join(installedRoot, path));
   }

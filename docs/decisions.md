@@ -5,9 +5,26 @@
 
 ---
 
+## D-014 — JavaScript 패키지 스코프는 공개 여부로 구분 (2026-08-29)
+
+**결정.** npmjs에 공개하는 JavaScript 패키지는 `@devslab/*`, 사내에서만
+사용하는 restricted 패키지는 GitHub Packages의 `@devslab-kr/*`를 사용한다.
+DDS의 다섯 패키지와 Site Kit은 내부 공통 인프라이므로 `@devslab-kr/*`이며,
+최초 발행 뒤 GitHub 패키지 가시성을 Private에서 Internal로 변경한다.
+
+**인증.** 릴리스는 저장소가 자동 발급하는 `GITHUB_TOKEN`과
+`packages: write`를 사용한다. 소비 서비스 CI와 개발자 PAT에는
+`read:packages`만 부여한다. npmjs용 `NPM_TOKEN`은 공개 `@devslab/*`
+릴리스에만 사용하며 이 저장소의 내부 패키지 릴리스에는 사용하지 않는다.
+
+**근거.** 공개 SDK와 내부 UI 인프라의 배포·권한 경계를 패키지 이름만으로
+식별할 수 있고, 내부 패키지를 npmjs 공개 릴리스와 혼동하지 않게 한다.
+
+**재검토 시점.** DDS 또는 Site Kit을 외부 개발자에게 지원 대상으로 공개할 때.
+
 ## D-013 — dds-icons: 세트는 둘, 컴포넌트는 아직 없음 (2026-08-15)
 
-**결정.** `@devslab/dds-icons` 를 만들면서 세 가지를 정한다.
+**결정.** `@devslab-kr/dds-icons` 를 만들면서 세 가지를 정한다.
 
 1. **스트로크는 1.6(코어) / 1.8(site)** — 스펙 §3.7 의 "1.5px" 는 에셋이
    존재하기 전에 쓴 숫자다. 실제로 그려진 세트는 1.6 이고, AskLinq 위젯이

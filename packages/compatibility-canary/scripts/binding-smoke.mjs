@@ -9,13 +9,19 @@ const origin = `http://127.0.0.1:${port}`;
 const gatewayConfig = resolve("fixtures/binding-gateway/wrangler.jsonc");
 const serviceConfig = resolve("fixtures/binding-service/wrangler.jsonc");
 const wrangler = resolve("node_modules/wrangler/bin/wrangler.js");
-const server = spawn(process.execPath, [wrangler, "dev", "-c", gatewayConfig, "-c", serviceConfig, "--ip", "127.0.0.1", "--port", String(port)], {
-  cwd: process.cwd(),
-  env: process.env,
-  stdio: ["ignore", "pipe", "pipe"],
-});
+const startWorker = (config, workerPort) => spawn(
+  process.execPath,
+  [wrangler, "dev", "-c", config, "--ip", "127.0.0.1", "--port", String(workerPort)],
+  { cwd: process.cwd(), env: process.env, stdio: ["ignore", "pipe", "pipe"] },
+);
+const service = startWorker(serviceConfig, 4182);
+const gateway = startWorker(gatewayConfig, port);
 let diagnostics = "";
-for (const stream of [server.stdout, server.stderr]) stream.on("data", (chunk) => { diagnostics += chunk.toString(); });
+for (const server of [service, gateway]) {
+  for (const stream of [server.stdout, server.stderr]) {
+    stream.on("data", (chunk) => { diagnostics += chunk.toString(); });
+  }
+}
 
 try {
   let response;
@@ -26,7 +32,7 @@ try {
     } catch {}
     await new Promise((resolveWait) => setTimeout(resolveWait, 100));
   }
-  assert.equal(response?.status, 200);
+  assert.equal(response?.status, 200, diagnostics);
   const policy = response.headers.get("content-security-policy");
   const nonce = policy?.match(/'nonce-([^']+)'/)?.[1];
   assert.ok(nonce, "binding gateway CSP nonce is missing");
@@ -36,5 +42,6 @@ try {
   assertCleanDiagnostics(diagnostics);
   console.log("Wrangler multi-config service binding and CSP nonce smoke passed");
 } finally {
-  server.kill();
+  gateway.kill();
+  service.kill();
 }
