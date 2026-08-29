@@ -10,8 +10,8 @@
 .site-brand { color: var(--dds-color-text-primary); font-weight: 700; text-decoration: none; }
 .site-nav { display: flex; align-items: center; gap: var(--dds-space-16); margin-inline-start: auto; }
 .site-nav__list, .site-footer__links { display: flex; flex-wrap: wrap; gap: var(--dds-space-16); padding: 0; margin: 0; list-style: none; }
-.site-nav a, .site-footer a { color: var(--dds-color-text-secondary); text-decoration: none; }
-.site-nav a:hover, .site-footer a:hover { color: var(--dds-color-text-primary); text-decoration: underline; }
+.site-nav__list a, .site-footer__links a { color: var(--dds-color-text-secondary); text-decoration: none; }
+.site-nav__list a:hover, .site-footer__links a:hover { color: var(--dds-color-text-primary); text-decoration: underline; }
 .site-header__controls { display: flex; align-items: center; gap: var(--dds-space-8); }
 .site-menu-button { display: none; }
 .site-locale { inline-size: auto; min-inline-size: 9rem; }
