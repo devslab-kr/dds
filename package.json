@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
-    "check": "pnpm -r run check && node scripts/check-docs-sync.mjs",
+    "check": "pnpm -r run check && node scripts/check-docs-sync.mjs && node scripts/check-consumers.mjs",
+    "check:consumers": "node scripts/check-consumers.mjs",
     "verify": "pnpm run build && pnpm run check",
     "verify:source:stage1-2": "node --test packages/compatibility-canary/tests/contracts.test.mjs packages/compatibility-canary/tests/application-contracts.test.mjs tests/foundation-contracts.test.mjs",
     "verify:source:stage3-4": "node --test tests/dds-solid-contracts.test.mjs tests/site-kit-core.test.mjs tests/site-kit-contracts.test.mjs tests/site-kit-worker.test.mjs",
