@@ -11,7 +11,7 @@ for (const packageName of packages) {
   assert.equal(manifest.name, `@devslab/${packageName}`);
   assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org/");
   assert.equal(manifest.publishConfig?.access, "restricted");
-  assert.equal(manifest.publishConfig?.provenance, true);
+  assert.equal(manifest.publishConfig?.provenance, false);
 }
 
 const workspace = fileURLToPath(new URL("..", import.meta.url));

@@ -15,7 +15,7 @@ test("foundation packages use the final @devslab names and TypeScript 7", async 
   for (const [path, name] of Object.entries(expected)) {
     const manifest = await json(path);
     assert.equal(manifest.name, name);
-    assert.equal(manifest.version, "0.2.2");
+    assert.equal(manifest.version, "0.2.3");
     assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org/");
     assert.equal(manifest.publishConfig?.access, "restricted");
   }
@@ -50,7 +50,7 @@ test("unpublished DDS packages bootstrap from this workspace", async () => {
     for (const name of names) {
       assert.equal(
         manifest.dependencies?.[name],
-        "workspace:0.2.2",
+        "workspace:0.2.3",
         `${path} must resolve unpublished ${name} from the local release workspace`,
       );
     }
