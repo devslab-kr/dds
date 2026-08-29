@@ -7,11 +7,12 @@ import { pathToFileURL } from "node:url";
 
 const workspace = resolve(new URL("..", import.meta.url).pathname.replace(/^\/(?:([A-Za-z]:))/, "$1"));
 const temp = await mkdtemp(join(tmpdir(), "site-kit-release-"));
-const npmCli = join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
+const npmCli = process.platform === "win32" ? process.execPath : "npm";
+const npmPrefix = process.platform === "win32" ? [join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js")] : [];
 const pnpmCli = process.platform === "win32" ? process.execPath : "pnpm";
 const pnpmPrefix = process.platform === "win32" ? [join(dirname(process.execPath), "node_modules", "corepack", "dist", "pnpm.js")] : [];
 const run = (args, cwd) => {
-  const result = spawnSync(process.execPath, [npmCli, ...args], {
+  const result = spawnSync(npmCli, [...npmPrefix, ...args], {
     cwd,
     encoding: "utf8",
     env: { ...process.env, NPM_CONFIG_CACHE: join(temp, ".npm-cache") },
