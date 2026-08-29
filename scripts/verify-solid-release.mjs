@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -47,16 +47,15 @@ try {
     if (packageName === "dds-solid") solidTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "dds-solid");
-  const published = JSON.parse(run(["publish", solidTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot));
-  const files = published.files;
-  assert.ok(files.some(({ path }) => path === "dist/index.js"));
-  assert.ok(files.some(({ path }) => path === "dist/server.js"));
-  assert.ok(files.some(({ path }) => path === "dist/index.d.ts"));
-  assert.ok(files.some(({ path }) => path === "styles.css"));
-  assert.equal(published.name, "@devslab/dds-solid");
+  run(["publish", solidTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
-  const manifest = JSON.parse(await readFile(join(temp, "node_modules", "@devslab", "dds-solid", "package.json"), "utf8"));
+  const installedRoot = join(temp, "node_modules", "@devslab", "dds-solid");
+  const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
+  assert.equal(manifest.name, "@devslab/dds-solid");
+  for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts", "styles.css"]) {
+    await access(join(installedRoot, path));
+  }
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   const ssrScript = join(temp, "consumer-ssr.mjs");
   await writeFile(ssrScript, `
