@@ -6,6 +6,6 @@ export default defineConfig({
   build: {
     lib: { entry: "src/solid/index.ts", formats: ["es"], fileName: "solid" },
     sourcemap: true,
-    rollupOptions: { external: [/^solid-js(?:\/|$)/, /^@solidjs\/web(?:\/|$)/, /^@devslab\//] },
+    rollupOptions: { external: [/^solid-js(?:\/|$)/, /^@solidjs\/web(?:\/|$)/, /^@devslab-kr\//] },
   },
 });

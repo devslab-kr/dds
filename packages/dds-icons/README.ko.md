@@ -1,4 +1,4 @@
-# @devslab/dds-icons
+# @devslab-kr/dds-icons
 
 방향성 아이콘 소비자는 `dds-icon--directional` 클래스를 추가한다. 패키지의
 `direction-policy.json`이 RTL에서 미러링할 아이콘과 물리 방향을 유지할
@@ -12,12 +12,12 @@ DDS 아이콘 세트 — 아이콘당 SVG 소스 하나(24 그리드, `currentCo
 
 | 산출물 | 임포트 | 용도 |
 | --- | --- | --- |
-| `dist/svg/*.svg` | `@devslab/dds-icons/svg/phone.svg` | 빌드 파이프라인, `<img>`, 디자인 툴 |
-| `dist/icons.svg` | `@devslab/dds-icons/icons.svg` | 웹 스프라이트 — `<use href="…/icons.svg#dds-phone">` |
-| `dist/icons.js` (+ `.d.ts`) | `@devslab/dds-icons` | 요소를 직접 만드는 런타임(RN, `createElementNS` 렌더러, SSR) |
+| `dist/svg/*.svg` | `@devslab-kr/dds-icons/svg/phone.svg` | 빌드 파이프라인, `<img>`, 디자인 툴 |
+| `dist/icons.svg` | `@devslab-kr/dds-icons/icons.svg` | 웹 스프라이트 — `<use href="…/icons.svg#dds-phone">` |
+| `dist/icons.js` (+ `.d.ts`) | `@devslab-kr/dds-icons` | 요소를 직접 만드는 런타임(RN, `createElementNS` 렌더러, SSR) |
 
 ```js
-import { icons } from "@devslab/dds-icons";
+import { icons } from "@devslab-kr/dds-icons";
 
 const i = icons.phone; // { viewBox, strokeWidth, set, body }
 ```

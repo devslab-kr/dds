@@ -1,4 +1,4 @@
-import { directionPolicy, icons, type DdsIconName } from "@devslab/dds-icons";
+import { directionPolicy, icons, type DdsIconName } from "@devslab-kr/dds-icons";
 import { splitProps, type JSX } from "solid-js";
 
 import { classes } from "./utils";

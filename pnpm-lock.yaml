@@ -73,14 +73,14 @@ importers:
 
   packages/dds-solid:
     dependencies:
-      '@devslab/dds-css':
-        specifier: workspace:0.2.3
+      '@devslab-kr/dds-css':
+        specifier: workspace:0.2.4
         version: link:../dds-css
-      '@devslab/dds-icons':
-        specifier: workspace:0.2.3
+      '@devslab-kr/dds-icons':
+        specifier: workspace:0.2.4
         version: link:../dds-icons
-      '@devslab/dds-tokens':
-        specifier: workspace:0.2.3
+      '@devslab-kr/dds-tokens':
+        specifier: workspace:0.2.4
         version: link:../dds-tokens
     devDependencies:
       '@testing-library/jest-dom':
@@ -119,8 +119,8 @@ importers:
 
   packages/site-kit:
     dependencies:
-      '@devslab/dds-solid':
-        specifier: workspace:0.2.3
+      '@devslab-kr/dds-solid':
+        specifier: workspace:0.2.4
         version: link:../dds-solid
     devDependencies:
       '@tanstack/solid-router':

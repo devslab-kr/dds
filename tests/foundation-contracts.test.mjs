@@ -5,18 +5,18 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const json = async (path) => JSON.parse(await read(path));
 
-test("foundation packages use the final @devslab names and TypeScript 7", async () => {
+test("private foundation packages use the final @devslab-kr names and TypeScript 7", async () => {
   const expected = {
-    "packages/dds-tokens/package.json": "@devslab/dds-tokens",
-    "packages/dds-css/package.json": "@devslab/dds-css",
-    "packages/dds-icons/package.json": "@devslab/dds-icons",
+    "packages/dds-tokens/package.json": "@devslab-kr/dds-tokens",
+    "packages/dds-css/package.json": "@devslab-kr/dds-css",
+    "packages/dds-icons/package.json": "@devslab-kr/dds-icons",
   };
 
   for (const [path, name] of Object.entries(expected)) {
     const manifest = await json(path);
     assert.equal(manifest.name, name);
-    assert.equal(manifest.version, "0.2.3");
-    assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org/");
+    assert.equal(manifest.version, "0.2.4");
+    assert.equal(manifest.publishConfig?.registry, "https://npm.pkg.github.com");
     assert.equal(manifest.publishConfig?.access, "restricted");
   }
 
@@ -32,17 +32,17 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.equal(root.devDependencies?.["@changesets/cli"], "2.29.7");
 
   const config = await json(".changeset/config.json");
-  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit"]]);
+  assert.deepEqual(config.fixed, [["@devslab-kr/dds-tokens", "@devslab-kr/dds-css", "@devslab-kr/dds-icons", "@devslab-kr/dds-solid", "@devslab-kr/site-kit"]]);
 });
 
 test("unpublished DDS packages bootstrap from this workspace", async () => {
   const internalDependencies = {
     "packages/dds-solid/package.json": [
-      "@devslab/dds-css",
-      "@devslab/dds-icons",
-      "@devslab/dds-tokens",
+      "@devslab-kr/dds-css",
+      "@devslab-kr/dds-icons",
+      "@devslab-kr/dds-tokens",
     ],
-    "packages/site-kit/package.json": ["@devslab/dds-solid"],
+    "packages/site-kit/package.json": ["@devslab-kr/dds-solid"],
   };
 
   for (const [path, names] of Object.entries(internalDependencies)) {
@@ -50,7 +50,7 @@ test("unpublished DDS packages bootstrap from this workspace", async () => {
     for (const name of names) {
       assert.equal(
         manifest.dependencies?.[name],
-        "workspace:0.2.3",
+        "workspace:0.2.4",
         `${path} must resolve unpublished ${name} from the local release workspace`,
       );
     }

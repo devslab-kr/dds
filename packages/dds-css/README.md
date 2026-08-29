@@ -1,4 +1,4 @@
-# @devslab/dds-css
+# @devslab-kr/dds-css
 
 🌐 [한국어](README.ko.md)
 
@@ -20,7 +20,7 @@ the native counterpart of Dialog — Phase 3).
   so a hardcoded color fails CI, not review.
 - Dark mode is free: `data-theme="dark"` on `<html>` or any subtree
   (`data-theme="light"` pins back). No component has a dark branch.
-- Per-component imports: `@devslab/dds-css/components/button.css` etc.
+- Per-component imports: `@devslab-kr/dds-css/components/button.css` etc.
 - Markup contracts, states, accessibility checklists and do/don't per
   component: [`docs/components.md`](../../docs/components.md).
   Live reference: `preview/components.html` (run `pnpm build` first).

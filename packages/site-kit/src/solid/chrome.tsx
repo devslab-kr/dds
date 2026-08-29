@@ -1,4 +1,4 @@
-import { Button } from "@devslab/dds-solid";
+import { Button } from "@devslab-kr/dds-solid";
 import { For, createSignal, onMount, type JSX } from "solid-js";
 
 import { LOCALES, type SiteLocale } from "../core/locales.mjs";
