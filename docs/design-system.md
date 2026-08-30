@@ -3,11 +3,8 @@
 🌐 [한국어](design-system.ko.md)
 
 The rules that bind **web and mobile apps into one design language** across the
-DevsLab product family (AskLinq, BookLinq, FlowLinq — the Linq family). We use
-[Toss Design System (TDS)](https://tossmini-docs.toss.im/tds-react-native/) as
-the reference model — token-based foundations + per-platform component
-packages — while staying framework-neutral (TDS 2.x depends on Toss's own RN
-framework, Granite — we do not create that kind of dependency).
+DevsLab product family. DDS combines token-based foundations with per-platform
+component packages while keeping the source of truth framework-neutral.
 
 > **A note on location.** This document lives in the asklinq repo until the
 > spec settles. Once implementation starts it graduates to a shared package at
@@ -48,10 +45,10 @@ Three layers. The lower, the more platform-neutral.
 
 | Package | Contents | Consumers |
 | --- | --- | --- |
-| `@devslab-kr/dds-tokens` | Token JSON + build outputs (table below) | everywhere |
-| `@devslab-kr/dds-css` | CSS component layer (class-based, framework-agnostic) | SSR pages, vanilla widget, Vue, React, Ionic |
+| `@devslab/dds-tokens` | Token JSON + build outputs (table below) | everywhere |
+| `@devslab/dds-css` | CSS component layer (class-based, framework-agnostic) | SSR pages, vanilla widget, Vue, React, Ionic |
 | `@devslab/dds-native` | React Native components | mobile apps (if RN is chosen) |
-| `@devslab-kr/dds-icons` | Icons (single SVG source → per-platform codegen) | everywhere |
+| `@devslab/dds-icons` | Icons (single SVG source → per-platform codegen) | everywhere |
 
 Token builds use a [Style Dictionary](https://styledictionary.com/)-class tool
 to generate every platform output **from one source**. The moment web and
@@ -357,7 +354,7 @@ instantly instead.
   Brand logos are separate assets, not part of the icon set.
 - Web and RN components are code-generated from the same SVG source. Never
   hand-maintain two copies. Until a framework's product exists, the shipped
-  form is the source itself plus a path-data map (`@devslab-kr/dds-icons`).
+  form is the source itself plus a path-data map (`@devslab/dds-icons`).
 
 ---
 
@@ -479,8 +476,5 @@ implementation work, not a redesign.
 
 ## References
 
-- [TDS React Native docs](https://tossmini-docs.toss.im/tds-react-native/) — structural reference model
-- [Toss Design System intro (Apps in Toss)](https://developers-apps-in-toss.toss.im/design/components.html)
-- [Rethinking design systems — Toss Tech](https://toss.tech/article/rethinking-design-system)
 - [W3C Design Tokens Format](https://design-tokens.github.io/community-group/format/)
 - [Pretendard](https://github.com/orioncactus/pretendard)

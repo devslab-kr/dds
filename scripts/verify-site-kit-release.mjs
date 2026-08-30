@@ -44,21 +44,22 @@ try {
   }
   const packageRoot = join(workspace, "packages", "site-kit");
   const bundle = await readFile(join(packageRoot, "dist", "solid.js"), "utf8");
-  assert.match(bundle, /from\s+["']@devslab-kr\/dds-solid["']/, "site-kit must externalize dds-solid");
+  assert.match(bundle, /from\s+["']@devslab\/dds-solid["']/, "site-kit must externalize dds-solid");
   run(["publish", siteKitTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs], temp);
-  const installedRoot = join(temp, "node_modules", "@devslab-kr", "site-kit");
+  const installedRoot = join(temp, "node_modules", "@devslab", "site-kit");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
-  assert.equal(manifest.name, "@devslab-kr/site-kit");
+  assert.equal(manifest.name, "@devslab/site-kit");
   for (const path of ["dist/solid.js", "dist/index.d.ts", "src/core/index.mjs", "src/core/index.d.mts", "src/tanstack-start.mjs", "src/tanstack-start.d.mts", "styles.css"]) {
     await access(join(installedRoot, path));
   }
-  assert.equal(manifest.publishConfig.access, "restricted");
+  assert.equal(manifest.publishConfig.access, "public");
+  assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   const core = await import(pathToFileURL(join(installedRoot, "src", "core", "index.mjs")));
   assert.equal(core.LOCALES.length, 14);
-  console.log("site-kit pack, restricted publish dry-run, and fresh consumer import passed");
+  console.log("site-kit pack, public publish dry-run, and fresh consumer import passed");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

@@ -7,8 +7,9 @@ const json = async (path) => JSON.parse(await read(path));
 
 test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundaries", async () => {
   const manifest = await json("packages/site-kit/package.json");
-  assert.equal(manifest.name, "@devslab-kr/site-kit");
-  assert.equal(manifest.publishConfig.access, "restricted");
+  assert.equal(manifest.name, "@devslab/site-kit");
+  assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
+  assert.equal(manifest.publishConfig.access, "public");
   for (const path of [".", "./solid", "./tanstack-start", "./styles.css"]) assert.ok(manifest.exports[path]);
   assert.equal(manifest.exports["./solid"].types, "./dist/index.d.ts");
   assert.equal(manifest.exports["./solid"].browser, "./dist/solid.js");
@@ -21,7 +22,7 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
   );
   assert.match(manifest.scripts.build, /vite build --config vite\.server\.config\.ts/);
   assert.match(await read("packages/site-kit/vite.server.config.ts"), /solid\.server\.js/);
-  assert.match(await read("packages/site-kit/vitest.config.ts"), /@devslab-kr\/dds-solid/);
+  assert.match(await read("packages/site-kit/vitest.config.ts"), /@devslab\/dds-solid/);
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies["@types/node"], "26.3.0");
@@ -33,7 +34,23 @@ test("Solid adapter exports every shared public-site shell", async () => {
   for (const symbol of [
     "SiteHeader", "LocaleMenu", "ThemeToggle", "MarketingShell", "SiteFooter",
     "LegalLayout", "StatusBanner", "RequestAccessForm", "NotFoundLayout", "ErrorLayout",
+    "OssProductMark", "OssProductMarkProps",
   ]) assert.match(source, new RegExp(`\\b${symbol}\\b`), `${symbol} missing`);
+});
+
+test("OSS product marks remain caller-supplied and reference the canonical brand source", async () => {
+  const component = await read("packages/site-kit/src/solid/oss-product-mark.tsx");
+  const styles = await read("packages/site-kit/styles.css");
+  assert.match(component, /src:\s*string/);
+  assert.match(component, /name:\s*string/);
+  assert.match(component, /decoding="async"/);
+  assert.match(component, /props\.decorative\s*\?\s*""\s*:\s*props\.name/);
+  assert.doesNotMatch(component, /editor-ruler|ssrf-guard|numkey|kokey/, "DDS must not duplicate Q-line routes");
+  assert.match(styles, /\.oss-product-mark/);
+  assert.match(styles, /block-size/);
+  assert.doesNotMatch(styles, /\.oss-product-mark[^}]*animation\s*:/s);
+  assert.match(await read("brand/index.html"), /https:\/\/devslab\.kr\/brand\/open-source\//);
+  assert.match(await read("brand/index.html"), /oss-brand\/releases\/tag\/v0\.2\.0/);
 });
 
 test("public chrome requires injected copy and keeps forms native", async () => {
@@ -82,7 +99,7 @@ test("Worker and browser fixtures consume adapters and prove hydration plus Arab
     read(".github/workflows/ci.yml"),
     json("package.json"),
   ]);
-  assert.match(worker, /@devslab-kr\/site-kit\/solid/);
+  assert.match(worker, /@devslab\/site-kit\/solid/);
   assert.match(worker, /toTanStackHead/);
   assert.match(worker, /renderToString/);
   assert.match(worker, /data-site-hydration/);

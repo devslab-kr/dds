@@ -1,4 +1,4 @@
-# @devslab-kr/dds-tokens
+# @devslab/dds-tokens
 
 🌐 [한국어](README.ko.md)
 
@@ -8,11 +8,11 @@ DDS design tokens, built from the single source at the repo root
 
 | Artifact | Import | Consumer |
 | --- | --- | --- |
-| `dist/tokens.css` | `@devslab-kr/dds-tokens/tokens.css` | Every web surface. `--dds-*` custom properties — light on `:root`, dark on `[data-theme="dark"]` |
-| `dist/tailwind/theme.css` | `@devslab-kr/dds-tokens/tailwind/theme.css` | Tailwind v4 (`@theme`) |
-| `dist/tailwind/preset.js` / `.cjs` | `@devslab-kr/dds-tokens/tailwind/preset` | Tailwind v3 (`presets: [...]`) |
-| `dist/tokens.ts` (+ `tokens.js` / `tokens.d.ts`) | `@devslab-kr/dds-tokens` | RN and any runtime code — raw numbers (px on web, pt on RN) |
-| `dist/ionic.css` | `@devslab-kr/dds-tokens/ionic.css` | Ionic apps — `--ion-*` mapped onto `--dds-*`: brand color (`primary` + `-rgb`/`-shade`/`-tint`/`-contrast`), the three status colors with their `-contrast`, page background/text/border, font, and app chrome (`item`, `toolbar`, `tab-bar`, `card`) |
+| `dist/tokens.css` | `@devslab/dds-tokens/tokens.css` | Every web surface. `--dds-*` custom properties — light on `:root`, dark on `[data-theme="dark"]` |
+| `dist/tailwind/theme.css` | `@devslab/dds-tokens/tailwind/theme.css` | Tailwind v4 (`@theme`) |
+| `dist/tailwind/preset.js` / `.cjs` | `@devslab/dds-tokens/tailwind/preset` | Tailwind v3 (`presets: [...]`) |
+| `dist/tokens.ts` (+ `tokens.js` / `tokens.d.ts`) | `@devslab/dds-tokens` | RN and any runtime code — raw numbers (px on web, pt on RN) |
+| `dist/ionic.css` | `@devslab/dds-tokens/ionic.css` | Ionic apps — `--ion-*` mapped onto `--dds-*`: brand color (`primary` + `-rgb`/`-shade`/`-tint`/`-contrast`), the three status colors with their `-contrast`, page background/text/border, font, and app chrome (`item`, `toolbar`, `tab-bar`, `card`) |
 
 ## Usage notes
 
