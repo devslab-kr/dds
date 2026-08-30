@@ -38,8 +38,8 @@ export const FILES = [
   "emptystate.css",
 ];
 
-const banner = `/* @devslab-kr/dds-css — generated bundle, do not edit. Source: src/*.css
- * Requires @devslab-kr/dds-tokens/tokens.css to be loaded first. */
+const banner = `/* @devslab/dds-css — generated bundle, do not edit. Source: src/*.css
+ * Requires @devslab/dds-tokens/tokens.css to be loaded first. */
 `;
 
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);

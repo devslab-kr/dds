@@ -9,7 +9,7 @@
 
 ## P1 — Phase 1: 토큰 파이프라인과 첫 소비자
 
-### 1. 토큰 빌드 파이프라인 (`@devslab-kr/dds-tokens`) — `완료` (2026-08-13)
+### 1. 토큰 빌드 파이프라인 (`@devslab/dds-tokens`) — `완료` (2026-08-13)
 스펙 §2. 레포를 pnpm 워크스페이스로 전환하고 `packages/dds-tokens` 생성.
 [Style Dictionary](https://styledictionary.com/) v4로 `tokens/*.json`에서
 한 소스 → 전 산출물 생성:
@@ -24,7 +24,7 @@
 - 완료 기준 충족: `pnpm build` 한 번으로 4개 산출물, CI 초록. 결정 기록
   D-001~D-005 (`docs/decisions.md`).
 
-### 2. CSS 컴포넌트 레이어 (`@devslab-kr/dds-css`) Core 6종 — `완료` (2026-08-13)
+### 2. CSS 컴포넌트 레이어 (`@devslab/dds-css`) Core 6종 — `완료` (2026-08-13)
 스펙 §2, §4. `preview/index.html`에 프로토타입된 스타일을 클래스 기반
 패키지로 정식화. 토큰 CSS 변수만 참조(하드코딩 금지 — `check-css.mjs`가
 hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
@@ -92,7 +92,7 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
 devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴을
 `dds-css`의 공식 스니펫으로 문서화 (허브 README에 기존 구현 있음).
 
-### 6. 아이콘 파이프라인 (`@devslab-kr/dds-icons`) — `완료` (2026-08-15)
+### 6. 아이콘 파이프라인 (`@devslab/dds-icons`) — `완료` (2026-08-15)
 스펙 §3.7(D-013으로 개정). 단일 SVG 소스 → 파일·스프라이트·path 데이터 맵.
 - [x] `packages/dds-icons` 신설. 코어 40종(업스트림 22 + 내비 글리프 18종
       신규 제작: chevron/arrow 4+2, close, search, plus, minus, menu,
@@ -180,5 +180,4 @@ Geist/Geist Mono 셀프호스팅 여부, Pretendard 서브셋, RN 번들 전략.
 ## 참고 링크
 
 - 미리보기 아티팩트: 파운데이션 https://claude.ai/code/artifact/0df45005-15d3-4567-a61d-71d0419498b9 · 브랜드 https://claude.ai/code/artifact/05925654-5d02-4f80-a58a-3b1e171f0eab
-- 구조 참조: [TDS React Native](https://tossmini-docs.toss.im/tds-react-native/)
 - 토큰 포맷: [W3C Design Tokens](https://design-tokens.github.io/community-group/format/)

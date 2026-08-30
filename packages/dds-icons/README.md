@@ -1,4 +1,4 @@
-# @devslab-kr/dds-icons
+# @devslab/dds-icons
 
 Directional consumers add `dds-icon--directional`; the packaged
 `direction-policy.json` is the source of truth for icons that mirror in RTL
@@ -12,12 +12,12 @@ amended by [D-013](../../docs/decisions.md).
 
 | Artifact | Import | For |
 | --- | --- | --- |
-| `dist/svg/*.svg` | `@devslab-kr/dds-icons/svg/phone.svg` | build pipelines, `<img>`, design tools |
-| `dist/icons.svg` | `@devslab-kr/dds-icons/icons.svg` | web sprite — `<use href="…/icons.svg#dds-phone">` |
-| `dist/icons.js` (+ `.d.ts`) | `@devslab-kr/dds-icons` | any runtime that builds its own element (RN, `createElementNS` renderers, SSR) |
+| `dist/svg/*.svg` | `@devslab/dds-icons/svg/phone.svg` | build pipelines, `<img>`, design tools |
+| `dist/icons.svg` | `@devslab/dds-icons/icons.svg` | web sprite — `<use href="…/icons.svg#dds-phone">` |
+| `dist/icons.js` (+ `.d.ts`) | `@devslab/dds-icons` | any runtime that builds its own element (RN, `createElementNS` renderers, SSR) |
 
 ```js
-import { icons } from "@devslab-kr/dds-icons";
+import { icons } from "@devslab/dds-icons";
 
 const i = icons.phone; // { viewBox, strokeWidth, set, body }
 ```

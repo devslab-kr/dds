@@ -1,18 +1,18 @@
 {
-  "name": "@devslab-kr/dds-tokens",
-  "version": "0.2.8",
+  "name": "@devslab/dds-tokens",
+  "version": "0.3.0",
   "description": "DDS (DevsLab Design System) design tokens — one JSON source, built for CSS, Tailwind, TypeScript/RN and Ionic",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/devslab-kr/dds.git",
     "directory": "packages/dds-tokens"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted",
-    "provenance": false
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
   },
   "files": [
     "dist"

@@ -1,9 +1,9 @@
 import { renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
 
-import { buildMetadata, type SiteLocale } from "@devslab-kr/site-kit";
-import { MarketingShell } from "@devslab-kr/site-kit/solid";
-import { toTanStackHead } from "@devslab-kr/site-kit/tanstack-start";
+import { buildMetadata, type SiteLocale } from "@devslab/site-kit";
+import { MarketingShell } from "@devslab/site-kit/solid";
+import { toTanStackHead } from "@devslab/site-kit/tanstack-start";
 import coreWorker from "./index.mjs";
 
 const messages = {

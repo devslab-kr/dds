@@ -3,10 +3,10 @@
   "changelog": false,
   "commit": false,
   "fixed": [
-    ["@devslab-kr/dds-tokens", "@devslab-kr/dds-css", "@devslab-kr/dds-icons", "@devslab-kr/dds-solid", "@devslab-kr/site-kit"]
+    ["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit"]
   ],
   "linked": [],
-  "access": "restricted",
+  "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": ["@devslab/compatibility-canary"]

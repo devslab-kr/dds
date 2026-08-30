@@ -7,7 +7,7 @@ export default defineConfig({
     lib: { entry: "src/index.ts", formats: ["es"], fileName: "index" },
     sourcemap: true,
     rollupOptions: {
-      external: [/^solid-js(?:\/|$)/, /^@solidjs\/web(?:\/|$)/, /^@devslab-kr\//],
+      external: [/^solid-js(?:\/|$)/, /^@solidjs\/web(?:\/|$)/, /^@devslab\//],
     },
   },
 });

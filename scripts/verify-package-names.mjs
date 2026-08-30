@@ -8,10 +8,11 @@ for (const packageName of packages) {
   const manifest = JSON.parse(
     await readFile(new URL(`../packages/${packageName}/package.json`, import.meta.url), "utf8"),
   );
-  assert.equal(manifest.name, `@devslab-kr/${packageName}`);
-  assert.equal(manifest.publishConfig?.registry, "https://npm.pkg.github.com");
-  assert.equal(manifest.publishConfig?.access, "restricted");
-  assert.equal(manifest.publishConfig?.provenance, false);
+  assert.equal(manifest.name, `@devslab/${packageName}`);
+  assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
+  assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org");
+  assert.equal(manifest.publishConfig?.access, "public");
+  assert.equal(manifest.publishConfig?.provenance, true);
 }
 
 const workspace = fileURLToPath(new URL("..", import.meta.url));
@@ -25,7 +26,7 @@ async function scan(directory) {
       const content = await readFile(path, "utf8").catch(() => "");
       assert.doesNotMatch(
         content,
-        /@devslab\/(?:dds-tokens|dds-css|dds-icons|dds-solid|site-kit)/,
+        /@devslab-kr\/(?:dds-tokens|dds-css|dds-icons|dds-solid|site-kit)/,
         `legacy package scope remains in ${path}`,
       );
     }
@@ -33,4 +34,4 @@ async function scan(directory) {
 }
 await scan(workspace);
 
-console.log(`verified ${packages.length} final @devslab-kr package names`);
+console.log(`verified ${packages.length} public @devslab package names`);
