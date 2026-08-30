@@ -1,0 +1,74 @@
+DevsLab Source-Available License 1.0
+
+Copyright (c) 2026 DevsLab. All rights reserved.
+
+This license governs the DDS software, design tokens, components, icons,
+documentation, and other materials distributed with this license (the
+"Software").
+
+1. Permitted use
+
+Subject to this license, DevsLab grants you a limited, worldwide,
+non-exclusive, non-transferable, revocable, royalty-free right to:
+
+- download and install unmodified copies of the Software;
+- use and execute the Software for internal or commercial applications;
+- compile, minify, tree-shake, and bundle unmodified Software solely as a
+  technical part of building an application; and
+- distribute the resulting object code only as an inseparable part of that
+  application and not as a standalone library, design system, component kit,
+  template, or asset collection.
+
+Normal application configuration through documented public APIs, design-token
+overrides, CSS custom properties, and component properties is permitted and is
+not considered modification of the Software.
+
+2. Restrictions
+
+Except where applicable law does not allow the restriction, you may not:
+
+- modify, adapt, translate, reverse engineer, or create derivative works of the
+  Software itself;
+- publish, republish, sublicense, sell, rent, host, or redistribute the
+  Software or any modified version as a standalone package or downloadable
+  collection;
+- use the Software or a substantial portion of it to create or operate a
+  competing general-purpose design system, UI kit, component library, icon
+  library, token library, template marketplace, or hosted equivalent;
+- remove or alter copyright, license, attribution, or provenance notices; or
+- use DevsLab names, logos, product marks, or trade dress except to make a
+  truthful statement that an application uses the Software.
+
+No patent, trademark, design, or branding rights are granted except the
+copyright permissions stated in Section 1.
+
+3. Ownership and feedback
+
+The Software is licensed, not sold. DevsLab and its licensors retain all
+right, title, and interest in the Software. You grant DevsLab a perpetual,
+worldwide, irrevocable, royalty-free right to use feedback you voluntarily
+provide about the Software.
+
+4. Termination
+
+This license terminates automatically if you breach it. Upon termination, you
+must stop using and distributing the Software and delete all copies under your
+control. Sections 2, 3, 5, and 6 survive termination.
+
+5. Disclaimer and limitation of liability
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, TITLE, AND NON-INFRINGEMENT. TO THE MAXIMUM EXTENT PERMITTED BY LAW,
+DEVSLAB WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
+CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOSS OF DATA, PROFITS,
+REVENUE, OR BUSINESS, ARISING FROM OR RELATED TO THE SOFTWARE.
+
+6. Governing law
+
+This license is governed by the laws of the Republic of Korea, excluding
+conflict-of-law rules. The Seoul Central District Court has exclusive
+jurisdiction over disputes arising from this license.
+
+This is a source-available license, not an open-source license approved by the
+Open Source Initiative.

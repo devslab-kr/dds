@@ -1,4 +1,4 @@
-import { Button, Field } from "@devslab-kr/dds-solid";
+import { Button, Field } from "@devslab/dds-solid";
 import { createSignal } from "solid-js";
 
 export interface RequestAccessMessages {

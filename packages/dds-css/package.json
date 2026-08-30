@@ -1,18 +1,18 @@
 {
-  "name": "@devslab-kr/dds-css",
-  "version": "0.2.8",
+  "name": "@devslab/dds-css",
+  "version": "0.3.0",
   "description": "DDS CSS component layer — class-based, framework-neutral, semantic-token-only (spec §4.3 v1 inventory, 20 components)",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/devslab-kr/dds.git",
     "directory": "packages/dds-css"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted",
-    "provenance": false
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
   },
   "files": [
     "dist"

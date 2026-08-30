@@ -5,10 +5,11 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const json = async (path) => JSON.parse(await read(path));
 
-test("dds-solid is a restricted exact-version package with stable exports", async () => {
+test("dds-solid is a public exact-version package with stable exports", async () => {
   const manifest = await json("packages/dds-solid/package.json");
-  assert.equal(manifest.name, "@devslab-kr/dds-solid");
-  assert.equal(manifest.publishConfig.access, "restricted");
+  assert.equal(manifest.name, "@devslab/dds-solid");
+  assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
+  assert.equal(manifest.publishConfig.access, "public");
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies["@solidjs/web"], undefined);
@@ -79,8 +80,8 @@ test("Icon and style adapters consume DDS framework-neutral contracts", async ()
   assert.match(icon, /directionPolicy/);
   assert.match(icon, /aria-hidden/);
   assert.match(icon, /role=.*"img"/);
-  assert.match(styles, /@devslab-kr\/dds-tokens\/tokens\.css/);
-  assert.match(styles, /@devslab-kr\/dds-css\/dds\.css/);
+  assert.match(styles, /@devslab\/dds-tokens\/tokens\.css/);
+  assert.match(styles, /@devslab\/dds-css\/dds\.css/);
 });
 
 test("runtime suites cover every primitive, both state modes, focus lifecycle, a11y, and hydration", async () => {
@@ -100,7 +101,7 @@ test("runtime suites cover every primitive, both state modes, focus lifecycle, a
   for (const symbol of ["Dialog", "Tabs", "Tooltip", "ToastProvider", "Checkbox", "Radio", "Switch", "Select", "Field", "IconButton"]) assert.match(ssr, new RegExp(`\\b${symbol}\\b`));
   assert.match(release, /renderToString/);
   assert.match(release, /hydrate/);
-  assert.match(release, /@devslab-kr\/dds-solid/);
+  assert.match(release, /@devslab\/dds-solid/);
 });
 
 test("Toast dismiss control has an injected localized accessible name without an English fallback", async () => {

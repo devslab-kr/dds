@@ -46,8 +46,9 @@ try {
     const cwd = join(workspace, "packages", directory);
     const output = run(npm, [...npmPrefix, "pack", "--json", "--pack-destination", temp], cwd);
     const [{ filename, files, name }] = JSON.parse(output);
-    assert.equal(name, `@devslab-kr/${directory}`);
+    assert.equal(name, `@devslab/${directory}`);
     assert.ok(files.some(({ path }) => path === "package.json"));
+    assert.ok(files.some(({ path }) => path === "LICENSE"), `${directory} must pack its source-available license`);
     assert.ok(files.some(({ path }) => path.startsWith("dist/")), `${directory} must pack dist`);
     if (directory === "dds-icons") {
       assert.ok(files.some(({ path }) => path === "direction-policy.json"));
@@ -60,11 +61,11 @@ try {
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true }), "utf8");
   run(npm, [...npmPrefix, "install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs], temp);
 
-  const tokens = await import(new URL(`file:///${join(temp, "node_modules", "@devslab-kr", "dds-tokens", "dist", "tokens.js").replaceAll("\\", "/")}`));
-  const icons = await import(new URL(`file:///${join(temp, "node_modules", "@devslab-kr", "dds-icons", "dist", "icons.js").replaceAll("\\", "/")}`));
-  const css = await readFile(join(temp, "node_modules", "@devslab-kr", "dds-css", "dist", "dds.css"), "utf8");
+  const tokens = await import(new URL(`file:///${join(temp, "node_modules", "@devslab", "dds-tokens", "dist", "tokens.js").replaceAll("\\", "/")}`));
+  const icons = await import(new URL(`file:///${join(temp, "node_modules", "@devslab", "dds-icons", "dist", "icons.js").replaceAll("\\", "/")}`));
+  const css = await readFile(join(temp, "node_modules", "@devslab", "dds-css", "dist", "dds.css"), "utf8");
   const directionPolicy = JSON.parse(await readFile(
-    join(temp, "node_modules", "@devslab-kr", "dds-icons", "direction-policy.json"),
+    join(temp, "node_modules", "@devslab", "dds-icons", "direction-policy.json"),
     "utf8",
   ));
   assert.ok(Object.keys(tokens).length > 0, "fresh consumer can import tokens");

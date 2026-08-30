@@ -1,4 +1,4 @@
-import { Button, type ButtonTone } from "@devslab-kr/dds-solid";
+import { Button, type ButtonTone } from "@devslab/dds-solid";
 import type { JSX } from "solid-js";
 
 import { SiteFooter, SiteHeader, type SiteFooterProps, type SiteHeaderProps } from "./chrome";

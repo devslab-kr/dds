@@ -2,11 +2,9 @@
 
 🌐 [English](design-system.md)
 
-데브스랩 제품군 (AskLinq, BookLinq, FlowLinq — Linq 패밀리) 의 **웹과 모바일 앱을
-하나의 디자인 언어로 묶는 규칙**. [토스 디자인 시스템 (TDS)](https://tossmini-docs.toss.im/tds-react-native/)
-의 구조 — 토큰 기반 파운데이션 + 플랫폼별 컴포넌트 패키지 — 를 참조 모델로 삼되,
-특정 프레임워크에 종속되지 않게 설계한다 (TDS 2.x 는 토스 자체 RN 프레임워크인
-Granite 에 종속된다 — 우리는 그 종속을 만들지 않는다).
+데브스랩 제품군의 **웹과 모바일 앱을 하나의 디자인 언어로 묶는 규칙**이다.
+토큰 기반 파운데이션과 플랫폼별 컴포넌트 패키지를 결합하되, 진실의 원천은
+특정 프레임워크에 종속되지 않게 설계한다.
 
 > **위치에 대한 노트.** 이 문서는 스펙이 확정될 때까지 asklinq 레포에 둔다.
 > 구현이 시작되면 [linq-kit](https://github.com/devslab-kr/linq-kit) 레벨의
@@ -45,10 +43,10 @@ Granite 에 종속된다 — 우리는 그 종속을 만들지 않는다).
 
 | 패키지 | 내용 | 소비자 |
 | --- | --- | --- |
-| `@devslab-kr/dds-tokens` | 토큰 JSON + 빌드 산출물 (아래 표) | 모든 곳 |
-| `@devslab-kr/dds-css` | CSS 컴포넌트 레이어 (클래스 기반, 프레임워크 무관) | SSR 페이지, 바닐라 위젯, Vue, React, Ionic |
+| `@devslab/dds-tokens` | 토큰 JSON + 빌드 산출물 (아래 표) | 모든 곳 |
+| `@devslab/dds-css` | CSS 컴포넌트 레이어 (클래스 기반, 프레임워크 무관) | SSR 페이지, 바닐라 위젯, Vue, React, Ionic |
 | `@devslab/dds-native` | React Native 컴포넌트 | 모바일 앱 (RN 선택 시) |
-| `@devslab-kr/dds-icons` | 아이콘 (SVG 단일 소스 → 플랫폼별 코드 생성) | 모든 곳 |
+| `@devslab/dds-icons` | 아이콘 (SVG 단일 소스 → 플랫폼별 코드 생성) | 모든 곳 |
 
 토큰 빌드는 [Style Dictionary](https://styledictionary.com/) 계열 도구로
 **한 소스에서** 모든 플랫폼 산출물을 생성한다. 웹과 네이티브가 각자 값을 들고
@@ -339,7 +337,7 @@ RN 은 같은 숫자를 pt 로 쓴다. 숫자가 같으므로 표는 하나다.
   아이콘 세트가 아니라 별도 에셋으로 관리.
 - 웹·RN 컴포넌트는 같은 SVG 소스에서 코드 생성한다. 손으로 두 벌 만들지 않는다.
   해당 프레임워크의 제품이 생기기 전까지 출하 형태는 소스 자체 + path 데이터
-  맵이다 (`@devslab-kr/dds-icons`).
+  맵이다 (`@devslab/dds-icons`).
 
 ---
 
@@ -456,8 +454,5 @@ Phase 3 이전에 모바일 패키지를 만들지 않는다 — 소비자 없�
 
 ## 참고
 
-- [TDS React Native 문서](https://tossmini-docs.toss.im/tds-react-native/) — 구조 참조 모델
-- [토스 디자인 시스템 소개 (앱인토스)](https://developers-apps-in-toss.toss.im/design/components.html)
-- [디자인 시스템 다시 생각해보기 — Toss Tech](https://toss.tech/article/rethinking-design-system)
 - [W3C Design Tokens Format](https://design-tokens.github.io/community-group/format/)
 - [Pretendard](https://github.com/orioncactus/pretendard)
