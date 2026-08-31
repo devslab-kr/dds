@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-icons",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "DDS icon set — one SVG source (24 grid, currentColor), shipped as files, a sprite and a path-data map",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -32,5 +32,16 @@
   "scripts": {
     "build": "node build.mjs",
     "check": "node scripts/check-icons.mjs"
-  }
+  },
+  "homepage": "https://devslab.kr/brand/",
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "keywords": [
+    "icons",
+    "svg",
+    "sprite",
+    "design-system",
+    "devslab"
+  ]
 }

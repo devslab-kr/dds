@@ -50,7 +50,7 @@ test("OSS product marks remain caller-supplied and reference the canonical brand
   assert.match(styles, /block-size/);
   assert.doesNotMatch(styles, /\.oss-product-mark[^}]*animation\s*:/s);
   assert.match(await read("brand/index.html"), /https:\/\/devslab\.kr\/brand\/open-source\//);
-  assert.match(await read("brand/index.html"), /oss-brand\/releases\/tag\/v0\.2\.0/);
+  assert.match(await read("brand/index.html"), /oss-brand\/releases\/tag\/v0\.3\.0/);
 });
 
 test("public chrome requires injected copy and keeps forms native", async () => {

@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-css",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "DDS CSS component layer — class-based, framework-neutral, semantic-token-only (spec §4.3 v1 inventory, 20 components)",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -24,5 +24,16 @@
   "scripts": {
     "build": "node build.mjs",
     "check": "node scripts/check-css.mjs"
-  }
+  },
+  "homepage": "https://devslab.kr/brand/",
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "keywords": [
+    "design-system",
+    "css",
+    "components",
+    "framework-neutral",
+    "devslab"
+  ]
 }
