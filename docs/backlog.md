@@ -172,8 +172,10 @@ Geist/Geist Mono 셀프호스팅 여부, Pretendard 서브셋, RN 번들 전략.
 
 - **로고 스토리**: `brand/index.html`의 마크 해석("코드 블록 + 아키텍처
   설계")은 형태를 보고 붙인 것. 실제 제작 의도가 따로 있으면 교체.
-- **DDS 공개 여부**: 레포/패키지를 공개(오픈소스)할지, npm 스코프 배포
-  방식(공개 vs GitHub Packages)을 어떻게 할지.
+- ~~**DDS 공개 여부**~~: **해소 (2026-08-31, D-015)** — 레포 공개 + 공개 npm
+  `@devslab/*` 배포, DevsLab Source-Available License 1.0 적용(오픈소스 아님).
+  남은 오너 액션: ① GitHub 레포 Public 전환, ② 레포 시크릿 `NPM_TOKEN` 확인,
+  ③ `dds-v*` 태그 푸시로 릴리스 워크플로 가동.
 - **브랜드 페이지 i18n 범위**: devslab.kr의 14개 로케일을 /brand에도 전부
   적용할지, ko/en만 유지할지.
 
