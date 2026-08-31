@@ -24,5 +24,16 @@
   "scripts": {
     "build": "node build.mjs",
     "check": "node scripts/check-css.mjs"
-  }
+  },
+  "homepage": "https://devslab.kr/brand/",
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "keywords": [
+    "design-system",
+    "css",
+    "components",
+    "framework-neutral",
+    "devslab"
+  ]
 }

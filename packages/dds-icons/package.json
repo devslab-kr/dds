@@ -32,5 +32,16 @@
   "scripts": {
     "build": "node build.mjs",
     "check": "node scripts/check-icons.mjs"
-  }
+  },
+  "homepage": "https://devslab.kr/brand/",
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "keywords": [
+    "icons",
+    "svg",
+    "sprite",
+    "design-system",
+    "devslab"
+  ]
 }

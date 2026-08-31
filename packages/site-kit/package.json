@@ -83,5 +83,16 @@
     "vite-plugin-solid": "2.11.14",
     "vitest": "4.1.1",
     "wrangler": "4.127.1"
-  }
+  },
+  "homepage": "https://devslab.kr/brand/",
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "keywords": [
+    "solidjs",
+    "i18n",
+    "seo",
+    "design-system",
+    "devslab"
+  ]
 }

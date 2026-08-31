@@ -37,5 +37,16 @@
   },
   "devDependencies": {
     "typescript": "7.0.2"
-  }
+  },
+  "homepage": "https://devslab.kr/brand/",
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "keywords": [
+    "design-tokens",
+    "design-system",
+    "css-variables",
+    "tailwind",
+    "devslab"
+  ]
 }
