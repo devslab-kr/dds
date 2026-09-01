@@ -110,11 +110,10 @@ format:
 
 ### 3.1 Color
 
-The color system adopts TDS's structure directly: three tiers — **raw palette
-(10 steps, 50–900, per hue) + alpha scale + semantic (adaptive) tokens**. Just
-as TDS separates palette entries like `colors.blue500` from adaptive tokens
-like `colors.background` / `colors.greyBackground` /
-`colors.layeredBackground`, DDS separates palette from semantics, and
+The color system has three tiers — **raw palette (10 steps, 50–900, per
+hue) + alpha scale + semantic (adaptive) tokens**. Palette entries
+(`palette.blue.500`) stay separate from adaptive semantic tokens
+(`color.bg.base` / `color.bg.subtle` / `color.bg.elevated`), and
 components only ever see the semantic layer.
 
 **The system anchor is the DevsLab homepage (devslab.kr).** The system
@@ -154,7 +153,7 @@ filled brand face**, whatever the hue.
 | `green.50–900` | success | `green.500 = #22c55e`, `green.700 = #15803d`, `green.50 = #f0fdf4` |
 | `blue.50–900` | info · links | `blue.500 = #3b82f6`, `blue.700 = #1d4ed8`, `blue.50 = #eff6ff` |
 
-**Alpha scale** — DDS's equivalent of TDS greyOpacity. Overlays, pressed
+**Alpha scale** — overlays, pressed
 states, and dims are solved with alpha, not opaque greys (so they layer
 naturally over any background). Anchored to values the homepage actually
 uses:
@@ -175,8 +174,8 @@ toggle**; both mappings are first-class from day one.
 | Token | Light | Dark | Use |
 | --- | --- | --- | --- |
 | `color.bg.default` | `#ffffff` | `zinc.950` | base screen background |
-| `color.bg.subtle` | `zinc.50` | `zinc.900` | section/card separation (TDS greyBackground) |
-| `color.bg.elevated` | `#ffffff` + elevation | `zinc.900` | modals, popovers, sheets (TDS layered/floated) |
+| `color.bg.subtle` | `zinc.50` | `zinc.900` | section/card separation |
+| `color.bg.elevated` | `#ffffff` + elevation | `zinc.900` | modals, popovers, sheets |
 | `color.bg.brand` | `cyan.500` | `cyan.500` | brand surfaces (primary buttons etc.) |
 | `color.bg.brand-hover` | `cyan.400` | `cyan.400` | brand surface hover (homepage idiom) |
 | `color.bg.brand-subtle` | `cyan.50` | `cyan.900` | soft brand backgrounds |

@@ -44,8 +44,7 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
 ### 3. AskLinq에 적용 (첫 소비자) — `완료` (2026-08-13)
 스펙 8장 Phase 1. asklinq 레포의 위젯·SSR 페이지가 `dds-tokens`/`dds-css`를
 소비하도록 전환. 기존 teal(`#14b8a6`)을 cyan으로 수렴.
-- 참고: asklinq `claude/tds-react-native-design-ohuzj0` 브랜치에 이 작업의
-  전사(前史)가 있다 (문서는 이 레포로 이동됨, 커밋 `b396978` 참조)
+- 참고: 이 작업의 전사(前史) 문서는 asklinq 레포에서 이 레포로 이동됨
 - [x] **토큰 소비 + 브랜드 정리** (asklinq#195 → 같은 날 D-051로 개정):
       cyan 수렴은 소유자 반려("홈페이지랑 같은 색") → **멀티 브랜드로 확정**
       (dds D-010, 스펙 3.1 개정) — AskLinq는 제품 teal 유지, 뉴트럴·상태는

@@ -105,11 +105,10 @@
 
 ### 3.1 컬러
 
-컬러 시스템은 TDS 의 구조를 그대로 차용한다: **원시 팔레트 (색상별 50–900
-10단계) + 알파 스케일 + 시맨틱 (어댑티브) 토큰** 의 3층. TDS 가
-`colors.blue500` 같은 팔레트와 `colors.background` / `colors.greyBackground` /
-`colors.layeredBackground` 같은 어댑티브 토큰을 분리하듯, DDS 도 팔레트와
-시맨틱을 분리하고 컴포넌트는 시맨틱만 본다.
+컬러 시스템은 **원시 팔레트 (색상별 50–900 10단계) + 알파 스케일 + 시맨틱
+(어댑티브) 토큰** 의 3층이다. `palette.blue.500` 같은 팔레트와
+`color.bg.base` / `color.bg.subtle` / `color.bg.elevated` 같은 어댑티브
+시맨틱 토큰을 분리하고, 컴포넌트는 시맨틱만 본다.
 
 **시스템 기준색은 데브스랩 홈페이지 (devslab.kr) 다.** 홈페이지가 실제로
 쓰는 **cyan** (`#06b6d4`, hover `#22d3ee`) 과 **zinc 뉴트럴** (`#09090b`
@@ -147,7 +146,7 @@
 | `green.50–900` | 성공 | `green.500 = #22c55e`, `green.700 = #15803d`, `green.50 = #f0fdf4` |
 | `blue.50–900` | 정보·링크 | `blue.500 = #3b82f6`, `blue.700 = #1d4ed8`, `blue.50 = #eff6ff` |
 
-**알파 스케일** — TDS 의 greyOpacity 에 해당. 오버레이·pressed·딤 처리는 회색
+**알파 스케일** — 오버레이·pressed·딤 처리는 회색
 불투명값이 아니라 알파로 푼다 (배경색과 무관하게 자연스럽게 겹치기 위해).
 홈페이지가 실제 쓰는 값 기준:
 
@@ -167,8 +166,8 @@
 | 토큰 | 라이트 | 다크 | 용도 |
 | --- | --- | --- | --- |
 | `color.bg.default` | `#ffffff` | `zinc.950` | 기본 화면 배경 |
-| `color.bg.subtle` | `zinc.50` | `zinc.900` | 섹션·카드 구분 배경 (TDS greyBackground) |
-| `color.bg.elevated` | `#ffffff` + elevation | `zinc.900` | 모달·팝오버·시트 (TDS layered/floated) |
+| `color.bg.subtle` | `zinc.50` | `zinc.900` | 섹션·카드 구분 배경 |
+| `color.bg.elevated` | `#ffffff` + elevation | `zinc.900` | 모달·팝오버·시트 |
 | `color.bg.brand` | `cyan.500` | `cyan.500` | 브랜드 강조 면 (주요 버튼 등) |
 | `color.bg.brand-hover` | `cyan.400` | `cyan.400` | 브랜드 면 hover (홈피 관용) |
 | `color.bg.brand-subtle` | `cyan.50` | `cyan.900` | 브랜드 옅은 배경 |
