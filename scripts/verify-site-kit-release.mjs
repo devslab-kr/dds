@@ -51,7 +51,13 @@ try {
   const installedRoot = join(temp, "node_modules", "@devslab", "site-kit");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
   assert.equal(manifest.name, "@devslab/site-kit");
-  for (const path of ["dist/solid.js", "dist/index.d.ts", "src/core/index.mjs", "src/core/index.d.mts", "src/tanstack-start.mjs", "src/tanstack-start.d.mts", "styles.css"]) {
+  for (const path of [
+    "dist/solid.js", "dist/index.d.ts",
+    "src/core/index.mjs", "src/core/index.d.mts",
+    "src/core/flags.mjs", "src/core/flags.d.mts",
+    "src/tanstack-start.mjs", "src/tanstack-start.d.mts",
+    "styles.css", "flags/LICENSE-flag-icons.txt",
+  ]) {
     await access(join(installedRoot, path));
   }
   assert.equal(manifest.publishConfig.access, "public");
@@ -59,6 +65,20 @@ try {
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   const core = await import(pathToFileURL(join(installedRoot, "src", "core", "index.mjs")));
   assert.equal(core.LOCALES.length, 14);
+  assert.equal(
+    typeof (await import(pathToFileURL(join(installedRoot, "src", "core", "flags.mjs")))).flagFor,
+    "function",
+    "src/core/flags.mjs must export flagFor",
+  );
+  assert.ok(manifest.exports["./flags"], "package.json exports must declare a ./flags subpath");
+  const subpathProbe = join(temp, "resolve-flags-subpath.mjs");
+  await writeFile(
+    subpathProbe,
+    'import { flagFor } from "@devslab/site-kit/flags";\nif (typeof flagFor !== "function") throw new Error("@devslab/site-kit/flags did not resolve to flagFor");\n',
+    "utf8",
+  );
+  const subpathResult = spawnSync(process.execPath, [subpathProbe], { cwd: temp, encoding: "utf8" });
+  if (subpathResult.status !== 0) throw new Error(`@devslab/site-kit/flags subpath resolution failed\n${subpathResult.stdout}\n${subpathResult.stderr}`);
   console.log("site-kit pack, public publish dry-run, and fresh consumer import passed");
 } finally {
   await rm(temp, { recursive: true, force: true });

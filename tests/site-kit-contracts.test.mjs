@@ -52,7 +52,11 @@ test("flag locale menu is a native disclosure with tokenised, logical styles", a
   assert.match(styles, /min-block-size:\s*44px/);
   assert.doesNotMatch(styles, /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/, "site-kit styles must stay on tokens");
   const core = await read("packages/site-kit/src/core/index.mjs");
-  assert.match(core, /flagFor/);
+  assert.doesNotMatch(core, /flagFor/);
+  const manifest = await json("packages/site-kit/package.json");
+  assert.ok(manifest.exports["./flags"], "flag data must ship on its own subpath, not the root barrel");
+  assert.equal(manifest.exports["./flags"].types, "./src/core/flags.d.mts");
+  assert.equal(manifest.exports["./flags"].import, "./src/core/flags.mjs");
   assert.match(await read("packages/site-kit/package.json"), /build-flags\.mjs --check/);
 });
 

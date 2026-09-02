@@ -24,7 +24,9 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 디스클로저를 렌더링한다 — JavaScript 없이도 동작하며, Solid는 Escape로 닫기와
 `onLocaleChange(locale, href)` 콜백을 더한다. `SiteHeader`는 `localeVariant`를
 그대로 전달한다. 국기 데이터(`FLAG_COUNTRY`, `LOCALE_FLAGS`, `flagFor`)는
-런타임 중립 entry에서 export되며, 아트워크는 flag-icons에서 벤더링했다(MIT,
+런타임 중립 `.` entry가 아니라 전용 서브패스 `@devslab/site-kit/flags`에서
+export된다 — 벤더링한 아트워크가 SVG ~110 KB라 대부분의 소비자는 국기 메뉴를
+렌더링하지 않기 때문이다. 아트워크는 flag-icons에서 벤더링했다(MIT,
 `flags/LICENSE-flag-icons.txt`). 국기는 `dds-icons` 항목이 아니라 site-kit
 데이터다 — 아이콘 세트의 계약이 단색 `currentColor` 스트로크를 요구하기
 때문이다.

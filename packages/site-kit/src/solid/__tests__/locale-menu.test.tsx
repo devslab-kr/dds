@@ -24,7 +24,7 @@ it("flag variant renders a flag-only trigger named after the current language", 
   const trigger = host.querySelector<HTMLElement>(".site-locale-flag__trigger")!;
   expect(trigger.tagName).toBe("SUMMARY");
   expect(trigger.textContent?.trim()).toBe("");
-  expect(trigger.getAttribute("aria-label")).toBe("English");
+  expect(trigger.getAttribute("aria-label")).toBe("Language: English");
   expect(trigger.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
 });
 
