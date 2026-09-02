@@ -15,7 +15,7 @@ test("public foundation packages use the @devslab scope, source-available licens
   for (const [path, name] of Object.entries(expected)) {
     const manifest = await json(path);
     assert.equal(manifest.name, name);
-    assert.equal(manifest.version, "0.3.1");
+    assert.equal(manifest.version, "0.4.0");
     assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
     assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org");
     assert.equal(manifest.publishConfig?.access, "public");
@@ -58,7 +58,7 @@ test("unpublished DDS packages bootstrap from this workspace", async () => {
     for (const name of names) {
       assert.equal(
         manifest.dependencies?.[name],
-        "workspace:0.3.1",
+        "workspace:0.4.0",
         `${path} must resolve unpublished ${name} from the local release workspace`,
       );
     }
