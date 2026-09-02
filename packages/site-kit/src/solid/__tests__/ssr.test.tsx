@@ -2,6 +2,7 @@ import { renderToString } from "solid-js/web";
 import { expect, it } from "vitest";
 
 import { LocaleMenu, MarketingShell } from "../index";
+import { LOCALE_FLAGS } from "../../core/flags.mjs";
 import { locale, messages } from "./fixtures";
 
 const Fixture = () => <MarketingShell
@@ -23,5 +24,8 @@ it("server-renders the flag variant as a working disclosure without JavaScript",
   expect(html).toContain('class="site-locale-flag__trigger"');
   expect((html.match(/class="site-locale-flag__option"/g) ?? []).length).toBe(14);
   expect(html).toContain('href="/ar"');
-  expect(html).not.toContain("<script");
+  expect(html).toContain('viewBox="0 0 640 480"');
+  const koPath = LOCALE_FLAGS.ko.body.match(/d="[^"]{20,}"/)?.[0];
+  if (!koPath) throw new Error("expected a d=\"…\" path fragment in LOCALE_FLAGS.ko.body");
+  expect(html).toContain(koPath);
 });

@@ -76,7 +76,7 @@ function FlagLocaleMenu(props: LocaleMenuProps) {
   };
   return (
     <details ref={details} class="site-locale-flag" onKeyDown={onKeyDown}>
-      <summary ref={trigger} class="site-locale-flag__trigger" aria-label={current().nativeName} title={props.messages.localeLabel}>
+      <summary ref={trigger} class="site-locale-flag__trigger" aria-label={`${props.messages.localeLabel}: ${current().nativeName}`} title={props.messages.localeLabel}>
         <Flag locale={props.state.locale} class="site-locale-flag__svg" />
       </summary>
       <ul class="site-locale-flag__list" role="list">

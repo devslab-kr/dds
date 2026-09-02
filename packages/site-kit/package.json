@@ -34,6 +34,10 @@
       "types": "./src/core/index.d.mts",
       "import": "./src/core/index.mjs"
     },
+    "./flags": {
+      "types": "./src/core/flags.d.mts",
+      "import": "./src/core/flags.mjs"
+    },
     "./solid": {
       "types": "./dist/index.d.ts",
       "worker": "./dist/solid.server.js",
