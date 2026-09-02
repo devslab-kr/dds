@@ -16,3 +16,7 @@ accepts only the reviewed schema-type and claim allowlists, and every claim leaf
 still references the verified-fact registry. `buildRobots` keeps its legacy
 environment-only output, while an optional `policies` object can independently
 control search indexing, citation crawlers, and model-training crawlers.
+
+## Locale menu variants
+
+`LocaleMenu` renders a native `<select>` by default. `variant="flag"` renders a `<details>` disclosure whose trigger is the current locale's flag and whose rows are flag + native-name links — it works without JavaScript; Solid adds Escape-to-close and the `onLocaleChange(locale, href)` callback. `SiteHeader` forwards `localeVariant`. Flag data (`FLAG_COUNTRY`, `LOCALE_FLAGS`, `flagFor`) is exported from the runtime-neutral entry; the artwork is vendored from flag-icons (MIT, `flags/LICENSE-flag-icons.txt`). Flags are site-kit data, not `dds-icons` entries, because the icon set's contract requires single-colour `currentColor` strokes.

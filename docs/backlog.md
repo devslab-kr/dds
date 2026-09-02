@@ -151,6 +151,9 @@ devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴�
 Geist/Geist Mono 셀프호스팅 여부, Pretendard 서브셋, RN 번들 전략.
 결정을 `docs/decisions.md`에 기록.
 
+### 12. site-kit 국기 로케일 피커 — `완료` (2026-09-02)
+D-017. `LocaleMenu variant="flag"` + 국기 데이터 14개. 첫 소비자 TraceLinq 랜딩.
+
 ---
 
 ## P3 — 모바일 이후

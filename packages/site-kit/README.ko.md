@@ -16,3 +16,15 @@ DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. �
 claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. `buildRobots`의
 기존 environment-only 출력은 유지되며, 선택적 `policies`로 검색 인덱싱,
 인용 crawler, 모델 학습 crawler를 각각 제어할 수 있다.
+
+## 로케일 메뉴 variant
+
+`LocaleMenu`는 기본으로 네이티브 `<select>`를 렌더링한다. `variant="flag"`는
+트리거가 현재 로케일의 국기이고 행마다 국기 + 자국어 이름 링크인 `<details>`
+디스클로저를 렌더링한다 — JavaScript 없이도 동작하며, Solid는 Escape로 닫기와
+`onLocaleChange(locale, href)` 콜백을 더한다. `SiteHeader`는 `localeVariant`를
+그대로 전달한다. 국기 데이터(`FLAG_COUNTRY`, `LOCALE_FLAGS`, `flagFor`)는
+런타임 중립 entry에서 export되며, 아트워크는 flag-icons에서 벤더링했다(MIT,
+`flags/LICENSE-flag-icons.txt`). 국기는 `dds-icons` 항목이 아니라 site-kit
+데이터다 — 아이콘 세트의 계약이 단색 `currentColor` 스트로크를 요구하기
+때문이다.
