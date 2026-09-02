@@ -32,10 +32,28 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
 test("Solid adapter exports every shared public-site shell", async () => {
   const source = await read("packages/site-kit/src/solid/index.ts");
   for (const symbol of [
-    "SiteHeader", "LocaleMenu", "ThemeToggle", "MarketingShell", "SiteFooter",
+    "SiteHeader", "LocaleMenu", "LocaleMenuVariant", "ThemeToggle", "MarketingShell", "SiteFooter",
     "LegalLayout", "StatusBanner", "RequestAccessForm", "NotFoundLayout", "ErrorLayout",
     "OssProductMark", "OssProductMarkProps",
   ]) assert.match(source, new RegExp(`\\b${symbol}\\b`), `${symbol} missing`);
+});
+
+test("flag locale menu is a native disclosure with tokenised, logical styles", async () => {
+  const menu = await read("packages/site-kit/src/solid/locale-menu.tsx");
+  const styles = await read("packages/site-kit/styles.css");
+  assert.match(menu, /<details/);
+  assert.match(menu, /<summary/);
+  assert.match(menu, /aria-current=/);
+  assert.match(menu, /hreflang=/);
+  assert.doesNotMatch(menu, /props\.messages\.[A-Za-z0-9_]+\s*\?\?/);
+  assert.match(styles, /\.site-locale-flag__trigger/);
+  assert.match(styles, /\.site-locale-flag__option/);
+  assert.match(styles, /min-inline-size:\s*44px/);
+  assert.match(styles, /min-block-size:\s*44px/);
+  assert.doesNotMatch(styles, /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/, "site-kit styles must stay on tokens");
+  const core = await read("packages/site-kit/src/core/index.mjs");
+  assert.match(core, /flagFor/);
+  assert.match(await read("packages/site-kit/package.json"), /build-flags\.mjs --check/);
 });
 
 test("OSS product marks remain caller-supplied and reference the canonical brand source", async () => {
