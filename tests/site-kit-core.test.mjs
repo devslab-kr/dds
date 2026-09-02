@@ -18,6 +18,7 @@ import {
   buildVerifiedJsonLd,
   renderLlmsTxt,
 } from "../packages/site-kit/src/core/geo.mjs";
+import { FLAG_COUNTRY, LOCALE_FLAGS, flagFor } from "../packages/site-kit/src/core/flags.mjs";
 
 const localeCodes = ["ko", "en", "ja", "zh-HK", "zh-TW", "hi", "vi", "id", "th", "pt-BR", "fr", "de", "es", "ar"];
 
@@ -112,4 +113,18 @@ test("GEO output accepts only sourced, current facts", () => {
   assert.throws(() => buildVerifiedJsonLd({ type: "Thing", id: "x", identity: { name: "x", url: "https://example.com" }, claims: {} }, registry), /unsupported schema type/i);
   assert.throws(() => buildVerifiedJsonLd({ type: "toString", id: "x", identity: { name: "x", url: "https://example.com" }, claims: {} }, registry), /unsupported schema type/i);
   assert.throws(() => buildVerifiedJsonLd({ type: "SoftwareApplication", id: "x", identity: { name: "x", url: "https://example.com" }, claims: { aggregateRating: { factId: "coverage" } } }, registry), /unsupported claim/i);
+});
+
+test("every locale has exactly one flag and the flag data is renderable SVG", () => {
+  assert.deepEqual(Object.keys(FLAG_COUNTRY).sort(), [...localeCodes].sort());
+  assert.deepEqual(Object.keys(LOCALE_FLAGS).sort(), [...localeCodes].sort());
+  for (const locale of localeCodes) {
+    const flag = flagFor(locale);
+    assert.equal(flag.country, FLAG_COUNTRY[locale]);
+    assert.match(flag.viewBox, /^0 0 \d+ \d+$/);
+    assert.ok(flag.body.length > 0, `${locale} body is empty`);
+    assert.doesNotMatch(flag.body, /<svg\b/, `${locale} body must be inner markup only`);
+    assert.doesNotMatch(flag.body, /<script|on[a-z]+=/i, `${locale} body must be inert`);
+  }
+  assert.throws(() => flagFor("xx"), RangeError);
 });

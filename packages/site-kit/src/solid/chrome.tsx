@@ -1,37 +1,10 @@
 import { Button, Icon, IconButton } from "@devslab/dds-solid";
 import { For, createSignal, onMount, type JSX } from "solid-js";
 
-import { LOCALES, type SiteLocale } from "../core/locales.mjs";
+import { LocaleMenu, type LocaleMenuProps, type LocaleMenuVariant } from "./locale-menu";
 import type { LocaleState, SiteBrand, SiteLink, SiteMessages, ThemePreference } from "./types";
 
-export interface LocaleMenuProps {
-  state: LocaleState;
-  messages: SiteMessages;
-  onLocaleChange?: (locale: SiteLocale, href: string) => void;
-}
-
-export function LocaleMenu(props: LocaleMenuProps) {
-  return (
-    <label>
-      <span class="dds-sr-only">{props.messages.localeLabel}</span>
-      <span class="dds-select site-locale">
-        <select
-          class="dds-select__input"
-          value={props.state.locale}
-          aria-label={props.messages.localeLabel}
-          onChange={(event) => {
-            const locale = event.currentTarget.value as SiteLocale;
-            const href = props.state.hrefForLocale(locale);
-            if (props.onLocaleChange) props.onLocaleChange(locale, href);
-            else window.location.assign(href);
-          }}
-        >
-          <For each={LOCALES}>{(locale) => <option value={locale.code} lang={locale.code} dir={locale.dir}>{locale.nativeName}</option>}</For>
-        </select>
-      </span>
-    </label>
-  );
-}
+export type { LocaleMenuProps };
 
 export interface ThemeToggleProps {
   messages: SiteMessages;
@@ -92,6 +65,7 @@ export interface SiteHeaderProps {
   messages: SiteMessages;
   theme?: Omit<ThemeToggleProps, "messages">;
   onLocaleChange?: LocaleMenuProps["onLocaleChange"];
+  localeVariant?: LocaleMenuVariant;
   actions?: JSX.Element;
 }
 
@@ -112,6 +86,7 @@ export function SiteHeader(props: SiteHeaderProps) {
           <LocaleMenu
             state={props.locale}
             messages={props.messages}
+            {...(props.localeVariant ? { variant: props.localeVariant } : {})}
             {...(props.onLocaleChange ? { onLocaleChange: props.onLocaleChange } : {})}
           />
           {props.theme && <ThemeToggle {...props.theme} messages={props.messages} />}
