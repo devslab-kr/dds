@@ -49,6 +49,7 @@
 .site-locale-flag__trigger:hover { background: var(--dds-color-bg-subtle); }
 .site-locale-flag__trigger:focus-visible { outline: 2px solid var(--dds-color-border-focus); outline-offset: 2px; }
 .site-locale-flag__svg { inline-size: 24px; block-size: 18px; border-radius: 2px; box-shadow: 0 0 0 1px var(--dds-color-border-default); }
+/* z-index is local to .site-header's own stacking context (position: sticky, z-index: 100), not the document root. */
 .site-locale-flag__list { position: absolute; inset-block-start: calc(100% + var(--dds-space-4)); inset-inline-end: 0; z-index: 200; margin: 0; padding: var(--dds-space-4); list-style: none; min-inline-size: 14rem; max-block-size: min(60dvh, 28rem); overflow-y: auto; background: var(--dds-color-bg-default); border: 1px solid var(--dds-color-border-default); border-radius: var(--dds-radius-md); box-shadow: var(--dds-elevation-2); }
 .site-locale-flag__option { display: flex; align-items: center; gap: var(--dds-space-12); min-block-size: 44px; padding-inline: var(--dds-space-12); border-radius: var(--dds-radius-sm); color: var(--dds-color-text-primary); text-decoration: none; }
 .site-locale-flag__option:hover { background: var(--dds-color-bg-subtle); }

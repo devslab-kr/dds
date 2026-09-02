@@ -19,7 +19,7 @@ const flagFixture = `<!doctype html><html lang="ar" dir="rtl"><head><meta charse
 <a class="site-brand" href="/ar">لينك</a>
 <button type="button" class="dds-btn dds-btn--ghost site-menu-button" aria-expanded="false" aria-controls="site-navigation">فتح القائمة</button>
 <nav id="site-navigation" class="site-nav" data-open="false" aria-label="التنقل الرئيسي"><ul class="site-nav__list"><li><a href="/docs">الوثائق</a></li></ul></nav>
-<div class="site-header__controls" data-open="true"><details class="site-locale-flag"><summary class="site-locale-flag__trigger" aria-label="العربية"><svg class="site-locale-flag__svg" viewBox="0 0 640 480" aria-hidden="true"><rect width="640" height="480" fill="green"/></svg></summary><ul class="site-locale-flag__list" role="list"><li><a class="site-locale-flag__option" href="/ko" lang="ko" hreflang="ko" dir="ltr"><svg class="site-locale-flag__svg" viewBox="0 0 640 480" aria-hidden="true"><rect width="640" height="480" fill="white"/></svg><span>한국어</span></a></li><li><a class="site-locale-flag__option" href="/ar" lang="ar" hreflang="ar" dir="rtl" aria-current="true"><svg class="site-locale-flag__svg" viewBox="0 0 640 480" aria-hidden="true"><rect width="640" height="480" fill="green"/></svg><span>العربية</span></a></li></ul></details><a class="dds-btn dds-btn--primary" href="/access">طلب الوصول</a></div>
+<div class="site-header__controls" data-open="false"><details class="site-locale-flag"><summary class="site-locale-flag__trigger" aria-label="العربية"><svg class="site-locale-flag__svg" viewBox="0 0 640 480" aria-hidden="true"><rect width="640" height="480" fill="green"/></svg></summary><ul class="site-locale-flag__list" role="list"><li><a class="site-locale-flag__option" href="/ko" lang="ko" hreflang="ko" dir="ltr"><svg class="site-locale-flag__svg" viewBox="0 0 640 480" aria-hidden="true"><rect width="640" height="480" fill="white"/></svg><span>한국어</span></a></li><li><a class="site-locale-flag__option" href="/ar" lang="ar" hreflang="ar" dir="rtl" aria-current="true"><svg class="site-locale-flag__svg" viewBox="0 0 640 480" aria-hidden="true"><rect width="640" height="480" fill="green"/></svg><span>العربية</span></a></li></ul></details><a class="dds-btn dds-btn--primary" href="/access">طلب الوصول</a></div>
 </div></header><main id="main-content" class="site-main"><h1>واجهة عربية طويلة لا ينبغي أن تتجاوز عرض الشاشة</h1></main></div>
 <script>document.querySelector('.site-menu-button').addEventListener('click', (event) => { const button=event.currentTarget; const open=button.getAttribute('aria-expanded')!=='true'; button.setAttribute('aria-expanded', String(open)); document.querySelector('#site-navigation').dataset.open=String(open); document.querySelector('.site-header__controls').dataset.open=String(open); });</script>
 </body></html>`;
@@ -106,6 +106,9 @@ for (const width of [1280, 375]) {
   test(`flag locale menu opens, is keyboard-operable, and does not overflow in RTL at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 812 });
     await page.setContent(flagFixture);
+    if (width === 375) {
+      await page.getByRole("button", { name: "فتح القائمة" }).click();
+    }
     const trigger = page.locator(".site-locale-flag__trigger");
     await expect(trigger).toHaveAttribute("aria-label", "العربية");
     const box = (await trigger.boundingBox())!;
