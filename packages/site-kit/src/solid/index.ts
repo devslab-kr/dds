@@ -1,4 +1,5 @@
-export { LocaleMenu, SiteFooter, SiteHeader, ThemeToggle, type LocaleMenuProps, type SiteFooterProps, type SiteHeaderProps, type ThemeToggleProps } from "./chrome";
+export { LocaleMenu, type LocaleMenuProps, type LocaleMenuVariant } from "./locale-menu";
+export { SiteFooter, SiteHeader, ThemeToggle, type SiteFooterProps, type SiteHeaderProps, type ThemeToggleProps } from "./chrome";
 export { ErrorLayout, LegalLayout, MarketingShell, NotFoundLayout, StatusBanner, type ErrorLayoutProps, type LegalLayoutProps, type MarketingShellProps, type NotFoundLayoutProps, type StatusBannerProps } from "./layouts";
 export { RequestAccessForm, type RequestAccessFormProps, type RequestAccessMessages } from "./request-access";
 export { OssProductMark, type OssProductMarkProps } from "./oss-product-mark";
