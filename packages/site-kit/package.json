@@ -19,6 +19,7 @@
   },
   "files": [
     "dist",
+    "flags",
     "src/core",
     "src/tanstack-start.mjs",
     "src/tanstack-start.d.mts",
@@ -49,7 +50,7 @@
   },
   "scripts": {
     "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "check": "tsc -p tsconfig.json --noEmit",
+    "check": "node scripts/build-flags.mjs --check && tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts && vitest run --config vitest.ssr.config.ts",
     "test:a11y": "vitest run --config vitest.config.ts src/solid/__tests__/a11y.test.tsx",
     "test:worker": "wrangler deploy --dry-run --config fixtures/worker/wrangler.jsonc --outdir dist-worker"
