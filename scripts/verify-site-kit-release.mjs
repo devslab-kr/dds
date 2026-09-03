@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const workspace = resolve(new URL("..", import.meta.url).pathname.replace(/^\/(?:([A-Za-z]:))/, "$1"));
@@ -29,6 +29,24 @@ const runPnpm = (args, cwd) => {
   if (result.status !== 0) throw new Error(`pnpm ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
   return result.stdout;
 };
+// `npm publish --dry-run` still asks the registry whether the version exists and
+// refuses one that is already published. On main right after a release that is
+// the normal state, not a defect — the pack, the manifest and the fresh-consumer
+// install are what this gate checks — so "already published" counts as passed.
+const publishDryRun = (tarball, cwd) => {
+  const result = spawnSync(npmCli, [...npmPrefix, "publish", tarball, "--dry-run", "--json", "--ignore-scripts"], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, NPM_CONFIG_CACHE: join(temp, ".npm-cache") },
+  });
+  if (result.status === 0) return;
+  const output = `${result.stdout}\n${result.stderr}`;
+  if (/cannot publish over the previously published versions/i.test(output)) {
+    console.log(`${basename(tarball)} is already on npm; publish dry-run skipped`);
+    return;
+  }
+  throw new Error(`publish ${basename(tarball)} --dry-run failed\n${output}`);
+};
 
 try {
   const packageNames = ["dds-tokens", "dds-css", "dds-icons", "dds-solid", "site-kit"];
@@ -45,7 +63,7 @@ try {
   const packageRoot = join(workspace, "packages", "site-kit");
   const bundle = await readFile(join(packageRoot, "dist", "solid.js"), "utf8");
   assert.match(bundle, /from\s+["']@devslab\/dds-solid["']/, "site-kit must externalize dds-solid");
-  run(["publish", siteKitTarball, "--dry-run", "--json", "--ignore-scripts"], packageRoot);
+  publishDryRun(siteKitTarball, packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs], temp);
   const installedRoot = join(temp, "node_modules", "@devslab", "site-kit");

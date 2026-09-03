@@ -48,9 +48,13 @@ pnpm 워크스페이스. `pnpm install` 후:
   `verify:site-kit:release` — 정확한 로케일·카탈로그 계약, 공통 UI 동작,
   다국어 검색 문서, 패키징·신규 소비자·publish dry-run 게이트
 
-다섯 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스한다. 방향성
-아이콘에는 `dds-icon--directional`을 사용하며 mirror/유지 목록은
-`@devslab/dds-icons/direction-policy.json`으로 함께 배포한다.
+다섯 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스하며, 릴리스는
+자동이다: `main`에 푸시될 때마다 `.github/workflows/release.yml`이 전체 검증
+게이트를 통과한 뒤 `changesets/action`이 — 대기 중인 changeset 파일이 있으면
+"chore: release dds" 버전 PR을 열고, 그 PR이 방금 머지됐으면 `main`에는 있지만
+npm에는 아직 없는 버전을 배포한다. 버전 PR 머지가 곧 릴리스 결정이고, 손으로
+태그를 푸시하지 않는다. 방향성 아이콘에는 `dds-icon--directional`을 사용하며
+mirror/유지 목록은 `@devslab/dds-icons/direction-policy.json`으로 함께 배포한다.
 
 배포 가능한 DDS 패키지는 모두 공개 npm의 `@devslab/*`를 사용하며 DevsLab
 Source-Available License 1.0을 따른다. compatibility canary는 비공개·미배포로
