@@ -50,9 +50,14 @@ pnpm workspace. `pnpm install`, then:
   `verify:site-kit:release` — exact locale/catalog contracts, shared UI behavior,
   localized discovery documents, pack, fresh-consumer and publish dry-run gates
 
-The five public packages release in lockstep through Changesets. Directional
-icons use `dds-icon--directional`; the authoritative mirror/keep lists ship as
-`@devslab/dds-icons/direction-policy.json`.
+The five public packages release in lockstep through Changesets, and the release
+is automatic: every push to `main` runs `.github/workflows/release.yml`, which
+passes the full verification gate and then lets `changesets/action` either open
+the "chore: release dds" version PR (when changeset files are waiting) or publish
+whatever version is on `main` but not yet on npm (when that PR has just merged).
+Merging the version PR is the release decision; no tag is pushed by hand.
+Directional icons use `dds-icon--directional`; the authoritative mirror/keep
+lists ship as `@devslab/dds-icons/direction-policy.json`.
 
 All distributable DDS packages use `@devslab/*` on the public npm registry under the
 DevsLab Source-Available License 1.0. The compatibility canary remains private and

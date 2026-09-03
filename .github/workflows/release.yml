@@ -1,19 +1,48 @@
+# Release — versioning and publishing to public npm through the standard
+# Changesets flow, the same shape linq-kit uses.
+#
+# Two modes, chosen automatically by changesets/action@v1 on every push to
+# main:
+#
+#   1. Unconsumed changeset files exist in `.changeset/*.md` → the action
+#      opens (or refreshes) a "chore: release dds" PR that bumps the fixed
+#      group's versions and deletes the consumed changesets. Merging that PR
+#      is the release decision.
+#
+#   2. No unconsumed changesets (the release PR was just merged, or a
+#      version was bumped by hand) → the action runs `pnpm release`, which
+#      is `changeset publish`: every package whose version is not yet on
+#      npm is published, and a git tag per package is pushed. Versions
+#      already on npm are skipped, so re-runs are safe.
+#
+# The publish only happens after the full verification gate below — the
+# same gates CI runs — so a red main never reaches npm. Publishing uses the
+# repository `NPM_TOKEN` secret with npm provenance (`id-token: write`).
+#
+# Before 2026-09-03 this workflow ran only on a hand-pushed `dds-v*` tag;
+# two release commits (0.4.0, 0.4.1) sat on main for days without a tag and
+# npm stayed at 0.3.0. The tag is no longer the trigger.
+
 name: Release public packages
 
 on:
   push:
-    tags:
-      - "dds-v*"
+    branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   id-token: write
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
@@ -36,7 +65,25 @@ jobs:
       - run: pnpm run verify:site-kit:ui
       - run: pnpm run verify:site-kit:browser
       - run: pnpm run verify:site-kit:release
-      - run: pnpm release
+      - name: Create the release PR or publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release
+          version: pnpm version-packages
+          commit: "chore: release dds"
+          title: "chore: release dds"
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+      - name: Summarise what was published
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          PUBLISHED: ${{ steps.changesets.outputs.publishedPackages }}
+        run: |
+          {
+            echo "### Published to npm"
+            echo ""
+            echo "$PUBLISHED" | jq -r '.[] | "- `\(.name)@\(.version)`"'
+          } >> "$GITHUB_STEP_SUMMARY"
