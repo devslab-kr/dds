@@ -1,0 +1,21 @@
+# Text is LF in the repository and LF in the working tree, on every platform.
+#
+# Without this, a Windows checkout with core.autocrlf=true hands CRLF to
+# anything that reads a file — including packages/site-kit/scripts/build-flags.mjs,
+# which inlines flags/*.svg into a generated module. JSON.stringify preserved
+# those carriage returns as \r\n escapes, so the committed output depended on
+# who generated it: --check passed on Windows and failed on Linux CI, and the
+# published flag data carried 2.8 KB of stray \r.
+* text=auto eol=lf
+
+# Binary — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
