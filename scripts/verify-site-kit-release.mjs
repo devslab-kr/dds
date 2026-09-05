@@ -74,7 +74,7 @@ try {
     "src/core/index.mjs", "src/core/index.d.mts",
     "src/core/flags.mjs", "src/core/flags.d.mts",
     "src/tanstack-start.mjs", "src/tanstack-start.d.mts",
-    "styles.css", "flags/LICENSE-flag-icons.txt",
+    "styles.css", "site-sections.css", "flags/LICENSE-flag-icons.txt",
   ]) {
     await access(join(installedRoot, path));
   }

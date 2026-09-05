@@ -20,12 +20,13 @@ html:lang(ko) .site-section__head h2,
 html:lang(ko) .site-section__lede { word-break: keep-all; overflow-wrap: break-word; }
 
 /* Steps: three columns sharing one hairline; ring numerals in the body face. */
-.site-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; border-block-start: 1px solid var(--dds-color-border-default); }
+.site-steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; list-style: none; border-block-start: 1px solid var(--dds-color-border-default); }
 .site-steps__step { padding-block: var(--dds-space-24); padding-inline-end: var(--dds-space-24); border-block-end: 1px solid var(--dds-color-border-default); }
 .site-steps__marker { display: inline-flex; align-items: center; justify-content: center; inline-size: 28px; block-size: 28px; border-radius: var(--dds-radius-full); border: 1.5px solid var(--dds-color-text-brand); color: var(--dds-color-text-brand); font-family: var(--dds-font-family-sans); font-size: 13px; font-weight: 600; line-height: 1; }
 .site-steps__step h3 { margin-block: var(--dds-space-12) var(--dds-space-8); font-size: var(--dds-typo-title-3-font-size); }
 .site-steps__step p { margin: 0; color: var(--dds-color-text-secondary); font-size: var(--dds-typo-body-2-font-size); line-height: 1.7; }
 @media (min-width: 56.25rem) {
+  .site-steps { grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr)); }
   .site-steps__step + .site-steps__step { padding-inline-start: var(--dds-space-24); border-inline-start: 1px solid var(--dds-color-border-default); }
 }
 html:lang(ko) .site-steps__step p { word-break: keep-all; overflow-wrap: break-word; }

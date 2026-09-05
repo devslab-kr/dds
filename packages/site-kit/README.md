@@ -19,7 +19,7 @@ control search indexing, citation crawlers, and model-training crawlers.
 
 ## Sections
 
-Six stateless primitives for a family landing page, extracted from VisionLinq. Import from `@devslab/site-kit/solid`; the stylesheet ships inside `styles.css`.
+Six stateless primitives for a family landing page, extracted from VisionLinq. Import from `@devslab/site-kit/solid`; the stylesheet ships inside `styles.css`. The primitives are full-bleed — each carries its own inner width — so a page built from them should render inside `<MarketingShell mainWidth="bleed">`; the shell's default `<main>` inset would otherwise double-inset them and turn `tone="band"` into a boxed rectangle.
 
 | Primitive | Renders |
 |---|---|
@@ -39,7 +39,7 @@ Six stateless primitives for a family landing page, extracted from VisionLinq. I
 
 ### Locale subsets
 
-`defineLocaleRegistry({ only: ["ko", "en", "ja"] })` keeps only those family locales (family order, before any `extra`). Pass the registry to `SiteHeader localeRegistry` and to `validateCatalogs(…, { registry })`; a visitor asking for a locale outside the subset resolves to your `defaultLocale`.
+`defineLocaleRegistry({ only: ["ko", "en", "ja"] })` keeps only those family locales (family order, before any `extra`). Pass the registry to `SiteHeader localeRegistry` and to `validateCatalogs(…, { registry })`; a visitor asking for a locale outside the subset resolves to your `defaultLocale`. `defaultLocale` must itself be inside `only`; an alias whose target falls outside the subset (e.g. `zh` → `zh-TW` when only `zh-HK` is kept) resolves to `undefined` and so falls through to `defaultLocale`, never to another script.
 
 ## Product locales
 

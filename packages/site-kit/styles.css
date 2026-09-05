@@ -6,6 +6,7 @@
 
 .site-shell { min-block-size: 100dvh; display: flex; flex-direction: column; background: var(--dds-color-bg-default); color: var(--dds-color-text-primary); }
 .site-main { flex: 1; inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; }
+.site-main--bleed { inline-size: 100%; }
 .site-header { position: sticky; inset-block-start: 0; z-index: 100; border-block-end: 1px solid var(--dds-color-border-default); background: var(--dds-color-bg-default); }
 .site-header__inner { min-block-size: 64px; inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--dds-space-16); }
 .site-brand { justify-self: start; color: var(--dds-color-text-primary); font-weight: 700; text-decoration: none; }

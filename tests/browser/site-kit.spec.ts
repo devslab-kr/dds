@@ -3,7 +3,9 @@ import { readFile } from "node:fs/promises";
 
 const tokens = await readFile(new URL("../../packages/dds-tokens/dist/tokens.css", import.meta.url), "utf8");
 const css = await readFile(new URL("../../packages/dds-css/dist/dds.css", import.meta.url), "utf8");
-const site = (await readFile(new URL("../../packages/site-kit/styles.css", import.meta.url), "utf8")).replace(/^@import[^;]+;\s*/, "");
+const siteBase = (await readFile(new URL("../../packages/site-kit/styles.css", import.meta.url), "utf8")).replace(/@import[^;]+;\s*/g, "");
+const siteSections = await readFile(new URL("../../packages/site-kit/site-sections.css", import.meta.url), "utf8");
+const site = `${siteBase}\n${siteSections}`;
 const fixture = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>${tokens}\n${css}\n${site}</style></head><body>
 <div class="site-shell"><header class="site-header"><div class="site-header__inner">
 <a class="site-brand" href="/ar">لينك</a>
@@ -39,6 +41,24 @@ function contrast(foreground: string, background: string) {
   const dark = Math.min(luminance(foreground), luminance(background));
   return (light + 0.05) / (dark + 0.05);
 }
+
+const sectionFixture = `<!doctype html><html lang="en"><head><meta charset="utf-8"><style>${tokens}\n${css}\n${site}</style></head><body>
+<section class="site-section" data-tone="band"><div class="site-section__shell"><h2>Band</h2></div></section>
+</body></html>`;
+
+test("a band-tone section resolves to the family's subtle background token", async ({ page }) => {
+  await page.setContent(sectionFixture);
+  const [bandBackground, subtleToken] = await page.evaluate(() => {
+    const section = document.querySelector(".site-section")!;
+    const probe = document.createElement("div");
+    probe.style.background = "var(--dds-color-bg-subtle)";
+    document.body.appendChild(probe);
+    const result = [getComputedStyle(section).backgroundColor, getComputedStyle(probe).backgroundColor] as const;
+    probe.remove();
+    return result;
+  });
+  expect(bandBackground).toBe(subtleToken);
+});
 
 test("header primary action keeps readable button colors in light and dark themes", async ({ page }) => {
   await page.setContent(fixture);

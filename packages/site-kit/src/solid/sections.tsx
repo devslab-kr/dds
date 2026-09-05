@@ -49,6 +49,7 @@ export function SectionHead(props: SectionHeadProps) {
 }
 
 export interface HeroSplitProps {
+  id?: string;
   eyebrow?: string;
   title: string;
   titleId: string;
@@ -61,7 +62,7 @@ export interface HeroSplitProps {
 
 export function HeroSplit(props: HeroSplitProps) {
   return (
-    <section class="site-hero" aria-labelledby={props.titleId}>
+    <section id={props.id} class="site-hero" aria-labelledby={props.titleId}>
       <div class="site-hero__shell">
         <div class="site-hero__copy">
           <Show when={props.eyebrow}>{(eyebrow) => <p class="site-hero__eyebrow">{eyebrow()}</p>}</Show>

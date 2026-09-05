@@ -9,10 +9,14 @@ export interface MarketingShellProps {
   footer: SiteFooterProps;
   messages: SiteMessages;
   children: JSX.Element;
+  /** "bleed" removes the shell's max-width/inset from <main> — for pages composed from
+   * full-bleed section primitives, each of which carries its own inner width. Default "shell". */
+  mainWidth?: "shell" | "bleed";
 }
 
 export function MarketingShell(props: MarketingShellProps) {
-  return <div class="site-shell"><SiteHeader {...props.header} /><main id="main-content" class="site-main" tabIndex={-1}>{props.children}</main><SiteFooter {...props.footer} /></div>;
+  const mainClass = () => (props.mainWidth === "bleed" ? "site-main site-main--bleed" : "site-main");
+  return <div class="site-shell"><SiteHeader {...props.header} /><main id="main-content" class={mainClass()} tabIndex={-1}>{props.children}</main><SiteFooter {...props.footer} /></div>;
 }
 
 export interface LegalLayoutProps {

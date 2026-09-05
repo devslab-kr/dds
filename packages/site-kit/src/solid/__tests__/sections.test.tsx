@@ -76,6 +76,15 @@ it("StepFlow numbers steps with ring numerals, never the section's zero-padded m
   for (const cls of ["site-steps", "site-steps__step", "site-steps__marker"]) expect(SECTIONS_CSS).toMatch(new RegExp(`\\.${cls}\\b`));
 });
 
+it("StepFlow stacks to a single column below the breakpoint and only fans out in the media block", () => {
+  const baseRuleMatch = SECTIONS_CSS.match(/\.site-steps\s*\{[^}]*\}/);
+  expect(baseRuleMatch).not.toBeNull();
+  expect(baseRuleMatch![0]).not.toMatch(/repeat\(/);
+  const mediaBlockMatch = SECTIONS_CSS.match(/@media \(min-width: 56\.25rem\) \{[\s\S]*?\n\}/);
+  expect(mediaBlockMatch).not.toBeNull();
+  expect(mediaBlockMatch![0]).toMatch(/\.site-steps \{[^}]*repeat\(/);
+});
+
 it("FeatureRows renders hairline rows, a badge only where given, and never a card grid", () => {
   const { FeatureRows } = kit;
   const host = mount(() => <FeatureRows label="Who" rows={[
@@ -107,10 +116,11 @@ it("exports the six section primitives", () => {
 
 it("HeroSplit puts copy beside a labelled figure and leaves the aside's height to the consumer", () => {
   const { HeroSplit } = kit;
-  const host = mount(() => <HeroSplit eyebrow="AskLinq" title="Same answers, every time." titleId="hero-title" lede="Upload once."
+  const host = mount(() => <HeroSplit id="hero" eyebrow="AskLinq" title="Same answers, every time." titleId="hero-title" lede="Upload once."
     actions={<a class="dds-btn dds-btn--primary" href="/signup">Start</a>}
     aside={<div data-testid="walkthrough">card</div>} asideLabel="Product walkthrough" />);
   const section = host.querySelector("section.site-hero")!;
+  expect(section.id).toBe("hero");
   expect(section.getAttribute("aria-labelledby")).toBe("hero-title");
   expect(host.querySelector(".site-hero__eyebrow")?.textContent).toBe("AskLinq");
   expect(host.querySelector("h1#hero-title")?.textContent).toBe("Same answers, every time.");
