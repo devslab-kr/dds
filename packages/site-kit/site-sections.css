@@ -50,7 +50,7 @@ html:lang(ko) .site-rows__body { word-break: keep-all; overflow-wrap: break-word
 
 /* Hero: copy 6 / aside 5, one column below the threshold. The aside has no
    height rule — a swapping scene fixes its own height in the consumer. */
-.site-hero { padding-block: var(--dds-space-64) var(--dds-space-64); }
+.site-hero { padding-block: var(--dds-space-64); }
 .site-hero__shell { inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--dds-space-48); align-items: start; }
 .site-hero__eyebrow { margin: 0; margin-block-end: var(--dds-space-12); color: var(--dds-color-text-brand); font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-caption-font-size); letter-spacing: .18em; }
 .site-hero__copy h1 { margin: 0; font-size: var(--dds-typo-display-font-size); line-height: var(--dds-typo-display-line-height); letter-spacing: -.025em; text-wrap: balance; white-space: pre-line; }

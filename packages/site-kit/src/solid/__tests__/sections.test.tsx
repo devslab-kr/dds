@@ -122,3 +122,14 @@ it("HeroSplit puts copy beside a labelled figure and leaves the aside's height t
   expect(SECTIONS_CSS).not.toMatch(/\.site-hero__aside\s*\{[^}]*block-size/);
   for (const cls of ["site-hero", "site-hero__shell", "site-hero__copy", "site-hero__eyebrow", "site-hero__lede", "site-hero__actions", "site-hero__aside"]) expect(SECTIONS_CSS).toMatch(new RegExp(`\\.${cls}\\b`));
 });
+
+it("every class a primitive renders is defined in site-sections.css", () => {
+  const { HeroSplit, SectionBlock, SectionHead, StepFlow, FeatureRows, PricingNote } = kit;
+  const host = mount(() => <>
+    <HeroSplit title="t" titleId="a" lede="l" actions={<span />} aside={<span />} asideLabel="x" />
+    <SectionBlock id="s" labelledBy="b"><SectionHead index="01" title="t" titleId="b" lede="l" /><StepFlow steps={[{ title: "t", body: "b" }]} /><FeatureRows rows={[{ title: "t", body: "b", badge: "x" }]} /><PricingNote action={<span />}><p>p</p></PricingNote></SectionBlock>
+  </>);
+  const classes = new Set<string>();
+  for (const element of host.querySelectorAll("[class]")) for (const cls of element.classList) if (cls.startsWith("site-")) classes.add(cls);
+  for (const cls of classes) expect(SECTIONS_CSS, cls).toMatch(new RegExp(`\\.${cls}\\b`));
+});
