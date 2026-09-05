@@ -15,6 +15,7 @@ export default defineConfig({
       "src/solid/__tests__/locale-menu.test.tsx",
       "src/solid/__tests__/shells.test.tsx",
       "src/solid/__tests__/oss-product-mark.test.tsx",
+      "src/solid/__tests__/sections.test.tsx",
     ],
     restoreMocks: true,
   },
