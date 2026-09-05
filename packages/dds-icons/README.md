@@ -35,7 +35,8 @@ const i = icons.phone; // { viewBox, strokeWidth, set, body }
 ## Two sets
 
 - **core** (`svg/*.svg`, stroke 1.6) — product UI. Names are function-shaped
-  (`chevron-down`, `external-link`); the 22 names inherited from the AskLinq
+  (`chevron-down`, `external-link`, `globe` — the flag-less fallback for a
+  language-picker trigger); the 22 names inherited from the AskLinq
   widget keep their exact spelling, because renaming them would break live
   card icons.
 - **site** (`svg/site/site-*.svg`, stroke 1.8) — devslab.kr only, drawn for

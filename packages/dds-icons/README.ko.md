@@ -35,7 +35,8 @@ const i = icons.phone; // { viewBox, strokeWidth, set, body }
 ## 두 개의 세트
 
 - **core** (`svg/*.svg`, 스트로크 1.6) — 제품 UI. 이름은 기능형
-  (`chevron-down`, `external-link`). AskLinq 위젯에서 물려받은 22개는
+  (`chevron-down`, `external-link`, `globe` — 지구본, 언어 선택 트리거의
+  국기 없는 폴백). AskLinq 위젯에서 물려받은 22개는
   철자를 그대로 유지합니다 — 이름을 바꾸면 라이브 카드 아이콘이 깨집니다.
 - **site** (`svg/site/site-*.svg`, 스트로크 1.8) — devslab.kr 전용, 마케팅
   표면에서 32–40px로 크게 쓰이도록 그려진 세트. `site-` 접두는 이름의
