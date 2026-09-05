@@ -63,6 +63,9 @@ export function defineLocaleRegistry(options = {}) {
     if (LOCALES.some((known) => known.code === locale.code)) {
       throw new RangeError(`${locale.code} is already a family locale — remove it from \`extra\``);
     }
+    if (seen.has(locale.code)) {
+      throw new RangeError(`${locale.code} appears twice in \`extra\``);
+    }
     if (!locale.nativeName) throw new TypeError(`${locale.code} needs a nativeName — it is what the picker shows`);
     if (locale.dir !== "ltr" && locale.dir !== "rtl") throw new RangeError(`${locale.code} needs dir "ltr" or "rtl"`);
     seen.add(locale.code);

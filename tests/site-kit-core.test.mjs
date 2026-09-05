@@ -183,6 +183,8 @@ test("a registry refuses a definition that would render wrong", () => {
   assert.throws(() => defineLocaleRegistry({ extra: [{ code: "en", language: "English", nativeName: "English", dir: "ltr", flagCountry: "gb" }] }), /already a family locale/);
   assert.throws(() => defineLocaleRegistry({ extra: [{ code: "ta", language: "Tamil", dir: "ltr", flagCountry: "in" }] }), /nativeName/);
   assert.throws(() => defineLocaleRegistry({ extra: [{ code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "sideways", flagCountry: "in" }] }), /dir/);
+  const ta = { code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "ltr", flagCountry: "in" };
+  assert.throws(() => defineLocaleRegistry({ extra: [ta, ta] }), /appears twice/);
 });
 
 test("product locales reuse a vendored flag rather than shipping a second copy", () => {
