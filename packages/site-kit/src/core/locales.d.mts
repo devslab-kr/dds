@@ -1,4 +1,5 @@
 export type SiteLocale = "ko" | "en" | "ja" | "zh-HK" | "zh-TW" | "hi" | "vi" | "id" | "th" | "pt-BR" | "fr" | "de" | "es" | "ar";
+export type LocaleCode = SiteLocale;
 export type TextDirection = "ltr" | "rtl";
 export interface LocaleDefinition { readonly code: SiteLocale; readonly language: string; readonly nativeName: string; readonly dir: TextDirection }
 
@@ -31,6 +32,7 @@ export declare const LOCALES: readonly LocaleDefinition[];
  * are the family registry, so not calling this changes nothing.
  */
 export declare function defineLocaleRegistry<Extra extends string = never>(options?: {
+  only?: ReadonlyArray<LocaleCode>;
   extra?: readonly ExtraLocaleDefinition<Extra>[];
   aliases?: readonly (readonly [string, SiteLocale | Extra])[];
 }): LocaleRegistry<SiteLocale | Extra>;

@@ -35,7 +35,22 @@ test("Solid adapter exports every shared public-site shell", async () => {
     "SiteHeader", "LocaleMenu", "LocaleMenuVariant", "ThemeToggle", "MarketingShell", "SiteFooter",
     "LegalLayout", "StatusBanner", "RequestAccessForm", "NotFoundLayout", "ErrorLayout",
     "OssProductMark", "OssProductMarkProps",
+    "SectionBlock", "SectionHead", "HeroSplit", "StepFlow", "FeatureRows", "PricingNote",
   ]) assert.match(source, new RegExp(`\\b${symbol}\\b`), `${symbol} missing`);
+});
+
+test("section primitives ship their stylesheet through styles.css and keep two glyph systems", async () => {
+  const [styles, sections, tsx] = await Promise.all([
+    read("packages/site-kit/styles.css"),
+    read("packages/site-kit/site-sections.css"),
+    read("packages/site-kit/src/solid/sections.tsx"),
+  ]);
+  assert.match(styles, /@import "\.\/site-sections\.css";/);
+  assert.match(sections, /\.site-section__index\s*\{[^}]*--dds-font-family-mono/);
+  assert.match(sections, /\.site-steps__marker\s*\{[^}]*border-radius: var\(--dds-radius-full\)/);
+  assert.doesNotMatch(sections, /#[0-9a-f]{3,8}\b/i, "colour literals belong to product brand slices");
+  assert.doesNotMatch(tsx, /`0\$\{index\(\) \+ 1\}`/, "steps never render the section's zero-padded index");
+  assert.doesNotMatch(tsx, /style=/, "no inline styles in primitives");
 });
 
 test("flag locale menu is a native disclosure with tokenised, logical styles", async () => {

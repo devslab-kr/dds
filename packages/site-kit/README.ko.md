@@ -17,6 +17,30 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 기존 environment-only 출력은 유지되며, 선택적 `policies`로 검색 인덱싱,
 인용 crawler, 모델 학습 crawler를 각각 제어할 수 있다.
 
+## 섹션
+
+가족 랜딩 페이지를 위한 상태 없는 원시 컴포넌트 여섯 개, VisionLinq에서 추출했다. `@devslab/site-kit/solid`에서 import한다; 스타일시트는 `styles.css` 안에 들어 있다. 이 원시 컴포넌트들은 full-bleed — 각자 자기 내부 너비를 갖는다 — 라서 이걸로 구성한 페이지는 `<MarketingShell mainWidth="bleed">` 안에서 렌더해야 한다; 그렇지 않으면 셸의 기본 `<main>` 인셋이 이중으로 안쪽 여백을 주고 `tone="band"`가 박스형 사각형이 되어 버린다.
+
+| 원시 컴포넌트 | 렌더 |
+|---|---|
+| `SectionBlock` | `<section>` + 콘텐츠 셸; `tone="band"`는 배경을 토큰 한 단계 낮춘다 |
+| `SectionHead` | 모노 zero-padded `index`(장식용), `h2`, 선택적 lede |
+| `HeroSplit` | 카피 6 / aside 5; aside `figure`에는 높이 규칙이 없다 — 각자의 장면에서 고쳐야 한다 |
+| `StepFlow` | 단계 `<ol>`, **원형 숫자 1 2 3** — 섹션 인덱스와 다른 글리프 체계 |
+| `FeatureRows` | 선택적 `dds-badge`가 있는 헤어라인 행; 카드 그리드는 절대 아님 |
+| `PricingNote` | 문단 블록 하나 + 액션 하나 |
+
+```tsx
+<SectionBlock id="how" labelledBy="how-title">
+  <SectionHead index="01" titleId="how-title" title={t("how.title")} lede={t("how.lede")} />
+  <StepFlow label={t("how.title")} steps={[{ title: t("how.1.title"), body: t("how.1.body") }, …]} />
+</SectionBlock>
+```
+
+### 로케일 부분집합
+
+`defineLocaleRegistry({ only: ["ko", "en", "ja"] })`는 그 가족 로케일들만 남긴다(가족 순서, `extra`보다 먼저). 이 레지스트리를 `SiteHeader localeRegistry`와 `validateCatalogs(…, { registry })`에 넘긴다; 부분집합 밖 로케일을 요청하는 방문자는 `defaultLocale`로 귀결된다. `defaultLocale` 자체가 `only` 안에 있어야 한다; 별칭의 대상이 부분집합 밖에 있으면(예: `zh` → `zh-TW`인데 `zh-HK`만 남긴 경우) `undefined`로 귀결되어 `defaultLocale`로 떨어질 뿐, 다른 문자 체계로 넘어가는 일은 없다.
+
 ## 제품 로케일
 
 `LOCALES`는 **가족 목록**이다 — devslab.kr이 마케팅하는 14개 언어이자 모든

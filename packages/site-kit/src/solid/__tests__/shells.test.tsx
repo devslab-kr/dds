@@ -55,6 +55,23 @@ it("renders shared chrome and opens the mobile navigation", () => {
   expect(host.querySelector("#main-content h1")?.textContent).toBe("Document intelligence");
 });
 
+it("defaults main to the shell width and opts into a full-bleed main for section pages", () => {
+  const shellProps = {
+    messages,
+    header: { brand: { name: "VisionLinq", href: "/" }, navigation: [], locale, messages },
+    footer: { brand: { name: "VisionLinq", href: "/" }, links: [], copyright: "2026 DevsLab", messages },
+  };
+
+  const defaultHost = document.body.appendChild(document.createElement("div"));
+  const disposeDefault = render(() => <MarketingShell {...shellProps}><p>Default</p></MarketingShell>, defaultHost);
+  expect(defaultHost.querySelector("#main-content")?.className).toBe("site-main");
+  disposeDefault();
+
+  const bleedHost = document.body.appendChild(document.createElement("div"));
+  dispose = render(() => <MarketingShell {...shellProps} mainWidth="bleed"><p>Bleed</p></MarketingShell>, bleedHost);
+  expect(bleedHost.querySelector("#main-content")?.classList.contains("site-main--bleed")).toBe(true);
+});
+
 it("submits request-access data once and announces success", async () => {
   const submit = vi.fn(async () => undefined);
   const host = document.body.appendChild(document.createElement("div"));

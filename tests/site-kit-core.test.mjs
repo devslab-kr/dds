@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  FAMILY_LOCALES,
   LOCALES,
   createTranslator,
   defineLocaleRegistry,
@@ -182,6 +183,8 @@ test("a registry refuses a definition that would render wrong", () => {
   assert.throws(() => defineLocaleRegistry({ extra: [{ code: "en", language: "English", nativeName: "English", dir: "ltr", flagCountry: "gb" }] }), /already a family locale/);
   assert.throws(() => defineLocaleRegistry({ extra: [{ code: "ta", language: "Tamil", dir: "ltr", flagCountry: "in" }] }), /nativeName/);
   assert.throws(() => defineLocaleRegistry({ extra: [{ code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "sideways", flagCountry: "in" }] }), /dir/);
+  const ta = { code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "ltr", flagCountry: "in" };
+  assert.throws(() => defineLocaleRegistry({ extra: [ta, ta] }), /appears twice/);
 });
 
 test("product locales reuse a vendored flag rather than shipping a second copy", () => {
@@ -221,4 +224,24 @@ test("catalogs and metadata cover the product's languages, not just the family's
 
   const sitemap = buildSitemap({ baseUrl: "https://getbooklinq.app", routes: ["/"], defaultLocale: "en", registry });
   assert.equal(sitemap.length, registry.LOCALES.length);
+});
+
+test("a subset registry keeps only the named family locales, in family order, before any extra", () => {
+  const registry = defineLocaleRegistry({ only: ["en", "ko", "ja"] });
+  assert.deepEqual(registry.LOCALES.map(({ code }) => code), ["ko", "en", "ja"]);
+  assert.equal(registry.canonicalLocale("ar"), undefined);
+  assert.equal(registry.resolveLocale({ acceptLanguage: "ar,de;q=0.8", defaultLocale: "ko" }).locale, "ko");
+  assert.equal(registry.resolveLocale({ acceptLanguage: "ja-JP,en;q=0.5", defaultLocale: "ko" }).locale, "ja");
+  const withExtra = defineLocaleRegistry({ only: ["ko"], extra: [{ code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "ltr", flagCountry: "in" }] });
+  assert.deepEqual(withExtra.LOCALES.map(({ code }) => code), ["ko", "ta"]);
+});
+
+test("a subset registry refuses unknown codes and an empty list", () => {
+  assert.throws(() => defineLocaleRegistry({ only: ["ko", "xx"] }), /xx is not a family locale/);
+  assert.throws(() => defineLocaleRegistry({ only: [] }), /at least one locale/);
+});
+
+test("the family registry is untouched by the subset option", () => {
+  assert.equal(FAMILY_LOCALES.LOCALES.length, 14);
+  assert.equal(defineLocaleRegistry().LOCALES.length, 14);
 });
