@@ -45,6 +45,9 @@ native implementation waits for a native consumer (Phase 3).
 - **A11y**: primary text is `on-brand` (zinc.950, ~8:1 — spec §3.1 note);
   danger text is `on-status` (white/light, dark/zinc.950); focus ring 2px
   `border.focus` offset 2px; icon-only buttons must add `aria-label`.
+- **Links as buttons**: `<a class="dds-btn dds-btn--primary" href="…">` gets the
+  same look — the base rule resets the anchor underline, so no consumer shim
+  is needed.
 - **Do**: one primary per view; pair danger with a confirm step.
 - **Don't**: don't fake a disabled state with a ghost variant — use
   `[disabled]` so it's out of the tab order and announced correctly.

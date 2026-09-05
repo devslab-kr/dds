@@ -21,6 +21,9 @@
   line-height: var(--dds-typo-label-line-height);
   font-weight: var(--dds-typo-label-font-weight);
   color: var(--dds-color-text-primary);
+  /* Links styled as buttons (<a class="dds-btn">) inherit the UA anchor
+   * underline otherwise; no state re-adds it. */
+  text-decoration: none;
   cursor: pointer;
   transition: background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
   -webkit-tap-highlight-color: transparent;
