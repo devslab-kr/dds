@@ -1,0 +1,20 @@
+/* Section primitives (sections.tsx). Every selector here is prefixed
+   site-section / site-hero / site-steps / site-rows / site-pricing and is
+   defined once. Tokens only; no colour literals; no theme rules — the
+   tokens carry light and dark. */
+
+.site-section { padding-block: var(--dds-space-64); border-block-start: 1px solid var(--dds-color-border-default); }
+.site-section[data-tone="band"] { background: var(--dds-color-bg-subtle); }
+.site-section__shell { inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; }
+
+.site-section__head { max-inline-size: 46rem; margin-block-end: var(--dds-space-40); }
+.site-section__index { margin: 0; margin-block-end: var(--dds-space-12); color: var(--dds-color-text-brand); font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-caption-font-size); letter-spacing: .18em; }
+.site-section__head h2 { margin: 0; font-size: var(--dds-typo-title-1-font-size); line-height: var(--dds-typo-title-1-line-height); letter-spacing: -.02em; text-wrap: balance; white-space: pre-line; }
+.site-section__lede { margin: 0; margin-block-start: var(--dds-space-12); max-inline-size: 44rem; color: var(--dds-color-text-secondary); font-size: var(--dds-typo-body-1-font-size); line-height: 1.7; }
+
+@media (max-width: 48rem) {
+  .site-section { padding-block: var(--dds-space-48); }
+}
+
+html:lang(ko) .site-section__head h2,
+html:lang(ko) .site-section__lede { word-break: keep-all; overflow-wrap: break-word; }

@@ -5,7 +5,8 @@
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
   "sideEffects": [
-    "./styles.css"
+    "./styles.css",
+    "./site-sections.css"
   ],
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "src/tanstack-start.mjs",
     "src/tanstack-start.d.mts",
     "styles.css",
+    "site-sections.css",
     "README.md",
     "README.ko.md"
   ],
@@ -50,7 +52,8 @@
       "types": "./src/tanstack-start.d.mts",
       "import": "./src/tanstack-start.mjs"
     },
-    "./styles.css": "./styles.css"
+    "./styles.css": "./styles.css",
+    "./site-sections.css": "./site-sections.css"
   },
   "scripts": {
     "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly",
