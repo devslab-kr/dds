@@ -28,10 +28,12 @@
     "verify:site-kit:browser": "playwright test --config playwright.site-kit.config.ts",
     "verify:site-kit:release": "pnpm run verify:foundation:core && pnpm --filter @devslab/dds-solid run build && pnpm --filter @devslab/site-kit run build && node scripts/verify-site-kit-release.mjs",
     "changeset": "changeset",
-    "version-packages": "changeset version",
+    "version-packages": "changeset version && pnpm install --lockfile-only",
     "release": "changeset publish"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "packageManager": "pnpm@9.12.3",
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

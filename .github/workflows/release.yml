@@ -75,7 +75,12 @@ jobs:
           # the version PR it opens fails `pnpm install --frozen-lockfile`
           # the moment it lands on main. Refresh the lockfile in the same
           # commit — lockfile only, node_modules untouched.
-          version: pnpm version-packages && pnpm install --lockfile-only
+          # One token after the command, nothing more: changesets/action splits
+          # this string on spaces and hands the rest to the script as arguments
+          # — `changeset version "&&" "pnpm" "install" "--lockfile-only"` is what
+          # the previous form actually ran, and changesets refuses extra
+          # arguments. The lockfile refresh lives inside the npm script.
+          version: pnpm version-packages
           commit: "chore: release dds"
           title: "chore: release dds"
         env:

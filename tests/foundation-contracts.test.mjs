@@ -45,6 +45,12 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.equal(config.access, "public");
   assert.match(await read("LICENSE"), /DevsLab Source-Available License 1\.0/);
   const workflow = await read(".github/workflows/release.yml");
+  // The version PR must carry the lockfile (0.5.0 failed frozen-lockfile on
+  // main), and the refresh must live in the npm script: changesets/action
+  // passes everything after the first word of `version:` to changesets as
+  // arguments, and changesets rejects them.
+  assert.equal(root.scripts["version-packages"], "changeset version && pnpm install --lockfile-only");
+  assert.match(workflow, /^\s*version: pnpm version-packages\s*$/m);
   assert.match(workflow, /registry-url:\s*https:\/\/registry\.npmjs\.org/);
   assert.match(workflow, /id-token:\s*write/);
   assert.match(workflow, /npm publish|changeset publish|pnpm release/);
