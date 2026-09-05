@@ -69,3 +69,42 @@ export function StepFlow(props: StepFlowProps) {
     </ol>
   );
 }
+
+export interface FeatureRow { title: string; body: string; badge?: string }
+
+export interface FeatureRowsProps {
+  rows: ReadonlyArray<FeatureRow>;
+  label?: string;
+}
+
+/** Hairline rows — a card grid is the thing this primitive exists to replace. */
+export function FeatureRows(props: FeatureRowsProps) {
+  return (
+    <ul class="site-rows" aria-label={props.label}>
+      <For each={props.rows}>{(row) => (
+        <li class="site-rows__row">
+          <div class="site-rows__title">
+            <h3>{row.title}</h3>
+            <Show when={row.badge}>{(badge) => <span class="dds-badge dds-badge--brand">{badge()}</span>}</Show>
+          </div>
+          <p class="site-rows__body">{row.body}</p>
+        </li>
+      )}</For>
+    </ul>
+  );
+}
+
+export interface PricingNoteProps {
+  children: JSX.Element;
+  action: JSX.Element;
+}
+
+/** One paragraph block, one action. No table, no tiers — a note, not a pricing page. */
+export function PricingNote(props: PricingNoteProps) {
+  return (
+    <div class="site-pricing">
+      <div class="site-pricing__note">{props.children}</div>
+      <div class="site-pricing__action">{props.action}</div>
+    </div>
+  );
+}
