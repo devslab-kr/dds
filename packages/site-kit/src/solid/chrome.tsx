@@ -2,6 +2,7 @@ import { Button, Icon, IconButton } from "@devslab/dds-solid";
 import { For, createSignal, onMount, type JSX } from "solid-js";
 
 import { LocaleMenu, type LocaleMenuProps, type LocaleMenuVariant } from "./locale-menu";
+import type { LocaleRegistry } from "../core/locales.mjs";
 import type { LocaleState, SiteBrand, SiteLink, SiteMessages, ThemePreference } from "./types";
 
 export type { LocaleMenuProps };
@@ -66,6 +67,12 @@ export interface SiteHeaderProps {
   theme?: Omit<ThemeToggleProps, "messages">;
   onLocaleChange?: LocaleMenuProps["onLocaleChange"];
   localeVariant?: LocaleMenuVariant;
+  /**
+   * The languages the picker offers. Defaults to the family's fourteen;
+   * pass the registry from `defineLocaleRegistry` if this product sells in
+   * languages the family does not carry.
+   */
+  localeRegistry?: LocaleRegistry<string>;
   actions?: JSX.Element;
 }
 
@@ -87,6 +94,7 @@ export function SiteHeader(props: SiteHeaderProps) {
             state={props.locale}
             messages={props.messages}
             {...(props.localeVariant ? { variant: props.localeVariant } : {})}
+            {...(props.localeRegistry ? { registry: props.localeRegistry } : {})}
             {...(props.onLocaleChange ? { onLocaleChange: props.onLocaleChange } : {})}
           />
           {props.theme && <ThemeToggle {...props.theme} messages={props.messages} />}
