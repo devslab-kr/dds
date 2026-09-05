@@ -140,3 +140,13 @@ test("Worker and browser fixtures consume adapters and prove hydration plus Arab
     assert.match(workflow, new RegExp(gate.replaceAll(":", "\\:")), `${gate} must gate CI`);
   }
 });
+
+test("the TanStack adapter accepts metadata built from a product registry", async () => {
+  // buildMetadata<Code> returns SiteMetadata<Code>; an adapter typed to the
+  // family default alone made every product-registry consumer cast or
+  // augment the module to get its head descriptors out.
+  const dts = await readFile(new URL("../packages/site-kit/src/tanstack-start.d.mts", import.meta.url), "utf8");
+  assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
+  assert.match(dts, /toHtmlAttributes: <Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
+});
+
