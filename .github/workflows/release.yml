@@ -70,7 +70,12 @@ jobs:
         uses: changesets/action@v1
         with:
           publish: pnpm release
-          version: pnpm version-packages
+          # `changeset version` rewrites the fixed group's internal
+          # `workspace:x.y.z` specifiers but never touches pnpm-lock.yaml, so
+          # the version PR it opens fails `pnpm install --frozen-lockfile`
+          # the moment it lands on main. Refresh the lockfile in the same
+          # commit — lockfile only, node_modules untouched.
+          version: pnpm version-packages && pnpm install --lockfile-only
           commit: "chore: release dds"
           title: "chore: release dds"
         env:
