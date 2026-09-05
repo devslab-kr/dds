@@ -17,6 +17,30 @@ still references the verified-fact registry. `buildRobots` keeps its legacy
 environment-only output, while an optional `policies` object can independently
 control search indexing, citation crawlers, and model-training crawlers.
 
+## Sections
+
+Six stateless primitives for a family landing page, extracted from VisionLinq. Import from `@devslab/site-kit/solid`; the stylesheet ships inside `styles.css`.
+
+| Primitive | Renders |
+|---|---|
+| `SectionBlock` | `<section>` + content shell; `tone="band"` steps the background down one token |
+| `SectionHead` | mono zero-padded `index` (decorative), `h2`, optional lede |
+| `HeroSplit` | copy 6 / aside 5; the aside `figure` has no height rule — fix it in your scene |
+| `StepFlow` | `<ol>` of steps with **ring numerals 1 2 3** — a different glyph system from the section index |
+| `FeatureRows` | hairline rows with an optional `dds-badge`; never a card grid |
+| `PricingNote` | one paragraph block + one action |
+
+```tsx
+<SectionBlock id="how" labelledBy="how-title">
+  <SectionHead index="01" titleId="how-title" title={t("how.title")} lede={t("how.lede")} />
+  <StepFlow label={t("how.title")} steps={[{ title: t("how.1.title"), body: t("how.1.body") }, …]} />
+</SectionBlock>
+```
+
+### Locale subsets
+
+`defineLocaleRegistry({ only: ["ko", "en", "ja"] })` keeps only those family locales (family order, before any `extra`). Pass the registry to `SiteHeader localeRegistry` and to `validateCatalogs(…, { registry })`; a visitor asking for a locale outside the subset resolves to your `defaultLocale`.
+
 ## Product locales
 
 `LOCALES` is the family list — the fourteen languages devslab.kr markets in,
