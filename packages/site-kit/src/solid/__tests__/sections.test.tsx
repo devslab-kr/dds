@@ -57,3 +57,21 @@ it("site-sections.css defines every class the primitives render and stays token-
     expect(SECTIONS_CSS, cls).toMatch(new RegExp(`\\.${cls.replace(/[$()*+.?[\\\]^{|}]/g, "\\$&")}\\b`));
   }
 });
+
+it("StepFlow numbers steps with ring numerals, never the section's zero-padded mono", () => {
+  const { StepFlow } = kit;
+  const host = mount(() => <StepFlow label="Steps" steps={[
+    { title: "Register", body: "Upload." },
+    { title: "Distribute", body: "Print the QR." },
+    { title: "Confirm", body: "Only what needs a human." },
+  ]} />);
+  const list = host.querySelector("ol.site-steps")!;
+  expect(list.getAttribute("aria-label")).toBe("Steps");
+  const markers = [...list.querySelectorAll(".site-steps__marker")].map((m) => m.textContent);
+  expect(markers).toEqual(["1", "2", "3"]);
+  for (const marker of list.querySelectorAll(".site-steps__marker")) expect(marker.getAttribute("aria-hidden")).toBe("true");
+  expect([...list.querySelectorAll("h3")].map((h) => h.textContent)).toEqual(["Register", "Distribute", "Confirm"]);
+  expect(list.querySelectorAll(".site-steps__step p")[1]?.textContent).toBe("Print the QR.");
+  expect(host.innerHTML).not.toMatch(/>0[1-3]</);
+  for (const cls of ["site-steps", "site-steps__step", "site-steps__marker"]) expect(SECTIONS_CSS).toMatch(new RegExp(`\\.${cls}\\b`));
+});

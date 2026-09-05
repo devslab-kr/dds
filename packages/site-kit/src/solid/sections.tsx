@@ -1,4 +1,4 @@
-import { Show, type JSX } from "solid-js";
+import { For, Show, type JSX } from "solid-js";
 
 /**
  * Section primitives — the rhythm of a family landing page.
@@ -45,5 +45,27 @@ export function SectionHead(props: SectionHeadProps) {
       <h2 id={props.titleId}>{props.title}</h2>
       <Show when={props.lede}>{(lede) => <p class="site-section__lede">{lede()}</p>}</Show>
     </header>
+  );
+}
+
+export interface StepFlowStep { title: string; body: string }
+
+export interface StepFlowProps {
+  steps: ReadonlyArray<StepFlowStep>;
+  /** Accessible name for the list — pass the section title's words, localized. */
+  label?: string;
+}
+
+export function StepFlow(props: StepFlowProps) {
+  return (
+    <ol class="site-steps" aria-label={props.label}>
+      <For each={props.steps}>{(step, index) => (
+        <li class="site-steps__step">
+          <span class="site-steps__marker" aria-hidden="true">{index() + 1}</span>
+          <h3>{step.title}</h3>
+          <p>{step.body}</p>
+        </li>
+      )}</For>
+    </ol>
   );
 }
