@@ -52,6 +52,10 @@ if (bundle) {
     const src = readFileSync(join(pkgDir, "src", file), "utf8").trim();
     if (!bundle.includes(src)) errors.push(`dist/dds.css is stale: src/${file} content not in bundle`);
   }
+  // Built contract: <a class="dds-btn"> must not carry the UA anchor underline.
+  const btnStart = bundle.indexOf(".dds-btn {");
+  const btnBlock = btnStart >= 0 ? bundle.slice(btnStart, bundle.indexOf("}", btnStart)) : "";
+  if (!/text-decoration:\s*none/.test(btnBlock)) errors.push("dist/dds.css: .dds-btn block lacks text-decoration: none");
 }
 
 if (errors.length) {

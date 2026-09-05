@@ -113,6 +113,13 @@ test("buttons preserve readable CJK labels and expose 44px touch targets", async
   assert.match(iconButton, /min-block-size:\s*44px/);
 });
 
+test("buttons rendered as links carry no anchor underline", async () => {
+  const button = await read("packages/dds-css/src/button.css");
+  const base = button.slice(button.indexOf(".dds-btn {"), button.indexOf("}", button.indexOf(".dds-btn {")));
+  assert.match(base, /text-decoration:\s*none/, ".dds-btn must reset the UA anchor underline");
+  assert.doesNotMatch(button.replace(base, ""), /text-decoration:\s*(underline|revert|initial)/, "no .dds-btn state may re-add an underline");
+});
+
 test("CSS defines RTL, forced-colors, and reduced-motion policies", async () => {
   const base = await read("packages/dds-css/src/base.css");
   const cssFiles = await readdir(new URL("../packages/dds-css/src/", import.meta.url));

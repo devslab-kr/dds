@@ -44,6 +44,8 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 - **접근성**: primary 텍스트는 `on-brand`(zinc.950, 약 8:1 — 스펙 §3.1 노트);
   danger 텍스트는 `on-status`(라이트=흰색, 다크=zinc.950); 포커스 링 2px
   `border.focus` + offset 2px; 아이콘 단독 버튼은 `aria-label` 필수.
+- **링크를 버튼으로**: `<a class="dds-btn dds-btn--primary" href="…">`도 같은
+  모양 — 기본 규칙이 앵커 밑줄을 지우므로 소비자 쪽 보정 CSS가 필요 없습니다.
 - **Do**: 화면당 primary 하나. danger는 확인 단계와 함께.
 - **Don't**: 비활성을 ghost로 흉내내지 말 것 — `[disabled]`를 써야 탭 순서에서
   빠지고 AT에 올바르게 읽힙니다.
