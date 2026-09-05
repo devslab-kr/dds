@@ -100,3 +100,25 @@ it("PricingNote is one paragraph block and one action", () => {
   expect(host.querySelector("table")).toBeNull();
   for (const cls of ["site-pricing", "site-pricing__note", "site-pricing__action"]) expect(SECTIONS_CSS).toMatch(new RegExp(`\\.${cls}\\b`));
 });
+
+it("exports the six section primitives", () => {
+  for (const component of [kit.SectionBlock, kit.SectionHead, kit.HeroSplit, kit.StepFlow, kit.FeatureRows, kit.PricingNote]) expect(typeof component).toBe("function");
+});
+
+it("HeroSplit puts copy beside a labelled figure and leaves the aside's height to the consumer", () => {
+  const { HeroSplit } = kit;
+  const host = mount(() => <HeroSplit eyebrow="AskLinq" title="Same answers, every time." titleId="hero-title" lede="Upload once."
+    actions={<a class="dds-btn dds-btn--primary" href="/signup">Start</a>}
+    aside={<div data-testid="walkthrough">card</div>} asideLabel="Product walkthrough" />);
+  const section = host.querySelector("section.site-hero")!;
+  expect(section.getAttribute("aria-labelledby")).toBe("hero-title");
+  expect(host.querySelector(".site-hero__eyebrow")?.textContent).toBe("AskLinq");
+  expect(host.querySelector("h1#hero-title")?.textContent).toBe("Same answers, every time.");
+  expect(host.querySelector(".site-hero__lede")?.textContent).toBe("Upload once.");
+  expect(host.querySelector(".site-hero__actions a")?.textContent).toBe("Start");
+  const figure = host.querySelector("figure.site-hero__aside")!;
+  expect(figure.getAttribute("aria-label")).toBe("Product walkthrough");
+  expect(figure.querySelector("[data-testid=walkthrough]")).not.toBeNull();
+  expect(SECTIONS_CSS).not.toMatch(/\.site-hero__aside\s*\{[^}]*block-size/);
+  for (const cls of ["site-hero", "site-hero__shell", "site-hero__copy", "site-hero__eyebrow", "site-hero__lede", "site-hero__actions", "site-hero__aside"]) expect(SECTIONS_CSS).toMatch(new RegExp(`\\.${cls}\\b`));
+});

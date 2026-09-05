@@ -48,6 +48,33 @@ export function SectionHead(props: SectionHeadProps) {
   );
 }
 
+export interface HeroSplitProps {
+  eyebrow?: string;
+  title: string;
+  titleId: string;
+  lede: string;
+  actions: JSX.Element;
+  /** The product's own scene. Its height is the consumer's decision — fix it there if the scene swaps panels. */
+  aside: JSX.Element;
+  asideLabel: string;
+}
+
+export function HeroSplit(props: HeroSplitProps) {
+  return (
+    <section class="site-hero" aria-labelledby={props.titleId}>
+      <div class="site-hero__shell">
+        <div class="site-hero__copy">
+          <Show when={props.eyebrow}>{(eyebrow) => <p class="site-hero__eyebrow">{eyebrow()}</p>}</Show>
+          <h1 id={props.titleId}>{props.title}</h1>
+          <p class="site-hero__lede">{props.lede}</p>
+          <div class="site-hero__actions">{props.actions}</div>
+        </div>
+        <figure class="site-hero__aside" aria-label={props.asideLabel}>{props.aside}</figure>
+      </div>
+    </section>
+  );
+}
+
 export interface StepFlowStep { title: string; body: string }
 
 export interface StepFlowProps {
