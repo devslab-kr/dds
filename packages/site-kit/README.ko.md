@@ -1,6 +1,6 @@
 # @devslab/site-kit
 
-DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. 엄격한 14개 로케일 카탈로그, 로케일 협상, SEO/GEO 문서 생성기, 접근 가능한 SolidJS 2 사이트 셸을 제공한다. 제품명·주장·내비게이션·번역 문구는 항상 소비 앱이 소유한다.
+DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. 가족 로케일에 대한 엄격한 카탈로그(제품별 확장 가능), 로케일 협상, SEO/GEO 문서 생성기, 접근 가능한 SolidJS 2 사이트 셸을 제공한다. 제품명·주장·내비게이션·번역 문구는 항상 소비 앱이 소유한다.
 
 ## 진입점
 
@@ -9,13 +9,44 @@ DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. �
 - `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환
 - `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일
 
-카탈로그 생성은 의도적으로 엄격하다. 14개 로케일 모두 동일한 키와 이름 기반 placeholder를 가져야 하며 런타임 문구 폴백은 없다.
+카탈로그 생성은 의도적으로 엄격하다. 레지스트리의 모든 로케일이 동일한 키와 이름 기반 placeholder를 가져야 하며 런타임 문구 폴백은 없다.
 
-사이트맵은 14개 로케일 alternate와 `x-default`를 출력한다.
+사이트맵은 레지스트리 로케일마다 alternate 하나와 `x-default`를 출력한다.
 `buildVerifiedJsonLd`는 검토된 schema type과 claim allowlist만 허용하고 모든
 claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. `buildRobots`의
 기존 environment-only 출력은 유지되며, 선택적 `policies`로 검색 인덱싱,
 인용 crawler, 모델 학습 crawler를 각각 제어할 수 있다.
+
+## 제품 로케일
+
+`LOCALES`는 **가족 목록**이다 — devslab.kr이 마케팅하는 14개 언어이자 모든
+제품이 기본으로 받는 바닥. 모든 제품의 목록은 아니다. 가족이 갖지 않은
+언어로 파는 제품은 레지스트리를 만든다:
+
+```js
+import { defineLocaleRegistry } from "@devslab/site-kit";
+
+export const locales = defineLocaleRegistry({
+  extra: [
+    { code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "ltr", flagCountry: "in" },
+  ],
+});
+```
+
+로케일을 다루는 헬퍼는 전부 이것을 받는다: `validateCatalogs(catalogs, "en", { registry })`,
+`buildMetadata({ …, registry })`, `buildSitemap({ …, registry })`,
+`localizedPath(path, locale, defaultLocale, registry)`,
+`<SiteHeader localeRegistry={…}>`. 안 넘기면 가족 레지스트리이므로
+`defineLocaleRegistry`를 부른 적 없는 소비자는 영향이 없다.
+
+`flagCountry`는 이 패키지가 **이미 벤더링한** 나라를 지목해야 한다
+(`FLAG_COUNTRY` 참조). 제품은 국기 아트워크를 싣지 않는다 — 라이선스가 있고,
+생성되며, 여기서 스캔된다. 그리고 국기는 나라를 가리키지 언어를 가리키지
+않으므로 인도 로케일 7개가 정당하게 `in`을 공유한다.
+
+레지스트리는 전부 넘기거나 전혀 안 넘기거나다. 레지스트리로 그린 페이지의
+메타데이터를 레지스트리 없이 만들면, 페이지는 타밀어로 렌더되면서 검색
+엔진에는 타밀어가 없다고 말한다.
 
 ## 로케일 메뉴 variant
 

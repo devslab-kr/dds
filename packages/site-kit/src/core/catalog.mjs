@@ -1,4 +1,4 @@
-import { LOCALES, canonicalLocale } from "./locales.mjs";
+import { FAMILY_LOCALES } from "./locales.mjs";
 
 const placeholders = (message) => [...String(message).matchAll(/\{([A-Za-z][A-Za-z0-9_]*)\}/g)].map((match) => match[1]).sort();
 const difference = (left, right) => left.filter((value) => !right.includes(value));
@@ -11,12 +11,25 @@ export class CatalogValidationError extends Error {
   }
 }
 
-export function validateCatalogs(catalogs, referenceLocale) {
-  const reference = canonicalLocale(referenceLocale);
+/**
+ * Every locale the site sells in must carry every key.
+ *
+ * `options.registry` says which locales those are. Omitted, it is the
+ * family's fourteen — which is the right answer for a family site and the
+ * wrong one for a product that added its own, because a catalog missing
+ * six languages would validate clean.
+ *
+ * @param {object} catalogs
+ * @param {string} referenceLocale
+ * @param {{ registry?: { LOCALES: ReadonlyArray<{code: string}>, canonicalLocale: (c: string) => string | undefined } }} [options]
+ */
+export function validateCatalogs(catalogs, referenceLocale, options = {}) {
+  const registry = options.registry ?? FAMILY_LOCALES;
+  const reference = registry.canonicalLocale(referenceLocale);
   if (!reference || !catalogs[reference]) throw new CatalogValidationError([`reference locale ${referenceLocale} is missing`]);
   const referenceKeys = Object.keys(catalogs[reference]).sort();
   const issues = [];
-  for (const { code } of LOCALES) {
+  for (const { code } of registry.LOCALES) {
     const catalog = catalogs[code];
     if (!catalog) { issues.push(`missing locale ${code}`); continue; }
     const keys = Object.keys(catalog).sort();

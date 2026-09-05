@@ -1,4 +1,10 @@
-import { LOCALES, canonicalLocale, localeAttributes } from "./locales.mjs";
+import { FAMILY_LOCALES } from "./locales.mjs";
+
+// Every function here that names a locale takes an optional `registry`.
+// Omitted it is the family's fourteen, which is what a family site wants.
+// A product that added its own languages must pass its registry, or the
+// hreflang alternates and the sitemap would quietly omit them — the page
+// would render in Tamil while telling search engines Tamil does not exist.
 
 const cleanBase = (baseUrl) => String(baseUrl).replace(/\/+$/, "");
 const cleanPath = (path) => {
@@ -6,27 +12,27 @@ const cleanPath = (path) => {
   return value === "/" ? "/" : value;
 };
 
-export function localizedPath(path, locale, defaultLocale) {
-  const canonical = canonicalLocale(locale);
-  const fallback = canonicalLocale(defaultLocale);
+export function localizedPath(path, locale, defaultLocale, registry = FAMILY_LOCALES) {
+  const canonical = registry.canonicalLocale(locale);
+  const fallback = registry.canonicalLocale(defaultLocale);
   if (!canonical || !fallback) throw new RangeError("localizedPath received an unsupported locale");
   const normalized = cleanPath(path);
   return canonical === fallback ? normalized : `/${canonical}${normalized === "/" ? "" : normalized}`;
 }
 
-export function localizedUrl(baseUrl, path, locale, defaultLocale) {
-  return `${cleanBase(baseUrl)}${localizedPath(path, locale, defaultLocale)}`;
+export function localizedUrl(baseUrl, path, locale, defaultLocale, registry = FAMILY_LOCALES) {
+  return `${cleanBase(baseUrl)}${localizedPath(path, locale, defaultLocale, registry)}`;
 }
 
-export function buildMetadata({ baseUrl, path, locale, defaultLocale, title, description, siteName, image }) {
-  const canonicalLocaleCode = canonicalLocale(locale);
+export function buildMetadata({ baseUrl, path, locale, defaultLocale, title, description, siteName, image, registry = FAMILY_LOCALES }) {
+  const canonicalLocaleCode = registry.canonicalLocale(locale);
   if (!canonicalLocaleCode) throw new RangeError(`Unsupported locale: ${locale}`);
-  const canonical = localizedUrl(baseUrl, path, canonicalLocaleCode, defaultLocale);
-  const alternates = LOCALES.map(({ code }) => ({ hreflang: code, href: localizedUrl(baseUrl, path, code, defaultLocale) }));
-  alternates.push({ hreflang: "x-default", href: localizedUrl(baseUrl, path, defaultLocale, defaultLocale) });
+  const canonical = localizedUrl(baseUrl, path, canonicalLocaleCode, defaultLocale, registry);
+  const alternates = registry.LOCALES.map(({ code }) => ({ hreflang: code, href: localizedUrl(baseUrl, path, code, defaultLocale, registry) }));
+  alternates.push({ hreflang: "x-default", href: localizedUrl(baseUrl, path, defaultLocale, defaultLocale, registry) });
   const imageUrl = new URL(image, `${cleanBase(baseUrl)}/`).href;
   return {
-    html: localeAttributes(canonicalLocaleCode),
+    html: registry.localeAttributes(canonicalLocaleCode),
     title,
     description,
     canonical,
@@ -44,13 +50,13 @@ export function buildMetadata({ baseUrl, path, locale, defaultLocale, title, des
   };
 }
 
-export function buildSitemap({ baseUrl, routes, defaultLocale, lastModified }) {
-  return routes.flatMap((path) => LOCALES.map(({ code }) => ({
-    loc: localizedUrl(baseUrl, path, code, defaultLocale),
+export function buildSitemap({ baseUrl, routes, defaultLocale, lastModified, registry = FAMILY_LOCALES }) {
+  return routes.flatMap((path) => registry.LOCALES.map(({ code }) => ({
+    loc: localizedUrl(baseUrl, path, code, defaultLocale, registry),
     locale: code,
     alternates: [
-      ...LOCALES.map(({ code: alternate }) => ({ hreflang: alternate, href: localizedUrl(baseUrl, path, alternate, defaultLocale) })),
-      { hreflang: "x-default", href: localizedUrl(baseUrl, path, defaultLocale, defaultLocale) },
+      ...registry.LOCALES.map(({ code: alternate }) => ({ hreflang: alternate, href: localizedUrl(baseUrl, path, alternate, defaultLocale, registry) })),
+      { hreflang: "x-default", href: localizedUrl(baseUrl, path, defaultLocale, defaultLocale, registry) },
     ],
     ...(lastModified ? { lastmod: lastModified } : {}),
   })));

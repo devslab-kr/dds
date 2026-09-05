@@ -35,33 +35,63 @@ const entries = Object.entries(FLAG_COUNTRY).map(([locale, country]) => {
   return { locale, country, viewBox, body };
 });
 
+// One entry per country, not per locale: seven Indian languages would
+// otherwise inline the same India SVG seven times.
+const byCountry = [...new Map(entries.map((e) => [e.country, e])).values()];
+
 const js = `${HEADER}
 export const FLAG_COUNTRY = Object.freeze(${JSON.stringify(FLAG_COUNTRY, null, 2)});
 
-export const LOCALE_FLAGS = Object.freeze({
-${entries.map((e) => `  ${JSON.stringify(e.locale)}: Object.freeze({ country: ${JSON.stringify(e.country)}, viewBox: ${JSON.stringify(e.viewBox)}, body: ${JSON.stringify(e.body)} }),`).join("\n")}
+/**
+ * Flags indexed by country, not by locale.
+ *
+ * A locale-keyed map can only answer for languages the family ships. A
+ * product that adds its own — BookLinq sells in six Indian languages the
+ * family does not carry — names a country here instead, so nobody vendors
+ * a second copy of an SVG this package already has.
+ */
+export const FLAGS_BY_COUNTRY = Object.freeze({
+${byCountry.map((e) => `  ${JSON.stringify(e.country)}: Object.freeze({ country: ${JSON.stringify(e.country)}, viewBox: ${JSON.stringify(e.viewBox)}, body: ${JSON.stringify(e.body)} }),`).join("\n")}
 });
 
-export function flagFor(locale) {
+export const LOCALE_FLAGS = Object.freeze({
+${entries.map((e) => `  ${JSON.stringify(e.locale)}: FLAGS_BY_COUNTRY[${JSON.stringify(e.country)}],`).join("\n")}
+});
+
+/**
+ * @param {string} locale
+ * @param {{ LOCALES?: ReadonlyArray<{ code: string, flagCountry?: string }> }} [registry]
+ *   A product's locale registry, for a locale the family does not carry.
+ *   Its \`flagCountry\` names one of FLAGS_BY_COUNTRY.
+ */
+export function flagFor(locale, registry) {
   const flag = LOCALE_FLAGS[locale];
-  if (!flag) throw new RangeError(\`No flag for locale: \${locale}\`);
-  return flag;
+  if (flag) return flag;
+  const extra = registry?.LOCALES?.find((definition) => definition.code === locale);
+  if (extra?.flagCountry) {
+    const vendored = FLAGS_BY_COUNTRY[extra.flagCountry];
+    if (vendored) return vendored;
+    throw new RangeError(\`No vendored flag for country: \${extra.flagCountry} (locale \${locale})\`);
+  }
+  throw new RangeError(\`No flag for locale: \${locale}\`);
 }
 `;
 const dts = `${HEADER}
+import type { LocaleRegistry } from "./locales.mjs";
 import type { SiteLocale } from "./locales.mjs";
 export interface LocaleFlag { readonly country: string; readonly viewBox: string; readonly body: string }
 export declare const FLAG_COUNTRY: Readonly<Record<SiteLocale, string>>;
+export declare const FLAGS_BY_COUNTRY: Readonly<Record<string, LocaleFlag>>;
 export declare const LOCALE_FLAGS: Readonly<Record<SiteLocale, LocaleFlag>>;
-export declare function flagFor(locale: SiteLocale): LocaleFlag;
+export declare function flagFor(locale: string, registry?: LocaleRegistry<string>): LocaleFlag;
 `;
 
 const targets = [["src/core/flags.mjs", js], ["src/core/flags.d.mts", dts]];
 if (process.argv.includes("--check")) {
   const stale = targets.filter(([rel, next]) => readFileSync(join(pkg, rel), "utf8") !== next);
   if (stale.length) { console.error(`flags out of date: ${stale.map(([r]) => r).join(", ")} — run build-flags`); process.exit(1); }
-  console.log("site-kit flags: 14 locales, generated output in sync");
+  console.log(`site-kit flags: ${entries.length} locales over ${byCountry.length} countries, in sync`);
 } else {
   for (const [rel, next] of targets) writeFileSync(join(pkg, rel), next);
-  console.log("site-kit flags: wrote src/core/flags.mjs and flags.d.mts (14 locales)");
+  console.log(`site-kit flags: wrote flags.mjs and flags.d.mts (${entries.length} locales, ${byCountry.length} countries)`);
 }

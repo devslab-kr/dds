@@ -1,6 +1,6 @@
 # @devslab/site-kit
 
-Public product-site infrastructure for DevsLab products. It provides strict 14-locale catalogs, locale negotiation, SEO/GEO document builders, and accessible SolidJS 2 site shells. Product names, claims, navigation, and translated copy always remain in the consuming application.
+Public product-site infrastructure for DevsLab products. It provides strict catalogs over the family locales (extensible per product), locale negotiation, SEO/GEO document builders, and accessible SolidJS 2 site shells. Product names, claims, navigation, and translated copy always remain in the consuming application.
 
 ## Entry points
 
@@ -9,13 +9,44 @@ Public product-site infrastructure for DevsLab products. It provides strict 14-l
 - `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors.
 - `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles.
 
-Catalog construction is intentionally strict: all 14 locales must have exactly the same keys and named placeholders. There is no runtime copy fallback.
+Catalog construction is intentionally strict: every locale in the registry must have exactly the same keys and named placeholders. There is no runtime copy fallback.
 
-Sitemaps emit 14 locale alternates plus `x-default`. `buildVerifiedJsonLd`
+Sitemaps emit one alternate per registry locale plus `x-default`. `buildVerifiedJsonLd`
 accepts only the reviewed schema-type and claim allowlists, and every claim leaf
 still references the verified-fact registry. `buildRobots` keeps its legacy
 environment-only output, while an optional `policies` object can independently
 control search indexing, citation crawlers, and model-training crawlers.
+
+## Product locales
+
+`LOCALES` is the family list — the fourteen languages devslab.kr markets in,
+and the floor every product gets. It is not every product's list. A product
+that sells in languages the family does not carry builds a registry:
+
+```js
+import { defineLocaleRegistry } from "@devslab/site-kit";
+
+export const locales = defineLocaleRegistry({
+  extra: [
+    { code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "ltr", flagCountry: "in" },
+  ],
+});
+```
+
+Every locale-aware helper takes one: `validateCatalogs(catalogs, "en", { registry })`,
+`buildMetadata({ …, registry })`, `buildSitemap({ …, registry })`,
+`localizedPath(path, locale, defaultLocale, registry)`, and
+`<SiteHeader localeRegistry={…}>`. Omit it and you get the family registry, so
+a consumer that never calls `defineLocaleRegistry` is unaffected.
+
+`flagCountry` must name a country this package already vendors — see
+`FLAG_COUNTRY` for the list. Products do not ship flag artwork: it is
+licensed, generated and scanned here, and a flag names a country, not a
+language, so seven Indian locales legitimately share `in`.
+
+Pass the registry everywhere or nowhere. A page built with the registry but
+metadata built without it renders in Tamil while telling search engines Tamil
+does not exist.
 
 ## Locale menu variants
 
