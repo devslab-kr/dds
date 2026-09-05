@@ -41,14 +41,26 @@ const FAMILY_ALIASES = Object.freeze([["zh", "zh-TW"], ["pt", "pt-BR"]]);
  * and security-scanned here, and seven Indian languages share one flag
  * anyway.
  *
- * @param {{ extra?: ReadonlyArray<object>, aliases?: ReadonlyArray<[string, string]> }} [options]
+ * @param {{ only?: ReadonlyArray<string>, extra?: ReadonlyArray<object>, aliases?: ReadonlyArray<[string, string]> }} [options]
  */
 export function defineLocaleRegistry(options = {}) {
   const extra = options.extra ?? [];
-  const seen = new Set(LOCALES.map(({ code }) => code));
+  // `only` — the product sells in a subset of the family's languages. The
+  // subset keeps the family's order (the picker order is a family decision)
+  // and is applied before `extra`, so a product may still add its own.
+  let family = LOCALES;
+  if (options.only !== undefined) {
+    if (options.only.length === 0) throw new RangeError("`only` needs at least one locale — a registry with none is a bug, not a choice");
+    const wanted = new Set(options.only);
+    for (const code of wanted) {
+      if (!LOCALES.some((locale) => locale.code === code)) throw new RangeError(`${code} is not a family locale — \`only\` selects from the family list; use \`extra\` for a product's own`);
+    }
+    family = Object.freeze(LOCALES.filter((locale) => wanted.has(locale.code)));
+  }
+  const seen = new Set(family.map(({ code }) => code));
   for (const locale of extra) {
     if (!locale?.code) throw new TypeError("every extra locale needs a code");
-    if (seen.has(locale.code)) {
+    if (LOCALES.some((known) => known.code === locale.code)) {
       throw new RangeError(`${locale.code} is already a family locale — remove it from \`extra\``);
     }
     if (!locale.nativeName) throw new TypeError(`${locale.code} needs a nativeName — it is what the picker shows`);
@@ -56,7 +68,7 @@ export function defineLocaleRegistry(options = {}) {
     seen.add(locale.code);
   }
 
-  const locales = Object.freeze([...LOCALES, ...extra.map((locale) => Object.freeze({ ...locale }))]);
+  const locales = Object.freeze([...family, ...extra.map((locale) => Object.freeze({ ...locale }))]);
   const byLower = new Map(locales.map((locale) => [locale.code.toLowerCase(), locale]));
   const aliases = new Map([...FAMILY_ALIASES, ...(options.aliases ?? [])]);
 
@@ -65,7 +77,7 @@ export function defineLocaleRegistry(options = {}) {
     const exact = byLower.get(String(candidate).trim().toLowerCase());
     if (exact) return exact.code;
     const base = String(candidate).trim().toLowerCase().split("-")[0];
-    if (aliases.has(base)) return aliases.get(base);
+    if (aliases.has(base)) { const target = aliases.get(base); return byLower.has(target.toLowerCase()) ? target : undefined; }
     return byLower.get(base)?.code;
   }
 
