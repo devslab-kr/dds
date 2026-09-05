@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-css",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "DDS CSS component layer — class-based, framework-neutral, semantic-token-only (spec §4.3 v1 inventory, 20 components)",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",

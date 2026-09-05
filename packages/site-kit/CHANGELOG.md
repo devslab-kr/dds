@@ -1,5 +1,12 @@
 # @devslab/site-kit
 
+## 0.5.1
+
+### Patch Changes
+
+- 2a91469: `toTanStackHead` and `toHtmlAttributes` are generic over the locale code, matching the builders that feed them. Metadata built with a product registry (`SiteMetadata<string>`) no longer needs a cast or a module augmentation to reach the TanStack head.
+  - @devslab/dds-solid@0.5.1
+
 ## 0.5.0
 
 ### Minor Changes

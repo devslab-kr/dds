@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-tokens",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "DDS (DevsLab Design System) design tokens — one JSON source, built for CSS, Tailwind, TypeScript/RN and Ionic",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
