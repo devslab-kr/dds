@@ -12,10 +12,17 @@ test("public foundation packages use the @devslab scope, source-available licens
     "packages/dds-icons/package.json": "@devslab/dds-icons",
   };
 
+  // The fixed group moves in lockstep, so one manifest is the source of
+  // truth for the version and the others must agree with it. A literal here
+  // was a test that every release broke — it asserted that no release had
+  // happened.
+  const { version } = await json("packages/dds-tokens/package.json");
+  assert.match(version, /^\d+\.\d+\.\d+$/);
+
   for (const [path, name] of Object.entries(expected)) {
     const manifest = await json(path);
     assert.equal(manifest.name, name);
-    assert.equal(manifest.version, "0.4.1");
+    assert.equal(manifest.version, version, `${path} must move in lockstep with dds-tokens`);
     assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
     assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org");
     assert.equal(manifest.publishConfig?.access, "public");
@@ -53,12 +60,17 @@ test("unpublished DDS packages bootstrap from this workspace", async () => {
     "packages/site-kit/package.json": ["@devslab/dds-solid"],
   };
 
+  // `changeset version` rewrites these to `workspace:<the new version>` on
+  // every release (updateInternalDependencies: "patch"), so the expectation
+  // is the specifier's shape and the lockstep version, not a literal.
+  const { version } = await json("packages/dds-tokens/package.json");
   for (const [path, names] of Object.entries(internalDependencies)) {
     const manifest = await json(path);
+    assert.equal(manifest.version, version, `${path} must move in lockstep with dds-tokens`);
     for (const name of names) {
       assert.equal(
         manifest.dependencies?.[name],
-        "workspace:0.4.1",
+        `workspace:${version}`,
         `${path} must resolve unpublished ${name} from the local release workspace`,
       );
     }
