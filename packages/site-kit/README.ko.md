@@ -72,7 +72,41 @@ export const locales = defineLocaleRegistry({
 메타데이터를 레지스트리 없이 만들면, 페이지는 타밀어로 렌더되면서 검색
 엔진에는 타밀어가 없다고 말한다.
 
-## 로케일 메뉴 variant
+## 제작사 표시
+
+루트 entry는 프레임워크 중립 `definePublisher`, `buildPublisher`,
+`serializeJsonLd`, `renderPublisherHtml`을 제공한다. DevsLab 제품과 OSS는
+별도 entry `@devslab/site-kit/devslab`의 공통 설정을 사용한다.
+
+```js
+import { buildPublisher, renderPublisherHtml } from "@devslab/site-kit";
+import { DEVSLAB_PUBLISHER } from "@devslab/site-kit/devslab";
+
+const publisher = buildPublisher(DEVSLAB_PUBLISHER, { locale: "ko" });
+// footer에는 publisher.link.href / .label을 사용한다.
+// JSON-LD graph에는 publisher.organization을 넣고,
+// 제품/WebSite publisher에는 publisher.reference를 사용한다.
+const html = renderPublisherHtml(DEVSLAB_PUBLISHER);
+// 정적 페이지 빌드에서 삽입: 보이는 링크 + Organization.
+```
+
+`PublisherIdentity`의 필수 필드는 `id`, `name`, `url`이다. 선택 필드
+`alternateName`, `sameAs`, `labels`, `defaultLabel`은 정체성만 표현하며
+제품 기능 주장을 추가하지 않는다. URL은 사용자 정보 없는 절대 HTTP(S)만
+허용한다. 설정은 복사 후 동결한다. 라벨은 정확한 locale, 소문자/기본 언어,
+`defaultLabel`(없으면 `name`) 순서다. DevsLab 기본 라벨은
+`데브스랩(DevsLab)`이고 `en`은 `DevsLab`이다. 공식 홈페이지·한국어 이름·
+공식 `sameAs` 링크는 이 설정이 소유한다.
+
+`renderPublisherHtml`은 링크와 JSON-LD를 escape하며 CSP용 `nonce`를
+선택적으로 받는다. DOM이나 Solid 없이 문자열을 반환하므로 Node 빌드,
+MkDocs 준비 작업, SSR에서 공통으로 쓴다. 기존 graph를 script에 넣을 때는
+`serializeJsonLd`를 사용한다. Organization은 페이지마다 한 번 출력한다.
+다른 제작사는 자체 설정으로 `definePublisher`를 호출한다. 기능 주장은
+계속 `VerifiedFactRegistry`로 검증한다. robots·동의·분석·학습 정책은
+이 API가 변경하지 않는다.
+
+## 로케일 메뉴 렌더링
 
 `LocaleMenu`는 기본으로 네이티브 `<select>`를 렌더링한다. `variant="flag"`는
 트리거가 현재 로케일의 국기이고 행마다 국기 + 자국어 이름 링크인 `<details>`

@@ -41,7 +41,40 @@ Six stateless primitives for a family landing page, extracted from VisionLinq. I
 
 `defineLocaleRegistry({ only: ["ko", "en", "ja"] })` keeps only those family locales (family order, before any `extra`). Pass the registry to `SiteHeader localeRegistry` and to `validateCatalogs(…, { registry })`; a visitor asking for a locale outside the subset resolves to your `defaultLocale`. `defaultLocale` must itself be inside `only`; an alias whose target falls outside the subset (e.g. `zh` → `zh-TW` when only `zh-HK` is kept) resolves to `undefined` and so falls through to `defaultLocale`, never to another script.
 
-## Product locales
+## Publisher attribution
+
+The root entry provides framework-neutral `definePublisher`, `buildPublisher`,
+`serializeJsonLd`, and `renderPublisherHtml`. DevsLab products and OSS sites use
+one identity preset from the separate `@devslab/site-kit/devslab` entry:
+
+```js
+import { buildPublisher, renderPublisherHtml } from "@devslab/site-kit";
+import { DEVSLAB_PUBLISHER } from "@devslab/site-kit/devslab";
+
+const publisher = buildPublisher(DEVSLAB_PUBLISHER, { locale: "ko" });
+// Render publisher.link.href / .label in the footer.
+// Put publisher.organization in the JSON-LD graph and use
+// publisher.reference as the product/WebSite publisher.
+const html = renderPublisherHtml(DEVSLAB_PUBLISHER);
+// Insert html into a static page during its build: visible link + Organization.
+```
+
+`PublisherIdentity` requires `id`, `name`, and `url`; optional `alternateName`,
+`sameAs`, `labels`, and `defaultLabel` describe identity, not product capabilities.
+URLs must be absolute HTTP(S) without credentials. Configuration is copied and
+frozen. Labels use exact locale, lowercase/base language, then `defaultLabel`
+(or `name`). The DevsLab default is `데브스랩(DevsLab)`; `en` uses `DevsLab`.
+The preset owns the official homepage, Korean alias and official `sameAs` links.
+
+`renderPublisherHtml` escapes the anchor and JSON-LD and accepts an optional
+`nonce` for CSP. It returns a string without reading the DOM or importing Solid;
+Node build scripts, MkDocs preparation, and SSR can use the same output.
+For an existing graph, use `serializeJsonLd` when inserting JSON into a script.
+Render the Organization once per page. Other publishers call `definePublisher`
+with their own configuration. Capability claims still use `VerifiedFactRegistry`;
+this API does not change robots rules, consent, analytics or training policy.
+
+## Product locale registries
 
 `LOCALES` is the family list — the fourteen languages devslab.kr markets in,
 and the floor every product gets. It is not every product's list. A product
