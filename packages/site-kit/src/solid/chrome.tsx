@@ -1,8 +1,8 @@
 import { Button, Icon, IconButton } from "@devslab/dds-solid";
-import { For, createSignal, onMount, type JSX } from "solid-js";
+import { For, Show, createSignal, onMount, type JSX } from "solid-js";
 
 import { LocaleMenu, type LocaleMenuProps, type LocaleMenuVariant } from "./locale-menu";
-import type { LocaleRegistry } from "../core/locales.mjs";
+import { FAMILY_LOCALES, type LocaleRegistry, type SiteLocale } from "../core/locales.mjs";
 import type { LocaleState, SiteBrand, SiteLink, SiteMessages, ThemePreference } from "./types";
 
 export type { LocaleMenuProps };
@@ -109,16 +109,79 @@ export interface SiteFooterProps {
   brand: SiteBrand;
   links: SiteLink[];
   copyright: string;
+  /** Wraps the copyright in a link — the family site, usually. */
+  copyrightHref?: string;
   messages: SiteMessages;
+  /**
+   * The language row. Omit it and no row is rendered: a product whose header
+   * already offers every language may not want a second copy of the list.
+   */
+  locale?: LocaleState;
+  /** The languages the row lists. Defaults to the family's fourteen. */
+  localeRegistry?: LocaleRegistry<string>;
+  /**
+   * Called with the code the reader picked, before the browser follows the
+   * link — for a product that remembers the choice in a cookie.
+   */
+  onLocaleSelect?: (locale: string) => void;
+  /** Links after the brand name, middot-separated: the family line, the operator. */
+  family?: SiteLink[];
 }
 
+/**
+ * The family footer: a language row, then the brand beside its family links,
+ * then the page's links and the copyright.
+ *
+ * Every product wrote this by hand. VisionLinq, BookLinq and TraceLinq each
+ * carried their own copy with a comment saying the kit's footer "takes only a
+ * flat link list; extending it is a dds release this page would then wait on" —
+ * three copies and three notes naming the same missing release. Their CSS had
+ * already converged byte-for-byte. This is that release.
+ *
+ * Additive: a caller that passes only brand/links/copyright/messages gets the
+ * same single row it got before, plus its brand mark if it set one.
+ */
 export function SiteFooter(props: SiteFooterProps) {
+  const registry = () => props.localeRegistry ?? (FAMILY_LOCALES as LocaleRegistry<string>);
   return (
     <footer class="site-footer" aria-label={props.messages.footerLabel}>
       <div class="site-footer__inner">
-        <strong>{props.brand.name}</strong>
-        <ul class="site-footer__links"><For each={props.links}>{(item) => <li><a href={item.href}>{item.label}</a></li>}</For></ul>
-        <small>{props.copyright}</small>
+        <Show when={props.locale}>{(locale) => (
+          <nav class="site-footer__langs" aria-label={props.messages.localeLabel}>
+            <For each={registry().LOCALES}>{(entry) => (
+              <a
+                href={locale().hrefForLocale(entry.code as SiteLocale)}
+                hreflang={entry.code}
+                lang={entry.code}
+                dir={entry.dir}
+                aria-current={entry.code === locale().locale ? "page" : undefined}
+                onClick={() => props.onLocaleSelect?.(entry.code)}
+              >{entry.nativeName}</a>
+            )}</For>
+          </nav>
+        )}</Show>
+        <div class="site-footer__row">
+          <p class="site-footer__brand">
+            {props.brand.logo}
+            <strong>{props.brand.name}</strong>
+            <For each={props.family ?? []}>{(item) => <>
+              <span aria-hidden="true">·</span>
+              <a href={item.href}>{item.label}</a>
+            </>}</For>
+          </p>
+          <ul class="site-footer__links">
+            <For each={props.links}>{(item) => <li><a href={item.href}>{item.label}</a></li>}</For>
+            {/*
+              A copyright like "© 2026 DevsLab" mixes neutral, digit and Latin
+              runs, which the bidi algorithm reorders on an RTL page into
+              "DevsLab 2026 ©". <bdi> isolates it so it reads as written in
+              every direction.
+            */}
+            <li><Show when={props.copyrightHref} fallback={<bdi>{props.copyright}</bdi>}>
+              {(href) => <a href={href()}><bdi>{props.copyright}</bdi></a>}
+            </Show></li>
+          </ul>
+        </div>
       </div>
     </footer>
   );
