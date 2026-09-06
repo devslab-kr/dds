@@ -10,7 +10,10 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
   assert.equal(manifest.name, "@devslab/site-kit");
   assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
   assert.equal(manifest.publishConfig.access, "public");
-  for (const path of [".", "./solid", "./tanstack-start", "./styles.css"]) assert.ok(manifest.exports[path]);
+  for (const path of [".", "./devslab", "./solid", "./tanstack-start", "./styles.css"]) assert.ok(manifest.exports[path]);
+  assert.equal(manifest.exports["./devslab"].types, "./src/core/devslab.d.mts");
+  assert.equal(manifest.exports["./devslab"].import, "./src/core/devslab.mjs");
+  assert.ok(manifest.files.includes("src/core"));
   assert.equal(manifest.exports["./solid"].types, "./dist/index.d.ts");
   assert.equal(manifest.exports["./solid"].browser, "./dist/solid.js");
   assert.equal(manifest.exports["./solid"].worker, "./dist/solid.server.js");
@@ -164,4 +167,3 @@ test("the TanStack adapter accepts metadata built from a product registry", asyn
   assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
   assert.match(dts, /toHtmlAttributes: <Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
 });
-

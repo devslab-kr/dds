@@ -72,6 +72,7 @@ try {
   for (const path of [
     "dist/solid.js", "dist/index.d.ts",
     "src/core/index.mjs", "src/core/index.d.mts",
+    "src/core/publisher.mjs", "src/core/publisher.d.mts", "src/core/devslab.mjs", "src/core/devslab.d.mts",
     "src/core/flags.mjs", "src/core/flags.d.mts",
     "src/tanstack-start.mjs", "src/tanstack-start.d.mts",
     "styles.css", "site-sections.css", "flags/LICENSE-flag-icons.txt",
@@ -83,6 +84,9 @@ try {
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   const core = await import(pathToFileURL(join(installedRoot, "src", "core", "index.mjs")));
   assert.equal(core.LOCALES.length, 14);
+  const { DEVSLAB_PUBLISHER } = await import(pathToFileURL(join(installedRoot, "src/core/devslab.mjs")));
+  assert.equal(core.buildPublisher(DEVSLAB_PUBLISHER).link.label, "데브스랩(DevsLab)");
+  assert.equal(manifest.exports["./devslab"].types, "./src/core/devslab.d.mts");
   assert.equal(
     typeof (await import(pathToFileURL(join(installedRoot, "src", "core", "flags.mjs")))).flagFor,
     "function",
