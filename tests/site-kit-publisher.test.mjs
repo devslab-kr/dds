@@ -6,7 +6,7 @@ import { DEVSLAB_PUBLISHER } from "../packages/site-kit/src/core/devslab.mjs";
 test("one publisher identity supplies the organization, reference and localized link", () => {
   const publisher = buildPublisher(DEVSLAB_PUBLISHER, { locale: "ko" });
   assert.equal(publisher.organization.name, "DevsLab");
-  assert.equal(publisher.organization.alternateName, "데브스랩");
+  assert.deepEqual(publisher.organization.alternateName, ["데브스랩", "devslab"]);
   assert.equal(publisher.organization["@id"], "https://devslab.kr/#organization");
   assert.equal(publisher.reference["@id"], publisher.organization["@id"]);
   assert.equal(publisher.link.href, publisher.organization.url);

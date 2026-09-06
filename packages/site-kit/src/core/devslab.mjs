@@ -4,7 +4,7 @@ import { definePublisher } from "./publisher.mjs";
 export const DEVSLAB_PUBLISHER = definePublisher({
   id: "https://devslab.kr/#organization",
   name: "DevsLab",
-  alternateName: "데브스랩",
+  alternateName: ["데브스랩", "devslab"],
   url: "https://devslab.kr/",
   sameAs: ["https://github.com/devslab-kr", "https://devslab-kr.github.io/"],
   defaultLabel: "데브스랩(DevsLab)",
