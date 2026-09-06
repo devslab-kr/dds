@@ -1,5 +1,15 @@
 # @devslab/site-kit
 
+## 0.8.0
+
+### Minor Changes
+
+- 329979a: Add framework-neutral publisher identity, Organization references, safe JSON-LD and static attribution rendering, with a shared bilingual DevsLab preset at `@devslab/site-kit/devslab`.
+
+### Patch Changes
+
+- @devslab/dds-solid@0.8.0
+
 ## 0.7.0
 
 ### Minor Changes
