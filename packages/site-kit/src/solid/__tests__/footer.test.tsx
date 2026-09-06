@@ -78,7 +78,9 @@ it("lists every family language, marking the current one, and reports the pick",
     locale={{ locale: "ko", hrefForLocale: (code: string) => `/${code}` }}
     onLocaleSelect={(code) => picked.push(code)}
   />);
-  const links = [...host.querySelectorAll<HTMLAnchorElement>(".site-footer__langs a")];
+  // Collapsed, but every anchor is in the document: a crawler follows them all
+  // and the menu works with no JavaScript.
+  const links = [...host.querySelectorAll<HTMLAnchorElement>(".site-footer__langs-list a")];
   expect(links).toHaveLength(FAMILY_LOCALES.LOCALES.length);
 
   const korean = links.find((a) => a.getAttribute("hreflang") === "ko")!;
@@ -102,7 +104,7 @@ it("honours a locale subset registry", () => {
     locale={{ locale: "en", hrefForLocale: (code: string) => `/${code}` }}
     localeRegistry={registry}
   />);
-  expect([...host.querySelectorAll(".site-footer__langs a")].map((a) => a.getAttribute("hreflang"))).toEqual(["ko", "en", "ja"]);
+  expect([...host.querySelectorAll(".site-footer__langs-list a")].map((a) => a.getAttribute("hreflang"))).toEqual(["ko", "en", "ja"]);
 });
 
 it("puts the family links after the brand, separated for sighted readers only", () => {
@@ -137,7 +139,8 @@ it("isolates the copyright so an RTL page does not reorder it, with or without a
 it("ships the rules the three rows need, so no consumer has to keep its own copy", () => {
   for (const rule of [
     ".site-footer__langs",
-    ".site-footer__langs a[aria-current=\"page\"]",
+    ".site-footer__langs-trigger",
+    ".site-footer__langs-list a[aria-current=\"page\"]",
     ".site-footer__row",
     ".site-footer__brand",
   ]) {
@@ -150,4 +153,46 @@ it("sizes the footer link row, so it does not inherit the body step", () => {
   // than the same row on a sibling product's page. Each consumer that noticed
   // had added the rule locally.
   expect(STYLES).toMatch(/\.site-footer__links \{ font-size: var\(--dds-typo-body-2-font-size\); \}/);
+});
+
+it("collapses the language row behind the current language's own name", () => {
+  const { SiteFooter } = kit;
+  // The flat row was a different length in every product — ten locales in one,
+  // twenty in another — so the same footer carried a different weight depending
+  // on how many languages the product sells in.
+  const host = mount(() => <SiteFooter
+    {...base}
+    locale={{ locale: "ko", hrefForLocale: (code: string) => `/${code}` }}
+  />);
+  const details = host.querySelector<HTMLDetailsElement>(".site-footer__langs-menu")!;
+  expect(details.open).toBe(false);
+
+  const trigger = details.querySelector("summary")!;
+  // The reader who cannot read this page still recognises their own language's
+  // name, which is why the trigger is the name and not a translated "Language".
+  expect(trigger.textContent).toBe("한국어");
+  expect(trigger.getAttribute("aria-label")).toBe("Language: 한국어");
+
+  // The landmark survives the collapse.
+  const nav = host.querySelector(".site-footer__langs")!;
+  expect(nav.tagName).toBe("NAV");
+  expect(nav.getAttribute("aria-label")).toBe("Language");
+});
+
+it("closes on Escape and hands focus back to the trigger", () => {
+  const { SiteFooter } = kit;
+  const host = mount(() => <SiteFooter
+    {...base}
+    locale={{ locale: "en", hrefForLocale: (code: string) => `/${code}` }}
+  />);
+  const details = host.querySelector<HTMLDetailsElement>(".site-footer__langs-menu")!;
+  const trigger = details.querySelector<HTMLElement>("summary")!;
+  details.open = true;
+  details.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  expect(details.open).toBe(false);
+  expect(document.activeElement).toBe(trigger);
+});
+
+it("opens the list upward, because the footer is at the foot of the page", () => {
+  expect(STYLES).toMatch(/\.site-footer__langs-list \{[^}]*inset-block-end/);
 });
