@@ -23,10 +23,19 @@
    inherited the 16px body and read a step larger than the same row on a
    sibling product's page. Every consumer that noticed fixed it locally. */
 .site-footer__links { font-size: var(--dds-typo-body-2-font-size); }
-.site-footer__langs { display: flex; flex-wrap: wrap; gap: var(--dds-space-8) var(--dds-space-16); font-size: var(--dds-typo-caption-font-size); }
-.site-footer__langs a { color: var(--dds-color-text-muted); text-decoration: none; }
-.site-footer__langs a:hover { color: var(--dds-color-text-primary); }
-.site-footer__langs a[aria-current="page"] { color: var(--dds-color-text-primary); font-weight: 600; }
+.site-footer__langs { font-size: var(--dds-typo-caption-font-size); }
+.site-footer__langs-menu { position: relative; display: inline-block; }
+.site-footer__langs-trigger { display: inline-flex; align-items: center; gap: var(--dds-space-4); color: var(--dds-color-text-muted); cursor: pointer; list-style: none; }
+.site-footer__langs-trigger::-webkit-details-marker { display: none; }
+.site-footer__langs-trigger::after { content: ""; inline-size: 0; block-size: 0; border-inline: 4px solid transparent; border-block-start: 4px solid currentColor; }
+.site-footer__langs-menu[open] .site-footer__langs-trigger,
+.site-footer__langs-trigger:hover { color: var(--dds-color-text-primary); }
+.site-footer__langs-trigger:focus-visible { outline: 2px solid var(--dds-color-border-focus); outline-offset: 2px; }
+/* The footer sits at the foot of the page, so the list opens upward. */
+.site-footer__langs-list { position: absolute; inset-block-end: calc(100% + var(--dds-space-8)); inset-inline-start: 0; z-index: 20; margin: 0; padding: var(--dds-space-8); max-block-size: 60vh; overflow-y: auto; display: grid; gap: var(--dds-space-4); min-inline-size: 12rem; list-style: none; border: 1px solid var(--dds-color-border-default); border-radius: var(--dds-radius-md); background: var(--dds-color-bg-default); box-shadow: var(--dds-elevation-2); }
+.site-footer__langs-list a { display: block; padding: var(--dds-space-4) var(--dds-space-8); border-radius: var(--dds-radius-sm); color: var(--dds-color-text-secondary); text-decoration: none; }
+.site-footer__langs-list a:hover { background: var(--dds-color-bg-subtle); color: var(--dds-color-text-primary); }
+.site-footer__langs-list a[aria-current="page"] { color: var(--dds-color-text-primary); font-weight: 600; }
 .site-footer__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--dds-space-16) var(--dds-space-32); }
 .site-footer__brand { display: inline-flex; align-items: center; gap: var(--dds-space-8); margin: 0; color: var(--dds-color-text-secondary); }
 .site-footer__brand img, .site-footer__brand svg { block-size: 16px; inline-size: 16px; }

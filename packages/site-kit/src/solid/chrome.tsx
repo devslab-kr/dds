@@ -105,6 +105,64 @@ export function SiteHeader(props: SiteHeaderProps) {
   );
 }
 
+/**
+ * The footer's language row, collapsed.
+ *
+ * It used to be every language laid out flat, which is a different length in
+ * every product — ten for one, twenty for another — so the same footer carried
+ * a different visual weight depending on how many languages the product sells
+ * in. A `<details>` keeps all of them: the anchors are in the document whether
+ * it is open or not, so a crawler still follows every locale, and it works with
+ * no JavaScript. Same mechanism as the header's flag menu, including Escape
+ * returning focus to the trigger.
+ *
+ * The trigger is the current language's own name rather than a translated word
+ * for "language": it is the one label already meaningful to a reader who cannot
+ * read the page, and it is what the flat row marked with `aria-current`.
+ */
+function FooterLocaleMenu(props: {
+  state: LocaleState;
+  registry: LocaleRegistry<string>;
+  label: string;
+  /* Required key, optional value: the caller always passes it through, and
+     `exactOptionalPropertyTypes` rejects an explicit undefined on an optional. */
+  onSelect: ((locale: string) => void) | undefined;
+}) {
+  let details: HTMLDetailsElement | undefined;
+  let trigger: HTMLElement | undefined;
+  const current = () => props.registry.LOCALES.find((entry) => entry.code === props.state.locale);
+  const close = () => { if (details) details.open = false; };
+  const onKeyDown: JSX.EventHandler<HTMLDetailsElement, KeyboardEvent> = (event) => {
+    if (event.key !== "Escape" || !details?.open) return;
+    event.preventDefault();
+    close();
+    trigger?.focus();
+  };
+  return (
+    <nav class="site-footer__langs" aria-label={props.label}>
+      <details ref={details} class="site-footer__langs-menu" onKeyDown={onKeyDown}>
+        <summary ref={trigger} class="site-footer__langs-trigger" aria-label={`${props.label}: ${current()?.nativeName ?? props.state.locale}`}>
+          <span lang={current()?.code} dir={current()?.dir}>{current()?.nativeName ?? props.state.locale}</span>
+        </summary>
+        <ul class="site-footer__langs-list" role="list">
+          <For each={props.registry.LOCALES}>{(entry) => (
+            <li>
+              <a
+                href={props.state.hrefForLocale(entry.code as SiteLocale)}
+                hreflang={entry.code}
+                lang={entry.code}
+                dir={entry.dir}
+                aria-current={entry.code === props.state.locale ? "page" : undefined}
+                onClick={() => props.onSelect?.(entry.code)}
+              >{entry.nativeName}</a>
+            </li>
+          )}</For>
+        </ul>
+      </details>
+    </nav>
+  );
+}
+
 export interface SiteFooterProps {
   brand: SiteBrand;
   links: SiteLink[];
@@ -147,18 +205,12 @@ export function SiteFooter(props: SiteFooterProps) {
     <footer class="site-footer" aria-label={props.messages.footerLabel}>
       <div class="site-footer__inner">
         <Show when={props.locale}>{(locale) => (
-          <nav class="site-footer__langs" aria-label={props.messages.localeLabel}>
-            <For each={registry().LOCALES}>{(entry) => (
-              <a
-                href={locale().hrefForLocale(entry.code as SiteLocale)}
-                hreflang={entry.code}
-                lang={entry.code}
-                dir={entry.dir}
-                aria-current={entry.code === locale().locale ? "page" : undefined}
-                onClick={() => props.onLocaleSelect?.(entry.code)}
-              >{entry.nativeName}</a>
-            )}</For>
-          </nav>
+          <FooterLocaleMenu
+            state={locale()}
+            registry={registry()}
+            label={props.messages.localeLabel}
+            onSelect={props.onLocaleSelect}
+          />
         )}</Show>
         <div class="site-footer__row">
           <p class="site-footer__brand">
