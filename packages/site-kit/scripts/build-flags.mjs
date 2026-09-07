@@ -2,10 +2,21 @@
  * Flag data for the locale picker — one vendored 4x3 SVG per locale, inlined
  * as inner markup so SSR and the Worker can render it without a fetch.
  *
+ * Three modules, because the bodies are ~115 KB and the map is 300 bytes:
+ *
+ *   flag-countries.mjs  locale → country, `flagCountryFor` — what the Solid
+ *                       menu imports statically (it names symbols by country)
+ *   flag-bodies.mjs     the SVG markup by country — imported statically by the
+ *                       server build only; the browser build reaches it through
+ *                       a dynamic import() taken solely when a flag menu renders
+ *                       without server HTML
+ *   flags.mjs           the public `@devslab/site-kit/flags` subpath, composing
+ *                       both — its API is unchanged for consumers
+ *
  * Flags live here, not in dds-icons: that set's check-icons.mjs bans colour
  * literals and requires stroke="currentColor", which a flag cannot satisfy.
  *
- *   node scripts/build-flags.mjs          write src/core/flags.mjs + .d.mts
+ *   node scripts/build-flags.mjs          write the three modules + .d.mts
  *   node scripts/build-flags.mjs --check  fail if the committed output is stale
  */
 import { readFileSync, writeFileSync } from "node:fs";
@@ -42,13 +53,51 @@ const entries = Object.entries(FLAG_COUNTRY).map(([locale, country]) => {
   return { locale, country, viewBox, body };
 });
 
+const viewBoxes = new Set(entries.map((e) => e.viewBox));
+if (viewBoxes.size !== 1) throw new Error(`flags must share one viewBox so a <use> can reference any symbol: ${[...viewBoxes].join(", ")}`);
+const [FLAG_VIEWBOX] = viewBoxes;
+
 // One entry per country, not per locale: seven Indian languages would
 // otherwise inline the same India SVG seven times.
 const byCountry = [...new Map(entries.map((e) => [e.country, e])).values()];
 
-const js = `${HEADER}
+const countriesJs = `${HEADER}
 export const FLAG_COUNTRY = Object.freeze(${JSON.stringify(FLAG_COUNTRY, null, 2)});
 
+/** Every vendored flag is 4:3 on this box, so any <use> can point at any symbol. */
+export const FLAG_VIEWBOX = ${JSON.stringify(FLAG_VIEWBOX)};
+
+const VENDORED = new Set(Object.values(FLAG_COUNTRY));
+
+/**
+ * The country whose flag stands for a locale — a family locale through
+ * FLAG_COUNTRY, a product's own through its registry's \`flagCountry\`.
+ * Same lookup order and errors as \`flagFor\`, without loading a body.
+ *
+ * @param {string} locale
+ * @param {{ LOCALES?: ReadonlyArray<{ code: string, flagCountry?: string }> }} [registry]
+ * @returns {string}
+ */
+export function flagCountryFor(locale, registry) {
+  const country = FLAG_COUNTRY[locale];
+  if (country) return country;
+  const extra = registry?.LOCALES?.find((definition) => definition.code === locale);
+  if (extra?.flagCountry) {
+    if (VENDORED.has(extra.flagCountry)) return extra.flagCountry;
+    throw new RangeError(\`No vendored flag for country: \${extra.flagCountry} (locale \${locale})\`);
+  }
+  throw new RangeError(\`No flag for locale: \${locale}\`);
+}
+`;
+const countriesDts = `${HEADER}
+import type { LocaleRegistry } from "./locales.mjs";
+import type { SiteLocale } from "./locales.mjs";
+export declare const FLAG_COUNTRY: Readonly<Record<SiteLocale, string>>;
+export declare const FLAG_VIEWBOX: string;
+export declare function flagCountryFor(locale: string, registry?: LocaleRegistry<string>): string;
+`;
+
+const bodiesJs = `${HEADER}
 /**
  * Flags indexed by country, not by locale.
  *
@@ -60,6 +109,17 @@ export const FLAG_COUNTRY = Object.freeze(${JSON.stringify(FLAG_COUNTRY, null, 2
 export const FLAGS_BY_COUNTRY = Object.freeze({
 ${byCountry.map((e) => `  ${JSON.stringify(e.country)}: Object.freeze({ country: ${JSON.stringify(e.country)}, viewBox: ${JSON.stringify(e.viewBox)}, body: ${JSON.stringify(e.body)} }),`).join("\n")}
 });
+`;
+const bodiesDts = `${HEADER}
+export interface LocaleFlag { readonly country: string; readonly viewBox: string; readonly body: string }
+export declare const FLAGS_BY_COUNTRY: Readonly<Record<string, LocaleFlag>>;
+`;
+
+const js = `${HEADER}
+import { FLAG_COUNTRY, FLAG_VIEWBOX, flagCountryFor } from "./flag-countries.mjs";
+import { FLAGS_BY_COUNTRY } from "./flag-bodies.mjs";
+
+export { FLAG_COUNTRY, FLAG_VIEWBOX, flagCountryFor, FLAGS_BY_COUNTRY };
 
 export const LOCALE_FLAGS = Object.freeze({
 ${entries.map((e) => `  ${JSON.stringify(e.locale)}: FLAGS_BY_COUNTRY[${JSON.stringify(e.country)}],`).join("\n")}
@@ -86,19 +146,24 @@ export function flagFor(locale, registry) {
 const dts = `${HEADER}
 import type { LocaleRegistry } from "./locales.mjs";
 import type { SiteLocale } from "./locales.mjs";
-export interface LocaleFlag { readonly country: string; readonly viewBox: string; readonly body: string }
-export declare const FLAG_COUNTRY: Readonly<Record<SiteLocale, string>>;
-export declare const FLAGS_BY_COUNTRY: Readonly<Record<string, LocaleFlag>>;
+import type { LocaleFlag } from "./flag-bodies.mjs";
+export type { LocaleFlag };
+export { FLAG_COUNTRY, FLAG_VIEWBOX, flagCountryFor } from "./flag-countries.mjs";
+export { FLAGS_BY_COUNTRY } from "./flag-bodies.mjs";
 export declare const LOCALE_FLAGS: Readonly<Record<SiteLocale, LocaleFlag>>;
 export declare function flagFor(locale: string, registry?: LocaleRegistry<string>): LocaleFlag;
 `;
 
-const targets = [["src/core/flags.mjs", js], ["src/core/flags.d.mts", dts]];
+const targets = [
+  ["src/core/flag-countries.mjs", countriesJs], ["src/core/flag-countries.d.mts", countriesDts],
+  ["src/core/flag-bodies.mjs", bodiesJs], ["src/core/flag-bodies.d.mts", bodiesDts],
+  ["src/core/flags.mjs", js], ["src/core/flags.d.mts", dts],
+];
 if (process.argv.includes("--check")) {
-  const stale = targets.filter(([rel, next]) => readFileSync(join(pkg, rel), "utf8") !== next);
+  const stale = targets.filter(([rel, next]) => { try { return readFileSync(join(pkg, rel), "utf8") !== next; } catch { return true; } });
   if (stale.length) { console.error(`flags out of date: ${stale.map(([r]) => r).join(", ")} — run build-flags`); process.exit(1); }
   console.log(`site-kit flags: ${entries.length} locales over ${byCountry.length} countries, in sync`);
 } else {
   for (const [rel, next] of targets) writeFileSync(join(pkg, rel), next);
-  console.log(`site-kit flags: wrote flags.mjs and flags.d.mts (${entries.length} locales, ${byCountry.length} countries)`);
+  console.log(`site-kit flags: wrote ${targets.length} files (${entries.length} locales, ${byCountry.length} countries)`);
 }

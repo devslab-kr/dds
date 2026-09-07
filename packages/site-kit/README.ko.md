@@ -112,10 +112,22 @@ MkDocs 준비 작업, SSR에서 공통으로 쓴다. 기존 graph를 script에 �
 트리거가 현재 로케일의 국기이고 행마다 국기 + 자국어 이름 링크인 `<details>`
 디스클로저를 렌더링한다 — JavaScript 없이도 동작하며, Solid는 Escape로 닫기와
 `onLocaleChange(locale, href)` 콜백을 더한다. `SiteHeader`는 `localeVariant`를
-그대로 전달한다. 국기 데이터(`FLAG_COUNTRY`, `LOCALE_FLAGS`, `flagFor`)는
-런타임 중립 `.` entry가 아니라 전용 서브패스 `@devslab/site-kit/flags`에서
-export된다 — 벤더링한 아트워크가 SVG ~110 KB라 대부분의 소비자는 국기 메뉴를
-렌더링하지 않기 때문이다. 아트워크는 flag-icons에서 벤더링했다(MIT,
-`flags/LICENSE-flag-icons.txt`). 국기는 `dds-icons` 항목이 아니라 site-kit
-데이터다 — 아이콘 세트의 계약이 단색 `currentColor` 스트로크를 요구하기
-때문이다.
+그대로 전달한다. 국기 데이터(`FLAG_COUNTRY`, `LOCALE_FLAGS`, `flagFor`,
+`flagCountryFor`)는 런타임 중립 `.` entry가 아니라 전용 서브패스
+`@devslab/site-kit/flags`에서 export된다 — 벤더링한 아트워크가 SVG ~110 KB라
+대부분의 소비자는 국기 메뉴를 렌더링하지 않기 때문이다. 아트워크는
+flag-icons에서 벤더링했다(MIT, `flags/LICENSE-flag-icons.txt`). 국기는
+`dds-icons` 항목이 아니라 site-kit 데이터다 — 아이콘 세트의 계약이 단색
+`currentColor` 스트로크를 요구하기 때문이다.
+
+국기 메뉴는 그 아트워크를 **브라우저 번들에서도** 뺀다. 메뉴 하나가
+`<symbol>` 스프라이트 하나(나라당 본문 하나)를 렌더링하고 모든 국기는 그것을
+`<svg><use href="#…">`로 참조하므로, 클라이언트에서 로케일이 바뀌어도
+`href`만 바뀐다. 스프라이트 마크업은 **서버 빌드**가 쓰고 하이드레이션은 그
+마크업을 그대로 인수하며, 브라우저 빌드는 본문을 동적 `import()`(자기 청크
+`dist/flag-bodies.js`)로만 닿는다 — 서버 HTML 없이 국기 메뉴가 렌더링될
+때(클라이언트 전용 앱, jsdom 테스트)에만 가져온다. 그래서 `SiteHeader`를
+import하는 소비자는 kit 전체로 클라이언트 JS ~150 KB가 아니라 ~40 KB를 싣는다.
+`pnpm check`가 최소 소비자(`fixtures/bundle-probe`)를 빌드해 국기 본문이 메인
+청크로 되돌아오면 실패시킨다. 본문은 서버 렌더 HTML에는 여전히 실린다 —
+가져오는 파일로 옮기는 것은 별도 결정이다.

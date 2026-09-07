@@ -1,7 +1,8 @@
-import { For, createUniqueId, type JSX } from "solid-js";
+import { For, createUniqueId, sharedConfig, type JSX } from "solid-js";
 
 import { FAMILY_LOCALES, type LocaleRegistry, type SiteLocale } from "../core/locales.mjs";
-import { flagFor } from "../core/flags.mjs";
+import { FLAG_VIEWBOX, flagCountryFor } from "../core/flag-countries.mjs";
+import { flagBodiesNow, loadFlagBodies, type FlagBodies } from "./flag-bodies";
 import type { LocaleState, SiteMessages } from "./types";
 
 export type LocaleMenuVariant = "select" | "flag";
@@ -35,16 +36,52 @@ function scopeFlagIds(body: string, uid: string): string {
 
 const registryOf = (props: LocaleMenuProps) => props.registry ?? (FAMILY_LOCALES as LocaleRegistry<string>);
 
-function Flag(props: { locale: string; class?: string; registry: LocaleRegistry<string> }) {
-  const uid = createUniqueId();
-  const flag = () => flagFor(props.locale, props.registry);
+const symbolId = (country: string, uid: string) => `site-flag-${country}-${uid}`;
+
+function spriteMarkup(countries: readonly string[], bodies: FlagBodies, uid: string): string {
+  return countries.map((country) => {
+    const flag = bodies[country];
+    if (!flag) throw new RangeError(`No vendored flag for country: ${country}`);
+    return `<symbol id="${symbolId(country, uid)}" viewBox="${flag.viewBox}">${scopeFlagIds(flag.body, uid)}</symbol>`;
+  }).join("");
+}
+
+/**
+ * One copy of each flag the menu shows, as <symbol>s the flags <use>.
+ *
+ * The trigger and the current row used to inline the same body twice, and
+ * the browser bundle carried every body so a client render could write
+ * them. With a sprite, a locale change on the client only swaps an href,
+ * so after hydration the browser never needs the artwork: the server build
+ * writes it (flagBodiesNow), hydration adopts it untouched, and only a
+ * render with no server HTML — a client-only app, a jsdom test — fetches
+ * the bodies through loadFlagBodies, which the browser build emits as its
+ * own chunk. Zero-sized rather than display:none so the referenced clip
+ * paths and gradients still resolve.
+ */
+function FlagSprite(props: { countries: readonly string[]; uid: string }) {
+  const bodies = flagBodiesNow();
+  if (bodies) {
+    return <svg class="site-flag-sprite" aria-hidden="true" innerHTML={spriteMarkup(props.countries, bodies, props.uid)} />;
+  }
   return (
     <svg
-      class={props.class}
-      viewBox={flag().viewBox}
+      class="site-flag-sprite"
       aria-hidden="true"
-      innerHTML={scopeFlagIds(flag().body, uid)}
+      ref={(element) => {
+        if (sharedConfig.context) return; // hydrating: the server already drew the sprite
+        void loadFlagBodies().then((loaded) => { element.innerHTML = spriteMarkup(props.countries, loaded, props.uid); });
+      }}
     />
+  );
+}
+
+function Flag(props: { locale: string; class?: string; registry: LocaleRegistry<string>; uid: string }) {
+  const country = () => flagCountryFor(props.locale, props.registry);
+  return (
+    <svg class={props.class} viewBox={FLAG_VIEWBOX} aria-hidden="true">
+      <use href={`#${symbolId(country(), props.uid)}`} />
+    </svg>
   );
 }
 
@@ -88,7 +125,9 @@ function SelectLocaleMenu(props: LocaleMenuProps) {
 function FlagLocaleMenu(props: LocaleMenuProps) {
   let details: HTMLDetailsElement | undefined;
   let trigger: HTMLElement | undefined;
+  const uid = createUniqueId();
   const registry = () => registryOf(props);
+  const countries = () => [...new Set(registry().LOCALES.map((entry) => flagCountryFor(entry.code, registry())))];
   const current = () => registry().LOCALES.find((entry) => entry.code === props.state.locale);
   const close = () => { if (details) details.open = false; };
   const onKeyDown: JSX.EventHandler<HTMLDetailsElement, KeyboardEvent> = (event) => {
@@ -104,7 +143,8 @@ function FlagLocaleMenu(props: LocaleMenuProps) {
   return (
     <details ref={details} class="site-locale-flag" onKeyDown={onKeyDown}>
       <summary ref={trigger} class="site-locale-flag__trigger" aria-label={triggerLabel()} title={props.messages.localeLabel}>
-        <Flag locale={props.state.locale} class="site-locale-flag__svg" registry={registry()} />
+        <FlagSprite countries={countries()} uid={uid} />
+        <Flag locale={props.state.locale} class="site-locale-flag__svg" registry={registry()} uid={uid} />
       </summary>
       <ul class="site-locale-flag__list" role="list">
         <For each={registry().LOCALES}>{(entry) => (
@@ -123,7 +163,7 @@ function FlagLocaleMenu(props: LocaleMenuProps) {
                 props.onLocaleChange(entry.code as SiteLocale, props.state.hrefForLocale(entry.code as SiteLocale));
               }}
             >
-              <Flag locale={entry.code} class="site-locale-flag__svg" registry={registry()} />
+              <Flag locale={entry.code} class="site-locale-flag__svg" registry={registry()} uid={uid} />
               <span>{entry.nativeName}</span>
             </a>
           </li>

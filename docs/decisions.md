@@ -5,6 +5,47 @@
 
 ---
 
+## D-020 — 국기 아트워크는 서버가 쓰고 브라우저는 `<use>`한다 (2026-09-08)
+
+**결정.** `LocaleMenu variant="flag"`는 메뉴당 `<symbol>` 스프라이트 하나(나라당
+본문 하나)를 렌더링하고 모든 국기를 `<svg><use href="#…">`로 참조한다. 스프라이트
+마크업은 **서버 빌드만** 쓴다(`src/solid/flag-bodies.server.ts`, 서버 Vite·Vitest
+설정이 alias). 브라우저 빌드(`dist/solid.js`)는 본문을 정적으로 import하지 않고
+동적 `import()`(자기 청크 `dist/flag-bodies.js`)로만 닿으며, 그마저 서버 HTML 없이
+렌더링될 때(하이드레이션이 아닐 때 — `sharedConfig.context` 부재)만 실행한다.
+생성기는 `flags.mjs` 하나 대신 `flag-countries.mjs`(로케일→나라, 300바이트)와
+`flag-bodies.mjs`(본문 110 KB)로 나누고 `flags.mjs`는 둘을 합친 공개 서브패스로
+남는다(API 무변경, `flagCountryFor`·`FLAG_VIEWBOX` 추가). `pnpm check`가 최소
+소비자(`fixtures/bundle-probe`)를 실제 Vite로 빌드해 본문이 메인 청크로 돌아오면
+실패한다.
+
+**근거.** TraceLinq 랜딩(D-017 첫 소비자)의 클라이언트 메인 청크가 빈 스캐폴드
+대비 ~147 KB 커졌고, 그 크기가 `dist/solid.js` 통째(138 KB)와 같아 tree-shaking
+실패로 보였다. 최소 소비자로 재현하니 **tree-shaking은 되고 있었다** — 전부
+import해도 헤더만 import한 것보다 13 KB 클 뿐. 남은 115 KB는 국기 SVG 14개
+(스페인 문장 하나가 85 KB)로, `LocaleMenu`가 `variant`를 **런타임에** 분기하므로
+`select` 변형을 쓰는 소비자도 헤더 하나로 국기 전부를 실었고, `Flag`가 effect
+안에서 `innerHTML`을 다시 써서 하이드레이션에도 본문이 필요했다. 즉 패키징이
+아니라 **데이터가 있는 자리**의 문제다. `preserveModules`나 컴포넌트별
+서브패스는 이 바이트를 한 개도 못 뺀다 — 헤더가 정당하게 그 분기에 닿기 때문.
+
+**측정.** 최소 소비자(Vite + vite-plugin-solid, `SiteHeader`만): 147.5 KB /
+gzip 38.8 KB → 42.8 KB / gzip 15.1 KB. `dist/solid.js`: 138.2 KB / gzip 32.5 KB →
+28.7 KB / gzip 8.2 KB. TraceLinq 랜딩 실측은 changeset에.
+
+**트레이드오프.** ① 스프라이트는 `display:none`이 아니라 0×0 절대배치 — 참조된
+clipPath·그라디언트가 `display:none` 트리에서는 해석되지 않는 브라우저가 있다.
+② 클라이언트 전용 렌더(서버 HTML 없음)는 국기가 한 박자 늦게 찬다 — 가족 제품은
+전부 SSR이라 실제 경로가 아니며, jsdom 테스트는 `await`한다. ③ 서버 HTML에는
+본문이 여전히 실린다(메뉴당 나라마다 한 번 — 이전엔 현재 로케일이 두 번).
+페이지 무게 ~115 KB는 그대로다; 국기를 **가져오는 파일**(`<img src>`, 브라우저
+캐시)로 옮기면 그것도 사라지지만 소비자마다 정적 파일 서빙이 필요한 API 변경이라
+별도 결정. ④ D-017의 "제품은 아트워크를 싣지 않는다"는 유지 — 여전히 site-kit
+데이터, 자리만 바뀜.
+
+**재검토 시점.** 서버 HTML 무게가 문제로 측정되거나 SSR 없는 소비자가 생기면
+(그때 `<img src>` + 소비자 정적 서빙 헬퍼를 검토한다).
+
 ## D-019 — SSR에서 선택 상태는 `<option selected>`, `<select value>`가 아니다 (2026-09-05)
 
 **결정.** `SelectLocaleMenu`가 `<select value={...}>` 대신 현재 로케일의
