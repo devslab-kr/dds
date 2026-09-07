@@ -78,6 +78,37 @@ test("flag locale menu is a native disclosure with tokenised, logical styles", a
   assert.match(await read("packages/site-kit/package.json"), /build-flags\.mjs --check/);
 });
 
+test("flag artwork stays out of the browser bundle: server writes the sprite, the client <use>s it", async () => {
+  // The bodies are ~115 KB. They used to ride along with every SiteHeader
+  // because the menu imported them statically and re-set innerHTML on the
+  // client, hydration included. Now the menu imports only the locale→country
+  // map; the bodies reach the server build through an aliased loader and the
+  // browser build through a dynamic import taken only without server HTML.
+  const menu = await read("packages/site-kit/src/solid/locale-menu.tsx");
+  assert.match(menu, /from "\.\.\/core\/flag-countries\.mjs"/);
+  assert.doesNotMatch(menu, /flag-bodies\.mjs|core\/flags\.mjs|FLAGS_BY_COUNTRY|LOCALE_FLAGS|flagFor\b/, "the menu must not reach the bodies statically");
+  assert.match(menu, /<symbol id=/);
+  assert.match(menu, /<use href=/);
+  assert.match(menu, /sharedConfig\.context/, "hydration must adopt the server sprite instead of loading");
+  const loader = await read("packages/site-kit/src/solid/flag-bodies.ts");
+  assert.match(loader, /import\("\.\.\/core\/flag-bodies\.mjs"\)/, "the browser loader is a dynamic import");
+  assert.doesNotMatch(loader, /^import \{[^}]*FLAGS_BY_COUNTRY/m);
+  const server = await read("packages/site-kit/src/solid/flag-bodies.server.ts");
+  assert.match(server, /^import \{ FLAGS_BY_COUNTRY \} from "\.\.\/core\/flag-bodies\.mjs"/m);
+  for (const config of ["packages/site-kit/vite.server.config.ts", "packages/site-kit/vitest.ssr.config.ts"]) {
+    assert.match(await read(config), /"\.\/flag-bodies":.*flag-bodies\.server\.ts/, `${config} must alias the loader to the server one`);
+  }
+  assert.doesNotMatch(await read("packages/site-kit/vite.config.ts"), /flag-bodies\.server/, "the browser build must not get the server loader");
+  const styles = await read("packages/site-kit/styles.css");
+  assert.match(styles, /\.site-flag-sprite\s*\{[^}]*inline-size:\s*0/);
+  assert.doesNotMatch(styles, /\.site-flag-sprite\s*\{[^}]*display:\s*none/, "a display:none sprite breaks referenced clip paths and gradients");
+  const manifest = await json("packages/site-kit/package.json");
+  assert.match(manifest.scripts.check, /check-client-bundle\.mjs/, "the bundle gate runs in check");
+  assert.match(manifest.scripts.check, /build-flags\.mjs --check.*check-client-bundle/, "flags in sync before the gate reads them");
+  const generator = await read("packages/site-kit/scripts/build-flags.mjs");
+  for (const file of ["flag-countries.mjs", "flag-bodies.mjs", "flags.mjs"]) assert.match(generator, new RegExp(`src/core/${file}`));
+});
+
 test("OSS product marks remain caller-supplied and reference the canonical brand source", async () => {
   const component = await read("packages/site-kit/src/solid/oss-product-mark.tsx");
   const styles = await read("packages/site-kit/styles.css");

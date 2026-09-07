@@ -31,6 +31,27 @@ it("server-renders the flag variant as a working disclosure without JavaScript",
   expect(html).toContain(koPath);
 });
 
+it("server-writes each flag body once, in a sprite the trigger and rows <use>", () => {
+  // The server is the only place the artwork is written: hydration adopts
+  // this markup, so the browser bundle can leave the ~115 KB of bodies out.
+  // The current locale used to be inlined twice (trigger + its row); now it
+  // is one <symbol> and two <use>s.
+  const koLocale = { ...locale, locale: "ko" as const };
+  const html = renderToString(() => <LocaleMenu variant="flag" state={koLocale} messages={messages} />);
+  expect((html.match(/<svg[^>]*class="site-flag-sprite"/g) ?? []).length).toBe(1);
+  expect((html.match(/<symbol /g) ?? []).length).toBe(14);
+  const koPath = LOCALE_FLAGS.ko.body.match(/d="[^"]{20,}"/)?.[0]!;
+  expect(html.split(koPath).length - 1).toBe(1);
+  const koSymbol = html.match(/<symbol id="(site-flag-kr-[^"]+)"/)?.[1];
+  expect(koSymbol).toBeDefined();
+  expect((html.match(new RegExp(`<use href="#${koSymbol}"`, "g")) ?? []).length).toBe(2);
+  // Every <use> resolves to a symbol in the sprite.
+  const symbolIds = new Set([...html.matchAll(/<symbol id="([^"]+)"/g)].map((m) => m[1]));
+  const uses = [...html.matchAll(/<use href="#([^"]+)"/g)].map((m) => m[1]);
+  expect(uses).toHaveLength(15);
+  for (const id of uses) expect(symbolIds.has(id)).toBe(true);
+});
+
 it("marks the current option selected — a <select> has no value attribute", () => {
   // The bug this pins: `value={props.state.locale}` on the <select>.
   // In a browser Solid assigns the DOM property and it works; under SSR the

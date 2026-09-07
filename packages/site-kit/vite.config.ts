@@ -6,6 +6,11 @@ export default defineConfig({
   build: {
     lib: { entry: "src/solid/index.ts", formats: ["es"], fileName: "solid" },
     sourcemap: true,
-    rollupOptions: { external: [/^solid-js(?:\/|$)/, /^@solidjs\/web(?:\/|$)/, /^@devslab\//] },
+    rollupOptions: {
+      external: [/^solid-js(?:\/|$)/, /^@solidjs\/web(?:\/|$)/, /^@devslab\//],
+      // The flag bodies are the only dynamic import; a stable name keeps the
+      // chunk addressable by the bundle gate and by anyone reading dist/.
+      output: { chunkFileNames: "[name].js" },
+    },
   },
 });

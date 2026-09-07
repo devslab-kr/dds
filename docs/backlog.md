@@ -154,6 +154,14 @@ Geist/Geist Mono 셀프호스팅 여부, Pretendard 서브셋, RN 번들 전략.
 ### 12. site-kit 국기 로케일 피커 — `완료` (2026-09-02)
 D-017. `LocaleMenu variant="flag"` + 국기 데이터 14개. 첫 소비자 TraceLinq 랜딩.
 
+### 13. site-kit 브라우저 번들에서 국기 아트워크 분리 — `완료` (2026-09-08)
+D-020. TraceLinq 랜딩의 클라이언트 메인 청크가 `dist/solid.js` 통째(138 KB)만큼
+컸던 것 — tree-shaking이 아니라 국기 SVG 115 KB가 `SiteHeader`에 딸려 온 것.
+스프라이트 + `<use>`, 서버만 본문 작성, 브라우저는 동적 청크(서버 HTML 없을
+때만). `pnpm check`의 최소 소비자 게이트(`fixtures/bundle-probe`)가 회귀를 막는다.
+- 남은 것: 서버 HTML의 본문 ~115 KB/페이지 → `<img src>` + 소비자 정적 서빙
+  (API 변경, D-020 재검토 시점).
+
 ---
 
 ## P3 — 모바일 이후
