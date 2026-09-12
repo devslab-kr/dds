@@ -1,7 +1,7 @@
 import { For, Show, createSignal, createUniqueId, onCleanup, onMount, type JSX } from "solid-js";
 
 /** One item in a nav group's list. `active` is a caller override — pass it
- * only when the generic prefix rule below gets a route wrong (spec §3.4). */
+ * only when the generic prefix rule below gets a route wrong. */
 export interface ConsoleNavItem {
   id: string;
   href: string;

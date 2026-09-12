@@ -244,6 +244,20 @@
   line-height: var(--dds-typo-caption-line-height);
 }
 
+/* Console density: every dds-css control inside the shell reads at the body-2
+ * size (14px), not dds-btn's own default (13px, --dds-typo-label-font-size).
+ * Scoped to .dds-console-shell rather than left as a global override on
+ * .dds-btn/.dds-input/.dds-select/.dds-textarea themselves — a shell that
+ * establishes a density owns the override for controls inside it, the same
+ * way a shared class must never carry a layout rule that only makes sense
+ * for one consumer's container. */
+.dds-console-shell .dds-btn,
+.dds-console-shell .dds-input,
+.dds-console-shell .dds-select,
+.dds-console-shell .dds-textarea {
+  font-size: var(--dds-typo-body-2-font-size);
+}
+
 @media (max-width: 56.25rem) {
   .dds-console-shell {
     grid-template-columns: minmax(0, 1fr);
