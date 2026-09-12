@@ -6,6 +6,7 @@ import {
   Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, Select, Switch,
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip, useToast,
 } from "../index";
+import { createStatusPill } from "../status-pill";
 
 let dispose: (() => void) | undefined;
 afterEach(() => { vi.useRealTimers(); dispose?.(); dispose = undefined; document.body.replaceChildren(); });
@@ -152,5 +153,34 @@ describe("keyboard lifecycle", () => {
     expect(tabs[0]).toBe(document.activeElement);
     tabs[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
     expect(tabs[1]).toBe(document.activeElement);
+  });
+});
+
+describe("createStatusPill", () => {
+  const pill = createStatusPill<"key" | "role">({
+    tones: { key: { active: "success", revoked: "danger" }, role: { owner: "brand" } },
+    label: (_domain, value) => (value === "active" ? "Active" : value === "owner" ? "Owner" : undefined),
+    openDomains: ["role"],
+  });
+
+  it("renders the tone and the injected label", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => pill({ domain: "key", value: "active", locale: "en" }), host);
+    const node = host.querySelector("span");
+    expect(node?.className).toContain("dds-badge--success");
+    expect(node?.getAttribute("data-status")).toBe("key.active");
+    expect(node?.getAttribute("data-tone")).toBe("success");
+    expect(node?.textContent).toBe("Active");
+  });
+
+  it("throws for an unknown value in a closed domain", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    expect(() => render(() => pill({ domain: "key", value: "mystery", locale: "en" }), host)).toThrow();
+  });
+
+  it("renders raw text for an unknown value in an open domain", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => pill({ domain: "role", value: "project.viewer", locale: "en" }), host);
+    expect(host.querySelector("code")?.textContent).toBe("project.viewer");
   });
 });

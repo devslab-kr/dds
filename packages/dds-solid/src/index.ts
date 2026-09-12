@@ -20,6 +20,8 @@ export {
 } from "./controls";
 export { Dialog, type DialogProps } from "./dialog";
 export { Icon, type IconProps } from "./icon";
+export { createStatusPill } from "./status-pill";
+export type { StatusTone } from "./status-pill";
 export { Tab, TabList, TabPanel, Tabs, type TabPanelProps, type TabProps, type TabsProps } from "./tabs";
 export { ToastProvider, useToast, type ToastApi, type ToastInput, type ToastProviderProps, type ToastTone } from "./toast";
 export { Tooltip, type TooltipProps, type TooltipTriggerProps } from "./tooltip";
