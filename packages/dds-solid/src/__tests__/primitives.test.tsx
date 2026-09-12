@@ -7,6 +7,7 @@ import {
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip, useToast,
 } from "../index";
 import { createStatusPill } from "../status-pill";
+import { ConsoleShell } from "../console-shell";
 
 let dispose: (() => void) | undefined;
 afterEach(() => { vi.useRealTimers(); dispose?.(); dispose = undefined; document.body.replaceChildren(); });
@@ -182,5 +183,54 @@ describe("createStatusPill", () => {
     const host = document.body.appendChild(document.createElement("div"));
     dispose = render(() => pill({ domain: "role", value: "project.viewer", locale: "en" }), host);
     expect(host.querySelector("code")?.textContent).toBe("project.viewer");
+  });
+});
+
+describe("ConsoleShell", () => {
+  const nav = [{ label: "Build", items: [
+    { id: "projects", href: "/dashboard/projects", label: "Projects" },
+    { id: "jobs", href: "/dashboard/jobs", label: "Jobs", badge: 3 },
+  ] }];
+  const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", badge: "{count} pending" };
+  const shell = () => (
+    <ConsoleShell
+      surface="dashboard" activePath="/dashboard/jobs"
+      brand={{ href: "/dashboard", name: "VisionLinq", mark: "/brand/mark.svg" }}
+      nav={nav} labels={labels} header={{ title: "Jobs" }} foot={<button>Sign out</button>}
+    >
+      <p data-body>body</p>
+    </ConsoleShell>
+  );
+
+  it("marks the active item by exact match on an index route and by prefix elsewhere", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    const active = host.querySelector('[aria-current="page"]');
+    expect(active?.getAttribute("data-nav")).toBe("dashboard.jobs");
+  });
+
+  it("renders the badge with the injected label and no words of its own", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    const badge = host.querySelector(".dds-console-rail__badge");
+    expect(badge?.textContent).toBe("3");
+    expect(badge?.getAttribute("aria-label")).toBe("3 pending");
+  });
+
+  it("opens and closes the drawer", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    const toggle = host.querySelector('[data-action="toggle-rail"]') as HTMLButtonElement;
+    toggle.click();
+    expect(host.querySelector(".dds-console-rail")?.getAttribute("data-open")).toBe("true");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(host.querySelector(".dds-console-rail")?.getAttribute("data-open")).toBe("false");
+  });
+
+  it("renders the foot slot and the children", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    expect(host.querySelector(".dds-console-rail__foot button")?.textContent).toBe("Sign out");
+    expect(host.querySelector("[data-body]")).not.toBeNull();
   });
 });

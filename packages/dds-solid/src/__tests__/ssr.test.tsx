@@ -2,7 +2,7 @@ import { renderToString } from "solid-js/web";
 import { expect, it } from "vitest";
 
 import {
-  Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, Select, Switch,
+  Button, Checkbox, ConsoleShell, Dialog, Field, Icon, IconButton, Radio, Select, Switch,
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip,
 } from "../index";
 
@@ -23,4 +23,21 @@ it("server-renders every public primitive", () => {
   const html = renderToString(() => <AllPrimitives />);
   expect(html).toContain("Hydrate");
   expect(html).toContain("aria-label=\"Complete\"");
+});
+
+it("server-renders ConsoleShell without the client-only hydration claim", () => {
+  const nav = [{ label: "Build", items: [{ id: "projects", href: "/dashboard/projects", label: "Projects" }] }];
+  const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", badge: "{count} pending" };
+  const html = renderToString(() => (
+    <ConsoleShell
+      surface="dashboard" activePath="/dashboard/projects"
+      brand={{ href: "/dashboard", name: "VisionLinq", mark: "/brand/mark.svg" }}
+      nav={nav} labels={labels} header={{ title: "Projects" }}
+    >
+      <p>body</p>
+    </ConsoleShell>
+  ));
+  expect(html).toContain("Projects");
+  expect(html).toContain("data-nav=\"dashboard.projects\"");
+  expect(html).not.toContain("data-hydrated");
 });

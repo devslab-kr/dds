@@ -18,6 +18,7 @@ export {
   type SwitchProps,
   type ControlSize,
 } from "./controls";
+export { ConsoleShell, type ConsoleHeader, type ConsoleNavGroup, type ConsoleNavItem, type ConsoleShellLabels, type ConsoleShellProps } from "./console-shell";
 export { Dialog, type DialogProps } from "./dialog";
 export { Icon, type IconProps } from "./icon";
 export { createStatusPill } from "./status-pill";
