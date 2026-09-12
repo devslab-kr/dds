@@ -19,6 +19,13 @@ export interface ConsoleShellLabels {
   skip: string;
   menuOpen: string;
   menuClose: string;
+  /** Accessible name for the rail's `<nav>` landmark (e.g. "Dashboard
+   * navigation"). Required, not optional: a console page also has the
+   * DataTable's pagination `<nav>` (named via its own `labels.nextPage`),
+   * and an unnamed landmark next to a named one is a regression a
+   * screen-reader user would notice immediately — the rail is the primary
+   * nav, so it must never be the anonymous one. */
+  nav: string;
   /** Badge accessible name template. `{count}` is substituted with the
    * item's pending count — DDS supplies no words of its own. */
   badge: string;
@@ -92,7 +99,12 @@ export function ConsoleShell(props: ConsoleShellProps): JSX.Element {
       </button>
       <div class="dds-console-rail__scrim" data-open={open() ? "true" : "false"} onClick={close} />
       <aside id="dds-console-rail" class="dds-console-rail" data-open={open() ? "true" : "false"}>
-        <a class="dds-console-rail__brand" href={props.brand.href} aria-label={`${props.brand.name} home`}>
+        {/* No aria-label here: the decorative img (alt="") contributes
+            nothing to the accessible name, so it resolves to the visible
+            "{brand.name}" text alone — the original concatenated a
+            hardcoded English word ("home") onto this, which is exactly the
+            kind of copy this package must not author itself. */}
+        <a class="dds-console-rail__brand" href={props.brand.href}>
           <img src={props.brand.mark} alt="" width="20" height="20" />
           <strong>{props.brand.name}</strong>
         </a>
@@ -101,7 +113,7 @@ export function ConsoleShell(props: ConsoleShellProps): JSX.Element {
             <For each={props.context}>{(row) => <div><dt>{row.label}</dt><dd>{row.value}</dd></div>}</For>
           </dl>
         </Show>
-        <nav class="dds-console-rail__nav">
+        <nav class="dds-console-rail__nav" aria-label={props.labels.nav}>
           <For each={props.nav}>{(group) => {
             const groupId = `dds-console-group-${createUniqueId()}`;
             return (

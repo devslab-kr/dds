@@ -27,7 +27,7 @@ it("server-renders every public primitive", () => {
 
 it("server-renders ConsoleShell without the client-only hydration claim", () => {
   const nav = [{ label: "Build", items: [{ id: "projects", href: "/dashboard/projects", label: "Projects" }] }];
-  const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", badge: "{count} pending" };
+  const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", nav: "Dashboard navigation", badge: "{count} pending" };
   const html = renderToString(() => (
     <ConsoleShell
       surface="dashboard" activePath="/dashboard/projects"

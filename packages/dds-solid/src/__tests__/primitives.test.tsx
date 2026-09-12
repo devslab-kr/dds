@@ -191,7 +191,7 @@ describe("ConsoleShell", () => {
     { id: "projects", href: "/dashboard/projects", label: "Projects" },
     { id: "jobs", href: "/dashboard/jobs", label: "Jobs", badge: 3 },
   ] }];
-  const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", badge: "{count} pending" };
+  const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", nav: "Dashboard navigation", badge: "{count} pending" };
   const shell = () => (
     <ConsoleShell
       surface="dashboard" activePath="/dashboard/jobs"
