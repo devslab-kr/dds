@@ -36,6 +36,7 @@ export const FILES = [
   "toast.css",
   "tooltip.css",
   "emptystate.css",
+  "table.css",
 ];
 
 const banner = `/* @devslab/dds-css — generated bundle, do not edit. Source: src/*.css
