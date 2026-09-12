@@ -79,4 +79,48 @@ describe("DataTable", () => {
     expect(headers.at(-1)?.textContent).toBe("Actions");
     expect(host.querySelectorAll("tbody td .dds-table__actions button")).toHaveLength(2);
   });
+
+  it("sorts text case-insensitively (auto '\"text\"' resolution, not raw code-point order)", () => {
+    // Regression pin for the missing `sortFns` slot: without registering
+    // `sortFn_text`, TanStack's `sortFn: "auto"` falls back to `sortFn_basic`,
+    // which compares raw values — "Zebra" < "alpha" by char code (90 < 97).
+    type MixedCaseRow = { name: string };
+    const mixedRows: MixedCaseRow[] = [{ name: "Zebra" }, { name: "alpha" }];
+    const mixedColumns: Column<MixedCaseRow>[] = [
+      { id: "name", label: "Name", cell: (r) => r.name, sortBy: (r) => r.name, rowHeader: true },
+    ];
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <DataTable rows={mixedRows} columns={mixedColumns} caption="Keys" labels={labels} sort="client" />, host);
+    const button = host.querySelector("thead button") as HTMLButtonElement;
+    button.click();
+    expect([...host.querySelectorAll("tbody th")].map((n) => n.textContent)).toEqual(["alpha", "Zebra"]);
+  });
+
+  it("sorts a null sortBy value last, ascending (sortUndefined: \"last\")", () => {
+    // Regression pin for the null/undefined boundary: `sortBy` returns `null`
+    // for "no value" per our declared contract, but `createSortedRowModel`'s
+    // comparator only honors `sortUndefined` for `=== void 0`. A bare `null`
+    // falls through to the real comparator instead, which (for this numeric
+    // fixture) sorts the empty row FIRST ascending, not last.
+    //
+    // Numeric columns start their first sort press descending (auto sort
+    // direction), so a second press is what reaches ascending order — same
+    // toggle cycle the existing "reverses on a second press" test exercises.
+    type MaybeRow = { name: string; score: number | null };
+    const maybeRows: MaybeRow[] = [
+      { name: "unknown", score: null },
+      { name: "low", score: 5 },
+      { name: "high", score: 10 },
+    ];
+    const maybeColumns: Column<MaybeRow>[] = [
+      { id: "name", label: "Name", cell: (r) => r.name, rowHeader: true },
+      { id: "score", label: "Score", cell: (r) => (r.score === null ? "—" : String(r.score)), sortBy: (r) => r.score, numeric: true },
+    ];
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <DataTable rows={maybeRows} columns={maybeColumns} caption="Keys" labels={labels} sort="client" />, host);
+    const button = host.querySelector("thead button") as HTMLButtonElement;
+    button.click();
+    button.click();
+    expect([...host.querySelectorAll("tbody th")].map((n) => n.textContent)).toEqual(["low", "high", "unknown"]);
+  });
 });

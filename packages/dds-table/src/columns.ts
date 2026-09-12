@@ -9,6 +9,8 @@ import {
   createColumnHelper,
   createSortedRowModel,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
   tableFeatures,
   type ColumnDef,
 } from "@tanstack/solid-table";
@@ -67,12 +69,30 @@ export type TableFeatureSet = typeof baseFeatures;
  * rendered row order never does. Added here, after `TableFeatureSet` is
  * already named, so its function type closes over the narrow type instead of
  * over itself.
+ *
+ * `sortFns` registers the names `sortFn: "auto"` (the default every column
+ * gets — see `toColumnDefs`) can actually resolve to for a `Column<T>` whose
+ * `sortBy` returns `string | number | null`: plain strings resolve to
+ * `"text"`, strings containing digit runs (`"Row 10"`, `"SKU100"`) resolve to
+ * `"alphanumeric"`, and numbers/`null` never set a name at all and fall
+ * straight to the always-available `sortFn_basic` — so `"datetime"` is never
+ * reachable and is deliberately not registered. Leaving either reachable name
+ * unregistered means `"auto"` silently falls back to `sortFn_basic`, which
+ * compares raw values instead of lowercasing first: a case-sensitive sort
+ * that also warns on every column in development
+ * (`rowSortingFeature.utils.js`'s `column_getAutoSortFn`). Importing the two
+ * named functions (rather than the `sortFns` barrel export, whose own
+ * docstring says registering it "opts out of tree-shaking") keeps every
+ * other built-in sorting function — including the case-sensitive and
+ * datetime variants this component never produces — out of the bundle.
  */
 export const tableFeatureSet: TableFeatureSet & {
   sortedRowModel: ReturnType<typeof createSortedRowModel<TableFeatureSet, Record<string, unknown>>>;
+  sortFns: { text: typeof sortFn_text; alphanumeric: typeof sortFn_alphanumeric };
 } = {
   ...baseFeatures,
   sortedRowModel: createSortedRowModel<TableFeatureSet, Record<string, unknown>>(),
+  sortFns: { text: sortFn_text, alphanumeric: sortFn_alphanumeric },
 };
 
 /** Turns our declarations into TanStack column defs. Sorting is enabled per
@@ -82,8 +102,8 @@ export const tableFeatureSet: TableFeatureSet & {
  *  `Column<T>` deliberately leaves `T` unconstrained (any row shape a
  *  consumer wants to render), but TanStack's `RowData` requires
  *  `Record<string, any> | Array<any>`. Every real row is one of those at
- *  runtime, so the helper is instantiated at `Record<string, any>` and the
- *  accessor casts its parameter back to `T` — a boundary cast, not a
+ *  runtime, so the helper is instantiated at `Record<string, unknown>` and
+ *  the accessor casts its parameter back to `T` — a boundary cast, not a
  *  behavior change. */
 export function toColumnDefs<T>(columns: readonly Column<T>[]): ColumnDef<TableFeatureSet, Record<string, unknown>, unknown>[] {
   const helper = createColumnHelper<TableFeatureSet, Record<string, unknown>>();
@@ -95,7 +115,13 @@ export function toColumnDefs<T>(columns: readonly Column<T>[]): ColumnDef<TableF
     // supertype of `ColumnDef<..., string | number | null>`. The return type
     // annotation below is what makes TanStack infer `TValue = unknown`
     // instead of narrowing to the ternary's actual `string | number | null`.
-    helper.accessor((row): unknown => (column.sortBy ? column.sortBy(row as T) : null), {
+    //
+    // `?? undefined` is the adapter boundary translating our declared
+    // contract (`sortBy` returns `null` for "no value") into TanStack's:
+    // `createSortedRowModel`'s comparator only consults `sortUndefined`
+    // after testing `=== void 0`, so a bare `null` would never trigger it —
+    // `sortUndefined: "last"` would be a promise the code doesn't keep.
+    helper.accessor((row): unknown => (column.sortBy ? column.sortBy(row as T) ?? undefined : undefined), {
       id: column.id,
       enableSorting: Boolean(column.sortBy),
       sortUndefined: "last",
