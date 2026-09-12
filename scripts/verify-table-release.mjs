@@ -53,7 +53,7 @@ const runNode = (args, cwd) => {
 };
 
 try {
-  const packageNames = ["dds-tokens", "dds-css", "dds-icons", "dds-table"];
+  const packageNames = ["dds-tokens", "dds-css", "dds-table"];
   const tarballs = [];
   let solidTarball = "";
   for (const packageName of packageNames) {
@@ -65,9 +65,24 @@ try {
     if (packageName === "dds-table") solidTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "dds-table");
+  const tableManifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
+  const devslabDependencies = Object.keys(tableManifest.dependencies).filter((name) => name.startsWith("@devslab/"));
   for (const bundle of ["dist/index.js", "dist/server.js"]) {
     const source = await readFile(join(packageRoot, bundle), "utf8");
-    assert.match(source, /from\s+["']@devslab\/dds-icons["']/, `${bundle} must externalize dds-icons`);
+    assert.match(
+      source,
+      /(?:import|export)\s*(?:[^'"]*from\s*)?["']@tanstack\/solid-table["']/,
+      `${bundle} must import @tanstack/solid-table rather than inlining it`,
+    );
+    for (const dependency of devslabDependencies) {
+      if (!source.includes(dependency)) continue;
+      const escaped = dependency.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      assert.match(
+        source,
+        new RegExp(`(?:import|export)\\s*(?:[^'"]*from\\s*)?["']${escaped}["']`),
+        `${bundle} must externalize ${dependency}`,
+      );
+    }
   }
   publishDryRun(solidTarball, packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
@@ -83,9 +98,12 @@ try {
   await writeFile(ssrScript, `
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
-import { Button, Icon } from "@devslab/dds-table";
-const html = renderToString(() => createComponent(Button, { get children() { return ["Fresh consumer ", createComponent(Icon, { name: "check", label: "Complete" })]; } }));
-if (!html.includes("Fresh consumer") || !html.includes("aria-label=\\"Complete\\"")) throw new Error("fresh consumer SSR failed");
+import { DataTable } from "@devslab/dds-table";
+const rows = [{ id: "1", name: "Fresh consumer" }, { id: "2", name: "Second row" }];
+const columns = [{ id: "name", label: "Name", cell: (row) => row.name }];
+const labels = { sortBy: "Sort by {column}", actions: "Actions", nextPage: "Next page" };
+const html = renderToString(() => createComponent(DataTable, { rows, columns, labels, caption: "Fresh consumer table" }));
+if (!html.includes("Fresh consumer table")) throw new Error("fresh consumer SSR failed");
 process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html }));
 `, "utf8");
   const ssrPayload = runNode([ssrScript], temp);
@@ -101,12 +119,15 @@ Object.defineProperty(globalThis, "_$HY", { value: dom.window._$HY, configurable
 const host = document.querySelector("#root");
 const { hydrate } = await import("solid-js/web");
 const { createComponent } = await import("solid-js");
-const { Button, Icon } = await import("@devslab/dds-table");
+const { DataTable } = await import("@devslab/dds-table");
+const rows = [{ id: "1", name: "Fresh consumer" }, { id: "2", name: "Second row" }];
+const columns = [{ id: "name", label: "Name", cell: (row) => row.name }];
+const labels = { sortBy: "Sort by {column}", actions: "Actions", nextPage: "Next page" };
 const diagnostics = [];
 const warn = console.warn; const error = console.error;
 console.warn = (...values) => diagnostics.push(values.join(" "));
 console.error = (...values) => diagnostics.push(values.join(" "));
-const dispose = hydrate(() => createComponent(Button, { get children() { return ["Fresh consumer ", createComponent(Icon, { name: "check", label: "Complete" })]; } }), host);
+const dispose = hydrate(() => createComponent(DataTable, { rows, columns, labels, caption: "Fresh consumer table" }), host);
 await Promise.resolve();
 dispose(); console.warn = warn; console.error = error;
 if (diagnostics.length) throw new Error('fresh consumer hydration diagnostics: ' + diagnostics.join("\\n"));
