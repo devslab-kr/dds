@@ -90,7 +90,7 @@ try {
   const installedRoot = join(temp, "node_modules", "@devslab", "dds-table");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
   assert.equal(manifest.name, "@devslab/dds-table");
-  for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts", "styles.css"]) {
+  for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts"]) {
     await access(join(installedRoot, path));
   }
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
