@@ -157,7 +157,7 @@ describe("keyboard lifecycle", () => {
 });
 
 describe("createStatusPill", () => {
-  const pill = createStatusPill<"key" | "role">({
+  const pill = createStatusPill({
     tones: { key: { active: "success", revoked: "danger" }, role: { owner: "brand" } },
     label: (_domain, value) => (value === "active" ? "Active" : value === "owner" ? "Owner" : undefined),
     openDomains: ["role"],

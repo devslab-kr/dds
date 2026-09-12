@@ -5,11 +5,15 @@ export type StatusTone = "success" | "warning" | "danger" | "info" | "brand" | "
 /* The rule, not the vocabulary. A value a CLOSED domain does not know throws:
    that can only mean a schema gained a case the catalog forgot. A value an OPEN
    domain does not know renders as raw text: that is customer data, and it must
-   not crash the screen. */
+   not crash the screen.
+
+   `tones` declares which domains exist; `openDomains` only selects among the
+   domains `tones` already declared, so it must not itself widen or narrow that
+   set. */
 export function createStatusPill<D extends string>(config: {
   tones: Record<D, Record<string, StatusTone>>;
   label: (domain: D, value: string, locale: string) => string | undefined;
-  openDomains?: readonly D[];
+  openDomains?: readonly NoInfer<D>[];
 }) {
   const open = new Set<string>(config.openDomains ?? []);
   return function StatusPill(props: { domain: D; value: string; locale: string }): JSX.Element {
