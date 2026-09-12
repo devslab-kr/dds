@@ -23,9 +23,11 @@ const forbiddenRange = /^(?:\^|~|>|<|\*|latest$|next$|workspace:|catalog:)/i;
    `workspace:` specifier carries no compatibility claim to verify. So
    first-party names are exempt from the matrix comparison and the
    exact-pin check below, and are held to a narrower, positive rule
-   instead: they must actually use the `workspace:` protocol, so a
-   first-party dependency that somehow carried a published range (e.g.
-   "^0.10.0") still fails loudly. */
+   instead: the specifier must use the `workspace:` protocol AND name the
+   exact lockstep version currently linked, so neither a published range
+   (e.g. "^0.10.0") nor an unpinned one (e.g. "workspace:*" or
+   "workspace:^0.10.0" — what `pnpm add --workspace` writes by default)
+   passes silently. */
 const isFirstPartyDependency = (name) => name.startsWith("@devslab/");
 
 const declaredEntries = Object.entries(declared);
@@ -34,11 +36,29 @@ const thirdPartyDeclared = Object.fromEntries(declaredEntries.filter(([name]) =>
 
 assert.deepEqual(thirdPartyDeclared, expected, "package.json must exactly match compatibility-matrix.json");
 
+function assertLockfileSpecifier(name, version) {
+  const escapedName = name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+  assert.match(
+    lockfile,
+    new RegExp(`(?:'${escapedName}'|${escapedName}):\\r?\\n\\s+specifier: ${version.replaceAll(".", "\\.")}`),
+    `${name}@${version} is missing from the canary lockfile importer`,
+  );
+}
+
 for (const [name, version] of Object.entries(firstPartyDeclared)) {
-  assert.equal(
+  assert.ok(
     version.startsWith("workspace:"),
-    true,
     `${name} is a first-party DDS package and must use the workspace: protocol, received ${version}`,
+  );
+  assertLockfileSpecifier(name, version);
+
+  const pinned = version.slice("workspace:".length);
+  const installedManifest = resolve(packageRoot, "node_modules", ...name.split("/"), "package.json");
+  const installed = JSON.parse(await readFile(installedManifest, "utf8"));
+  assert.equal(
+    installed.version,
+    pinned,
+    `${name} must name the linked lockstep version, declared ${version}, linked ${installed.version}`,
   );
 }
 
@@ -48,11 +68,7 @@ for (const [name, version] of Object.entries(thirdPartyDeclared)) {
     false,
     `${name} must use an exact version, received ${version}`,
   );
-  assert.match(
-    lockfile,
-    new RegExp(`(?:'${name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}'|${name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}):\\r?\\n\\s+specifier: ${version.replaceAll(".", "\\.")}`),
-    `${name}@${version} is missing from the canary lockfile importer`,
-  );
+  assertLockfileSpecifier(name, version);
 
   const installedManifest = resolve(packageRoot, "node_modules", ...name.split("/"), "package.json");
   const installed = JSON.parse(await readFile(installedManifest, "utf8"));
@@ -74,4 +90,6 @@ for (const [label, candidate] of [
 assert.match(lockfile, /packages\/compatibility-canary:/, "canary lockfile importer is missing");
 assert.doesNotMatch(lockfile, /peerDependencyRules:|overrides:/, "lockfile contains dependency overrides");
 
-console.log(`verified ${Object.keys(declared).length} exact canary dependencies`);
+console.log(
+  `verified ${Object.keys(thirdPartyDeclared).length} exact canary dependencies and ${Object.keys(firstPartyDeclared).length} first-party workspace link(s)`,
+);
