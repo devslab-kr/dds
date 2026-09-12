@@ -16,9 +16,33 @@ const expected = { ...matrix.runtime, ...matrix.toolchain };
 const declared = { ...manifest.dependencies, ...manifest.devDependencies };
 const forbiddenRange = /^(?:\^|~|>|<|\*|latest$|next$|workspace:|catalog:)/i;
 
-assert.deepEqual(declared, expected, "package.json must exactly match compatibility-matrix.json");
+/* The matrix documents third-party *compatibility* — a version some other
+   team published and we are proving works with the rest of the stack.
+   A `@devslab/*` dependency is a sibling package in this monorepo: its
+   version tracks the same lockstep train as the canary itself, and a
+   `workspace:` specifier carries no compatibility claim to verify. So
+   first-party names are exempt from the matrix comparison and the
+   exact-pin check below, and are held to a narrower, positive rule
+   instead: they must actually use the `workspace:` protocol, so a
+   first-party dependency that somehow carried a published range (e.g.
+   "^0.10.0") still fails loudly. */
+const isFirstPartyDependency = (name) => name.startsWith("@devslab/");
 
-for (const [name, version] of Object.entries(declared)) {
+const declaredEntries = Object.entries(declared);
+const firstPartyDeclared = Object.fromEntries(declaredEntries.filter(([name]) => isFirstPartyDependency(name)));
+const thirdPartyDeclared = Object.fromEntries(declaredEntries.filter(([name]) => !isFirstPartyDependency(name)));
+
+assert.deepEqual(thirdPartyDeclared, expected, "package.json must exactly match compatibility-matrix.json");
+
+for (const [name, version] of Object.entries(firstPartyDeclared)) {
+  assert.equal(
+    version.startsWith("workspace:"),
+    true,
+    `${name} is a first-party DDS package and must use the workspace: protocol, received ${version}`,
+  );
+}
+
+for (const [name, version] of Object.entries(thirdPartyDeclared)) {
   assert.equal(
     forbiddenRange.test(version),
     false,

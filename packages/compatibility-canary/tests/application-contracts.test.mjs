@@ -40,6 +40,14 @@ test("actual TanStack application sources carry every canary contract", async ()
   assert.match(serverSource, /ServiceBinding/);
 });
 
+test("the canary exercises the table package at the pinned version", async () => {
+  const matrix = JSON.parse(await readFile(new URL("../compatibility-matrix.json", import.meta.url), "utf8"));
+  assert.equal(matrix.runtime["@tanstack/solid-table"], "9.2.4");
+  assert.equal(matrix.runtime["@tanstack/table-core"], "9.2.4");
+  const route = await readFile(new URL("../src/routes/table.tsx", import.meta.url), "utf8");
+  assert.match(route, /DataTable/);
+});
+
 test("actual verification entry points generate routes, inspect install output, and scan artifacts", async () => {
   const [manifestText, routerConfigText, installGate, previewSmoke, artifactScan, cleanRunner, sentinels] = await Promise.all([
     source("package.json"),
