@@ -463,7 +463,9 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 - 래퍼: `.dds-table-wrap`은 넘치면 가로로 스크롤되고,
   절대 위치로 클리핑되는 `.dds-visually-hidden` caption이 페이지가 아니라
   이 박스를 기준으로 클리핑되게 해주는 포지셔닝 조상입니다. `--tall`은
-  70vh로 높이를 제한하고 헤더(`thead th`)를 `position: sticky`로 고정합니다.
+  70vh로 높이를 제한하고 헤더(`thead th`)를 `position: sticky`로 고정하며,
+  테이블을 `border-collapse: separate`(간격 0)로 바꿉니다 — 테두리를
+  합치면 sticky 헤더가 붙지 않을 수 있기 때문입니다.
 - 밀도·레이아웃: `.dds-table--dense`는 행 높이를 `--dds-space-40` 토큰(40px)
   에서 2.25rem(36px)으로 줄입니다. `.dds-table--fixed`는
   `table-layout: fixed`로 바꾸고 `<colgroup>`을 기대하는데, 컴포넌트는
@@ -477,6 +479,14 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 - `.dds-table__actions`는 트레일링 액션 셀의 내용을 오른쪽 정렬하고, 액션
   컬럼 자체의 헤더는 `.dds-visually-hidden` 유틸리티를 써서 화면엔
   안 보여도 접근성 이름은 갖습니다.
+- 행 액션: `.dds-table__actions` 안의 `.dds-btn`은 크기 수식자와 상관없이
+  32px이고 줄바꿈하지 않으며, 액션 셀은 세로 패딩을 4px로 줄입니다 —
+  버튼이 있는 행이 버튼 없는 같은 행과 높이가 같습니다. `.dds-btn--sm`(id
+  옆 복사 버튼)을 담은 셀도 같은 방식으로 패딩을 줄입니다.
+  `.dds-table--dense`에서는 행 액션과 셀 안의 모든 `.dds-btn--sm`이
+  24px입니다. 거친 포인터(터치)에서는 전부 44px 터치 하한으로 돌아가고
+  대신 행이 커집니다(D-025).
+- 셀 안의 `<code>`는 13px 모노 서체를 씁니다 — 한 글자씩 읽는 id·키·해시용.
 - `.dds-table__pagination`은 라벨 붙은 `<nav>`가 평범한
   `.dds-btn.dds-btn--secondary` 링크를 감싼 것입니다 — 버튼이 아닙니다 —
   덕분에 커서 페이징이 JavaScript 없이도 동작합니다. 다음 페이지가 없으면
@@ -498,6 +508,9 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
   잘못 보고하게 되므로, 이 마크업은 그 경우(`sort`의 `{ statedOrder }`
   형태 — `@devslab/dds-table`의 README 참고)에 버튼을 아예 렌더링하지
   않습니다.
+- **Don't**: 제품 CSS에서 행 액션이나 셀 버튼의 크기를 다시 정하지 마세요 —
+  테이블이 이미 행 높이에 맞춰 두었고, 이 규칙들을 특이도로 이기는 제품
+  오버라이드는 여기서 다시 선언한 터치 하한까지 함께 무력화합니다.
 
 ## Console shell — `.dds-console-shell`
 

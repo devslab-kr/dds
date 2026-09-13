@@ -55,6 +55,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Code cells: ids, keys and hashes are read character by character, so a
+ * <code> inside a cell takes the mono family at 13px — a notch under the
+ * 14px cell text, which is the size mono needs to sit at the same visual
+ * weight as the sans around it. */
+.dds-table code {
+  font-family: var(--dds-font-family-mono);
+  font-size: .8125rem;
+}
+
 .dds-table th small {
   display: block;
   color: var(--dds-color-text-muted);
@@ -78,6 +87,17 @@
   inset-block-start: 0;
   z-index: 1;
   background: var(--dds-color-bg-elevated);
+}
+
+/* Separate borders under the sticky header: with border-collapse: collapse
+ * the cell borders belong to the table rather than the cells, and that can
+ * keep a sticky header from actually sticking when the wrap scrolls (the
+ * header row slides away, or its border stays behind). Every cell border
+ * here is block-start only, so separate borders with zero spacing draw the
+ * same lines. */
+.dds-table-wrap--tall .dds-table {
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .dds-table__sort {
@@ -126,6 +146,61 @@
 }
 .dds-table__actions[hidden] {
   display: none;
+}
+
+/* Row actions are 32px and stay on one line. A button's own geometry (40px
+ * default, 32px --sm, both with wrapping labels) plus the cell's 10px block
+ * padding made a row carrying a button measure ~53px against its 40px
+ * neighbours — a table whose rows are not one height reads as broken. So an
+ * action button is held to the --sm height whatever its size modifier
+ * (padding included, or a default button would still be 34px), its label
+ * never wraps (the wrap scrolls horizontally, nothing is clipped), and the
+ * actions cell trims its block padding so 32px fits inside the 40px row. */
+.dds-table__actions .dds-btn {
+  min-block-size: var(--dds-space-32);
+  padding-block: var(--dds-space-4);
+  white-space: nowrap;
+}
+
+/* The same trim for any cell holding a small button (a copy button beside
+ * an id): its own 10px padding around a 32px button is a 53px row, and even
+ * in a dense table 6px around a 24px button plus the 1px border is 37px, a
+ * pixel over the 36px row. A default-size button outside the actions cell
+ * keeps full padding — that is an explicit choice to be taller. */
+.dds-table td:has(> .dds-table__actions),
+.dds-table td:has(.dds-btn--sm) {
+  padding-block: var(--dds-space-4);
+}
+
+/* Small buttons in a dense table are 24px — a copy button beside an id in
+ * any cell, and every row action whatever its size modifier (the same
+ * "whatever its modifier" as the 32px rule above, one density down) — so
+ * they fit the 36px dense row. Zero block padding is what gets there:
+ * --sm's own 4px padding around a 16px label already makes 26px, which
+ * min-block-size can't pull back down. 24px is exactly the §6 web floor.
+ * A default-size button outside the actions cell is left alone: that is an
+ * explicit choice to be taller. The actions selector out-specifies the
+ * 32px rule; the --sm one ties it and wins on source order. Middle
+ * alignment keeps an inline button beside text from growing the line box
+ * past its own 24px by sitting on the text baseline. */
+.dds-table--dense .dds-btn--sm,
+.dds-table--dense .dds-table__actions .dds-btn {
+  min-block-size: var(--dds-space-24);
+  padding-block: 0;
+  vertical-align: middle;
+}
+
+/* Touch pointers keep the 44px floor (spec §6, button.css). The two rules
+ * above out-specify button.css's coarse-pointer rule, so without restating
+ * it here a table would silently shrink every action below the touch
+ * target on a phone. Uniform row height yields on touch; the target does
+ * not (docs/decisions.md D-025). */
+@media (pointer: coarse) {
+  .dds-table__actions .dds-btn,
+  .dds-table--dense .dds-btn--sm,
+  .dds-table--dense .dds-table__actions .dds-btn {
+    min-block-size: 44px;
+  }
 }
 
 .dds-table__order {

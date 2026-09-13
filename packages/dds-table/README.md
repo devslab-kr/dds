@@ -51,7 +51,7 @@ const labels: DataTableLabels = {
 | `caption` | `string` | required | The table's accessible name, rendered visually hidden (`<caption class="dds-visually-hidden">`). |
 | `labels` | `DataTableLabels` | required | Every word the component can render — see "Labels are required" below. |
 | `sort` | `"client" \| { statedOrder: string }` | optional, no sort buttons or order text when omitted | See Sorting below. |
-| `density` | `"comfortable" \| "dense"` | optional, default `"comfortable"` (40px rows) | `"dense"` adds `.dds-table--dense` (36px rows, tighter cell padding). |
+| `density` | `"comfortable" \| "dense"` | optional, default `"comfortable"` (40px rows) | `"dense"` adds `.dds-table--dense` (36px rows, tighter cell padding). Either way, row actions and small buttons in cells are held to the row height (32px buttons in 40px rows, 24px in 36px rows; 44px on touch) — see `docs/components.md` Table. |
 | `scroll` | `"auto" \| "tall"` | optional, default `"auto"` | `"tall"` adds `.dds-table-wrap--tall`: a `max-block-size: 70vh` scrolling body with a sticky header, for a long in-page list that shouldn't push the rest of the page down. |
 | `minWidth` | `string` (a CSS length) | optional | Sets the `<table>`'s `min-inline-size`, so narrow viewports scroll the table horizontally (inside `.dds-table-wrap`) instead of crushing its columns. |
 | `actions` | `(row: T) => JSX.Element` | optional | Renders a trailing cell per row (e.g. row-level buttons); adds a visually-hidden header cell from `labels.actions`. |
