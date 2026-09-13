@@ -1,7 +1,11 @@
 import { For, Show, createSignal, createUniqueId, onCleanup, onMount, type JSX } from "solid-js";
 
 /** One item in a nav group's list. `active` is a caller override — pass it
- * only when the generic prefix rule below gets a route wrong. */
+ * only when the generic prefix rule below gets a route wrong. "Index route"
+ * in that rule means an `href` exactly one path segment deep (e.g.
+ * `/dashboard`); a console mounted under a path prefix (so its own root is
+ * two or more segments deep) should pass `active` explicitly on that item
+ * rather than rely on the generic rule. */
 export interface ConsoleNavItem {
   id: string;
   href: string;
@@ -63,8 +67,15 @@ function isActive(activePath: string, href: string, explicit?: boolean): boolean
   return activePath === href || activePath.startsWith(`${href}/`);
 }
 
+/** Fills the `{count}` placeholder in a consumer-supplied badge label
+ *  template. A function replacer, not `template.replace("{count}", value)`
+ *  — a string replacement value is subject to special
+ *  `$&`/`$$`/`` $` ``/`$'` patterns. `count` is always a plain digit string
+ *  today, so this is defensive rather than a live bug, but it is the same
+ *  class of mistake as dds-table's analogous `sortBy` label fix — no
+ *  shared helper between the two packages (see that fix's note). */
 function fillBadgeLabel(template: string, count: number): string {
-  return template.replace("{count}", String(count));
+  return template.replace("{count}", () => String(count));
 }
 
 export function ConsoleShell(props: ConsoleShellProps): JSX.Element {

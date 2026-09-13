@@ -7,7 +7,7 @@ import {
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip, useToast,
 } from "../index";
 import { createStatusPill } from "../status-pill";
-import { ConsoleShell } from "../console-shell";
+import { ConsoleShell, type ConsoleNavItem } from "../console-shell";
 
 let dispose: (() => void) | undefined;
 afterEach(() => { vi.useRealTimers(); dispose?.(); dispose = undefined; document.body.replaceChildren(); });
@@ -232,5 +232,49 @@ describe("ConsoleShell", () => {
     dispose = render(shell, host);
     expect(host.querySelector(".dds-console-rail__foot button")?.textContent).toBe("Sign out");
     expect(host.querySelector("[data-body]")).not.toBeNull();
+  });
+
+  // isActive's two real behaviors, each pinned separately so deleting either
+  // branch in `isActive` (packages/dds-solid/src/console-shell.tsx) fails a
+  // test: the previous "exact match on an index route and by prefix
+  // elsewhere" test used an activePath/href pair that never exercised a
+  // one-segment index href or a path deeper than its href, so both branches
+  // were dead weight as far as coverage was concerned.
+  const render1 = (activePath: string, items: ConsoleNavItem[]) => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => (
+      <ConsoleShell
+        surface="dashboard" activePath={activePath}
+        brand={{ href: "/dashboard", name: "VisionLinq", mark: "/brand/mark.svg" }}
+        nav={[{ label: "Build", items }]} labels={labels} header={{ title: "Jobs" }}
+      >
+        <p data-body>body</p>
+      </ConsoleShell>
+    ), host);
+    return host;
+  };
+
+  it("matches a one-segment index href only by exact path", () => {
+    const items = [{ id: "home", href: "/dashboard", label: "Home" }];
+    const exact = render1("/dashboard", items);
+    expect(exact.querySelector('[aria-current="page"]')).not.toBeNull();
+  });
+
+  it("does not match a one-segment index href by prefix on a deeper activePath", () => {
+    const items = [{ id: "home", href: "/dashboard", label: "Home" }];
+    const deeper = render1("/dashboard/jobs", items);
+    expect(deeper.querySelector('[aria-current="page"]')).toBeNull();
+  });
+
+  it("matches a multi-segment href by prefix when activePath goes deeper still", () => {
+    const items = [{ id: "jobs", href: "/dashboard/jobs", label: "Jobs" }];
+    const host = render1("/dashboard/jobs/42", items);
+    expect(host.querySelector('[aria-current="page"]')).not.toBeNull();
+  });
+
+  it("lets an explicit active override win over an otherwise-matching href", () => {
+    const items = [{ id: "jobs", href: "/dashboard/jobs", label: "Jobs", active: false }];
+    const host = render1("/dashboard/jobs", items);
+    expect(host.querySelector('[aria-current="page"]')).toBeNull();
   });
 });
