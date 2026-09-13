@@ -7,3 +7,6 @@ playwright-report/
 dist-worker/
 *storybook.log
 *.log
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
