@@ -547,9 +547,12 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
   상태 포함), `__badge`(대기 건수 알약), `margin-block-start: auto`로
   바닥에 고정되는 `__foot` 슬롯.
 - 드로어(900px 아래에서만 작동): `.dds-console-rail__toggle`은 분기점
-  위에서는 `display: none`이고 아래에서 고정 햄버거 버튼이 됩니다.
+  위에서는 `display: none`이고 아래에서 고정 햄버거 버튼이 됩니다 — 이
+  버튼 자신은 상태를 `data-open`이 아니라 `aria-expanded`로 드러냅니다.
+  드러나는 대상이 아니라 여닫는 컨트롤이기 때문이고, 그 접근성 이름(아래
+  Visually hidden 절 참고)도 같은 상태에 맞춰 문구가 바뀝니다.
   `.dds-console-rail__scrim`도 마찬가지로 분기점 위에서는 숨겨져 있다가
-  아래에서 전체 화면 딤 처리가 됩니다. 토글·스크림·레일 자신 모두
+  아래에서 전체 화면 딤 처리가 됩니다. 스크림과 레일 자신(토글은 제외)은
   `data-open="true"` 또는 `data-open="false"`를 갖습니다 — **항상 둘 중
   하나이고 아예 없는 경우가 없습니다** — 그래서 드로어의 열림/닫힘 CSS
   (translate, `visibility`, 스크림의 opacity/`pointer-events`)가 이
@@ -598,8 +601,10 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
   기준으로 클리핑됩니다 — `.dds-table-wrap`이 정확히 이 이유로 그렇게
   설정돼 있어, 래퍼가 가로로 스크롤된 상태에서도 테이블 자신의 caption이
   올바르게 클리핑됩니다.
-- 실제로 쓰는 곳: 위 테이블의 caption과 액션 컬럼 헤더, 그리고 콘솔
-  셸의 skip 링크(포커스를 받을 때만 자신의 `:focus` 규칙으로 보임).
+- 실제로 쓰는 곳: 위 테이블의 caption과 액션 컬럼 헤더, 콘솔 셸의 skip
+  링크(포커스를 받을 때만 자신의 `:focus` 규칙으로 보임), 그리고 콘솔
+  셸 레일 토글 버튼의 접근성 이름(`menuOpen`/`menuClose` 라벨) — 드로어가
+  열리고 닫힐 때마다 문구가 바뀌는 시각적으로 숨겨진 span입니다.
 - **Do**: 화면으로 보는 사람에겐 필요 없지만 화면 낭독기에는 필요한
   텍스트에 쓰세요 — caption, 랜드마크의 접근성 이름, 아이콘만 있는
   컨트롤의 라벨.

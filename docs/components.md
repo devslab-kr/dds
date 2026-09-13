@@ -567,15 +567,18 @@ usage snippet, A11y notes, Do/Don't).
   `__foot` (a bottom slot, pinned with `margin-block-start: auto`).
 - Drawer (active only below 900px): `.dds-console-rail__toggle` is
   `display: none` above the breakpoint and the fixed hamburger button below
-  it; `.dds-console-rail__scrim` is likewise hidden above it and a
-  full-screen dimmer below it. The toggle, the scrim, and the rail itself
-  all read `data-open="true"` or `data-open="false"` — **always one or the
-  other, never absent** — which is what lets the drawer's open/close CSS
-  (translate, `visibility`, the scrim's opacity/`pointer-events`) target
-  `[data-open="true"]` directly rather than relying on the attribute's
-  presence, the way `[data-fold]` or `[hidden]` do elsewhere in this
-  catalog. `prefers-reduced-motion: reduce` removes the drawer's
-  transition.
+  it — it exposes its state as `aria-expanded`, not `data-open`, since it's
+  a disclosure control rather than the thing being disclosed; its own
+  accessible name (see the visually-hidden section below) switches with
+  that same state. `.dds-console-rail__scrim` is likewise hidden above the
+  breakpoint and a full-screen dimmer below it. The scrim and the rail
+  itself (not the toggle) read `data-open="true"` or `data-open="false"` —
+  **always one or the other, never absent** — which is what lets the
+  drawer's open/close CSS (translate, `visibility`, the scrim's
+  opacity/`pointer-events`) target `[data-open="true"]` directly rather
+  than relying on the attribute's presence, the way `[data-fold]` or
+  `[hidden]` do elsewhere in this catalog. `prefers-reduced-motion: reduce`
+  removes the drawer's transition.
 - `data-surface` names the console (`"dashboard"`, `"admin"`, …) for a
   consumer's own hooks and carries no CSS. `data-hydrated="true"` appears
   only once client-side hydration has actually run — it is **absent**, not
@@ -618,8 +621,10 @@ usage snippet, A11y notes, Do/Don't).
   this for exactly that reason, so the table's own caption clips correctly
   even while the wrap is scrolled horizontally.
 - Shipped consumers: the table's caption and its actions-column header
-  above, and the console shell's skip link (visible only once it receives
-  focus, via its own `:focus` rule).
+  above; the console shell's skip link (visible only once it receives
+  focus, via its own `:focus` rule); and the console shell's rail-toggle
+  button, whose accessible name (the `menuOpen`/`menuClose` label) is a
+  visually-hidden span that swaps text as the drawer opens and closes.
 - **Do**: use it for text a screen reader needs but a sighted user does
   not — a caption, a landmark's accessible name, an icon-only control's
   label.
