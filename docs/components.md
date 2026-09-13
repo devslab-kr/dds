@@ -480,7 +480,9 @@ usage snippet, A11y notes, Do/Don't).
 - Wrap: `.dds-table-wrap` scrolls horizontally on overflow and is the
   positioned ancestor an absolutely-clipped `.dds-visually-hidden` caption
   resolves against; `--tall` caps it at 70vh and pins the header
-  (`thead th`) with `position: sticky`.
+  (`thead th`) with `position: sticky`, and switches its table to
+  `border-collapse: separate` (zero spacing) — collapsed borders can keep a
+  sticky header from sticking.
 - Density and layout: `.dds-table--dense` shrinks row height from the
   `--dds-space-40` token (40px) to 2.25rem (36px); `.dds-table--fixed`
   switches to `table-layout: fixed` and expects a `<colgroup>` — the
@@ -497,6 +499,15 @@ usage snippet, A11y notes, Do/Don't).
 - `.dds-table__actions` right-aligns the trailing actions cell's content;
   the actions column's own header uses the `.dds-visually-hidden` utility
   so it still has an accessible name without a visible one.
+- Row actions: a `.dds-btn` inside `.dds-table__actions` is 32px whatever
+  its size modifier and never wraps, and the actions cell trims its block
+  padding to 4px — a row with a button is as tall as the same row without
+  one. Any cell holding a `.dds-btn--sm` (a copy button beside an id) trims
+  its padding the same way. In `.dds-table--dense`, row actions and every
+  `.dds-btn--sm` in a cell are 24px. On a coarse pointer all of them return
+  to the 44px touch floor and the row grows instead (D-025).
+- A `<code>` in a cell takes the mono family at 13px, for ids, keys and
+  hashes read character by character.
 - `.dds-table__pagination` is a labeled `<nav>` wrapping a plain
   `.dds-btn.dds-btn--secondary` link — never a button — so a cursor-paged
   next page keeps working with JavaScript off; it is `[hidden]` entirely
@@ -517,6 +528,9 @@ usage snippet, A11y notes, Do/Don't).
   ordered — a client sort of one paged slice would misreport the whole
   list's order, so this markup never renders one in that case (`sort`'s
   `{ statedOrder }` form; see `@devslab/dds-table`'s README).
+- **Don't**: don't re-size row actions or cell buttons in product CSS —
+  the table already holds them to its row height, and a product override
+  out-specifying these rules will also defeat their touch-floor restatement.
 
 ## Console shell — `.dds-console-shell`
 

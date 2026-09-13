@@ -51,7 +51,7 @@ const labels: DataTableLabels = {
 | `caption` | `string` | 필수 | 테이블의 접근성 이름, 시각적으로 숨겨져 렌더링(`<caption class="dds-visually-hidden">`). |
 | `labels` | `DataTableLabels` | 필수 | 컴포넌트가 렌더링할 수 있는 모든 문구 — 아래 "라벨은 필수다" 참고. |
 | `sort` | `"client" \| { statedOrder: string }` | 선택, 생략 시 정렬 버튼도 순서 문구도 없음 | 아래 정렬 절 참고. |
-| `density` | `"comfortable" \| "dense"` | 선택, 기본값 `"comfortable"`(40px 행) | `"dense"`는 `.dds-table--dense`를 붙인다(36px 행, 셀 패딩 축소). |
+| `density` | `"comfortable" \| "dense"` | 선택, 기본값 `"comfortable"`(40px 행) | `"dense"`는 `.dds-table--dense`를 붙인다(36px 행, 셀 패딩 축소). 어느 쪽이든 행 액션과 셀 안 작은 버튼은 행 높이에 맞춰진다(40px 행에 32px 버튼, 36px 행에 24px; 터치에서는 44px) — `docs/components.ko.md` Table 참고. |
 | `scroll` | `"auto" \| "tall"` | 선택, 기본값 `"auto"` | `"tall"`은 `.dds-table-wrap--tall`을 붙인다 — `max-block-size: 70vh`로 스크롤되는 본문 + 고정(sticky) 헤더, 페이지를 밀어내면 안 되는 긴 인페이지 목록용. |
 | `minWidth` | `string`(CSS 길이) | 선택 | `<table>`의 `min-inline-size`를 정한다 — 좁은 화면에서 컬럼이 짓눌리는 대신 `.dds-table-wrap` 안에서 가로 스크롤된다. |
 | `actions` | `(row: T) => JSX.Element` | 선택 | 행마다 트레일링 셀을 렌더링(예: 행 단위 버튼); `labels.actions`로부터 시각적으로 숨겨진 헤더 셀을 추가한다. |

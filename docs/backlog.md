@@ -184,7 +184,27 @@ DDS에 짓고 검증했을 뿐, VisionLinq 쪽 소비 전환은 아직 손대지
   레일 셸을 `ConsoleShell`로, 상태 배지를 `StatusPill`로 전환 — 이 계획의
   §Phase B(4개 PR)가 실행 순서. `npm view @devslab/dds-table version`이
   `0.11.0`을 찍기 전에는 시작할 수 없다(그 전 작업은 커밋 금지된 로컬
-  `pnpm.overrides`가 필요).
+  `pnpm.overrides`가 필요). → **이후 VisionLinq에서 진행됨**(VL-058,
+  visionlinq#56~#59) — 남은 제품 쪽 규칙은 아래 15번.
+
+### 15. 콘솔 테이블 규칙 4종을 DDS로 — `완료` (2026-09-13)
+D-025. VisionLinq가 `DataTable`로 옮긴 뒤에도 `product-shell.css`에 남겨 둔
+표 규칙을 일반형으로 `table.css`에:
+- [x] 셀 안 `<code>` 13px 모노.
+- [x] 행 액션 32px·줄바꿈 금지·액션 셀 세로 패딩 4px(크기 수식자 무관 — 패딩까지 정함).
+- [x] 밀집 표의 `--sm` 버튼·행 액션 24px(VisionLinq `.console-copy` 전용 규칙의
+      일반형) + `--sm` 버튼을 담은 셀(밀도 무관) 패딩 4px — 스크린샷 검토에서
+      기본 밀도의 복사 버튼 행이 53px로 튀어나온 것을 보고 넓힘.
+- [x] 긴 래퍼(`--tall`)의 분리 테두리.
+- [x] 거친 포인터에서 44px 하한 재선언 — 위 규칙이 `button.css`를 특이도로 이기므로.
+- [x] 소스 계약(`tests/dds-table-contracts.test.mjs`) + 실제 캐스케이드
+      기하(`tests/browser/table.spec.ts`, fine/coarse 두 포인터, `verify:foundation`에
+      편입). main의 CSS로 돌리면 4개 실패, 거친 포인터 블록을 빼면 터치 테스트 실패 확인.
+- 카나리 `/table` 라우트는 행 액션·밀집·긴 래퍼를 렌더하지 않고 `dds.css`도
+  로드하지 않아 시각 확인 대상이 아니다 — 브라우저 픽스처가 대신한다.
+- **다음(VisionLinq, 별도 세션)**: 릴리스 후 `@devslab/*` 올리고 규칙 1·2·4와
+  dense 복사 버튼 규칙 삭제(`.dds-table .console-id`는 유지), 유닛·하네스·1440/390
+  스크린샷 확인.
 
 ---
 
