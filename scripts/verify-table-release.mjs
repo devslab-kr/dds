@@ -55,14 +55,14 @@ const runNode = (args, cwd) => {
 try {
   const packageNames = ["dds-tokens", "dds-css", "dds-table"];
   const tarballs = [];
-  let solidTarball = "";
+  let tableTarball = "";
   for (const packageName of packageNames) {
     const packageRoot = join(workspace, "packages", packageName);
     const manifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
     runPnpm(["pack", "--pack-destination", temp], packageRoot);
     const tarball = join(temp, `${manifest.name.replace(/^@/, "").replace("/", "-")}-${manifest.version}.tgz`);
     tarballs.push(tarball);
-    if (packageName === "dds-table") solidTarball = tarball;
+    if (packageName === "dds-table") tableTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "dds-table");
   const tableManifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
@@ -84,13 +84,21 @@ try {
       );
     }
   }
-  publishDryRun(solidTarball, packageRoot);
+  publishDryRun(tableTarball, packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
   const installedRoot = join(temp, "node_modules", "@devslab", "dds-table");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
   assert.equal(manifest.name, "@devslab/dds-table");
-  for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts"]) {
+  // Mirrors verify-release.mjs's `files.some(({ path }) => path === "LICENSE")`
+  // for the foundation packages: dds-table's manifest points readers at
+  // "SEE LICENSE IN LICENSE", a source-available (non-OSI) licence, so the
+  // packed tarball actually containing that file is the terms, not
+  // boilerplate. Checked here via the fresh-consumer install already in
+  // progress (stronger than inspecting `npm pack --json` metadata: it
+  // proves the file survives pack -> publish -> install, not just that
+  // packing intended to include it).
+  for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts", "LICENSE"]) {
     await access(join(installedRoot, path));
   }
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
