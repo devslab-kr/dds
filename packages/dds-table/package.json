@@ -1,12 +1,24 @@
 {
   "name": "@devslab/dds-table",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Declarative data table for the DevsLab Design System",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": { "type": "git", "url": "https://github.com/devslab-kr/dds.git", "directory": "packages/dds-table" },
-  "publishConfig": { "registry": "https://registry.npmjs.org", "access": "public", "provenance": true },
-  "files": ["dist", "README.md", "README.ko.md"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/dds-table"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ko.md"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -26,11 +38,13 @@
     "test:a11y": "vitest run --config vitest.config.ts src/__tests__/a11y.test.tsx"
   },
   "dependencies": {
-    "@devslab/dds-css": "workspace:0.10.0",
-    "@devslab/dds-tokens": "workspace:0.10.0",
+    "@devslab/dds-css": "workspace:0.11.0",
+    "@devslab/dds-tokens": "workspace:0.11.0",
     "@tanstack/solid-table": "9.2.4"
   },
-  "peerDependencies": { "solid-js": "1.9.15" },
+  "peerDependencies": {
+    "solid-js": "1.9.15"
+  },
   "devDependencies": {
     "@types/node": "26.3.0",
     "axe-core": "4.13.0",
@@ -43,6 +57,13 @@
     "vitest": "4.1.1"
   },
   "homepage": "https://devslab.kr/brand/",
-  "bugs": { "url": "https://github.com/devslab-kr/dds/issues" },
-  "keywords": ["solidjs", "table", "design-system", "devslab"]
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "keywords": [
+    "solidjs",
+    "table",
+    "design-system",
+    "devslab"
+  ]
 }
