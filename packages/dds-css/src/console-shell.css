@@ -250,8 +250,17 @@
  * .dds-btn/.dds-input/.dds-select/.dds-textarea themselves — a shell that
  * establishes a density owns the override for controls inside it, the same
  * way a shared class must never carry a layout rule that only makes sense
- * for one consumer's container. */
-.dds-console-shell .dds-btn,
+ * for one consumer's container.
+ *
+ * .dds-btn's :not() exclusions matter: this selector's specificity (0,2,0)
+ * beats every size modifier in button.css (.dds-btn--lg, .dds-btn--sm, both
+ * 0,1,0), so an unqualified `.dds-console-shell .dds-btn` would override
+ * --lg's own font-size back down to body-2 and would give --sm the same
+ * font-size as a default button (--sm declares none of its own, so it was
+ * inheriting whichever rule won for plain .dds-btn) — the one outcome a
+ * size modifier exists to prevent. .dds-input/.dds-select/.dds-textarea
+ * carry no such modifiers today, so no matching exclusion is needed there. */
+.dds-console-shell .dds-btn:not(.dds-btn--lg):not(.dds-btn--sm),
 .dds-console-shell .dds-input,
 .dds-console-shell .dds-select,
 .dds-console-shell .dds-textarea {
