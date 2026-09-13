@@ -92,3 +92,46 @@ export function buildRobots({ baseUrl, environment, policies }) {
   if (environment !== "production") return "User-agent: *\nDisallow: /\n";
   return `User-agent: *\nAllow: /\nSitemap: ${cleanBase(baseUrl)}/sitemap.xml\n`;
 }
+
+/**
+ * The icon files @devslab/linq-brand ships for every product under
+ * dist/<product>/, in the order a page head should link them. A product
+ * serves that directory as-is (VisionLinq, BookLinq: /brand/*) or vendors
+ * the bytes and serves them under the same names (AskLinq); either way the
+ * head links come from here, so the four family sites cannot each pick a
+ * different subset — which is what they did before this existed.
+ *
+ * favicon.svg   — the tab icon, crisp at every size, linked first so a
+ *                 browser that understands it never fetches a raster.
+ * mark-48.png   — one raster of at least 48px: search engines want a
+ *                 <link>-declared square, Google "at least 8x8px,
+ *                 preferably >48x48px", and a 32px-only site shows its
+ *                 previous icon in results long after the file changed.
+ * favicon.ico   — 16/32/48 in one container, the bare-URL convention.
+ * apple-touch-icon.png — 180px, iOS home screen.
+ */
+export const BRAND_ICON_FILES = Object.freeze(["favicon.svg", "mark-48.png", "favicon.ico", "apple-touch-icon.png"]);
+
+const iconBase = (basePath) => {
+  const value = String(basePath ?? "/brand");
+  if (/^[a-z][a-z0-9+.-]*:|^\/\//i.test(value)) {
+    throw new RangeError("brandIconLinks basePath is a same-origin path, not a URL: a product serves its own icons");
+  }
+  const trimmed = value.replace(/^\/+|\/+$/g, "");
+  return trimmed ? `/${trimmed}` : "";
+};
+
+/**
+ * `<link>` descriptors for BRAND_ICON_FILES at `basePath` (default /brand).
+ * Same shape as toTanStackHead's `links`; a non-Start renderer can print
+ * them as attributes in this order.
+ */
+export function brandIconLinks({ basePath = "/brand" } = {}) {
+  const base = iconBase(basePath);
+  return [
+    { rel: "icon", type: "image/svg+xml", href: `${base}/favicon.svg` },
+    { rel: "icon", type: "image/png", sizes: "48x48", href: `${base}/mark-48.png` },
+    { rel: "icon", sizes: "16x16 32x32 48x48", href: `${base}/favicon.ico` },
+    { rel: "apple-touch-icon", sizes: "180x180", href: `${base}/apple-touch-icon.png` },
+  ];
+}

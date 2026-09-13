@@ -5,6 +5,39 @@
 
 ---
 
+## D-026 — 파비콘 `<link>` 묶음은 site-kit이 정하고, 파일은 linq-brand가 만든다 (2026-09-14)
+
+**결정.** `@devslab/site-kit`에 `brandIconLinks({ basePath })`와 `BRAND_ICON_FILES`를
+두고, `toTanStackHead(metadata, { icons })`가 옵트인으로 덧붙인다. 묶음은 넷으로
+고정: `favicon.svg`(먼저), `mark-48.png`(`48x48`), `favicon.ico`(`16x16 32x32 48x48`),
+`apple-touch-icon.png`(`180x180`). 파일 자체는 계속 `@devslab/linq-brand`가
+`dist/<product>/`에 만든다 — site-kit은 그 이름을 부를 뿐 그리지 않는다.
+
+**계기.** AskLinq 검색 결과 파비콘이 마크 교체(D-125, 2026-09-03) 열흘 뒤에도 옛
+물음표였다. 프로덕션 파일은 이미 새 마크였고, 원인은 둘: web-next 컷오버가 레거시
+head의 `<link rel="icon">`을 옮기지 않아 크롤러가 `/favicon.ico` 폴백만 봤고, 그
+파일이 32px PNG라 구글 권장(48px 초과)에 미달했다. 그리고 확인해 보니 가족 넷이
+각자 다른 조합이었다 — VisionLinq는 svg+ico(`any`)+apple, BookLinq는
+svg+32png+ico(`48x48`)+apple+manifest, TraceLinq는 자기 head, AskLinq는 없음.
+같은 패키지 파일을 네 가지로 부르고 있었으니 공통 자리는 head를 만드는 site-kit이다.
+
+**대안.** ① linq-brand 레지스트리에 링크 목록을 싣기 — 레지스트리는 프레임워크
+중립 자산 목록이고 `<link>` 속성(rel/sizes/type)은 head의 어휘라 반려. ② 각 제품이
+계속 자기 head에 쓰기 — 지금 네 가지로 갈라진 그 상태. ③ `toTanStackHead`가 항상
+아이콘을 내기 — 제품이 파일을 어디서 서빙하는지 어댑터가 모르고, 404 나는
+아이콘을 링크한 head는 안 링크한 head보다 나쁘므로 옵트인.
+
+**트레이드오프.** `basePath`는 같은 오리진 경로만 받는다(CDN URL은 RangeError) —
+아이콘은 제품이 직접 서빙한다는 전제를 코드로 둔다. manifest 링크는 묶음에 넣지
+않았다: PWA 매니페스트는 제품마다 내용이 달라 링크만 공통화해도 파일은 못 만든다.
+
+**재검토.** linq-brand가 파일 이름이나 크기 세트를 바꾸면 `BRAND_ICON_FILES`와
+같은 PR에서 움직여야 한다(두 레포라 자동 게이트 없음 — 소비자 테스트가 서빙
+바이트의 sha를 패키지 checksums와 대조하는 것이 유일한 그물). 구글이 요구 크기를
+바꾸면 `mark-48.png` 항목만 바뀐다.
+
+---
+
 ## D-025 — 테이블 안 버튼: 행 높이는 고정, 터치에서는 하한이 이긴다 (2026-09-13)
 
 **결정.** VisionLinq(VL-058)가 DDS 0.11.0으로 옮긴 뒤에도 제품 쪽에 남겨 둔

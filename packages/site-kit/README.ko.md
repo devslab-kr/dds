@@ -17,6 +17,26 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 기존 environment-only 출력은 유지되며, 선택적 `policies`로 검색 인덱싱,
 인용 crawler, 모델 학습 crawler를 각각 제어할 수 있다.
 
+## 브랜드 아이콘
+
+모든 제품의 아이콘 파일은 `@devslab/linq-brand`(`dist/<product>/`)에서 온다. `brandIconLinks()`는 그중 어떤 파일을 페이지 head가 어떤 순서로 링크하는지 정하는 유일한 자리다.
+
+| 링크 | 파일 | 이유 |
+|---|---|---|
+| `icon` `image/svg+xml` | `favicon.svg` | 탭 아이콘. SVG를 아는 브라우저가 래스터를 받지 않도록 맨 앞 |
+| `icon` `48x48` | `mark-48.png` | 검색엔진은 `<link>`로 선언된 48px 이상 정사각형을 원한다(구글: "최소 8x8px, 48x48px 초과 권장") |
+| `icon` `16x16 32x32 48x48` | `favicon.ico` | 주소만으로 요청되는 관례, 세 크기를 한 컨테이너에 |
+| `apple-touch-icon` `180x180` | `apple-touch-icon.png` | iOS 홈 화면 |
+
+`BRAND_ICON_FILES`는 같은 네 파일명을 나열하므로 제품은 한 디렉터리에서 그대로 서빙할 수 있다. 기본 `basePath`는 `/brand`이고, 다른 곳에서 서빙하는 제품은 자기 경로를 넘긴다. 같은 오리진 경로만 받는다 — 아이콘은 제품이 직접 서빙한다.
+
+```ts
+toTanStackHead(metadata, { icons: true });               // …/brand/favicon.svg, …
+toTanStackHead(metadata, { icons: { basePath: "/" } }); // /favicon.svg, /mark-48.png, …
+```
+
+옵션을 생략하면 어댑터는 아이콘 링크를 내지 않는다. 제품이 파일을 어디서 서빙하는지 어댑터가 알 수 없고, 서버가 404를 내는 아이콘을 링크한 head는 아무것도 링크하지 않은 head보다 나쁘기 때문이다.
+
 ## 섹션
 
 가족 랜딩 페이지를 위한 상태 없는 원시 컴포넌트 여섯 개, VisionLinq에서 추출했다. `@devslab/site-kit/solid`에서 import한다; 스타일시트는 `styles.css` 안에 들어 있다. 이 원시 컴포넌트들은 full-bleed — 각자 자기 내부 너비를 갖는다 — 라서 이걸로 구성한 페이지는 `<MarketingShell mainWidth="bleed">` 안에서 렌더해야 한다; 그렇지 않으면 셸의 기본 `<main>` 인셋이 이중으로 안쪽 여백을 주고 `tone="band"`가 박스형 사각형이 되어 버린다.

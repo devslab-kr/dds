@@ -1,4 +1,10 @@
-export function toTanStackHead(metadata) {
+import { brandIconLinks } from "./core/seo.mjs";
+
+// `icons` is opt-in: the adapter cannot know where (or whether) a product
+// serves the linq-brand files, and a head that links icons the server 404s
+// is worse than one that links none. `true` takes the /brand default.
+export function toTanStackHead(metadata, options = {}) {
+  const icons = options.icons === true ? brandIconLinks() : options.icons ? brandIconLinks(options.icons) : [];
   return {
     meta: [
       { title: metadata.title },
@@ -18,6 +24,7 @@ export function toTanStackHead(metadata) {
     links: [
       { rel: "canonical", href: metadata.canonical },
       ...metadata.alternates.map(({ hreflang, href }) => ({ rel: "alternate", hreflang, href })),
+      ...icons,
     ],
   };
 }

@@ -11,10 +11,13 @@ import {
   validateCatalogs,
 } from "../packages/site-kit/src/core/index.mjs";
 import {
+  BRAND_ICON_FILES,
+  brandIconLinks,
   buildMetadata,
   buildRobots,
   buildSitemap,
 } from "../packages/site-kit/src/core/seo.mjs";
+import { toTanStackHead } from "../packages/site-kit/src/tanstack-start.mjs";
 import {
   VerifiedFactRegistry,
   buildVerifiedJsonLd,
@@ -244,4 +247,51 @@ test("a subset registry refuses unknown codes and an empty list", () => {
 test("the family registry is untouched by the subset option", () => {
   assert.equal(FAMILY_LOCALES.LOCALES.length, 14);
   assert.equal(defineLocaleRegistry().LOCALES.length, 14);
+});
+
+test("brand icon links name the linq-brand files a product serves, in one fixed order", () => {
+  const links = brandIconLinks();
+  assert.deepEqual(links, [
+    { rel: "icon", type: "image/svg+xml", href: "/brand/favicon.svg" },
+    { rel: "icon", type: "image/png", sizes: "48x48", href: "/brand/mark-48.png" },
+    { rel: "icon", sizes: "16x16 32x32 48x48", href: "/brand/favicon.ico" },
+    { rel: "apple-touch-icon", sizes: "180x180", href: "/brand/apple-touch-icon.png" },
+  ]);
+  // Every href is a file @devslab/linq-brand ships under dist/<product>/, so a
+  // product that serves that directory as-is at basePath serves all of them.
+  for (const { href } of links) assert.ok(BRAND_ICON_FILES.includes(href.slice("/brand/".length)), href);
+  assert.deepEqual(new Set(BRAND_ICON_FILES), new Set(links.map(({ href }) => href.slice("/brand/".length))));
+  // Search engines need one raster of at least 48px (Google: "at least 8x8px, preferably >48x48px").
+  assert.ok(links.some(({ sizes }) => /^(?:48|96|144|192)x(?:48|96|144|192)$/.test(sizes ?? "")));
+  // The SVG comes first so browsers that understand it never fetch the raster.
+  assert.equal(links[0].type, "image/svg+xml");
+});
+
+test("brand icon links follow the base path a product serves the files at", () => {
+  assert.deepEqual(brandIconLinks({ basePath: "/" }).map(({ href }) => href), ["/favicon.svg", "/mark-48.png", "/favicon.ico", "/apple-touch-icon.png"]);
+  assert.equal(brandIconLinks({ basePath: "assets/brand/" })[0].href, "/assets/brand/favicon.svg");
+  assert.equal(brandIconLinks({ basePath: "/brand" })[0].href, "/brand/favicon.svg");
+  assert.throws(() => brandIconLinks({ basePath: "https://cdn.example.com/brand" }), RangeError);
+});
+
+test("the TanStack adapter appends the icon links only when asked, after canonical and alternates", () => {
+  const metadata = buildMetadata({
+    baseUrl: "https://example.com",
+    path: "/",
+    locale: "ko",
+    defaultLocale: "ko",
+    title: "Example",
+    description: "Example site",
+    siteName: "Example",
+    image: "/og.png",
+  });
+  const bare = toTanStackHead(metadata);
+  assert.ok(!bare.links.some(({ rel }) => rel === "icon" || rel === "apple-touch-icon"));
+  const withIcons = toTanStackHead(metadata, { icons: true });
+  const rels = withIcons.links.map(({ rel }) => rel);
+  assert.equal(rels.filter((rel) => rel === "icon").length, 3);
+  assert.ok(rels.indexOf("icon") > rels.lastIndexOf("alternate"));
+  assert.deepEqual(withIcons.links.slice(0, bare.links.length), bare.links);
+  assert.equal(toTanStackHead(metadata, { icons: { basePath: "/" } }).links.at(-1).href, "/apple-touch-icon.png");
+  assert.deepEqual(toTanStackHead(metadata, { icons: false }), bare);
 });
