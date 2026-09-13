@@ -80,6 +80,83 @@ describe("DataTable", () => {
     expect(host.querySelectorAll("tbody td .dds-table__actions button")).toHaveLength(2);
   });
 
+  it("renders no detail row at all when detail returns nothing for a row", () => {
+    // Regression pin: `<Show when={props.detail}>` used to test the PROP,
+    // not its result — a caller that renders an expandable panel as
+    // `detail={(row) => expanded() === row.id ? <Panel/> : null}` got a
+    // blank bordered <tr><td colspan> under every collapsed row.
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => (
+      <DataTable rows={rows} columns={columns} caption="Keys" labels={labels} detail={() => null} />
+    ), host);
+    expect(host.querySelectorAll("tbody tr")).toHaveLength(rows.length);
+  });
+
+  it("renders one detail row per row when detail returns content", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => (
+      <DataTable rows={rows} columns={columns} caption="Keys" labels={labels} detail={(r) => <p>{`Detail for ${r.name}`}</p>} />
+    ), host);
+    expect(host.querySelectorAll("tbody tr")).toHaveLength(rows.length * 2);
+    expect(host.querySelectorAll("tbody tr td[colspan]")).toHaveLength(rows.length);
+  });
+
+  it("keeps the stated order and the next-page link when a page has no rows", () => {
+    // A cursor-paged admin list can land on an empty page (e.g. after a
+    // filter narrows the result set) and still need a way forward and a
+    // statement of what order it was in — the product cannot supply either
+    // from outside the component once <Show> hides them too.
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => (
+      <DataTable
+        rows={[]}
+        columns={columns}
+        caption="Jobs"
+        labels={labels}
+        sort={{ statedOrder: "Newest first" }}
+        page={{ nextHref: "/admin/jobs?cursor=next" }}
+        empty={<p data-empty>Nothing on this page</p>}
+      />
+    ), host);
+    expect(host.querySelector("table")).toBeNull();
+    expect(host.querySelector("[data-empty]")).not.toBeNull();
+    expect(host.querySelector(".dds-table__order")?.textContent).toBe("Newest first");
+    const link = host.querySelector(".dds-table__pagination a") as HTMLAnchorElement;
+    expect(link.getAttribute("href")).toBe("/admin/jobs?cursor=next");
+  });
+
+  it("marks a column that is both rowHeader and numeric on the <th> the same way as a <td>", () => {
+    // Regression pin: the rowHeader branch carried data-fold but not
+    // data-numeric, so a rowHeader+numeric column silently lost tabular
+    // figures and right-alignment.
+    type NumericKeyRow = { id: number };
+    const numericKeyRows: NumericKeyRow[] = [{ id: 1 }, { id: 2 }];
+    const numericKeyColumns: Column<NumericKeyRow>[] = [
+      { id: "id", label: "ID", cell: (r) => String(r.id), rowHeader: true, numeric: true },
+    ];
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <DataTable rows={numericKeyRows} columns={numericKeyColumns} caption="Keys" labels={labels} />, host);
+    const rowHeaderCell = host.querySelector("tbody th");
+    expect(rowHeaderCell?.getAttribute("scope")).toBe("row");
+    expect(rowHeaderCell?.hasAttribute("data-numeric")).toBe(true);
+  });
+
+  it("does not corrupt the sort label when a column's label contains a $-sequence", () => {
+    // Regression pin: `labels.sortBy.replace("{column}", column.label)` is a
+    // STRING pattern replace — "$&"/"$$"/"$`"/"$'" in a consumer's label
+    // would be interpreted as replacement patterns, not literal text, if
+    // the fix ever regresses to a plain string-pattern .replace.
+    type PriceRow = { amount: number };
+    const priceRows: PriceRow[] = [{ amount: 1 }];
+    const priceColumns: Column<PriceRow>[] = [
+      { id: "amount", label: "Amount ($&)", cell: (r) => String(r.amount), sortBy: (r) => r.amount },
+    ];
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <DataTable rows={priceRows} columns={priceColumns} caption="Keys" labels={labels} sort="client" />, host);
+    const button = host.querySelector("thead button") as HTMLButtonElement;
+    expect(button.getAttribute("aria-label")).toBe("Sort by Amount ($&)");
+  });
+
   it("sorts text case-insensitively (auto '\"text\"' resolution, not raw code-point order)", () => {
     // Regression pin for the missing `sortFns` slot: without registering
     // `sortFn_text`, TanStack's `sortFn: "auto"` falls back to `sortFn_basic`,

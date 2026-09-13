@@ -4,6 +4,15 @@ import { tableFeatureSet, toColumnDefs, type Column, type DataTableLabels, type 
 
 export type SortMode = "client" | { statedOrder: string };
 
+/** Fills the `{column}` placeholder in a consumer-supplied label template.
+ *  A function replacer, not `template.replace("{column}", value)` — a
+ *  string replacement value is subject to special `$&`/`$$`/`` $` ``/`$'`
+ *  patterns, and this console has currency columns whose labels can contain
+ *  a literal `$`. */
+function fillLabel(template: string, value: string): string {
+  return template.replace("{column}", () => value);
+}
+
 export function DataTable<T>(props: {
   rows: readonly T[];
   columns: readonly Column<T>[];
@@ -49,68 +58,80 @@ export function DataTable<T>(props: {
   };
 
   return (
-    <Show when={props.rows.length > 0} fallback={props.empty}>
+    <>
+      {/* The stated order and the pagination link are not part of the "is
+          there a table to show" question — a cursor-paged list can land on
+          an empty page and still needs to say what order it was in and
+          offer a way forward. Only the table itself (and its wrap) falls
+          back to `empty` when there are no rows. */}
       <Show when={statedOrder()}>{(order) => <p class="dds-table__order">{order()}</p>}</Show>
-      <div class={props.scroll === "tall" ? "dds-table-wrap dds-table-wrap--tall" : "dds-table-wrap"}>
-        <table
-          class={`dds-table${props.density === "dense" ? " dds-table--dense" : ""}${fixed() ? " dds-table--fixed" : ""}`}
-          style={props.minWidth ? { "min-inline-size": props.minWidth } : undefined}
-        >
-          <caption class="dds-visually-hidden">{props.caption}</caption>
-          <Show when={fixed()}>
-            <colgroup>
-              <For each={props.columns}>{(column) => <col data-fold={column.fold ? "" : undefined} style={column.width ? { width: column.width } : undefined} />}</For>
-              <Show when={props.actions}><col /></Show>
-            </colgroup>
-          </Show>
-          <thead>
-            <tr>
-              <For each={props.columns}>{(column) => (
-                <th scope="col" data-column={column.id} data-fold={column.fold ? "" : undefined} data-numeric={column.numeric ? "" : undefined} aria-sort={clientSorted() && column.sortBy ? sortState(column.id) : undefined}>
-                  <Show when={clientSorted() && column.sortBy} fallback={column.label}>
-                    <button
-                      type="button"
-                      class="dds-table__sort"
-                      data-action="sort"
-                      aria-label={props.labels.sortBy.replace("{column}", column.label)}
-                      onClick={() => table.getColumn(column.id)?.toggleSorting()}
-                    >
-                      {column.label}
-                      <span class="dds-table__sort-mark" aria-hidden="true" data-sort-state={sortState(column.id)} />
-                    </button>
-                  </Show>
-                </th>
-              )}</For>
-              <Show when={props.actions}>
-                <th scope="col"><span class="dds-visually-hidden">{props.labels.actions}</span></th>
-              </Show>
-            </tr>
-          </thead>
-          <tbody>
-            <For each={ordered()}>{(row) => (
-              <>
-                <tr>
-                  <For each={props.columns}>{(column) => (
-                    <Show
-                      when={column.rowHeader}
-                      fallback={<td data-fold={column.fold ? "" : undefined} data-numeric={column.numeric ? "" : undefined}>{column.cell(row)}</td>}
-                    >
-                      <th scope="row" data-fold={column.fold ? "" : undefined}>{column.cell(row)}</th>
+      <Show when={props.rows.length > 0} fallback={props.empty}>
+        <div class={props.scroll === "tall" ? "dds-table-wrap dds-table-wrap--tall" : "dds-table-wrap"}>
+          <table
+            class={`dds-table${props.density === "dense" ? " dds-table--dense" : ""}${fixed() ? " dds-table--fixed" : ""}`}
+            style={props.minWidth ? { "min-inline-size": props.minWidth } : undefined}
+          >
+            <caption class="dds-visually-hidden">{props.caption}</caption>
+            <Show when={fixed()}>
+              <colgroup>
+                <For each={props.columns}>{(column) => <col data-fold={column.fold ? "" : undefined} style={column.width ? { width: column.width } : undefined} />}</For>
+                <Show when={props.actions}><col /></Show>
+              </colgroup>
+            </Show>
+            <thead>
+              <tr>
+                <For each={props.columns}>{(column) => (
+                  <th scope="col" data-column={column.id} data-fold={column.fold ? "" : undefined} data-numeric={column.numeric ? "" : undefined} aria-sort={clientSorted() && column.sortBy ? sortState(column.id) : undefined}>
+                    <Show when={clientSorted() && column.sortBy} fallback={column.label}>
+                      <button
+                        type="button"
+                        class="dds-table__sort"
+                        data-action="sort"
+                        aria-label={fillLabel(props.labels.sortBy, column.label)}
+                        onClick={() => table.getColumn(column.id)?.toggleSorting()}
+                      >
+                        {column.label}
+                        <span class="dds-table__sort-mark" aria-hidden="true" data-sort-state={sortState(column.id)} />
+                      </button>
                     </Show>
-                  )}</For>
-                  <Show when={props.actions}>{(actions) => <td><div class="dds-table__actions">{actions()(row)}</div></td>}</Show>
-                </tr>
-                <Show when={props.detail}>{(detail) => (
-                  <tr><td colSpan={props.columns.length + (props.actions ? 1 : 0)}>{detail()(row)}</td></tr>
-                )}</Show>
-              </>
-            )}</For>
-          </tbody>
-        </table>
-      </div>
+                  </th>
+                )}</For>
+                <Show when={props.actions}>
+                  <th scope="col"><span class="dds-visually-hidden">{props.labels.actions}</span></th>
+                </Show>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={ordered()}>{(row) => (
+                <>
+                  <tr>
+                    <For each={props.columns}>{(column) => (
+                      <Show
+                        when={column.rowHeader}
+                        fallback={<td data-fold={column.fold ? "" : undefined} data-numeric={column.numeric ? "" : undefined}>{column.cell(row)}</td>}
+                      >
+                        <th scope="row" data-fold={column.fold ? "" : undefined} data-numeric={column.numeric ? "" : undefined}>{column.cell(row)}</th>
+                      </Show>
+                    )}</For>
+                    <Show when={props.actions}>{(actions) => <td><div class="dds-table__actions">{actions()(row)}</div></td>}</Show>
+                  </tr>
+                  {/* Test the detail CONTENT, not the prop: a caller renders
+                      an expandable panel as
+                      `detail={(row) => expanded() === row.id ? <Panel/> : null}`,
+                      so a non-expanded row must produce no detail <tr> at
+                      all rather than a blank bordered one. */}
+                  <Show when={props.detail?.(row)}>{(node) => (
+                    <tr><td colSpan={props.columns.length + (props.actions ? 1 : 0)}>{node()}</td></tr>
+                  )}</Show>
+                </>
+              )}</For>
+            </tbody>
+          </table>
+        </div>
+      </Show>
       <nav class="dds-table__pagination" hidden={!props.page?.nextHref} aria-label={props.labels.nextPage}>
         <Show when={props.page?.nextHref}>{(href) => <a class="dds-btn dds-btn--secondary" href={href()}>{props.labels.nextPage}</a>}</Show>
       </nav>
-    </Show>
+    </>
   );
 }
