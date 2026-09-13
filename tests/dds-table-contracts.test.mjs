@@ -25,5 +25,25 @@ test("dds-table exports the table surface and nothing else", async () => {
   for (const symbol of ["DataTable", "Column", "DataTableLabels"]) {
     assert.match(entry, new RegExp(symbol), `${symbol} must be exported`);
   }
-  assert.doesNotMatch(entry, /Th|Td|useDataTable/, "primitives stay unexported until a second consumer needs them");
+
+  // Anchored to actual exported identifiers, not a raw substring search:
+  // `/Th|Td|useDataTable/` is unanchored and case-sensitive, so it would
+  // fail the moment a future comment contained an ordinary word like
+  // "This" or "Update" — without weakening the property being guarded
+  // (the row/cell primitives stay unexported), which this checks by name
+  // rather than by pattern.
+  const exportedNames = [...entry.matchAll(/export\s+(?:type\s+)?\{([^}]+)\}/g)]
+    .flatMap(([, group]) => group.split(","))
+    .map((specifier) => specifier.trim())
+    .filter(Boolean)
+    .map((specifier) => {
+      const aliased = specifier.match(/\bas\s+([A-Za-z0-9_$]+)\s*$/);
+      return aliased ? aliased[1] : specifier.split(/\s+/)[0];
+    });
+  for (const primitive of ["Th", "Td", "useDataTable"]) {
+    assert.ok(
+      !exportedNames.includes(primitive),
+      `${primitive} must stay unexported until a second consumer needs it`,
+    );
+  }
 });
