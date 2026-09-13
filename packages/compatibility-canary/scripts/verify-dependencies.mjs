@@ -36,6 +36,24 @@ const thirdPartyDeclared = Object.fromEntries(declaredEntries.filter(([name]) =>
 
 assert.deepEqual(thirdPartyDeclared, expected, "package.json must exactly match compatibility-matrix.json");
 
+/* The third-party check above is bidirectional by construction — deepEqual
+   against `expected` catches an addition AND a removal. The first-party
+   loop below only ever iterates whatever `firstPartyDeclared` happens to
+   contain, so it has no opinion on the SET of first-party dependencies —
+   deleting `@devslab/dds-table` from this manifest would pass every rule
+   below and this file would print "0 first-party workspace link(s)" on
+   exit 0, silently ending the one thing the canary exists to prove for
+   that package (its TanStack pin actually renders at runtime, per the
+   /table route this canary's build/preview gates exercise). Named here so
+   removing a first-party dependency is a required, deliberate edit to
+   this list, not a side effect of deleting a line elsewhere. */
+const expectedFirstPartyDependencies = ["@devslab/dds-table"];
+assert.deepEqual(
+  Object.keys(firstPartyDeclared).sort(),
+  [...expectedFirstPartyDependencies].sort(),
+  "canary's first-party @devslab/* dependencies must exactly match the expected set",
+);
+
 function assertLockfileSpecifier(name, version) {
   const escapedName = name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
   assert.match(
