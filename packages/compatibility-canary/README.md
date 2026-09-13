@@ -1,6 +1,6 @@
 # DDS compatibility canary
 
-This private workspace package is the admission gate for the production Solid and TanStack web stack and for future framework upgrades. The exact candidate matrix and upstream constraints live in `compatibility-matrix.json`; the package manifest must match it byte-for-byte at the version level.
+This private workspace package is the admission gate for the production Solid and TanStack web stack and for future framework upgrades. The exact candidate matrix and upstream constraints live in `compatibility-matrix.json`; the package manifest's third-party dependencies must match it byte-for-byte at the version level. First-party `@devslab/*` dependencies (sibling DDS packages) carry no third-party compatibility claim to record, so they are exempt from the matrix comparison and are instead required to use the `workspace:` protocol pinned to the exact linked lockstep version — never a range like `workspace:*` or `workspace:^x.y.z`.
 
 The fixture covers TanStack Start SSR/client hydration, a server function reading its request, TanStack Router with a custom 404, TanStack Query hydration state, Korean head metadata, a static SVG, and Cloudflare Vite/workerd preview. The `fixtures/binding-gateway` Worker binds `CANARY_SERVICE` to the test-only `fixtures/binding-service` sibling Worker through Wrangler configuration; its response also proves CSP nonce propagation from the response policy into serialized script state.
 

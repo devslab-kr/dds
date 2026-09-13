@@ -416,3 +416,198 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
   구분할 것.
 - **Don't**: `[hidden]`을 이기는 `display` 규칙으로 토글하지 말 것 —
   `.dds-empty[hidden]` 가드가 여기 있는 이유가 그것입니다.
+
+---
+
+## v1 이후 컴포넌트
+
+아래 두 섹션은 위 스펙 §4.3 v1 인벤토리 **이후**에 출하됐고 그 목록에
+속하지 않습니다 — `Table`과 `Console shell`은 콘솔 컴포넌트를 DDS로 옮긴
+작업에서 왔습니다(`docs/decisions.md` D-021). 참조 방식은 위 섹션들과
+동일합니다(실제 출하된 클래스만, 사용 예시, 접근성 노트, Do/Don't).
+
+## Table — `.dds-table`
+
+```html
+<div class="dds-table-wrap">
+  <table class="dds-table dds-table--fixed">
+    <caption class="dds-visually-hidden">작업</caption>
+    <colgroup>
+      <col style="width: 60%" />
+      <col data-fold style="width: 40%" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th scope="col" data-column="name" aria-sort="ascending">
+          <button type="button" class="dds-table__sort" aria-label="이름으로 정렬">
+            이름
+            <span class="dds-table__sort-mark" aria-hidden="true" data-sort-state="ascending"></span>
+          </button>
+        </th>
+        <th scope="col" data-column="count" data-fold data-numeric>건수</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">재색인</th>
+        <td data-fold data-numeric>12</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<nav class="dds-table__pagination" aria-label="다음 페이지">
+  <a class="dds-btn dds-btn--secondary" href="?cursor=abc">다음 페이지</a>
+</nav>
+```
+
+- 래퍼: `.dds-table-wrap`은 넘치면 가로로 스크롤되고,
+  절대 위치로 클리핑되는 `.dds-visually-hidden` caption이 페이지가 아니라
+  이 박스를 기준으로 클리핑되게 해주는 포지셔닝 조상입니다. `--tall`은
+  70vh로 높이를 제한하고 헤더(`thead th`)를 `position: sticky`로 고정합니다.
+- 밀도·레이아웃: `.dds-table--dense`는 행 높이를 `--dds-space-40` 토큰(40px)
+  에서 2.25rem(36px)으로 줄입니다. `.dds-table--fixed`는
+  `table-layout: fixed`로 바꾸고 `<colgroup>`을 기대하는데, 컴포넌트는
+  어떤 컬럼이든 `width`를 선언하는 순간 둘 다 자동으로 적용합니다.
+- 정렬: `.dds-table__sort`는 정렬 가능한 헤더의 버튼(클라이언트 정렬
+  가능한 컬럼에서만 렌더링)이고, `.dds-table__sort-mark`는 그 화살표로
+  `data-sort-state` 속성에 `"none"`/`"ascending"`/`"descending"`을
+  담습니다 — 헤더 자신의 `aria-sort`가 담는 것과 같은 세 값입니다.
+- `.dds-table__order`는 소비자가 정렬 버튼 대신 실제 순서 문장을 넘겼을 때
+  (아래 `sort` prop 참고) 테이블 위에 그 문장을 렌더링합니다.
+- `.dds-table__actions`는 트레일링 액션 셀의 내용을 오른쪽 정렬하고, 액션
+  컬럼 자체의 헤더는 `.dds-visually-hidden` 유틸리티를 써서 화면엔
+  안 보여도 접근성 이름은 갖습니다.
+- `.dds-table__pagination`은 라벨 붙은 `<nav>`가 평범한
+  `.dds-btn.dds-btn--secondary` 링크를 감싼 것입니다 — 버튼이 아닙니다 —
+  덕분에 커서 페이징이 JavaScript 없이도 동작합니다. 다음 페이지가 없으면
+  통째로 `[hidden]`입니다.
+- 속성 훅: `[data-fold]`는 접을 수 있는 컬럼(`<col>`·`<th>`·`<td>`)을
+  표시하며 `56.25rem`(900px) 아래에서 순수 미디어 쿼리로(JavaScript 없이)
+  통째로 숨깁니다. `[data-numeric]`은 셀을 오른쪽 정렬하고 고정폭
+  숫자체를 줍니다. `[data-sort-state]`(위)는 세 정렬 상태를 담습니다.
+  `[data-column]`은 소비자 자신의 훅을 위해 컬럼 이름을 붙일 뿐 CSS는
+  전혀 갖지 않습니다.
+- **접근성**: caption은 실제로 존재하고 시각적으로만 숨겨져 있습니다.
+  정렬 가능한 헤더는 `aria-label`이 붙은 진짜 `<button>`이지, 클릭만
+  가능한 맨 `<th>`가 아닙니다. 테이블당 정확히 한 컬럼만 `<td>` 대신
+  `<th scope="row">`로 렌더링해야 합니다.
+- **Do**: 모든 테이블에 caption을 주세요 — 시각적으로 숨겨도 좋습니다.
+  테이블의 접근성 이름이 그것입니다.
+- **Don't**: 서버가 정렬한 데이터를 보여주는 테이블에 정렬 버튼을 달지
+  마세요 — 페이징된 한 조각만 클라이언트에서 정렬하면 전체 목록의 순서를
+  잘못 보고하게 되므로, 이 마크업은 그 경우(`sort`의 `{ statedOrder }`
+  형태 — `@devslab/dds-table`의 README 참고)에 버튼을 아예 렌더링하지
+  않습니다.
+
+## Console shell — `.dds-console-shell`
+
+```html
+<div class="dds-console-shell" data-surface="dashboard" data-hydrated="true">
+  <a class="dds-console-skip dds-visually-hidden" href="#dds-console-main">본문으로 건너뛰기</a>
+  <button class="dds-console-rail__toggle" type="button" aria-controls="dds-console-rail" aria-expanded="false">
+    <span aria-hidden="true"></span>
+  </button>
+  <div class="dds-console-rail__scrim" data-open="false"></div>
+  <aside id="dds-console-rail" class="dds-console-rail" data-open="false">
+    <a class="dds-console-rail__brand" href="/">
+      <img src="/mark.svg" alt="" width="20" height="20" /><strong>Acme</strong>
+    </a>
+    <nav class="dds-console-rail__nav" aria-label="대시보드 내비게이션">
+      <section class="dds-console-rail__group" aria-labelledby="g1">
+        <h2 id="g1" class="dds-console-rail__group-label">오늘</h2>
+        <ul>
+          <li><a class="dds-console-rail__item" href="/overview" aria-current="page">
+            개요
+            <span class="dds-console-rail__badge" aria-label="3건 대기">3</span>
+          </a></li>
+        </ul>
+      </section>
+    </nav>
+  </aside>
+  <main id="dds-console-main" class="dds-console-main" tabindex="-1">
+    <header class="dds-console-page-header">
+      <div class="dds-console-page-header__text">
+        <p class="dds-console-page-eyebrow">Acme</p>
+        <h1>개요</h1>
+      </div>
+    </header>
+    …
+  </main>
+</div>
+```
+
+- 레이아웃: `.dds-console-shell`은 14.5rem(232px) 레일 + 본문 CSS
+  그리드입니다. `56.25rem`(900px) 아래 — 테이블의 `[data-fold]`와 같은
+  분기점이라, 한 콘솔 안에서 레일과 접히는 컬럼이 같은 뷰포트 폭에서
+  함께 모양을 바꿉니다 — 에서 그리드는 한 열로 접히고 `.dds-console-rail`은
+  고정된 오프캔버스 드로어가 됩니다.
+- 레일 구성 요소: `.dds-console-rail__brand`, `__context`(라벨/값 행의
+  `<dl>`), `__nav`, 라벨 붙은 섹션마다 하나씩인 `__group`(+
+  `__group-label`), `__item`(hover·`:focus-visible`·`aria-current="page"`
+  상태 포함), `__badge`(대기 건수 알약), `margin-block-start: auto`로
+  바닥에 고정되는 `__foot` 슬롯.
+- 드로어(900px 아래에서만 작동): `.dds-console-rail__toggle`은 분기점
+  위에서는 `display: none`이고 아래에서 고정 햄버거 버튼이 됩니다 — 이
+  버튼 자신은 상태를 `data-open`이 아니라 `aria-expanded`로 드러냅니다.
+  드러나는 대상이 아니라 여닫는 컨트롤이기 때문이고, 그 접근성 이름(아래
+  Visually hidden 절 참고)도 같은 상태에 맞춰 문구가 바뀝니다.
+  `.dds-console-rail__scrim`도 마찬가지로 분기점 위에서는 숨겨져 있다가
+  아래에서 전체 화면 딤 처리가 됩니다. 스크림과 레일 자신(토글은 제외)은
+  `data-open="true"` 또는 `data-open="false"`를 갖습니다 — **항상 둘 중
+  하나이고 아예 없는 경우가 없습니다** — 그래서 드로어의 열림/닫힘 CSS
+  (translate, `visibility`, 스크림의 opacity/`pointer-events`)가 이
+  카탈로그의 다른 곳에서 쓰는 `[data-fold]`나 `[hidden]`처럼 속성의
+  존재/부재에 기대지 않고 `[data-open="true"]`를 직접 겨냥합니다.
+  `prefers-reduced-motion: reduce`는 드로어의 전환 효과를 없앱니다.
+- `data-surface`는 콘솔 이름(`"dashboard"`·`"admin"` 등)을 소비자 자신의
+  훅을 위해 붙일 뿐 CSS는 없습니다. `data-hydrated="true"`는 클라이언트
+  하이드레이션이 실제로 끝난 뒤에만 나타납니다 — 첫 페인트 시점과
+  하이드레이션이 아예 닿지 않는 환경에서는 `"false"`가 아니라 **속성
+  자체가 없습니다.**
+- `.dds-console-main`은 skip 링크의 목적지(`id="dds-console-main"`,
+  `tabindex="-1"`)이고 `.dds-console-page-header`를 담습니다 — `__text`
+  (`.dds-console-page-eyebrow` + `<h1>`)와, 소비자가 넘겼을 때만 헤더
+  오른쪽의 `__actions`.
+- 밀도: `.dds-console-shell` 안에서 렌더링되는 `.dds-btn`·`.dds-input`·
+  `.dds-select`·`.dds-textarea`는 자기 기본 크기 대신 body-2(14px)
+  크기로 렌더링됩니다 — 컨트롤마다 각자 오버라이드하는 대신 콘솔이 한
+  번에 정합니다.
+- **접근성**: skip 링크는 실제 마크업이고 포커스를 받을 때까지만
+  `.dds-visually-hidden`으로 숨겨집니다. 레일의 `<nav>`는 소비자가 넘긴
+  `aria-label`을 요구합니다 — 콘솔 화면에는 (위) 테이블 자신의 페이징
+  `<nav>`도 있으므로, 이름 없는 레일 랜드마크가 이름 있는 것 옆에 있으면
+  그 자체로 회귀입니다. 이 스타일시트에서 `display`를 주는 모든 클래스는
+  드로어 미디어 쿼리 안의 것까지 포함해 바로 옆에 `[hidden] { display:
+  none }`을 다시 선언하므로, 숨겨진 레일·토글·스크림은 뷰포트 폭과 무관하게
+  절대 화면에 강제로 그려질 수 없습니다.
+- **Do**: 배지는 장식용 점이 아니라 실제 대기 건수에 쓰세요 — 접근성
+  이름은 이 패키지가 정한 단어가 아니라 소비자가 넘긴 라벨 템플릿에서
+  채워집니다.
+- **Don't**: 드로어를 열고 닫는 데 `[hidden]`을 쓰지 마세요 — 컴포넌트가
+  이미 `data-open`을 소유하고 있고, 위 CSS는 속성의 존재/부재가 아니라
+  그 정확한 문자열 값에 의존합니다.
+
+## Visually hidden — `.dds-visually-hidden`
+
+```html
+<span class="dds-visually-hidden">액션</span>
+```
+
+- 특정 컴포넌트에 묶이지 않은 `base.css`의 유틸리티입니다 — 콘텐츠를
+  1px 박스로 클리핑해(`clip-path: inset(50%)`) 화면에는 공간을 차지하지
+  않지만 접근성 트리에는 남습니다. 트리에서도 함께 지워버리는 `[hidden]`
+  (또는 `display: none`)과 다릅니다.
+- 담고 있는 블록은 `position: relative`여야 페이지가 아니라 그 박스를
+  기준으로 클리핑됩니다 — `.dds-table-wrap`이 정확히 이 이유로 그렇게
+  설정돼 있어, 래퍼가 가로로 스크롤된 상태에서도 테이블 자신의 caption이
+  올바르게 클리핑됩니다.
+- 실제로 쓰는 곳: 위 테이블의 caption과 액션 컬럼 헤더, 콘솔 셸의 skip
+  링크(포커스를 받을 때만 자신의 `:focus` 규칙으로 보임), 그리고 콘솔
+  셸 레일 토글 버튼의 접근성 이름(`menuOpen`/`menuClose` 라벨) — 드로어가
+  열리고 닫힐 때마다 문구가 바뀌는 시각적으로 숨겨진 span입니다.
+- **Do**: 화면으로 보는 사람에겐 필요 없지만 화면 낭독기에는 필요한
+  텍스트에 쓰세요 — caption, 랜드마크의 접근성 이름, 아이콘만 있는
+  컨트롤의 라벨.
+- **Don't**: 누구에게나 잠깐 숨기려는 용도로 쓰지 마세요 — 이건 접근성
+  트리에서 아무것도 지우지 않는데, 지금 아무도 지각하면 안 되는 콘텐츠엔
+  정확히 틀린 선택입니다. 그런 경우엔 `[hidden]`을 쓰세요.

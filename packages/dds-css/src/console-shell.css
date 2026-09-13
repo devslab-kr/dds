@@ -1,0 +1,360 @@
+/* Console shell — the 232px rail + below-900px drawer that a console route
+ * renders around its content. The fold breakpoint below is written in the
+ * same rem form as table.css's column fold (56.25rem = 900px at a 16px root
+ * font size), so a visitor with any browser default font size sees the rail
+ * change shape and the table's columns fold at the same viewport width
+ * inside the same console.
+ *
+ * Tokens only. Every class that declares `display` re-declares
+ * `[hidden] { display: none }` beside it, at a class+attribute specificity
+ * that beats every later `display` declaration for that class — including
+ * the ones inside the media query below — so a hidden rail, toggle, or
+ * scrim can never be drawn on screen regardless of viewport width. */
+
+.dds-console-shell {
+  min-block-size: 100vh;
+  display: grid;
+  grid-template-columns: 14.5rem minmax(0, 1fr);
+  background: var(--dds-color-bg-default);
+  color: var(--dds-color-text-primary);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.dds-console-shell[hidden] {
+  display: none;
+}
+
+/* The skip link is hidden by .dds-visually-hidden (applied by the
+ * component) and only needs to say what it looks like once focused —
+ * a visually-hidden element is never in the focus-visible/`:focus` chain
+ * while `hidden`, so no `[hidden]` guard applies here. */
+.dds-console-skip:focus {
+  position: fixed;
+  inset-block-start: var(--dds-space-8);
+  inset-inline-start: var(--dds-space-8);
+  z-index: 100;
+  clip-path: none;
+  inline-size: auto;
+  block-size: auto;
+  overflow: visible;
+  white-space: normal;
+  padding: var(--dds-space-12) var(--dds-space-16);
+  background: var(--dds-color-bg-elevated);
+  color: var(--dds-color-text-primary);
+  border: 2px solid var(--dds-color-border-focus);
+}
+
+.dds-console-rail {
+  position: sticky;
+  inset-block-start: 0;
+  block-size: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-16);
+  padding: var(--dds-space-20) var(--dds-space-12);
+  overflow-y: auto;
+  border-inline-end: 1px solid var(--dds-color-border-default);
+  background: var(--dds-color-bg-elevated);
+}
+.dds-console-rail[hidden] {
+  display: none;
+}
+
+.dds-console-rail__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dds-space-8);
+  padding-inline: var(--dds-space-8);
+  color: inherit;
+  font-size: .9375rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  text-decoration: none;
+}
+.dds-console-rail__brand[hidden] {
+  display: none;
+}
+.dds-console-rail__brand img {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.dds-console-rail__context {
+  display: grid;
+  gap: var(--dds-space-4);
+  margin: 0;
+  padding-inline: var(--dds-space-8);
+  font-size: var(--dds-typo-caption-font-size);
+  line-height: var(--dds-typo-caption-line-height);
+}
+.dds-console-rail__context[hidden] {
+  display: none;
+}
+.dds-console-rail__context dt {
+  color: var(--dds-color-text-muted);
+}
+.dds-console-rail__context dd {
+  margin: 0;
+  font-family: var(--dds-font-family-mono);
+  overflow-wrap: anywhere;
+}
+
+.dds-console-rail__nav {
+  display: grid;
+  gap: var(--dds-space-16);
+}
+.dds-console-rail__nav[hidden] {
+  display: none;
+}
+
+.dds-console-rail__group {
+  display: grid;
+  gap: var(--dds-space-2, 2px);
+}
+.dds-console-rail__group[hidden] {
+  display: none;
+}
+.dds-console-rail__group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.dds-console-rail__group ul[hidden] {
+  display: none;
+}
+.dds-console-rail__group-label {
+  margin: 0;
+  padding: 0 var(--dds-space-8) var(--dds-space-4);
+  color: var(--dds-color-text-muted);
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.dds-console-rail__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dds-space-8);
+  min-block-size: var(--dds-space-40);
+  padding-inline: var(--dds-space-8);
+  border-radius: var(--dds-radius-md);
+  color: var(--dds-color-text-secondary);
+  font-size: .875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+.dds-console-rail__item[hidden] {
+  display: none;
+}
+.dds-console-rail__item:hover {
+  background: var(--dds-color-bg-subtle);
+  color: var(--dds-color-text-primary);
+}
+.dds-console-rail__item[aria-current="page"] {
+  background: var(--dds-color-bg-brand-subtle);
+  color: var(--dds-color-text-brand);
+  font-weight: 650;
+}
+.dds-console-rail__item:focus-visible {
+  outline: 2px solid var(--dds-color-border-focus);
+  outline-offset: 2px;
+}
+
+.dds-console-rail__badge {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.125rem;
+  block-size: 1.125rem;
+  padding-inline: .3125rem;
+  border-radius: var(--dds-radius-full);
+  background: var(--dds-color-bg-brand);
+  color: var(--dds-color-text-on-brand);
+  font-size: .6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dds-console-rail__badge[hidden] {
+  display: none;
+}
+
+.dds-console-rail__foot {
+  margin-block-start: auto;
+  display: grid;
+  gap: var(--dds-space-8);
+  justify-items: start;
+  padding: var(--dds-space-12) var(--dds-space-8) 0;
+  border-block-start: 1px solid var(--dds-color-border-default);
+}
+.dds-console-rail__foot[hidden] {
+  display: none;
+}
+
+.dds-console-rail__toggle {
+  display: none;
+}
+.dds-console-rail__toggle[hidden] {
+  display: none;
+}
+
+.dds-console-rail__scrim {
+  display: none;
+}
+.dds-console-rail__scrim[hidden] {
+  display: none;
+}
+
+.dds-console-main {
+  min-inline-size: 0;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.dds-console-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dds-space-32);
+  margin-block-end: var(--dds-space-32);
+}
+.dds-console-page-header[hidden] {
+  display: none;
+}
+.dds-console-page-header h1 {
+  max-inline-size: 24ch;
+  margin: .25rem 0 0;
+  font-size: clamp(1.75rem, 2.2vw, 2.25rem);
+  line-height: 1.1;
+  letter-spacing: -.03em;
+  text-wrap: balance;
+}
+.dds-console-page-header__actions {
+  display: flex;
+  gap: var(--dds-space-8);
+}
+.dds-console-page-header__actions[hidden] {
+  display: none;
+}
+.dds-console-page-eyebrow {
+  margin: 0;
+  color: var(--dds-color-text-muted);
+  font-size: var(--dds-typo-caption-font-size);
+  line-height: var(--dds-typo-caption-line-height);
+}
+
+/* Console density: every dds-css control inside the shell reads at the body-2
+ * size (14px), not dds-btn's own default (13px, --dds-typo-label-font-size).
+ * Scoped to .dds-console-shell rather than left as a global override on
+ * .dds-btn/.dds-input/.dds-select/.dds-textarea themselves — a shell that
+ * establishes a density owns the override for controls inside it, the same
+ * way a shared class must never carry a layout rule that only makes sense
+ * for one consumer's container.
+ *
+ * .dds-btn's :not() exclusions matter: this selector's specificity (0,2,0)
+ * beats every size modifier in button.css (.dds-btn--lg, .dds-btn--sm, both
+ * 0,1,0), so an unqualified `.dds-console-shell .dds-btn` would override
+ * --lg's own font-size back down to body-2 and would give --sm the same
+ * font-size as a default button (--sm declares none of its own, so it was
+ * inheriting whichever rule won for plain .dds-btn) — the one outcome a
+ * size modifier exists to prevent. .dds-input/.dds-select/.dds-textarea
+ * carry no such modifiers today, so no matching exclusion is needed there. */
+.dds-console-shell .dds-btn:not(.dds-btn--lg):not(.dds-btn--sm),
+.dds-console-shell .dds-input,
+.dds-console-shell .dds-select,
+.dds-console-shell .dds-textarea {
+  font-size: var(--dds-typo-body-2-font-size);
+}
+
+@media (max-width: 56.25rem) {
+  .dds-console-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dds-console-rail__toggle {
+    position: fixed;
+    inset-block-start: .75rem;
+    inset-inline-start: .75rem;
+    z-index: 70;
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 1px solid var(--dds-color-border-default);
+    border-radius: var(--dds-radius-md);
+    background: var(--dds-color-bg-elevated);
+    cursor: pointer;
+  }
+  .dds-console-rail__toggle > span[aria-hidden] {
+    position: relative;
+    display: block;
+    inline-size: 16px;
+    block-size: 2px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .dds-console-rail__toggle > span[aria-hidden]::before,
+  .dds-console-rail__toggle > span[aria-hidden]::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    inline-size: 16px;
+    block-size: 2px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .dds-console-rail__toggle > span[aria-hidden]::before {
+    inset-block-start: -5px;
+  }
+  .dds-console-rail__toggle > span[aria-hidden]::after {
+    inset-block-start: 5px;
+  }
+  /* Translated off-screen is not gone: a closed drawer still takes Tab. Hide
+     it from the focus order with visibility, delayed by the slide's
+     duration so closing still animates, and lifted with no delay when it
+     opens. */
+  .dds-console-rail {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    inline-size: min(84vw, 18rem);
+    block-size: 100dvh;
+    visibility: hidden;
+    translate: -100% 0;
+    transition: translate .22s cubic-bezier(.16, 1, .3, 1), visibility 0s linear .22s;
+    box-shadow: var(--dds-elevation-2);
+  }
+  .dds-console-rail[data-open="true"] {
+    visibility: visible;
+    translate: 0 0;
+    transition-delay: 0s, 0s;
+  }
+  .dds-console-rail__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: var(--dds-color-overlay-dim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease;
+  }
+  .dds-console-rail__scrim[data-open="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dds-console-main {
+    padding-block-start: 4rem;
+  }
+  .dds-console-page-header {
+    display: grid;
+    gap: var(--dds-space-16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dds-console-rail,
+  .dds-console-rail__scrim {
+    transition: none;
+  }
+}

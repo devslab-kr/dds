@@ -40,11 +40,20 @@ test("actual TanStack application sources carry every canary contract", async ()
   assert.match(serverSource, /ServiceBinding/);
 });
 
+test("the canary exercises the table package at the pinned version", async () => {
+  const matrix = JSON.parse(await readFile(new URL("../compatibility-matrix.json", import.meta.url), "utf8"));
+  assert.equal(matrix.runtime["@tanstack/solid-table"], "9.2.4");
+  assert.equal(matrix.runtime["@tanstack/table-core"], "9.2.4");
+  const route = await readFile(new URL("../src/routes/table.tsx", import.meta.url), "utf8");
+  assert.match(route, /DataTable/);
+});
+
 test("actual verification entry points generate routes, inspect install output, and scan artifacts", async () => {
-  const [manifestText, routerConfigText, installGate, previewSmoke, artifactScan, cleanRunner, sentinels] = await Promise.all([
+  const [manifestText, routerConfigText, installGate, dependencyGate, previewSmoke, artifactScan, cleanRunner, sentinels] = await Promise.all([
     source("package.json"),
     source("tsr.config.json"),
     source("scripts/verify-install.mjs"),
+    source("scripts/verify-dependencies.mjs"),
     source("scripts/preview-smoke.mjs"),
     source("scripts/scan-build.mjs"),
     source("scripts/run-clean.mjs"),
@@ -61,6 +70,12 @@ test("actual verification entry points generate routes, inspect install output, 
   assert.match(manifest.scripts["verify:dependencies"], /verify-install/);
   assert.match(installGate, /strict-peer-dependencies/);
   assert.match(installGate, /assertCleanDiagnostics/);
+  // A first-party `@devslab/*` dependency must both declare the workspace:
+  // protocol and name the exact version currently linked — `workspace:*`
+  // and `workspace:^0.10.0` (what `pnpm add --workspace` writes by default)
+  // are ranges, not pins, and must not pass silently.
+  assert.match(dependencyGate, /version\.startsWith\("workspace:"\)/);
+  assert.match(dependencyGate, /installed\.version,\s*pinned,/);
   assert.match(previewSmoke, /initialHtml/);
   assert.match(previewSmoke, /assertNoLikelySecrets\(initialHtml/);
   assert.match(previewSmoke, /withSecretSentinels/);

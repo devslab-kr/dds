@@ -62,6 +62,9 @@ jobs:
       - run: pnpm run verify:solid:test
       - run: pnpm run verify:solid:a11y
       - run: pnpm run verify:solid:release
+      - run: pnpm run verify:table:test
+      - run: pnpm run verify:table:a11y
+      - run: pnpm run verify:table:release
       - run: pnpm run verify:site-kit:ui
       - run: pnpm run verify:site-kit:browser
       - run: pnpm run verify:site-kit:release

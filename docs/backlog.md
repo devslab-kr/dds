@@ -162,6 +162,30 @@ D-020. TraceLinq 랜딩의 클라이언트 메인 청크가 `dist/solid.js` 통�
 - 남은 것: 서버 HTML의 본문 ~115 KB/페이지 → `<img src>` + 소비자 정적 서빙
   (API 변경, D-020 재검토 시점).
 
+### 14. 콘솔 컴포넌트를 DDS로 (Phase A) — `완료` (2026-09-12)
+D-021~D-023. VisionLinq 콘솔이 DDS 토큰·CSS만 쓰고 dds-solid 컴포넌트는 0회,
+`@tanstack/solid-table`은 설치만 되고 표 12개가 수제였던 것(소유자 지시,
+2026-09-12)에서 시작한 두 단계 계획의 **1단계만** — 새 패키지·컴포넌트를
+DDS에 짓고 검증했을 뿐, VisionLinq 쪽 소비 전환은 아직 손대지 않았다.
+- [x] `@devslab/dds-table` 신설 — `DataTable` 컴포넌트, `@tanstack/solid-table@9.2.4`
+      정확히 고정. 정렬은 타입(`sort: "client" | { statedOrder }`)이 정하고,
+      페이징은 링크, 컬럼 접기는 CSS, 라벨은 전부 필수 prop(D-021).
+- [x] `dds-css`에 `.dds-table*` 스킨 + `.dds-visually-hidden` 유틸리티.
+- [x] `dds-solid`에 `createStatusPill`(닫힌 도메인 throw / 열린 도메인 원문
+      렌더, D-022)과 `ConsoleShell`(내비 레일 + 페이지 헤더, 문구·라우팅은
+      제품 몫).
+- [x] compatibility-canary가 실제로 `/table` 라우트를 하이드레이션까지
+      실행 + first-party(`@devslab/*`) 의존성은 `workspace:` 프로토콜이면서
+      정확한 링크 버전이어야 통과하도록 의존성 게이트 강화(D-023).
+- [x] `docs/decisions.md` D-021~D-023, `packages/dds-table/README(.ko).md`,
+      changeset(dds-table/dds-solid/dds-css minor — `fixed` 그룹에 dds-table
+      추가되어 전체 트레인이 함께 오른다).
+- **다음(Phase B, 미착수)**: VisionLinq 콘솔의 수제 표 12개를 `DataTable`로,
+  레일 셸을 `ConsoleShell`로, 상태 배지를 `StatusPill`로 전환 — 이 계획의
+  §Phase B(4개 PR)가 실행 순서. `npm view @devslab/dds-table version`이
+  `0.11.0`을 찍기 전에는 시작할 수 없다(그 전 작업은 커밋 금지된 로컬
+  `pnpm.overrides`가 필요).
+
 ---
 
 ## P3 — 모바일 이후

@@ -8,7 +8,8 @@
       "@devslab/dds-css",
       "@devslab/dds-icons",
       "@devslab/dds-solid",
-      "@devslab/site-kit"
+      "@devslab/site-kit",
+      "@devslab/dds-table"
     ]
   ],
   "linked": [],

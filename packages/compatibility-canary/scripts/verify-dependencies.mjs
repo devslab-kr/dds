@@ -16,19 +16,77 @@ const expected = { ...matrix.runtime, ...matrix.toolchain };
 const declared = { ...manifest.dependencies, ...manifest.devDependencies };
 const forbiddenRange = /^(?:\^|~|>|<|\*|latest$|next$|workspace:|catalog:)/i;
 
-assert.deepEqual(declared, expected, "package.json must exactly match compatibility-matrix.json");
+/* The matrix documents third-party *compatibility* — a version some other
+   team published and we are proving works with the rest of the stack.
+   A `@devslab/*` dependency is a sibling package in this monorepo: its
+   version tracks the same lockstep train as the canary itself, and a
+   `workspace:` specifier carries no compatibility claim to verify. So
+   first-party names are exempt from the matrix comparison and the
+   exact-pin check below, and are held to a narrower, positive rule
+   instead: the specifier must use the `workspace:` protocol AND name the
+   exact lockstep version currently linked, so neither a published range
+   (e.g. "^0.10.0") nor an unpinned one (e.g. "workspace:*" or
+   "workspace:^0.10.0" — what `pnpm add --workspace` writes by default)
+   passes silently. */
+const isFirstPartyDependency = (name) => name.startsWith("@devslab/");
 
-for (const [name, version] of Object.entries(declared)) {
+const declaredEntries = Object.entries(declared);
+const firstPartyDeclared = Object.fromEntries(declaredEntries.filter(([name]) => isFirstPartyDependency(name)));
+const thirdPartyDeclared = Object.fromEntries(declaredEntries.filter(([name]) => !isFirstPartyDependency(name)));
+
+assert.deepEqual(thirdPartyDeclared, expected, "package.json must exactly match compatibility-matrix.json");
+
+/* The third-party check above is bidirectional by construction — deepEqual
+   against `expected` catches an addition AND a removal. The first-party
+   loop below only ever iterates whatever `firstPartyDeclared` happens to
+   contain, so it has no opinion on the SET of first-party dependencies —
+   deleting `@devslab/dds-table` from this manifest would pass every rule
+   below and this file would print "0 first-party workspace link(s)" on
+   exit 0, silently ending the one thing the canary exists to prove for
+   that package (its TanStack pin actually renders at runtime, per the
+   /table route this canary's build/preview gates exercise). Named here so
+   removing a first-party dependency is a required, deliberate edit to
+   this list, not a side effect of deleting a line elsewhere. */
+const expectedFirstPartyDependencies = ["@devslab/dds-table"];
+assert.deepEqual(
+  Object.keys(firstPartyDeclared).sort(),
+  [...expectedFirstPartyDependencies].sort(),
+  "canary's first-party @devslab/* dependencies must exactly match the expected set",
+);
+
+function assertLockfileSpecifier(name, version) {
+  const escapedName = name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+  assert.match(
+    lockfile,
+    new RegExp(`(?:'${escapedName}'|${escapedName}):\\r?\\n\\s+specifier: ${version.replaceAll(".", "\\.")}`),
+    `${name}@${version} is missing from the canary lockfile importer`,
+  );
+}
+
+for (const [name, version] of Object.entries(firstPartyDeclared)) {
+  assert.ok(
+    version.startsWith("workspace:"),
+    `${name} is a first-party DDS package and must use the workspace: protocol, received ${version}`,
+  );
+  assertLockfileSpecifier(name, version);
+
+  const pinned = version.slice("workspace:".length);
+  const installedManifest = resolve(packageRoot, "node_modules", ...name.split("/"), "package.json");
+  const installed = JSON.parse(await readFile(installedManifest, "utf8"));
+  assert.equal(
+    installed.version,
+    pinned,
+    `${name} must name the linked lockstep version, declared ${version}, linked ${installed.version}`,
+  );
+}
+
+for (const [name, version] of Object.entries(thirdPartyDeclared)) {
   assert.equal(
     forbiddenRange.test(version),
     false,
     `${name} must use an exact version, received ${version}`,
   );
-  assert.match(
-    lockfile,
-    new RegExp(`(?:'${name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}'|${name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}):\\r?\\n\\s+specifier: ${version.replaceAll(".", "\\.")}`),
-    `${name}@${version} is missing from the canary lockfile importer`,
-  );
+  assertLockfileSpecifier(name, version);
 
   const installedManifest = resolve(packageRoot, "node_modules", ...name.split("/"), "package.json");
   const installed = JSON.parse(await readFile(installedManifest, "utf8"));
@@ -50,4 +108,6 @@ for (const [label, candidate] of [
 assert.match(lockfile, /packages\/compatibility-canary:/, "canary lockfile importer is missing");
 assert.doesNotMatch(lockfile, /peerDependencyRules:|overrides:/, "lockfile contains dependency overrides");
 
-console.log(`verified ${Object.keys(declared).length} exact canary dependencies`);
+console.log(
+  `verified ${Object.keys(thirdPartyDeclared).length} exact canary dependencies and ${Object.keys(firstPartyDeclared).length} first-party workspace link(s)`,
+);

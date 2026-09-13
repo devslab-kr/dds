@@ -6,6 +6,8 @@ import {
   Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, Select, Switch,
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip, useToast,
 } from "../index";
+import { createStatusPill } from "../status-pill";
+import { ConsoleShell, type ConsoleNavItem } from "../console-shell";
 
 let dispose: (() => void) | undefined;
 afterEach(() => { vi.useRealTimers(); dispose?.(); dispose = undefined; document.body.replaceChildren(); });
@@ -152,5 +154,127 @@ describe("keyboard lifecycle", () => {
     expect(tabs[0]).toBe(document.activeElement);
     tabs[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
     expect(tabs[1]).toBe(document.activeElement);
+  });
+});
+
+describe("createStatusPill", () => {
+  const pill = createStatusPill({
+    tones: { key: { active: "success", revoked: "danger" }, role: { owner: "brand" } },
+    label: (_domain, value) => (value === "active" ? "Active" : value === "owner" ? "Owner" : undefined),
+    openDomains: ["role"],
+  });
+
+  it("renders the tone and the injected label", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => pill({ domain: "key", value: "active", locale: "en" }), host);
+    const node = host.querySelector("span");
+    expect(node?.className).toContain("dds-badge--success");
+    expect(node?.getAttribute("data-status")).toBe("key.active");
+    expect(node?.getAttribute("data-tone")).toBe("success");
+    expect(node?.textContent).toBe("Active");
+  });
+
+  it("throws for an unknown value in a closed domain", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    expect(() => render(() => pill({ domain: "key", value: "mystery", locale: "en" }), host)).toThrow();
+  });
+
+  it("renders raw text for an unknown value in an open domain", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => pill({ domain: "role", value: "project.viewer", locale: "en" }), host);
+    expect(host.querySelector("code")?.textContent).toBe("project.viewer");
+  });
+});
+
+describe("ConsoleShell", () => {
+  const nav = [{ label: "Build", items: [
+    { id: "projects", href: "/dashboard/projects", label: "Projects" },
+    { id: "jobs", href: "/dashboard/jobs", label: "Jobs", badge: 3 },
+  ] }];
+  const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", nav: "Dashboard navigation", badge: "{count} pending" };
+  const shell = () => (
+    <ConsoleShell
+      surface="dashboard" activePath="/dashboard/jobs"
+      brand={{ href: "/dashboard", name: "VisionLinq", mark: "/brand/mark.svg" }}
+      nav={nav} labels={labels} header={{ title: "Jobs" }} foot={<button>Sign out</button>}
+    >
+      <p data-body>body</p>
+    </ConsoleShell>
+  );
+
+  it("marks the active item by exact match on an index route and by prefix elsewhere", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    const active = host.querySelector('[aria-current="page"]');
+    expect(active?.getAttribute("data-nav")).toBe("dashboard.jobs");
+  });
+
+  it("renders the badge with the injected label and no words of its own", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    const badge = host.querySelector(".dds-console-rail__badge");
+    expect(badge?.textContent).toBe("3");
+    expect(badge?.getAttribute("aria-label")).toBe("3 pending");
+  });
+
+  it("opens and closes the drawer", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    const toggle = host.querySelector('[data-action="toggle-rail"]') as HTMLButtonElement;
+    toggle.click();
+    expect(host.querySelector(".dds-console-rail")?.getAttribute("data-open")).toBe("true");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(host.querySelector(".dds-console-rail")?.getAttribute("data-open")).toBe("false");
+  });
+
+  it("renders the foot slot and the children", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(shell, host);
+    expect(host.querySelector(".dds-console-rail__foot button")?.textContent).toBe("Sign out");
+    expect(host.querySelector("[data-body]")).not.toBeNull();
+  });
+
+  // isActive's two real behaviors, each pinned separately so deleting either
+  // branch in `isActive` (packages/dds-solid/src/console-shell.tsx) fails a
+  // test: the previous "exact match on an index route and by prefix
+  // elsewhere" test used an activePath/href pair that never exercised a
+  // one-segment index href or a path deeper than its href, so both branches
+  // were dead weight as far as coverage was concerned.
+  const render1 = (activePath: string, items: ConsoleNavItem[]) => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => (
+      <ConsoleShell
+        surface="dashboard" activePath={activePath}
+        brand={{ href: "/dashboard", name: "VisionLinq", mark: "/brand/mark.svg" }}
+        nav={[{ label: "Build", items }]} labels={labels} header={{ title: "Jobs" }}
+      >
+        <p data-body>body</p>
+      </ConsoleShell>
+    ), host);
+    return host;
+  };
+
+  it("matches a one-segment index href only by exact path", () => {
+    const items = [{ id: "home", href: "/dashboard", label: "Home" }];
+    const exact = render1("/dashboard", items);
+    expect(exact.querySelector('[aria-current="page"]')).not.toBeNull();
+  });
+
+  it("does not match a one-segment index href by prefix on a deeper activePath", () => {
+    const items = [{ id: "home", href: "/dashboard", label: "Home" }];
+    const deeper = render1("/dashboard/jobs", items);
+    expect(deeper.querySelector('[aria-current="page"]')).toBeNull();
+  });
+
+  it("matches a multi-segment href by prefix when activePath goes deeper still", () => {
+    const items = [{ id: "jobs", href: "/dashboard/jobs", label: "Jobs" }];
+    const host = render1("/dashboard/jobs/42", items);
+    expect(host.querySelector('[aria-current="page"]')).not.toBeNull();
+  });
+
+  it("lets an explicit active override win over an otherwise-matching href", () => {
+    const items = [{ id: "jobs", href: "/dashboard/jobs", label: "Jobs", active: false }];
+    const host = render1("/dashboard/jobs", items);
+    expect(host.querySelector('[aria-current="page"]')).toBeNull();
   });
 });

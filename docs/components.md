@@ -432,3 +432,203 @@ native implementation waits for a native consumer (Phase 3).
   (offer to clear the filter).
 - **Don't**: don't toggle it with a `display` rule that outranks `[hidden]` —
   `.dds-empty[hidden]` is guarded here for exactly that reason.
+
+---
+
+## Post-v1 components
+
+The two sections below shipped after the spec §4.3 v1 inventory above and
+are not part of it — `Table` and `Console shell` arrived with the console
+migration into DDS (`docs/decisions.md` D-021). They follow the same
+reference conventions as every section above (real shipped classes only,
+usage snippet, A11y notes, Do/Don't).
+
+## Table — `.dds-table`
+
+```html
+<div class="dds-table-wrap">
+  <table class="dds-table dds-table--fixed">
+    <caption class="dds-visually-hidden">Jobs</caption>
+    <colgroup>
+      <col style="width: 60%" />
+      <col data-fold style="width: 40%" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th scope="col" data-column="name" aria-sort="ascending">
+          <button type="button" class="dds-table__sort" aria-label="Sort by Name">
+            Name
+            <span class="dds-table__sort-mark" aria-hidden="true" data-sort-state="ascending"></span>
+          </button>
+        </th>
+        <th scope="col" data-column="count" data-fold data-numeric>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Reindex</th>
+        <td data-fold data-numeric>12</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<nav class="dds-table__pagination" aria-label="Next page">
+  <a class="dds-btn dds-btn--secondary" href="?cursor=abc">Next page</a>
+</nav>
+```
+
+- Wrap: `.dds-table-wrap` scrolls horizontally on overflow and is the
+  positioned ancestor an absolutely-clipped `.dds-visually-hidden` caption
+  resolves against; `--tall` caps it at 70vh and pins the header
+  (`thead th`) with `position: sticky`.
+- Density and layout: `.dds-table--dense` shrinks row height from the
+  `--dds-space-40` token (40px) to 2.25rem (36px); `.dds-table--fixed`
+  switches to `table-layout: fixed` and expects a `<colgroup>` — the
+  component applies both automatically the moment any column declares a
+  `width`.
+- Sort: `.dds-table__sort` is a sortable header's button (rendered only for
+  a client-sortable column); `.dds-table__sort-mark` is its chevron, its
+  `data-sort-state` attribute holding `"none"` / `"ascending"` /
+  `"descending"` — the same three values the header's own `aria-sort`
+  carries.
+- `.dds-table__order` renders the stated-order sentence above the table
+  when the caller supplies one instead of a sort button (see the `sort`
+  prop below).
+- `.dds-table__actions` right-aligns the trailing actions cell's content;
+  the actions column's own header uses the `.dds-visually-hidden` utility
+  so it still has an accessible name without a visible one.
+- `.dds-table__pagination` is a labeled `<nav>` wrapping a plain
+  `.dds-btn.dds-btn--secondary` link — never a button — so a cursor-paged
+  next page keeps working with JavaScript off; it is `[hidden]` entirely
+  when there is no next page.
+- Attribute hooks: `[data-fold]` marks a column (`<col>`, `<th>`, `<td>`)
+  droppable — hidden outright below `56.25rem` (900px) by a plain media
+  query, no JavaScript; `[data-numeric]` right-aligns a cell and gives it
+  tabular figures; `[data-sort-state]` (above) carries the three sort
+  states; `[data-column]` names the column for a consumer's own hooks and
+  carries no CSS of its own.
+- **A11y**: the caption is real, only visually hidden; a sortable header is
+  a real `<button>` with `aria-label`, never a bare clickable `<th>`;
+  exactly one column per table should render as `<th scope="row">` rather
+  than `<td>`.
+- **Do**: give every table a caption, even a visually hidden one — it is
+  the table's accessible name.
+- **Don't**: don't offer a sort button on a table whose data is server-
+  ordered — a client sort of one paged slice would misreport the whole
+  list's order, so this markup never renders one in that case (`sort`'s
+  `{ statedOrder }` form; see `@devslab/dds-table`'s README).
+
+## Console shell — `.dds-console-shell`
+
+```html
+<div class="dds-console-shell" data-surface="dashboard" data-hydrated="true">
+  <a class="dds-console-skip dds-visually-hidden" href="#dds-console-main">Skip to content</a>
+  <button class="dds-console-rail__toggle" type="button" aria-controls="dds-console-rail" aria-expanded="false">
+    <span aria-hidden="true"></span>
+  </button>
+  <div class="dds-console-rail__scrim" data-open="false"></div>
+  <aside id="dds-console-rail" class="dds-console-rail" data-open="false">
+    <a class="dds-console-rail__brand" href="/">
+      <img src="/mark.svg" alt="" width="20" height="20" /><strong>Acme</strong>
+    </a>
+    <nav class="dds-console-rail__nav" aria-label="Dashboard navigation">
+      <section class="dds-console-rail__group" aria-labelledby="g1">
+        <h2 id="g1" class="dds-console-rail__group-label">Today</h2>
+        <ul>
+          <li><a class="dds-console-rail__item" href="/overview" aria-current="page">
+            Overview
+            <span class="dds-console-rail__badge" aria-label="3 pending">3</span>
+          </a></li>
+        </ul>
+      </section>
+    </nav>
+  </aside>
+  <main id="dds-console-main" class="dds-console-main" tabindex="-1">
+    <header class="dds-console-page-header">
+      <div class="dds-console-page-header__text">
+        <p class="dds-console-page-eyebrow">Acme</p>
+        <h1>Overview</h1>
+      </div>
+    </header>
+    …
+  </main>
+</div>
+```
+
+- Layout: `.dds-console-shell` is the 14.5rem (232px)-rail-plus-content CSS
+  grid; below `56.25rem` (900px) — the same breakpoint the table's
+  `[data-fold]` uses, so a rail and a table folding column change shape at
+  the same viewport width — the grid collapses to one column and
+  `.dds-console-rail` becomes a fixed, off-canvas drawer.
+- Rail parts: `.dds-console-rail__brand`, `__context` (a `<dl>` of
+  label/value rows), `__nav`, one `__group` per labeled section (+
+  `__group-label`), `__item` (with hover / `:focus-visible` /
+  `aria-current="page"` states), `__badge` (a pending-count pill), and
+  `__foot` (a bottom slot, pinned with `margin-block-start: auto`).
+- Drawer (active only below 900px): `.dds-console-rail__toggle` is
+  `display: none` above the breakpoint and the fixed hamburger button below
+  it — it exposes its state as `aria-expanded`, not `data-open`, since it's
+  a disclosure control rather than the thing being disclosed; its own
+  accessible name (see the visually-hidden section below) switches with
+  that same state. `.dds-console-rail__scrim` is likewise hidden above the
+  breakpoint and a full-screen dimmer below it. The scrim and the rail
+  itself (not the toggle) read `data-open="true"` or `data-open="false"` —
+  **always one or the other, never absent** — which is what lets the
+  drawer's open/close CSS (translate, `visibility`, the scrim's
+  opacity/`pointer-events`) target `[data-open="true"]` directly rather
+  than relying on the attribute's presence, the way `[data-fold]` or
+  `[hidden]` do elsewhere in this catalog. `prefers-reduced-motion: reduce`
+  removes the drawer's transition.
+- `data-surface` names the console (`"dashboard"`, `"admin"`, …) for a
+  consumer's own hooks and carries no CSS. `data-hydrated="true"` appears
+  only once client-side hydration has actually run — it is **absent**, not
+  `"false"`, on first paint and in any environment hydration never reaches.
+- `.dds-console-main` is the skip link's target (`id="dds-console-main"`,
+  `tabindex="-1"`) and holds `.dds-console-page-header` — `__text`
+  (`.dds-console-page-eyebrow` + `<h1>`) and, when the caller supplies one,
+  `__actions` to the header's right.
+- Density: any `.dds-btn`, `.dds-input`, `.dds-select`, or `.dds-textarea`
+  rendered inside `.dds-console-shell` renders at the body-2 (14px) size
+  instead of its own default — a console establishes this once for
+  everything inside it rather than each control overriding itself.
+- **A11y**: the skip link is real markup, hidden with `.dds-visually-hidden`
+  until it receives focus; the rail's `<nav>` requires a caller-supplied
+  `aria-label` — a console page also has the table's own pagination `<nav>`
+  (above), so an unnamed landmark next to a named one would be a
+  regression; every class in this stylesheet that sets `display`
+  re-declares `[hidden] { display: none }` beside it, including inside the
+  drawer media query, so a hidden rail/toggle/scrim can never be forced
+  back on screen regardless of viewport width.
+- **Do**: use the badge for a real pending count, not a decorative dot —
+  its accessible name is filled from a caller-supplied label template, not
+  a word this package chose.
+- **Don't**: don't reach for `[hidden]` to open or close the drawer — the
+  component already owns `data-open`, and the CSS above depends on that
+  exact string value, not on the attribute's presence or absence.
+
+## Visually hidden — `.dds-visually-hidden`
+
+```html
+<span class="dds-visually-hidden">Actions</span>
+```
+
+- A utility in `base.css`, not tied to any one component — it clips content
+  to a 1px box (`clip-path: inset(50%)`) so it takes no visual space but
+  stays in the accessibility tree, unlike `[hidden]` (or `display: none`),
+  which removes an element from the tree too.
+- Its containing block should be `position: relative` for the clip to
+  resolve against that box rather than the page — `.dds-table-wrap` sets
+  this for exactly that reason, so the table's own caption clips correctly
+  even while the wrap is scrolled horizontally.
+- Shipped consumers: the table's caption and its actions-column header
+  above; the console shell's skip link (visible only once it receives
+  focus, via its own `:focus` rule); and the console shell's rail-toggle
+  button, whose accessible name (the `menuOpen`/`menuClose` label) is a
+  visually-hidden span that swaps text as the drawer opens and closes.
+- **Do**: use it for text a screen reader needs but a sighted user does
+  not — a caption, a landmark's accessible name, an icon-only control's
+  label.
+- **Don't**: don't reach for it to hide something temporarily from
+  everyone — that removes nothing from the accessibility tree, which is
+  exactly wrong for content nobody should perceive right now; use
+  `[hidden]` for that instead.

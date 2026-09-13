@@ -1,0 +1,151 @@
+/* Table — the console list surface. Geometry comes from VisionLinq's shipped
+ * console (40px rows, 36px dense, sticky header in the tall variant); the
+ * colours are tokens only.
+ *
+ * .dds-table-wrap keeps position: relative even though it looks like dead
+ * positioning: it is what lets an absolutely-positioned .dds-visually-hidden
+ * caption or header label (see base.css) resolve against the table's own
+ * box instead of the page once the wrap is scrolling horizontally. Don't
+ * "clean up" this rule. */
+
+.dds-table-wrap {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--dds-color-border-default);
+}
+
+.dds-table-wrap--tall {
+  max-block-size: 70vh;
+  overflow: auto;
+}
+
+.dds-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  background: var(--dds-color-bg-elevated);
+}
+
+.dds-table caption {
+  padding: var(--dds-space-16);
+  text-align: start;
+  font-weight: 650;
+}
+
+.dds-table th,
+.dds-table td {
+  padding: .625rem var(--dds-space-16);
+  border-block-start: 1px solid var(--dds-color-border-default);
+  font-size: .875rem;
+  line-height: 1.5;
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.dds-table tbody tr {
+  block-size: var(--dds-space-40);
+}
+
+.dds-table--fixed {
+  table-layout: fixed;
+}
+
+.dds-table [data-numeric] {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.dds-table th small {
+  display: block;
+  color: var(--dds-color-text-muted);
+  font-weight: 400;
+}
+.dds-table th small[hidden] {
+  display: none;
+}
+
+.dds-table--dense th,
+.dds-table--dense td {
+  padding-block: .375rem;
+}
+
+.dds-table--dense tbody tr {
+  block-size: 2.25rem;
+}
+
+.dds-table-wrap--tall thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  background: var(--dds-color-bg-elevated);
+}
+
+.dds-table__sort {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 650;
+  color: inherit;
+  cursor: pointer;
+}
+.dds-table__sort[hidden] {
+  display: none;
+}
+.dds-table__sort:focus-visible {
+  outline: 2px solid var(--dds-color-border-focus);
+  outline-offset: 2px;
+}
+
+.dds-table__sort-mark {
+  inline-size: .5rem;
+  block-size: .5rem;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  rotate: 45deg;
+  opacity: .35;
+  translate: 0 -.125rem;
+}
+.dds-table__sort-mark[data-sort-state="ascending"] {
+  rotate: -135deg;
+  opacity: 1;
+  translate: 0 .125rem;
+}
+.dds-table__sort-mark[data-sort-state="descending"] {
+  opacity: 1;
+}
+
+.dds-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--dds-space-8);
+}
+.dds-table__actions[hidden] {
+  display: none;
+}
+
+.dds-table__order {
+  margin: 0 0 var(--dds-space-8);
+  font-size: .8125rem;
+  color: var(--dds-color-text-muted);
+  font-family: var(--dds-font-family-mono);
+}
+
+.dds-table__pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-block-start: var(--dds-space-16);
+}
+.dds-table__pagination[hidden] {
+  display: none;
+}
+
+@media (max-width: 56.25rem) {
+  .dds-table [data-fold] {
+    display: none;
+  }
+}

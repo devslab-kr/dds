@@ -41,7 +41,7 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.equal(root.devDependencies?.["@changesets/cli"], "2.29.7");
 
   const config = await json(".changeset/config.json");
-  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit"]]);
+  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit", "@devslab/dds-table"]]);
   assert.equal(config.access, "public");
   assert.match(await read("LICENSE"), /DevsLab Source-Available License 1\.0/);
   const workflow = await read(".github/workflows/release.yml");
@@ -101,6 +101,64 @@ test("CI keeps source-only gates separate and runs dependency-backed Stage 1-2 g
     "verify:foundation",
     "verify:release",
   ]) assert.match(workflow, new RegExp(`pnpm run ${gate.replaceAll(":", "\\:")}`), `${gate} must gate CI`);
+});
+
+test("every publishable, non-foundation package's verify:<surface> scripts are wired into CI and release", async () => {
+  const root = await json("package.json");
+  const ci = await read(".github/workflows/ci.yml");
+  const release = await read(".github/workflows/release.yml");
+
+  // The foundation trio (dds-tokens/dds-css/dds-icons) ships one joint gate
+  // (verify:foundation*, verify:release) instead of a per-package
+  // verify:<surface>:* family — already asserted by "workspace exposes
+  // deterministic foundation and release verification" above, so it is
+  // excluded here rather than re-checked. Every other publishable package
+  // follows the per-package surface convention dds-solid established
+  // (verify:<surface>:test/:a11y/:..., verify:<surface>:release), so both
+  // sides of this test — which packages must be wired, and which scripts
+  // wire them — are derived from the workspace and from root package.json
+  // rather than hardcoded. This is the guard for the gap dds-table shipped
+  // with: its verify:table:* scripts existed in package.json but were
+  // invoked by neither workflow, so its tests, its a11y gate, and its
+  // release check (pack, publish dry-run, fresh-consumer install) never
+  // ran anywhere.
+  const foundationTrio = new Set(["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons"]);
+  const packageDirs = await readdir(new URL("../packages/", import.meta.url));
+  const expectedSurfaces = new Set();
+  for (const dir of packageDirs) {
+    const manifest = await json(`packages/${dir}/package.json`);
+    if (manifest.private || foundationTrio.has(manifest.name)) continue;
+    expectedSurfaces.add(dir.replace(/^dds-/, ""));
+  }
+
+  const surfaceScripts = new Map(); // surface -> Set(suffix), e.g. "table" -> {"test", "a11y", "release"}
+  for (const script of Object.keys(root.scripts ?? {})) {
+    const match = script.match(/^verify:([a-z0-9-]+):(.+)$/);
+    if (!match) continue;
+    const [, surface, suffix] = match;
+    if (surface === "foundation" || surface === "canary" || surface === "source") continue;
+    if (!surfaceScripts.has(surface)) surfaceScripts.set(surface, new Set());
+    surfaceScripts.get(surface).add(suffix);
+  }
+
+  assert.deepEqual(
+    [...surfaceScripts.keys()].sort(),
+    [...expectedSurfaces].sort(),
+    "every non-foundation publishable package must define its own verify:<surface>:* scripts, and vice versa",
+  );
+
+  for (const [surface, suffixes] of surfaceScripts) {
+    assert.ok(suffixes.has("release"), `verify:${surface}:release is required`);
+    for (const suffix of suffixes) {
+      const script = `verify:${surface}:${suffix}`;
+      const [workflow, workflowName] = suffix === "release" ? [release, "release.yml"] : [ci, "ci.yml"];
+      assert.match(
+        workflow,
+        new RegExp(`pnpm run ${script.replaceAll(":", "\\:")}(?:\\s|$)`, "m"),
+        `${script} must run in ${workflowName}`,
+      );
+    }
+  }
 });
 
 test("buttons preserve readable CJK labels and expose 44px touch targets", async () => {

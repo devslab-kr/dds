@@ -45,6 +45,11 @@ try {
     await page.waitForSelector('html[data-canary-hydrated="true"]');
     await page.waitForSelector('[data-service-message]:has-text("service-binding-ok")');
     assert.match(await page.title(), /DDS 호환성 카나리/);
+
+    const tableResponse = await page.goto(`${origin}/table`, { waitUntil: "networkidle" });
+    assert.equal(tableResponse?.status(), 200);
+    await page.waitForSelector('html[data-canary-table-hydrated="true"]');
+
     assert.equal((await page.request.get(`${origin}/canary.svg`)).status(), 200);
     assert.equal((await page.request.get(`${origin}/missing`)).status(), 404);
     assertCleanDiagnostics(diagnostics);

@@ -29,3 +29,18 @@
     outline-color: Highlight;
   }
 }
+
+/* Visually hidden — content that stays in the accessibility tree (screen
+ * readers, AT) but takes up no visual space. Unlike display: none, which
+ * removes the element from the tree too, this only clips it out of view.
+ * Consumers: DataTable captions, icon-only header labels, skip links.
+ * The ancestor needs position: relative for this to clip against the right
+ * box (see table.css's .dds-table-wrap note) rather than the page. */
+.dds-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
