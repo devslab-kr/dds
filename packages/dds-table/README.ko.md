@@ -10,6 +10,19 @@ TanStack Table 기반 DDS 데이터 테이블 패키지(정확히 `9.2.4` 버전
 pnpm add @devslab/dds-table
 ```
 
+이 패키지는 자체 스타일시트를 내지 않는다 — 애플리케이션 셸에서
+`@devslab/dds-css`의 테이블 스타일을, 그것이 의존하는 토큰 CSS와 함께 한 번
+불러온다:
+
+```ts
+import "@devslab/dds-tokens/tokens.css";
+import "@devslab/dds-css/components/table.css";
+```
+
+불러오지 않으면 `<DataTable>`은 스타일 없이 렌더링된다 — `fold`는 아무
+효과가 없고(컬럼 접기는 전적으로 `table.css`의 미디어 쿼리다), 시각적으로
+숨겨져야 할 caption과 액션 컬럼 헤더가 눈에 보이게 렌더링된다.
+
 ```tsx
 import { DataTable, type Column, type DataTableLabels } from "@devslab/dds-table";
 
@@ -29,6 +42,23 @@ const labels: DataTableLabels = {
 <DataTable rows={jobs} columns={columns} caption="Jobs" labels={labels} sort="client" />;
 ```
 
+## `DataTable` props
+
+| Prop | 타입 | 필수/기본값 | 의미 |
+| --- | --- | --- | --- |
+| `rows` | `readonly T[]` | 필수 | 데이터(어떤 순서로 렌더링할지는 아래 정렬 절에서 누가 책임지는지 설명). |
+| `columns` | `readonly Column<T>[]` | 필수 | 컬럼 선언 — 아래 `Column<T>` 참고. |
+| `caption` | `string` | 필수 | 테이블의 접근성 이름, 시각적으로 숨겨져 렌더링(`<caption class="dds-visually-hidden">`). |
+| `labels` | `DataTableLabels` | 필수 | 컴포넌트가 렌더링할 수 있는 모든 문구 — 아래 "라벨은 필수다" 참고. |
+| `sort` | `"client" \| { statedOrder: string }` | 선택, 생략 시 정렬 버튼도 순서 문구도 없음 | 아래 정렬 절 참고. |
+| `density` | `"comfortable" \| "dense"` | 선택, 기본값 `"comfortable"`(40px 행) | `"dense"`는 `.dds-table--dense`를 붙인다(36px 행, 셀 패딩 축소). |
+| `scroll` | `"auto" \| "tall"` | 선택, 기본값 `"auto"` | `"tall"`은 `.dds-table-wrap--tall`을 붙인다 — `max-block-size: 70vh`로 스크롤되는 본문 + 고정(sticky) 헤더, 페이지를 밀어내면 안 되는 긴 인페이지 목록용. |
+| `minWidth` | `string`(CSS 길이) | 선택 | `<table>`의 `min-inline-size`를 정한다 — 좁은 화면에서 컬럼이 짓눌리는 대신 `.dds-table-wrap` 안에서 가로 스크롤된다. |
+| `actions` | `(row: T) => JSX.Element` | 선택 | 행마다 트레일링 셀을 렌더링(예: 행 단위 버튼); `labels.actions`로부터 시각적으로 숨겨진 헤더 셀을 추가한다. |
+| `detail` | `(row: T) => JSX.Element` | 선택 | 주어진 행 아래에 펼침 행을 렌더링한다. `null`을 반환하면(예: 펼쳐지지 않은 행) 그 행에는 빈 행이 아니라 아예 detail `<tr>`이 생기지 않는다. |
+| `page` | `{ nextHref?: string }` | 선택 | 아래 페이징 절 참고. |
+| `empty` | `JSX.Element` | 선택 | `rows`가 비어 있을 때 `<table>` 대신 렌더링된다. 순서 문구와(있다면) 페이징 링크는 그대로 렌더링된다 — 커서 페이징 목록의 빈 페이지도 순서가 있고 여전히 다음으로 갈 방법이 필요하기 때문이다. |
+
 ## `Column<T>`
 
 | 필드 | 타입 | 의미 |
@@ -44,8 +74,11 @@ const labels: DataTableLabels = {
 
 ## 정렬: `sort`
 
+`sort`는 두 모양 중 하나를 받는다 — 이 타입은 내보내지지 않는다(값을 그대로
+써넣으면 된다, import할 것이 없다):
+
 ```ts
-type SortMode = "client" | { statedOrder: string };
+"client" | { statedOrder: string }
 ```
 
 - **`sort="client"`** — 테이블이 전체 목록을 메모리에 들고 있는 경우. `sortBy`가

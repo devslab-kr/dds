@@ -10,6 +10,19 @@ what "next page" means — every string a visitor can read is a prop.
 pnpm add @devslab/dds-table
 ```
 
+This package ships no stylesheet of its own — import `@devslab/dds-css`'s
+table styles once in the application shell, alongside the tokens CSS it
+depends on:
+
+```ts
+import "@devslab/dds-tokens/tokens.css";
+import "@devslab/dds-css/components/table.css";
+```
+
+Without it, `<DataTable>` renders an unstyled table: `fold` does nothing
+(folding is entirely the CSS media query in `table.css`), and the
+visually-hidden caption and actions-column header render visible.
+
 ```tsx
 import { DataTable, type Column, type DataTableLabels } from "@devslab/dds-table";
 
@@ -29,6 +42,23 @@ const labels: DataTableLabels = {
 <DataTable rows={jobs} columns={columns} caption="Jobs" labels={labels} sort="client" />;
 ```
 
+## `DataTable` props
+
+| Prop | Type | Required / default | Meaning |
+| --- | --- | --- | --- |
+| `rows` | `readonly T[]` | required | The data, in the order to render (see Sorting for who is responsible for that order). |
+| `columns` | `readonly Column<T>[]` | required | Column declarations — see `Column<T>` below. |
+| `caption` | `string` | required | The table's accessible name, rendered visually hidden (`<caption class="dds-visually-hidden">`). |
+| `labels` | `DataTableLabels` | required | Every word the component can render — see "Labels are required" below. |
+| `sort` | `"client" \| { statedOrder: string }` | optional, no sort buttons or order text when omitted | See Sorting below. |
+| `density` | `"comfortable" \| "dense"` | optional, default `"comfortable"` (40px rows) | `"dense"` adds `.dds-table--dense` (36px rows, tighter cell padding). |
+| `scroll` | `"auto" \| "tall"` | optional, default `"auto"` | `"tall"` adds `.dds-table-wrap--tall`: a `max-block-size: 70vh` scrolling body with a sticky header, for a long in-page list that shouldn't push the rest of the page down. |
+| `minWidth` | `string` (a CSS length) | optional | Sets the `<table>`'s `min-inline-size`, so narrow viewports scroll the table horizontally (inside `.dds-table-wrap`) instead of crushing its columns. |
+| `actions` | `(row: T) => JSX.Element` | optional | Renders a trailing cell per row (e.g. row-level buttons); adds a visually-hidden header cell from `labels.actions`. |
+| `detail` | `(row: T) => JSX.Element` | optional | Renders an expandable row under a given row. Returning `null` (e.g. for a row that is not expanded) renders no detail `<tr>` for that row at all — not an empty one. |
+| `page` | `{ nextHref?: string }` | optional | See Paging below. |
+| `empty` | `JSX.Element` | optional | Rendered instead of the `<table>` when `rows` is empty. The stated-order text and the pagination link (if any) still render — an empty page of a cursor-paginated list still has an order and still needs a way forward. |
+
 ## `Column<T>`
 
 | Field | Type | Meaning |
@@ -44,8 +74,11 @@ const labels: DataTableLabels = {
 
 ## Sorting: `sort`
 
+`sort` accepts one of two shapes — this type is not exported (write the
+values inline; there is nothing to import):
+
 ```ts
-type SortMode = "client" | { statedOrder: string };
+"client" | { statedOrder: string }
 ```
 
 - **`sort="client"`** — the table holds its whole list in memory. Columns
