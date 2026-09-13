@@ -15,3 +15,8 @@ export declare function renderSitemapXml(entries: ReturnType<typeof buildSitemap
 export type RobotsPolicy = "allow" | "disallow";
 export declare const ROBOTS_USER_AGENTS: { readonly citation: readonly string[]; readonly modelTraining: readonly string[] };
 export declare function buildRobots(input: { baseUrl: string; environment: "production" | "preview" | "development"; policies?: { search: RobotsPolicy; citation: RobotsPolicy; modelTraining: RobotsPolicy } }): string;
+/** The @devslab/linq-brand icon files a page head links, in link order. */
+export declare const BRAND_ICON_FILES: readonly ["favicon.svg", "mark-48.png", "favicon.ico", "apple-touch-icon.png"];
+export interface BrandIconLink { rel: "icon" | "apple-touch-icon"; href: string; type?: string; sizes?: string }
+/** `<link>` descriptors for BRAND_ICON_FILES served at `basePath` (default "/brand"; a same-origin path, never a URL). */
+export declare function brandIconLinks(options?: { basePath?: string }): BrandIconLink[];

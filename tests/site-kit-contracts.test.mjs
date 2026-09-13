@@ -195,6 +195,6 @@ test("the TanStack adapter accepts metadata built from a product registry", asyn
   // family default alone made every product-registry consumer cast or
   // augment the module to get its head descriptors out.
   const dts = await readFile(new URL("../packages/site-kit/src/tanstack-start.d.mts", import.meta.url), "utf8");
-  assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
+  assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>, options\?: TanStackHeadOptions\)/);
   assert.match(dts, /toHtmlAttributes: <Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
 });

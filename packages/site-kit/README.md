@@ -17,6 +17,26 @@ still references the verified-fact registry. `buildRobots` keeps its legacy
 environment-only output, while an optional `policies` object can independently
 control search indexing, citation crawlers, and model-training crawlers.
 
+## Brand icons
+
+Every product's icon files come from `@devslab/linq-brand` (`dist/<product>/`); `brandIconLinks()` is the one place that says which of them a page head links, and in what order:
+
+| Link | File | Why |
+|---|---|---|
+| `icon` `image/svg+xml` | `favicon.svg` | the tab icon, first so a browser that understands SVG never fetches a raster |
+| `icon` `48x48` | `mark-48.png` | search engines want a `<link>`-declared square of at least 48px (Google: "at least 8x8px, preferably >48x48px") |
+| `icon` `16x16 32x32 48x48` | `favicon.ico` | the bare-URL convention, three sizes in one container |
+| `apple-touch-icon` `180x180` | `apple-touch-icon.png` | iOS home screen |
+
+`BRAND_ICON_FILES` lists the same four names, so a product can serve them from one directory. The default `basePath` is `/brand`; a product that serves the files elsewhere passes its own path. Only same-origin paths are accepted — a product serves its own icons.
+
+```ts
+toTanStackHead(metadata, { icons: true });               // …/brand/favicon.svg, …
+toTanStackHead(metadata, { icons: { basePath: "/" } }); // /favicon.svg, /mark-48.png, …
+```
+
+Omitted, the adapter emits no icon links: it cannot know where a product serves the files, and a head that links icons the server 404s is worse than one that links none.
+
 ## Sections
 
 Six stateless primitives for a family landing page, extracted from VisionLinq. Import from `@devslab/site-kit/solid`; the stylesheet ships inside `styles.css`. The primitives are full-bleed — each carries its own inner width — so a page built from them should render inside `<MarketingShell mainWidth="bleed">`; the shell's default `<main>` inset would otherwise double-inset them and turn `tone="band"` into a boxed rectangle.
