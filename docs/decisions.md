@@ -5,6 +5,47 @@
 
 ---
 
+## D-028 — 부품은 `children`도 한 번만 읽는다: `StatusBanner`의 이중 읽기 (2026-09-16)
+
+**결정.** `StatusBanner`가 `props.children`을 `createMemo`로 한 번 읽어, 진위 검사와
+삽입이 같은 해석값을 쓴다. D-027이 셸의 `header`/`footer`에 세운 규칙("kit은 받은
+것을 한 번만 읽는다")을 자식에도 적용한 것이다. `tests/site-kit-status-banner-hydration.test.mjs`가
+배너 둘을 인라인 `<ul><For>…</For></ul>` children으로 서버 렌더 → **Solid 개발 빌드**
+(`--conditions=browser --conditions=development`)로 jsdom 하이드레이션까지 돌려
+예외 0·잃은 서버 키 0을 고정한다(`verify:site-kit:ui`).
+
+**계기.** BookLinq가 D-027 규율을 자기 셸에 적용하고 브라우저 하이드레이션 게이트를
+새로 돌리자(jlc488/booklinq#51) `/status`가 `vite dev`에서 site-kit의 에러 레이아웃을
+그렸다. 원인은 `{props.children && <div>{props.children}</div>}` — 컴파일된 JSX
+children은 게터라 첫 읽기가 목록과 그 아래 `<li>` 전부를 만들어 버렸고, 그 요소들은
+서버 HTML에 없는 하이드레이션 키를 소모했다. BookLinq는 목록을 const로 한 번 만들어
+넘기는 우회로 출하하고 kit 건으로 넘겼다.
+
+**재현이 가르쳐 준 것.** 프로덕션 빌드로는 이 버그가 *보이지 않는다*. 서버와
+클라이언트가 버려지는 읽기에서 같은 수의 키를 낭비하므로 카운터는 어긋나지 않고,
+클라이언트가 없는 키를 조회하면 `getNextElement`가 조용히 템플릿을 복제한다 —
+잃은 키 0, 화면 정상. 첫 두 판의 테스트(평문 `<p>`, 그다음 BookLinq와 같은 `For`
+목록)가 미수정 kit에서 초록이었던 이유다. 개발 빌드는 같은 자리에서 `Hydration
+Mismatch`를 던진다(`web/dist/dev.js`). 그래서 이 테스트는 개발 빌드로 하이드레이션한다
+— 낭비된 키에 대해 진실을 말하는 쪽이 그쪽이고, 모든 소비자의 dev 서버가 도는 빌드도
+그쪽이다. 수정 전 빨강(`hydration key: 0010`), 수정 후 초록 확인.
+
+**대안.** ① 소비자가 children을 const로 만들어 넘기기(BookLinq의 우회) — 규율은
+잊히고, 부품이 한 번만 읽으면 규율 없이도 맞다. ② `children()` 헬퍼(solid-js) — 배열
+평탄화까지 하지만 여기선 필요 없고, 셸과 같은 `createMemo` 관용구 하나가 낫다.
+③ 진위 검사 제거(항상 `<div>` 렌더) — 자식 없는 배너에 빈 상자가 남는다.
+
+**트레이드오프.** 메모는 children이 신호에 의존하면 그때 재평가된다(소비자 패턴의
+원래 비용). 기존 `tests/site-kit-hydration.test.mjs`는 여전히 프로덕션 빌드로
+돈다 — D-027의 결함은 프로덕션에서도 키가 어긋나는 종류라 그쪽이 맞고, 이 테스트는
+개발 빌드만이 잡는 종류라 그쪽이 맞다.
+
+**재검토.** `NotFoundLayout`·`ErrorLayout`·`LegalLayout`은 children을 한 번만 읽는다
+(삽입만). 조건부 렌더가 새로 붙는 부품은 같은 메모 관용구를 쓰고 이 테스트 모양으로
+고정한다. npm 발행이 OIDC E404로 막혀 있어(소유자 액션) 이 수정은 0.12.2에 실린다.
+
+---
+
 ## D-027 — 셸은 header/footer를 한 번만 읽고, 빈 스프라이트는 스스로 본문을 로드한다 (2026-09-16)
 
 **결정.** `MarketingShell`이 `props.header`·`props.footer`를 `createMemo`로 한 번
