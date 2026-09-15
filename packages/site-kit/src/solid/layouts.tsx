@@ -49,8 +49,17 @@ export interface StatusBannerProps {
 }
 
 export function StatusBanner(props: StatusBannerProps) {
+  // Read children once. `<StatusBanner><ul>…</ul></StatusBanner>` compiles to a
+  // getter, and checking it for truthiness then inserting it read it twice:
+  // the first read built a list (and every <li> under it) that was thrown
+  // away, each with a hydration key the server never wrote. Solid's dev build
+  // throws `Hydration Mismatch` for those keys, so a consumer's status page
+  // fell to its error boundary in `vite dev` (BookLinq, site-kit 0.12.1). One
+  // memo, evaluated at the same point in the tree on both sides, is the
+  // check and the insert (D-027, D-028).
+  const children = createMemo(() => props.children);
   return <section class={`site-status site-status--${props.tone}`} role={props.tone === "danger" ? "alert" : "status"} aria-live={props.tone === "danger" ? "assertive" : "polite"}>
-    <strong>{props.title}</strong>{props.children && <div>{props.children}</div>}{props.action && <Button tone={props.action.tone ?? "secondary"} onClick={props.action.onClick}>{props.action.label}</Button>}
+    <strong>{props.title}</strong>{children() && <div>{children()}</div>}{props.action && <Button tone={props.action.tone ?? "secondary"} onClick={props.action.onClick}>{props.action.label}</Button>}
   </section>;
 }
 
