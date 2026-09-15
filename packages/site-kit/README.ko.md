@@ -17,6 +17,10 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 기존 environment-only 출력은 유지되며, 선택적 `policies`로 검색 인덱싱,
 인용 crawler, 모델 학습 crawler를 각각 제어할 수 있다.
 
+## 하이드레이션
+
+`MarketingShell`은 아무것도 렌더하기 전에 `header`·`footer`를 한 번(메모) 읽는다. `header={{ … }}`는 게터로 컴파일되므로 셸이 prop마다 다시 읽으면 리터럴 안에서 즉시 만들어진 JSX(`actions` 앵커, 로고)가 읽을 때마다 다시 만들어져 하이드레이션 키를 소모하고 — 서버와 브라우저의 횟수가 다르다 — 클라이언트는 헤더를 템플릿에서 다시 만든다. 셸 밖에서 `SiteHeader`·`SiteFooter`를 직접 마운트하는 제품은 같은 방식으로 자기 props를 한 번만 읽어야 한다. 국기 스프라이트는 이유가 무엇이든 클라이언트에 빈 채로 도착하면 본문을 로드한다.
+
 ## 브랜드 아이콘
 
 모든 제품의 아이콘 파일은 `@devslab/linq-brand`(`dist/<product>/`)에서 온다. `brandIconLinks()`는 그중 어떤 파일을 페이지 head가 어떤 순서로 링크하는지 정하는 유일한 자리다.

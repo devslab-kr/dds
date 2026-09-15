@@ -89,7 +89,11 @@ test("flag artwork stays out of the browser bundle: server writes the sprite, th
   assert.doesNotMatch(menu, /flag-bodies\.mjs|core\/flags\.mjs|FLAGS_BY_COUNTRY|LOCALE_FLAGS|flagFor\b/, "the menu must not reach the bodies statically");
   assert.match(menu, /<symbol id=/);
   assert.match(menu, /<use href=/);
-  assert.match(menu, /sharedConfig\.context/, "hydration must adopt the server sprite instead of loading");
+  // Adoption is decided by the element, not the hydration context: a drifted
+  // hydration recreates the sprite empty while the context is still set, and
+  // trusting the context left the first consumer with a blank flag box (D-027).
+  assert.match(menu, /childElementCount > 0\) return;/, "a sprite the server drew is adopted, not reloaded");
+  assert.doesNotMatch(menu, /sharedConfig\.context/, "the hydration context is not what decides whether the sprite loads");
   const loader = await read("packages/site-kit/src/solid/flag-bodies.ts");
   assert.match(loader, /import\("\.\.\/core\/flag-bodies\.mjs"\)/, "the browser loader is a dynamic import");
   assert.doesNotMatch(loader, /^import \{[^}]*FLAGS_BY_COUNTRY/m);

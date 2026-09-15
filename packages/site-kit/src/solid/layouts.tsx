@@ -1,5 +1,5 @@
 import { Button, type ButtonTone } from "@devslab/dds-solid";
-import type { JSX } from "solid-js";
+import { createMemo, type JSX } from "solid-js";
 
 import { SiteFooter, SiteHeader, type SiteFooterProps, type SiteHeaderProps } from "./chrome";
 import type { SiteMessages } from "./types";
@@ -16,7 +16,18 @@ export interface MarketingShellProps {
 
 export function MarketingShell(props: MarketingShellProps) {
   const mainClass = () => (props.mainWidth === "bleed" ? "site-main site-main--bleed" : "site-main");
-  return <div class="site-shell"><SiteHeader {...props.header} /><main id="main-content" class={mainClass()} tabIndex={-1}>{props.children}</main><SiteFooter {...props.footer} /></div>;
+  // Read header and footer once, here, before any element of the shell exists.
+  // `header={{ … }}` compiles to a getter, so spreading `props.header` straight
+  // into SiteHeader re-evaluated the literal on every prop read — and any JSX
+  // built eagerly inside it (an `actions` anchor, a logo) was built again each
+  // time, consuming hydration keys. The server and the client read a different
+  // number of times, so from the first extra read every key after it was off,
+  // and the client rebuilt the whole header from templates: the flag sprite
+  // came back empty (AskLinq, site-kit 0.12.0). A memo evaluates the literal
+  // exactly once per side, at the same point in the tree.
+  const header = createMemo(() => props.header);
+  const footer = createMemo(() => props.footer);
+  return <div class="site-shell"><SiteHeader {...header()} /><main id="main-content" class={mainClass()} tabIndex={-1}>{props.children}</main><SiteFooter {...footer()} /></div>;
 }
 
 export interface LegalLayoutProps {

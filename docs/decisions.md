@@ -5,6 +5,44 @@
 
 ---
 
+## D-027 — 셸은 header/footer를 한 번만 읽고, 빈 스프라이트는 스스로 본문을 로드한다 (2026-09-16)
+
+**결정.** `MarketingShell`이 `props.header`·`props.footer`를 `createMemo`로 한 번
+읽어 `SiteHeader`/`SiteFooter`에 펼친다. `FlagSprite`의 브라우저 분기는
+"하이드레이션 중인가"(`sharedConfig.context`)가 아니라 "엘리먼트에 자식이
+있는가"로 서버 HTML 유무를 판정하고, 비어 있으면 `loadFlagBodies`를 부른다.
+`tests/site-kit-hydration.test.mjs`가 서버 빌드로 렌더 → 브라우저 빌드로 jsdom
+하이드레이션까지 돌려 헤더 요소가 하나도 재생성되지 않고 심볼 14개가 살아남는지
+고정한다(stage3-4 게이트).
+
+**계기.** AskLinq가 site-kit 0.12.0을 소비하자(D-026 파비콘 작업의 부수 bump)
+국기 메뉴가 모든 브라우저에서 빈 칸이 됐다. 서버 HTML엔 심볼 10개가 있었고,
+라이브 DOM에선 `<details class="site-locale-flag">`만이 아니라 헤더 요소 대부분에
+`data-hk`가 없었다 — 즉시 만들어진 `actions` 앵커 둘만 키가 맞았다. 원인:
+`header={{ …, actions: <>…</> }}`는 게터로 컴파일되고, 셸이 `{...props.header}`로
+펼치면 prop을 읽을 때마다 리터럴이 재평가되며 그 안의 즉시 JSX가 매번 다시
+만들어져 하이드레이션 키를 소모한다. 서버(문자열, 소수 읽기)와 클라이언트(반응형,
+다수 읽기)의 횟수가 달라 그 뒤 키가 전부 어긋났다. 스프라이트 이전(≤0.9,
+`<select>` 변형)에서도 같은 재생성이 있었을 테지만 재생성된 `<select>`는
+멀쩡히 동작하므로 아무도 못 봤다 — 스프라이트는 서버 HTML에만 사는 첫 부품이었다.
+
+**대안.** ① 소비자에게 `get actions()` 규율 요구(AskLinq 셸은 `logo`에 이미 그
+주석을 달아 두고 `actions`에서 어겼다 — 규율은 잊히고, 셸이 한 번만 읽으면 규율
+없이도 맞다). ② `FlagSprite`의 uid를 국가 목록 해시로 결정적으로 만들기 — 재생성
+자체를 막지 못한다. ③ D-020을 되돌려 브라우저 번들에 본문 재탑재 — 115KB를
+되돌리는 데다 근본 원인(키 드리프트)은 남는다.
+
+**트레이드오프.** 메모는 `props.header`가 신호에 의존하면 그때 재평가되고 즉시
+JSX도 다시 만들어진다(소비자 패턴의 원래 비용). 빈 스프라이트 로드는 드리프트가
+남은 소비자에게 110KB 청크 fetch로 국기를 살린다 — 증상 완화이지 드리프트 해소는
+아니라서, 테스트는 "재생성 0"을 별도로 단언한다.
+
+**재검토.** Solid 2/dom-expressions가 하이드레이션 키 부여 방식을 바꾸면 테스트가
+먼저 알린다. 셸 밖에서 `SiteHeader`를 직접 쓰는 소비자는 여전히 자기 props를
+한 번만 읽어야 한다(README).
+
+---
+
 ## D-026 — 파비콘 `<link>` 묶음은 site-kit이 정하고, 파일은 linq-brand가 만든다 (2026-09-14)
 
 **결정.** `@devslab/site-kit`에 `brandIconLinks({ basePath })`와 `BRAND_ICON_FILES`를
