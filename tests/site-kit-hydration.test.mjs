@@ -25,7 +25,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
  *
  * SSR runs in this process (Node's default conditions pick solid-js's server
  * build); hydration runs in a child with --conditions=browser, as
- * scripts/verify-solid-release.mjs does.
+ * scripts/verify-solid-release.mjs does. It needs the installed workspace
+ * and a built site-kit, so it runs from verify:site-kit:ui after the build —
+ * not from the source-only stage3-4 gate.
  */
 
 const root = fileURLToPath(new URL("..", import.meta.url));
