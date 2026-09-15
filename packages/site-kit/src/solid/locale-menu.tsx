@@ -1,4 +1,4 @@
-import { For, createUniqueId, sharedConfig, type JSX } from "solid-js";
+import { For, createUniqueId, type JSX } from "solid-js";
 
 import { FAMILY_LOCALES, type LocaleRegistry, type SiteLocale } from "../core/locales.mjs";
 import { FLAG_VIEWBOX, flagCountryFor } from "../core/flag-countries.mjs";
@@ -58,6 +58,12 @@ function spriteMarkup(countries: readonly string[], bodies: FlagBodies, uid: str
  * the bodies through loadFlagBodies, which the browser build emits as its
  * own chunk. Zero-sized rather than display:none so the referenced clip
  * paths and gradients still resolve.
+ *
+ * "No server HTML" is decided by looking at the element, not at whether
+ * hydration is running: a hydration that drifted upstream recreates this
+ * element from the template, empty, while the hydration context is still
+ * set. Trusting the context left the first consumer with a blank flag
+ * box; an empty sprite loads its bodies whatever the reason it is empty.
  */
 function FlagSprite(props: { countries: readonly string[]; uid: string }) {
   const bodies = flagBodiesNow();
@@ -69,7 +75,7 @@ function FlagSprite(props: { countries: readonly string[]; uid: string }) {
       class="site-flag-sprite"
       aria-hidden="true"
       ref={(element) => {
-        if (sharedConfig.context) return; // hydrating: the server already drew the sprite
+        if (element.childElementCount > 0) return; // adopted from server HTML: the sprite is already drawn
         void loadFlagBodies().then((loaded) => { element.innerHTML = spriteMarkup(props.countries, loaded, props.uid); });
       }}
     />

@@ -17,6 +17,10 @@ still references the verified-fact registry. `buildRobots` keeps its legacy
 environment-only output, while an optional `policies` object can independently
 control search indexing, citation crawlers, and model-training crawlers.
 
+## Hydration
+
+`MarketingShell` reads `header` and `footer` once (a memo) before it renders anything. `header={{ … }}` compiles to a getter; if the shell re-read it per prop, any JSX built eagerly inside the literal (an `actions` anchor, a logo) would be built again on each read and consume hydration keys — a different number of times on the server than in the browser — and the client would rebuild the header from templates. A product that mounts `SiteHeader` or `SiteFooter` directly, outside the shell, has to read its own props once the same way. The flag sprite loads its bodies whenever it reaches the client empty, whatever the reason.
+
 ## Brand icons
 
 Every product's icon files come from `@devslab/linq-brand` (`dist/<product>/`); `brandIconLinks()` is the one place that says which of them a page head links, and in what order:
