@@ -5,6 +5,48 @@
 
 ---
 
+## D-029 — 한 언어 랜딩과 사업자 정보 바닥글: 헤더·푸터 선택 props 9가지 (2026-09-24)
+
+**결정.** `SiteHeader`·`SiteFooter`에 선택 옵션을 더한다. 아무것도 넘기지 않는 소비자는 전과 같은 마크업을 받는다(모든 소비자에 적용되는 기본값 변화는 트레이드오프에).
+
+1. `SiteHeader.locale`을 선택으로 — 없으면 언어 메뉴를 그리지 않는다(푸터 `locale`과 같은 `<Show>`).
+2. `SiteBrand.label` → 헤더 브랜드 링크의 `aria-label`. 워드마크를 `logo`로 넘기고 `name: ""`이면 이름이 두 번 찍히지 않고, 푸터도 빈 `<strong>`을 그리지 않는다.
+3. 좁은 화면 메뉴: Esc로 닫고 메뉴 버튼으로 포커스 복귀, 안의 링크를 따라가면 닫힘(같은 페이지 앵커 포함). 버튼(테마 전환)과 새 탭·새 창으로 여는 링크(`target`·수정 키)는 닫지 않는다. 헤더 안 요소의 핸들러가 이미 처리한 Esc(`defaultPrevented` — 국기 메뉴)와 `aria-modal` 요소 안에서 온 Esc(문서에 리스너를 다는 DDS Dialog는 이 핸들러 뒤에 돈다)는 그 컨트롤에 맡긴다.
+4. 터치(`pointer: coarse`)에서 브랜드 링크·헤더·푸터·푸터 언어 링크 44px, 720px 이하 열린 메뉴의 링크는 44px 줄(간격 0 — 16px 간격의 글줄과 거의 같은 피치), 닫힌 좁은 헤더의 첫 줄은 버튼 크기와 무관하게 64px.
+5. 붙는 헤더 아래에 섹션이 멈추게: `.site-hero, .site-section { scroll-margin-block-start: calc(var(--site-header-block-size, 64px) + space-8) }`. 헤더 높이는 사용자 속성 하나(`--site-header-block-size`, 기본 64px).
+6. 히어로 키커의 자간·굵기를 사용자 속성으로: `--site-hero-eyebrow-tracking`(기본 `.18em`), `--site-hero-eyebrow-weight`(기본 `normal`).
+7. `SiteFooter.details`(JSX) — 브랜드 줄 아래 블록(`.site-footer__identity` > `.site-footer__details`, 줄 간격 4px·자식 여백 0). 이때 행은 첫 줄 기준선 정렬(`first baseline`), 푸터 링크 줄은 기준선 정렬 — 터치에서 44px 링크의 글자가 브랜드·저작권 글자와 같은 높이. 푸터 로고의 16px 크기는 이름(`<strong>`) 옆 아이콘 마크에만(`:has(> strong)`) — `name: ""` 워드마크는 자기 크기.
+8. `SiteFooter.linksLabel` — 링크 목록을 `<nav aria-label>`로 감싼다.
+9. `SiteLink.emphasis` — 링크를 굵게(700, `text-primary`). 헤더 내비·푸터 링크·패밀리 링크 모두.
+
+그리고 헤더·푸터가 `brand`(푸터는 `details`도)를 `createMemo`로 한 번만 읽는다 — 셸 밖에서 직접 마운트해도 D-027·D-028의 규칙이 지켜지게.
+
+**계기.** FM덴탈서비스(부산 치과기공물 수거·배송, 가족 밖 첫 site-kit 소비자) 랜딩의 디자인 리뷰가 확인한 36건 중 9건이 "지금 kit으로는 그릴 수 없음"이었다. 한국어만 쓰는데 헤더가 언어 메뉴를 늘 그리고(`locale` 필수), 워드마크 링크에 이름을 줄 방법이 없고, 좁은 화면 메뉴가 Esc·링크 클릭에 닫히지 않아 `#contact`로 가도 열린 메뉴가 섹션을 가렸다. 바닥글에는 사업자 정보·주소를 둘 자리가 없고(브랜드 줄은 인라인 `<p>`라 `<address>`를 넣을 수 없음), 링크 묶음에 이름을 줄 수 없고, 개인정보처리방침을 다른 링크와 구분해 눈에 띄게 할 수 없었다(한국 사이트에서 요구되는 표시). 한글 키커에 `.18em` 모노 자간이 그대로 걸렸다.
+
+**근거.**
+- props는 **선택·가산**이다: 기존 소비자(VisionLinq·AskLinq·BookLinq·TraceLinq)의 마크업은 바뀌지 않는다 — `locale`을 넘기면 메뉴가 그대로 그려지고, `details`·`linksLabel`이 없으면 행 구조(`.site-footer__row > .site-footer__brand` + `ul`)도 그대로다. 테스트가 이 두 경로를 회귀 가드로 고정한다. 기하·동작 기본값은 모든 소비자에 적용된다(트레이드오프).
+- 메뉴 닫힘은 모든 소비자의 결함이었다 — 같은 페이지 앵커 내비게이션은 문서를 바꾸지 않아 열린 메뉴가 남는다. 링크에서만 닫고 버튼에서는 두는 것은 "독자가 어딘가로 갔는가"로 가른 것.
+- 44px은 스펙 §6의 모바일 최소선이고 버튼은 이미 `button.css`의 거친 포인터 규칙으로 44px이다(D-025와 같은 원리: 터치에서는 하한이 이긴다). 좁은 화면 메뉴 줄은 포인터와 무관하게 44px — 줄 목록이라 간격 16px의 글줄(약 40px 피치)과 시각 변화가 거의 없다.
+- 키커 자간은 `:lang(ko)` 규칙이 아니라 사용자 속성으로 열었다: 한국어 키커를 쓰는 다른 가족 제품(AskLinq·VisionLinq)의 현재 모습을 이 결정이 바꾸지 않게. 각 제품이 자기 랜딩 뿌리에서 정한다.
+- `details`·`brand`를 메모로 한 번 읽는 것은 D-027(셸)·D-028(StatusBanner)의 "kit은 받은 JSX를 한 번만 읽는다"를 헤더·푸터 자체로 넓힌 것 — `tests/site-kit-landing-chrome-hydration.test.mjs`가 게터 props로 직접 마운트한 헤더·푸터를 **개발 빌드**로 하이드레이션해 예외 0·잃은 키 0을 고정한다(메모를 직접 읽기로 바꾸면 `Hydration Mismatch`로 실패함을 확인).
+
+**반려한 대안.**
+- **FM이 자기 헤더·푸터를 그림** — 가족 셸을 벗어나면 D-027의 하이드레이션 규율·국기 메뉴·스킵 링크를 다시 구현하게 되고, 메뉴 닫힘 같은 전 소비자 결함은 kit에 남는다.
+- **`messages`에 `footerLinksLabel` 키 추가** — 필수 키라 모든 소비자의 카탈로그가 깨진다(런타임 폴백은 금지 규칙). 선택 prop으로.
+- **한글 키커 자간을 `html:lang(ko)`로 0** — 타이포로는 맞지만 다른 제품의 현재 랜딩을 소리 없이 바꾼다. 필요해지면 그 제품들과 함께 기본값을 바꾼다.
+- **`SiteLink.emphasis`를 `<strong>`으로** — 링크 안 강조 요소는 이름에 섞여 읽힐 뿐 뜻을 더하지 않는다. 클래스(`site-link--emphasis`)로 모양만.
+
+**트레이드오프.** 모든 소비자에 적용되는 기본값이 있다 — 사전 리뷰가 소비자별로 잰 값:
+- 좁은 화면의 닫힌 헤더는 위아래 패딩 대신 첫 줄 높이(64px)로 만든다. `.site-header__inner`는 dds 클래스가 아니라 전역 `box-sizing: border-box` 리셋이 없는 제품에서는 content-box라, 휴대폰 헤더가 **89px → 65px**(TraceLinq·BookLinq, 이전엔 64px 최소 높이 + 위아래 12px 패딩), 메뉴 버튼이 44px인 제품은 69px → 65px(AskLinq 터치, VisionLinq). 데스크톱(65px)과 같아지고 스크롤 간격도 맞게 되지만, 두 제품의 휴대폰 모양이 요청 없이 바뀐다 — 올릴 때 375px 시각 확인이 필요하다. 64px보다 큰 로고를 쓰는 소비자는 `--site-header-block-size`를 올리고, **`:root`나 `.site-shell`에 정해야** 섹션 간격까지 따라온다(`.site-header`에 정하면 헤더만 바뀜).
+- 열린 메뉴: 링크는 간격 0의 44px 줄, 컨트롤 줄 아래 12px(이전엔 헤더 전체 패딩). 첫 링크가 헤더 윗변에서 조금 더 내려간다.
+- 터치 기기에서 가족 전 제품의 브랜드 링크·바닥 링크가 44px 누르는 면(이전엔 글줄 높이) — 바닥 링크 줄이 높아진다. 브랜드 링크는 inline에서 inline-flex(가운데 정렬)로.
+- 메뉴가 Esc·링크 따라가기로 닫힌다(전 소비자의 결함 수정).
+- **타입 변경**: `SiteHeaderProps["locale"]`이 선택이 되어, 그 값을 `SiteHeaderProps`에서 읽는 코드는 좁혀야 한다 — BookLinq `MarketingFrame`의 `props.header.locale.locale`이 `tsc --strict`에서 TS18048. 필수로 두고 컴포넌트 인자만 넓히는 안은 FM이 셸의 `header`로 `locale`을 빼고 넘길 수 없어 반려; 대신 changeset에 적고 BookLinq는 올릴 때 `SiteHeaderProps & { locale: LocaleState }`로 좁힌다(늘 넘기므로 정확). 브라우저 기하는 `tests/browser/site-kit.spec.ts`가 마우스·터치 두 포인터로 고정한다(main의 CSS로 돌리면 5개 실패 확인).
+
+**재검토 시점.** 한국어 키커를 쓰는 두 번째 제품이 자간 0을 원할 때(그때 `:lang(ko)` 기본값), 헤더가 두 줄 이상 높이를 가져야 하는 소비자가 나올 때, 또는 TraceLinq·BookLinq가 휴대폰 헤더의 이전 높이를 원할 때(그때 패딩 경로를 옵션으로).
+
+---
+
 ## D-028 — 부품은 `children`도 한 번만 읽는다: `StatusBanner`의 이중 읽기 (2026-09-16)
 
 **결정.** `StatusBanner`가 `props.children`을 `createMemo`로 한 번 읽어, 진위 검사와

@@ -4,6 +4,10 @@
    tokens carry light and dark. */
 
 .site-section { padding-block: var(--dds-space-64); border-block-start: 1px solid var(--dds-color-border-default); }
+/* The site header sticks to the top; an in-page link ("#how") stops the section below it, not under it.
+   A product that changes --site-header-block-size sets it on :root or .site-shell (an ancestor of both
+   the header and <main>) — set on .site-header it resizes the header but never reaches the sections. */
+.site-hero, .site-section { scroll-margin-block-start: calc(var(--site-header-block-size, 64px) + var(--dds-space-8)); }
 .site-section[data-tone="band"] { background: var(--dds-color-bg-subtle); }
 .site-section__shell { inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; }
 
@@ -53,7 +57,9 @@ html:lang(ko) .site-rows__body { word-break: keep-all; overflow-wrap: break-word
    height rule — a swapping scene fixes its own height in the consumer. */
 .site-hero { padding-block: var(--dds-space-64); }
 .site-hero__shell { inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--dds-space-48); align-items: start; }
-.site-hero__eyebrow { margin: 0; margin-block-end: var(--dds-space-12); color: var(--dds-color-text-brand); font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-caption-font-size); letter-spacing: .18em; }
+/* Tracking and weight are hooks: wide mono tracking suits Latin caps, not Hangul — a product whose
+   eyebrow is Korean sets --site-hero-eyebrow-tracking: 0 (and a weight) on its landing root. */
+.site-hero__eyebrow { margin: 0; margin-block-end: var(--dds-space-12); color: var(--dds-color-text-brand); font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-caption-font-size); font-weight: var(--site-hero-eyebrow-weight, normal); letter-spacing: var(--site-hero-eyebrow-tracking, .18em); }
 .site-hero__copy h1 { margin: 0; font-size: var(--dds-typo-display-font-size); line-height: var(--dds-typo-display-line-height); letter-spacing: -.025em; text-wrap: balance; white-space: pre-line; }
 .site-hero__lede { margin: 0; margin-block-start: var(--dds-space-24); max-inline-size: 46ch; color: var(--dds-color-text-secondary); font-size: var(--dds-typo-body-1-font-size); line-height: 1.7; }
 .site-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--dds-space-16) var(--dds-space-24); margin-block-start: var(--dds-space-32); }

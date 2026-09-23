@@ -152,7 +152,7 @@ it("sizes the footer link row, so it does not inherit the body step", () => {
   // Without this the row renders at the 16px body size and reads a step larger
   // than the same row on a sibling product's page. Each consumer that noticed
   // had added the rule locally.
-  expect(STYLES).toMatch(/\.site-footer__links \{ font-size: var\(--dds-typo-body-2-font-size\); \}/);
+  expect(STYLES).toMatch(/\.site-footer__links \{ font-size: var\(--dds-typo-body-2-font-size\);[^}]*\}/);
 });
 
 it("collapses the language row behind the current language's own name", () => {

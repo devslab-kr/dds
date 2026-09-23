@@ -206,6 +206,19 @@ D-025. VisionLinq가 `DataTable`로 옮긴 뒤에도 `product-shell.css`에 남�
   dense 복사 버튼 규칙 삭제(`.dds-table .console-id`는 유지), 유닛·하네스·1440/390
   스크린샷 확인.
 
+### 16. site-kit 한 언어 랜딩·사업자 정보 바닥글 — `완료` (2026-09-24)
+D-029. FM덴탈서비스 랜딩 리뷰에서 kit으로 못 그리는 9건을 선택 props로:
+- [x] 헤더 `locale` 선택, 브랜드 링크 이름(`SiteBrand.label`), 빈 이름이면 푸터 `<strong>` 없음.
+- [x] 좁은 화면 메뉴: Esc로 닫고 버튼으로 포커스, 링크를 따라가면 닫힘(버튼은 유지, 안쪽이 처리한 Esc는 무시).
+- [x] 터치 44px 링크, 720px 이하 메뉴 44px 줄, 닫힌 좁은 헤더 첫 줄 64px.
+- [x] 섹션 `scroll-margin`(`--site-header-block-size`), 히어로 키커 자간·굵기 사용자 속성.
+- [x] 푸터 `details`·`linksLabel`, `SiteLink.emphasis`.
+- [x] 헤더·푸터가 `brand`·`details`를 한 번만 읽음 — 개발 빌드 하이드레이션 테스트로 고정.
+- [x] 테스트: 컴포넌트 16개(옛 코드에서 실패 확인), 소스 계약, 개발 빌드 하이드레이션(메모 제거 시 실패 확인), 브라우저 기하 마우스·터치·터치 넓은 화면(main CSS에서 실패 확인).
+- [x] 사전 리뷰(5개 관점, 확인된 지적 15건) 반영: 브랜드 링크 44px, 새 탭·수정 키·`aria-modal` Esc에서 메뉴 유지, 푸터 기준선 정렬, details 여백, 워드마크 로고 크기, 모든 소비자 기본값·타입 변경 문서화.
+- **다음(BookLinq·TraceLinq, 올릴 때)**: 휴대폰 헤더 89px → 65px — 375px 시각 확인. BookLinq는 `MarketingFrame`의 `SiteHeaderProps`를 `& { locale: LocaleState }`로 좁혀야 타입 검사가 통과.
+- **다음(fm-dental, 별도 세션)**: 랜딩 구현 때 이 버전을 쓴다 — 워드마크 `logo` + `name: ""` + `label`, `locale` 없음, `details`에 사업자 정보·주소, `linksLabel`, 개인정보처리방침 `emphasis`, 랜딩 뿌리에 `--site-hero-eyebrow-tracking: 0`.
+
 ---
 
 ## P3 — 모바일 이후

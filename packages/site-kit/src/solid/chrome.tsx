@@ -1,5 +1,5 @@
 import { Button, Icon, IconButton } from "@devslab/dds-solid";
-import { For, Show, createSignal, onMount, type JSX } from "solid-js";
+import { For, Show, createMemo, createSignal, onMount, type JSX } from "solid-js";
 
 import { LocaleMenu, type LocaleMenuProps, type LocaleMenuVariant } from "./locale-menu";
 import { FAMILY_LOCALES, type LocaleRegistry, type SiteLocale } from "../core/locales.mjs";
@@ -62,7 +62,13 @@ export function ThemeToggle(props: ThemeToggleProps) {
 export interface SiteHeaderProps {
   brand: SiteBrand;
   navigation: SiteLink[];
-  locale: LocaleState;
+  /**
+   * The language picker's state. Omit it and no picker is rendered — a
+   * single-language product (FM덴탈서비스 is Korean-only) has nothing to pick,
+   * and a picker with one entry reads as broken. Same contract as the
+   * footer's `locale`.
+   */
+  locale?: LocaleState;
   messages: SiteMessages;
   theme?: Omit<ThemeToggleProps, "messages">;
   onLocaleChange?: LocaleMenuProps["onLocaleChange"];
@@ -76,27 +82,61 @@ export interface SiteHeaderProps {
   actions?: JSX.Element;
 }
 
+/** The emphasis class a `SiteLink` asks for, or none. */
+const linkClass = (item: SiteLink) => (item.emphasis ? "site-link--emphasis" : undefined);
+
 export function SiteHeader(props: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = createSignal(false);
+  // brand={{ logo: <Mark /> }} compiles to a getter that rebuilds the logo on
+  // every read; read it once (D-027).
+  const brand = createMemo(() => props.brand);
+  // The narrow-screen menu closes the way a menu is expected to. Escape closes
+  // it and puts focus back on the button that opened it — unless a control
+  // inside already used that Escape (the flag menu closes itself first and
+  // marks the event handled, so one press closes one layer). Following a link
+  // inside it closes it too: a same-page anchor ("#contact") scrolls the page
+  // but leaves the document in place, and without this the open menu kept
+  // covering the section the reader just asked for. Buttons (the theme toggle)
+  // leave it open — the reader has not gone anywhere — and so does a link that
+  // opens a new tab or window. Handlers on elements inside the header run
+  // before this one (the flag menu); a modal inside it (a DDS Dialog listens on
+  // the document, after this) owns its own Escape, so an Escape from inside an
+  // aria-modal element is left alone too.
+  const onKeyDown: JSX.EventHandler<HTMLElement, KeyboardEvent> = (event) => {
+    if (event.key !== "Escape" || event.defaultPrevented || !menuOpen()) return;
+    if ((event.target as Element | null)?.closest('[aria-modal="true"]')) return;
+    event.preventDefault();
+    setMenuOpen(false);
+    event.currentTarget.querySelector<HTMLButtonElement>(".site-menu-button")?.focus();
+  };
+  const closeOnLink: JSX.EventHandler<HTMLElement, MouseEvent> = (event) => {
+    const link = (event.target as Element | null)?.closest("a");
+    if (!menuOpen() || !link) return;
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    if (link.target && link.target !== "_self") return;
+    setMenuOpen(false);
+  };
   return (
-    <header class="site-header">
+    <header class="site-header" onKeyDown={onKeyDown}>
       <a class="dds-sr-only" href="#main-content">{props.messages.skipToContent}</a>
       <div class="site-header__inner">
-        <a class="site-brand" href={props.brand.href}>{props.brand.logo}{props.brand.name}</a>
+        <a class="site-brand" href={brand().href} aria-label={brand().label}>{brand().logo}{brand().name}</a>
         <Button class="site-menu-button" tone="ghost" aria-expanded={menuOpen()} aria-controls="site-navigation" onClick={() => setMenuOpen((open) => !open)}>
           {menuOpen() ? props.messages.menuClose : props.messages.menuOpen}
         </Button>
-        <nav id="site-navigation" class="site-nav" data-open={String(menuOpen())} aria-label={props.messages.navigationLabel}>
-          <ul class="site-nav__list"><For each={props.navigation}>{(item) => <li><a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noreferrer" : undefined}>{item.label}</a></li>}</For></ul>
+        <nav id="site-navigation" class="site-nav" data-open={String(menuOpen())} aria-label={props.messages.navigationLabel} onClick={closeOnLink}>
+          <ul class="site-nav__list"><For each={props.navigation}>{(item) => <li><a class={linkClass(item)} href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noreferrer" : undefined}>{item.label}</a></li>}</For></ul>
         </nav>
-        <div class="site-header__controls" data-open={String(menuOpen())}>
-          <LocaleMenu
-            state={props.locale}
-            messages={props.messages}
-            {...(props.localeVariant ? { variant: props.localeVariant } : {})}
-            {...(props.localeRegistry ? { registry: props.localeRegistry } : {})}
-            {...(props.onLocaleChange ? { onLocaleChange: props.onLocaleChange } : {})}
-          />
+        <div class="site-header__controls" data-open={String(menuOpen())} onClick={closeOnLink}>
+          <Show when={props.locale}>{(locale) => (
+            <LocaleMenu
+              state={locale()}
+              messages={props.messages}
+              {...(props.localeVariant ? { variant: props.localeVariant } : {})}
+              {...(props.localeRegistry ? { registry: props.localeRegistry } : {})}
+              {...(props.onLocaleChange ? { onLocaleChange: props.onLocaleChange } : {})}
+            />
+          )}</Show>
           {props.theme && <ThemeToggle {...props.theme} messages={props.messages} />}
           {props.actions}
         </div>
@@ -184,6 +224,19 @@ export interface SiteFooterProps {
   onLocaleSelect?: (locale: string) => void;
   /** Links after the brand name, middot-separated: the family line, the operator. */
   family?: SiteLink[];
+  /**
+   * A block under the brand line: the business registration line and the
+   * address a Korean commercial site must print, for one. Rendered as a block
+   * (the brand line is an inline `<p>`, where an `<address>` cannot go), and
+   * read once — JSX handed to the kit is built once per side (D-027, D-028).
+   */
+  details?: JSX.Element;
+  /**
+   * Names the link list: with it the list sits in `<nav aria-label>`, a
+   * landmark a screen-reader user can jump to — name it differently from the
+   * header's navigation. Without it the list stays a plain list.
+   */
+  linksLabel?: string;
 }
 
 /**
@@ -201,6 +254,35 @@ export interface SiteFooterProps {
  */
 export function SiteFooter(props: SiteFooterProps) {
   const registry = () => props.localeRegistry ?? (FAMILY_LOCALES as LocaleRegistry<string>);
+  const brand = createMemo(() => props.brand);
+  const details = createMemo(() => props.details);
+  // Each of these is called in exactly one branch of its <Show>, so each
+  // builds its nodes once.
+  const brandLine = () => (
+    <p class="site-footer__brand">
+      {brand().logo}
+      {/* A wordmark passed as the logo comes with `name: ""`; no empty <strong>. */}
+      <Show when={brand().name}>{(name) => <strong>{name()}</strong>}</Show>
+      <For each={props.family ?? []}>{(item) => <>
+        <span aria-hidden="true">·</span>
+        <a class={linkClass(item)} href={item.href}>{item.label}</a>
+      </>}</For>
+    </p>
+  );
+  const linkList = () => (
+    <ul class="site-footer__links">
+      <For each={props.links}>{(item) => <li><a class={linkClass(item)} href={item.href}>{item.label}</a></li>}</For>
+      {/*
+        A copyright like "© 2026 DevsLab" mixes neutral, digit and Latin
+        runs, which the bidi algorithm reorders on an RTL page into
+        "DevsLab 2026 ©". <bdi> isolates it so it reads as written in
+        every direction.
+      */}
+      <li><Show when={props.copyrightHref} fallback={<bdi>{props.copyright}</bdi>}>
+        {(href) => <a href={href()}><bdi>{props.copyright}</bdi></a>}
+      </Show></li>
+    </ul>
+  );
   return (
     <footer class="site-footer" aria-label={props.messages.footerLabel}>
       <div class="site-footer__inner">
@@ -213,26 +295,15 @@ export function SiteFooter(props: SiteFooterProps) {
           />
         )}</Show>
         <div class="site-footer__row">
-          <p class="site-footer__brand">
-            {props.brand.logo}
-            <strong>{props.brand.name}</strong>
-            <For each={props.family ?? []}>{(item) => <>
-              <span aria-hidden="true">·</span>
-              <a href={item.href}>{item.label}</a>
-            </>}</For>
-          </p>
-          <ul class="site-footer__links">
-            <For each={props.links}>{(item) => <li><a href={item.href}>{item.label}</a></li>}</For>
-            {/*
-              A copyright like "© 2026 DevsLab" mixes neutral, digit and Latin
-              runs, which the bidi algorithm reorders on an RTL page into
-              "DevsLab 2026 ©". <bdi> isolates it so it reads as written in
-              every direction.
-            */}
-            <li><Show when={props.copyrightHref} fallback={<bdi>{props.copyright}</bdi>}>
-              {(href) => <a href={href()}><bdi>{props.copyright}</bdi></a>}
-            </Show></li>
-          </ul>
+          <Show when={details()} fallback={brandLine()}>{(content) => (
+            <div class="site-footer__identity">
+              {brandLine()}
+              <div class="site-footer__details">{content()}</div>
+            </div>
+          )}</Show>
+          <Show when={props.linksLabel} fallback={linkList()}>{(label) => (
+            <nav class="site-footer__nav" aria-label={label()}>{linkList()}</nav>
+          )}</Show>
         </div>
       </div>
     </footer>
