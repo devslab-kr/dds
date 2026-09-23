@@ -21,6 +21,47 @@ control search indexing, citation crawlers, and model-training crawlers.
 
 `MarketingShell` reads `header` and `footer` once (a memo) before it renders anything. `header={{ … }}` compiles to a getter; if the shell re-read it per prop, any JSX built eagerly inside the literal (an `actions` anchor, a logo) would be built again on each read and consume hydration keys — a different number of times on the server than in the browser — and the client would rebuild the header from templates. A product that mounts `SiteHeader` or `SiteFooter` directly, outside the shell, has to read its own props once the same way. The flag sprite loads its bodies whenever it reaches the client empty, whatever the reason.
 
+The header and footer read `brand` (and the footer its `details`) once themselves, so a logo or details block built inline stays one build per side even outside the shell (D-029).
+
+## Header and footer options
+
+For a single-language product, and for a footer that has to print business details (D-029). The props are optional; a product that passes none of them gets the same markup. A few defaults apply to every product (listed after the options).
+
+```tsx
+<MarketingShell
+  mainWidth="bleed"
+  header={{
+    brand: { name: "", href: "/", label: "Acme home", logo: <Wordmark /> }, // the wordmark is the logo; name "" so it does not print twice
+    navigation: [{ href: "#how", label: "How it works" }, { href: "#contact", label: "Contact" }],
+    messages,
+    get actions() { return <a class="dds-btn dds-btn--primary" href="#contact">Get in touch</a>; },
+    // no `locale`: no language picker
+  }}
+  footer={{
+    brand: { name: "", href: "/", logo: <Wordmark /> },
+    get details() { return <><p>Acme Ltd · Reg. 000-00-00000</p><address>1 Main St</address></>; },
+    linksLabel: "Footer links",
+    links: [{ href: "/terms", label: "Terms" }, { href: "/privacy", label: "Privacy policy", emphasis: true }],
+    copyright: "© Acme",
+    messages,
+  }}
+  messages={messages}
+>…</MarketingShell>
+```
+
+- `SiteHeader` `locale` is optional. Omit it and no language picker renders — a picker with one language reads as broken. The footer's `locale` already worked this way.
+- `SiteBrand.label` names the header brand link (`aria-label`). Start it with the visible name. With a wordmark as `logo`, pass `name: ""`; the footer then renders no empty `<strong>`.
+- The narrow-screen menu closes on Escape (focus returns to the menu button) and when a link inside it is followed — including a same-page anchor, which would otherwise leave the open menu covering the section. Buttons inside it (the theme toggle) and links that open a new tab or window leave it open. An Escape that a control inside the header already handled (the flag menu), or that comes from inside an `aria-modal` element, is left to that control.
+- Touch (`pointer: coarse`): the brand link, navigation, footer and footer-language links are 44px targets, as buttons already are. At 720px and below the open menu's links are 44px rows, and the closed header's first row keeps its 64px height.
+- `SiteFooter` `details`: a block under the brand line (business registration, an `<address>`), its lines 4px apart with no paragraph margins. `linksLabel` wraps the links in `<nav aria-label>`; name it differently from the header's navigation. A footer wordmark passed as `logo` (with `name: ""`) keeps its own size — the 16px size is for an icon mark beside a printed name — and carries its own accessible text (`<img alt>`, or text), because `label` names only the header link.
+- `SiteLink.emphasis` draws a link heavier (header navigation, footer links, family links) — for a Korean site's privacy policy, which the law asks to stand out.
+- Sections (and the hero) stop below the sticky header when an in-page link targets them: `scroll-margin-block-start` is the header height plus 8px. The header height is `--site-header-block-size` (default 64px); set it on `:root` or `.site-shell` — an ancestor of both the header and `<main>` — not on `.site-header`, or the sections keep the 64px offset.
+- `--site-hero-eyebrow-tracking` (default `.18em`) and `--site-hero-eyebrow-weight` (default `normal`) tune the hero eyebrow. Wide mono tracking suits Latin capitals; a product whose eyebrow is Korean sets the tracking to `0` on its landing root.
+
+Defaults that apply to every product, with or without the new props: the 44px touch targets above; the narrow header's first row is `--site-header-block-size` (64px) with no block padding — a product without a global `box-sizing: border-box` reset loses 24px of phone header height (it was 64px plus 12px padding each side), and one whose menu button is 44px loses 4px; the open menu's links are 44px rows with no gap and its controls row has 12px below it; sections and the hero get the scroll offset; the menu closes on Escape and on following a link; footer links are baseline-aligned, and a row with details aligns on the first line.
+
+Type note: `SiteHeaderProps["locale"]` is now `LocaleState | undefined`. Code that reads it from a `SiteHeaderProps` value (`header.locale.locale`) must narrow it — for example type the value as `SiteHeaderProps & { locale: LocaleState }` where the product always sets it.
+
 ## Brand icons
 
 Every product's icon files come from `@devslab/linq-brand` (`dist/<product>/`); `brandIconLinks()` is the one place that says which of them a page head links, and in what order:

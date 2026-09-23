@@ -202,3 +202,35 @@ test("the TanStack adapter accepts metadata built from a product registry", asyn
   assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>, options\?: TanStackHeadOptions\)/);
   assert.match(dts, /toHtmlAttributes: <Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
 });
+
+test("the landing chrome keeps its touch targets, scroll offset and eyebrow hooks (D-029)", async () => {
+  const [styles, sections, chrome] = await Promise.all([
+    read("packages/site-kit/styles.css"),
+    read("packages/site-kit/site-sections.css"),
+    read("packages/site-kit/src/solid/chrome.tsx"),
+  ]);
+  // Touch: links are 44px targets like every button; the open narrow menu is 44px rows.
+  const coarse = styles.match(/@media \(pointer: coarse\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
+  for (const selector of [".site-brand", ".site-nav__list a", ".site-footer__links a", ".site-footer__langs-trigger", ".site-footer__langs-list a"]) {
+    assert.ok(coarse.includes(selector), `${selector} missing from the touch block`);
+  }
+  assert.match(coarse, /min-block-size:\s*44px/);
+  assert.ok(styles.indexOf("@media (pointer: coarse)") < styles.indexOf("@media (max-width: 720px)"), "the narrow menu rows must come after the touch block to set their display");
+  const narrow = styles.match(/@media \(max-width: 720px\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
+  assert.match(narrow, /\.site-nav__list a \{[^}]*min-block-size:\s*44px/);
+  assert.match(narrow, /grid-template-rows: var\(--site-header-block-size, 64px\)/, "the closed narrow header keeps one height");
+  // The sticky header's height is one property, and sections stop below it.
+  assert.match(styles, /\.site-header__inner \{[^}]*min-block-size: var\(--site-header-block-size, 64px\)/);
+  assert.match(sections, /scroll-margin-block-start: calc\(var\(--site-header-block-size, 64px\)/);
+  // The 16px icon-mark size applies only beside a printed name, so a wordmark logo keeps its size.
+  assert.match(styles, /\.site-footer__brand:has\(> strong\) :is\(img, svg\) \{[^}]*16px/);
+  assert.doesNotMatch(styles, /\.site-footer__brand img, \.site-footer__brand svg/);
+  // Eyebrow tracking and weight are hooks with the family defaults.
+  assert.match(sections, /\.site-hero__eyebrow \{[^}]*letter-spacing: var\(--site-hero-eyebrow-tracking, \.18em\)/);
+  assert.match(sections, /\.site-hero__eyebrow \{[^}]*font-weight: var\(--site-hero-eyebrow-weight, normal\)/);
+  // The chrome reads handed-over JSX once (D-027, D-028).
+  assert.match(chrome, /const details = createMemo\(\(\) => props\.details\)/);
+  assert.equal((chrome.match(/const brand = createMemo\(\(\) => props\.brand\)/g) ?? []).length, 2, "header and footer each read brand once");
+  assert.doesNotMatch(chrome, /props\.details(?!\))/, "details is read only through the memo");
+  assert.doesNotMatch(chrome, /props\.brand\./, "brand is read only through the memo");
+});

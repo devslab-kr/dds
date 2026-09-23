@@ -21,6 +21,47 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 
 `MarketingShell`은 아무것도 렌더하기 전에 `header`·`footer`를 한 번(메모) 읽는다. `header={{ … }}`는 게터로 컴파일되므로 셸이 prop마다 다시 읽으면 리터럴 안에서 즉시 만들어진 JSX(`actions` 앵커, 로고)가 읽을 때마다 다시 만들어져 하이드레이션 키를 소모하고 — 서버와 브라우저의 횟수가 다르다 — 클라이언트는 헤더를 템플릿에서 다시 만든다. 셸 밖에서 `SiteHeader`·`SiteFooter`를 직접 마운트하는 제품은 같은 방식으로 자기 props를 한 번만 읽어야 한다. 국기 스프라이트는 이유가 무엇이든 클라이언트에 빈 채로 도착하면 본문을 로드한다.
 
+헤더와 푸터는 `brand`(푸터는 `details`도)를 스스로 한 번만 읽는다. 그래서 셸 밖에서도 인라인으로 만든 로고·details 블록이 서버와 브라우저에서 각각 한 번씩만 만들어진다(D-029).
+
+## 헤더·푸터 옵션
+
+한 언어만 쓰는 제품과, 사업자 정보를 바닥에 적어야 하는 제품을 위한 옵션(D-029). props는 모두 선택이고, 아무것도 넘기지 않는 제품은 전과 같은 마크업을 받는다. 다만 모든 제품에 적용되는 기본값 몇 가지가 있다(옵션 목록 뒤).
+
+```tsx
+<MarketingShell
+  mainWidth="bleed"
+  header={{
+    brand: { name: "", href: "/", label: "Acme 첫 화면", logo: <Wordmark /> }, // 워드마크가 로고 — 이름이 두 번 찍히지 않게 name ""
+    navigation: [{ href: "#how", label: "이용 방법" }, { href: "#contact", label: "문의" }],
+    messages,
+    get actions() { return <a class="dds-btn dds-btn--primary" href="#contact">이용 문의</a>; },
+    // locale 없음: 언어 메뉴 없음
+  }}
+  footer={{
+    brand: { name: "", href: "/", logo: <Wordmark /> },
+    get details() { return <><p>상호 Acme · 사업자등록번호 000-00-00000</p><address>서울 …</address></>; },
+    linksLabel: "바닥 메뉴",
+    links: [{ href: "/terms", label: "이용약관" }, { href: "/privacy", label: "개인정보처리방침", emphasis: true }],
+    copyright: "© Acme",
+    messages,
+  }}
+  messages={messages}
+>…</MarketingShell>
+```
+
+- `SiteHeader`의 `locale`은 선택이다. 넘기지 않으면 언어 메뉴를 그리지 않는다 — 언어가 하나뿐인 메뉴는 고장 난 것처럼 보인다. 푸터의 `locale`은 원래 이렇게 동작했다.
+- `SiteBrand.label`은 헤더 브랜드 링크의 이름(`aria-label`)이다. 화면에 보이는 이름으로 시작한다. 워드마크를 `logo`로 넘기면 `name: ""` — 그러면 푸터도 빈 `<strong>`을 그리지 않는다.
+- 좁은 화면의 메뉴는 Esc로 닫히고(포커스는 메뉴 버튼으로 돌아감), 안의 링크를 따라가도 닫힌다 — 같은 페이지 앵커도. 안 그러면 열린 메뉴가 방금 고른 섹션을 가린다. 안의 버튼(테마 전환)과 새 탭·새 창으로 여는 링크는 메뉴를 닫지 않는다. 헤더 안의 컨트롤(국기 메뉴)이 이미 처리한 Esc와 `aria-modal` 요소 안에서 온 Esc는 그 컨트롤에 맡긴다.
+- 터치(`pointer: coarse`): 브랜드 링크·내비게이션·푸터·푸터 언어 링크가 버튼처럼 44px 누르는 면이다. 720px 이하에서 열린 메뉴의 링크는 44px 줄이고, 닫힌 헤더의 첫 줄은 64px 그대로다.
+- `SiteFooter`의 `details`: 브랜드 줄 아래 블록(사업자 정보, `<address>`), 줄 간격 4px·문단 여백 없음. `linksLabel`은 링크를 `<nav aria-label>`로 감싼다 — 헤더 내비게이션과 다른 이름으로. `logo`로 넘긴 푸터 워드마크(`name: ""`)는 자기 크기를 지킨다 — 16px은 이름 옆 아이콘 마크용 — 그리고 접근 가능한 이름을 스스로 가진다(`<img alt>`나 글자). `label`은 헤더 링크의 이름일 뿐이다.
+- `SiteLink.emphasis`는 링크를 굵게 그린다(헤더 내비게이션·푸터 링크·패밀리 링크). 법이 눈에 띄게 하라는 개인정보처리방침용.
+- 섹션(그리고 히어로)은 같은 페이지 링크로 이동하면 붙어 있는 헤더 아래에 멈춘다: `scroll-margin-block-start` = 헤더 높이 + 8px. 헤더 높이는 `--site-header-block-size`(기본 64px) — `:root`나 `.site-shell`(헤더와 `<main>`의 공통 조상)에 정한다. `.site-header`에 정하면 섹션은 64px 간격 그대로다.
+- `--site-hero-eyebrow-tracking`(기본 `.18em`)과 `--site-hero-eyebrow-weight`(기본 `normal`)로 히어로 키커를 조정한다. 넓은 모노 자간은 라틴 대문자에 맞고, 키커가 한국어인 제품은 랜딩 뿌리에서 자간을 `0`으로 둔다.
+
+새 props를 쓰든 안 쓰든 모든 제품에 적용되는 기본값: 위의 44px 터치 누르는 면, 좁은 헤더 첫 줄이 `--site-header-block-size`(64px)이고 위아래 패딩 없음 — 전역 `box-sizing: border-box` 리셋이 없는 제품은 휴대폰 헤더가 24px 낮아지고(64px에 위아래 12px 패딩이었음), 메뉴 버튼이 44px인 제품은 4px 낮아진다 — 열린 메뉴의 링크는 간격 없는 44px 줄이고 컨트롤 줄 아래 12px, 섹션·히어로의 스크롤 간격, Esc·링크로 메뉴 닫힘, 푸터 링크의 기준선 정렬과 details가 있는 줄의 첫 줄 정렬.
+
+타입 메모: `SiteHeaderProps["locale"]`은 이제 `LocaleState | undefined`다. `SiteHeaderProps` 값에서 읽는 코드(`header.locale.locale`)는 좁혀야 한다 — 예를 들어 제품이 늘 넘긴다면 그 값을 `SiteHeaderProps & { locale: LocaleState }`로 타입한다.
+
 ## 브랜드 아이콘
 
 모든 제품의 아이콘 파일은 `@devslab/linq-brand`(`dist/<product>/`)에서 온다. `brandIconLinks()`는 그중 어떤 파일을 페이지 head가 어떤 순서로 링크하는지 정하는 유일한 자리다.

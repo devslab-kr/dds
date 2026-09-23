@@ -17,6 +17,7 @@ export default defineConfig({
       "src/solid/__tests__/oss-product-mark.test.tsx",
       "src/solid/__tests__/sections.test.tsx",
       "src/solid/__tests__/footer.test.tsx",
+      "src/solid/__tests__/landing-chrome.test.tsx",
     ],
     restoreMocks: true,
   },
