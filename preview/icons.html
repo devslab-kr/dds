@@ -27,8 +27,11 @@
   header.site { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--dds-space-16); padding: var(--dds-space-40) 0 var(--dds-space-24); }
   header.site h1 { font-size: var(--dds-typo-title-1-font-size); line-height: var(--dds-typo-title-1-line-height); font-weight: var(--dds-typo-title-1-font-weight); margin: 0; }
   header.site .src { font-size: var(--dds-typo-label-font-size); color: var(--dds-color-text-muted); margin-left: auto; font-family: var(--dds-font-family-mono); }
-  header.site nav { display: flex; gap: var(--dds-space-16); flex-basis: 100%; margin-top: var(--dds-space-4); }
-  header.site nav a { font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-label-font-size); color: var(--dds-color-text-brand); text-decoration: none; }
+  /* wrap: without it the row can't shrink past the sum of each link's
+   * narrowest word, and on a phone every command splits after its "--".
+   * Row gap 8 on 16px lines = 24px pitch, the web target-size floor. */
+  header.site nav { display: flex; flex-wrap: wrap; gap: var(--dds-space-8) var(--dds-space-16); flex-basis: 100%; margin-top: var(--dds-space-4); }
+  header.site nav a { font-family: var(--dds-font-family-mono); font-size: var(--dds-typo-label-font-size); line-height: var(--dds-typo-label-line-height); color: var(--dds-color-text-brand); text-decoration: none; }
   header.site nav a:hover { text-decoration: underline; }
   h2 { font-size: var(--dds-typo-title-2-font-size); line-height: var(--dds-typo-title-2-line-height); font-weight: var(--dds-typo-title-2-font-weight); margin: var(--dds-space-48) 0 var(--dds-space-4); }
   p.note { font-size: var(--dds-typo-body-2-font-size); line-height: var(--dds-typo-body-2-line-height); color: var(--dds-color-text-secondary); margin: 0 0 var(--dds-space-16); max-width: 60em; }

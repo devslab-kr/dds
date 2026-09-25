@@ -98,7 +98,10 @@
     padding: 2px 8px; border-radius: 9999px;
   }
   header.site .src { font-size: 13px; color: var(--muted); margin-left: auto; }
-  header.site nav { display: flex; gap: 16px; flex-basis: 100%; margin-top: 4px; }
+  /* wrap: without it the row can't shrink past the sum of each link's
+     narrowest word, and on a phone every command splits after its "--".
+     Row gap 8 on 16px lines = 24px pitch, the web target-size floor. */
+  header.site nav { display: flex; flex-wrap: wrap; gap: 8px 16px; flex-basis: 100%; margin-top: 4px; }
   header.site nav a {
     font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px; line-height: 16px; color: var(--brand-text); text-decoration: none;
