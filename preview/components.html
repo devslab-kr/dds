@@ -9,6 +9,12 @@
   /* Page chrome only — components come 100% from dds.css.
    * Everything here uses the same --dds-* tokens (dogfooding). */
   * { box-sizing: border-box; }
+  /* Korean breaks between words, not between syllables. Keyed on the
+   * language root: Japanese and Chinese have no spaces between words, so
+   * keep-all there would remove their only break points. dds.css does not
+   * ship this — each product sets it on its own root (D-030). */
+  :where([lang|="ko"]) { word-break: keep-all; overflow-wrap: break-word; }
+  :where([lang]:not([lang|="ko"])) { word-break: normal; overflow-wrap: normal; }
   body {
     margin: 0;
     background: var(--dds-color-bg-default);

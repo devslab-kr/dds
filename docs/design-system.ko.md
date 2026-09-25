@@ -257,6 +257,19 @@
 → 시스템 고딕 순으로 폴백한다 (스택: `Geist, Pretendard, system-ui, …`).
 숫자가 중요한 화면 (대시보드 통계) 은 tabular figures 를 켠다.
 
+**한국어 줄바꿈.** 브라우저 기본값은 한글 음절 사이 어디서든 줄을 바꾼다
+("확 / 인하세요"). 한국어 페이지는 언어를 선언한 뿌리 (`<html lang="ko">` 등)
+에 아래 두 줄을 둔다 — 요소별로 걸면 표 칸·목록을 놓치고, 요소별
+`word-break: normal` 이 그것을 되돌린다. 일본어·중국어는 단어 사이 공백이
+없어 keep-all 이면 줄바꿈 자리가 사라지므로, 다른 언어를 선언한 요소는
+기본값으로 되돌린다. `dds.css` 는 이 규칙을 싣지 않는다 — 각 제품이 자기
+뿌리에서 정한다 (D-030).
+
+```css
+:where([lang|="ko"]) { word-break: keep-all; overflow-wrap: break-word; }
+:where([lang]:not([lang|="ko"])) { word-break: normal; overflow-wrap: normal; }
+```
+
 **스케일** — 이름·크기·행간·굵기가 한 세트다. 웹은 `rem` (1rem = 16px),
 RN 은 같은 숫자를 pt 로 쓴다. 숫자가 같으므로 표는 하나다.
 

@@ -171,6 +171,26 @@ test("buttons preserve readable CJK labels and expose 44px touch targets", async
   assert.match(iconButton, /min-block-size:\s*44px/);
 });
 
+test("preview pages break Korean between words; dds.css leaves that to each product's root (D-030)", async () => {
+  const root = /:where\(\[lang\|="ko"\]\)\s*\{\s*word-break:\s*keep-all;\s*overflow-wrap:\s*break-word;\s*\}/;
+  const reset = /:where\(\[lang\]:not\(\[lang\|="ko"\]\)\)\s*\{\s*word-break:\s*normal;\s*overflow-wrap:\s*normal;\s*\}/;
+  for (const page of ["preview/index.html", "preview/components.html", "preview/icons.html"]) {
+    const html = await read(page);
+    assert.match(html, /<html lang="ko">/, `${page} must declare its language — the rule keys on it`);
+    assert.match(html, root, `${page} must set keep-all on its Korean root`);
+    assert.match(html, reset, `${page} must return other languages (ja/zh) to normal breaking`);
+    // Only the root pair: keep-all on single elements misses table cells and
+    // lists, and an element-level word-break: normal undoes it (GitLinq's guide
+    // did that inside a phone media query).
+    assert.equal(html.match(/word-break:/g).length, 2, `${page} must not set word-break per element`);
+  }
+  const cssFiles = await readdir(new URL("../packages/dds-css/src/", import.meta.url));
+  const bundleSources = (await Promise.all(
+    cssFiles.filter((name) => name.endsWith(".css")).map((name) => read(`packages/dds-css/src/${name}`)),
+  )).join("\n");
+  assert.doesNotMatch(bundleSources, /keep-all/, "dds.css must not change Korean line breaking for every consumer (D-030)");
+});
+
 test("buttons rendered as links carry no anchor underline", async () => {
   const button = await read("packages/dds-css/src/button.css");
   const base = button.slice(button.indexOf(".dds-btn {"), button.indexOf("}", button.indexOf(".dds-btn {")));

@@ -268,6 +268,20 @@ Hangul glyphs, so Korean falls back to
 (stack: `Geist, Pretendard, system-ui, …`). Screens where numbers matter
 (dashboard stats) enable tabular figures.
 
+**Korean line breaking.** By default browsers break Hangul between any two
+syllables ("확 / 인하세요"). Korean pages put the two rules below on the
+element that declares the language (`<html lang="ko">`, …) — set per element,
+they miss table cells and lists, and a per-element `word-break: normal` undoes
+them. Japanese and Chinese have no spaces between words, so keep-all would
+remove their only break points; elements that declare another language go
+back to the default. `dds.css` does not ship this — each product sets it on
+its own root (D-030).
+
+```css
+:where([lang|="ko"]) { word-break: keep-all; overflow-wrap: break-word; }
+:where([lang]:not([lang|="ko"])) { word-break: normal; overflow-wrap: normal; }
+```
+
 **Scale** — name, size, line-height, and weight form one set. Web uses `rem`
 (1rem = 16px); RN uses the same numbers as pt. Since the numbers match, there
 is one table.
