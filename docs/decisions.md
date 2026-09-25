@@ -5,6 +5,38 @@
 
 ---
 
+## D-030 — 한국어 줄바꿈은 dds.css가 아니라 각 페이지의 언어 뿌리에서: 쇼케이스 3페이지부터 (2026-09-25)
+
+**결정.** 한국어를 음절이 아니라 어절에서 끊는 두 줄을 쇼케이스 세 페이지(`preview/index.html`·`components.html`·`icons.html`)의 인라인 `<style>`에 둔다.
+
+```css
+:where([lang|="ko"]) { word-break: keep-all; overflow-wrap: break-word; }
+:where([lang]:not([lang|="ko"])) { word-break: normal; overflow-wrap: normal; }
+```
+
+`dds.css`에는 싣지 않는다 — D-029가 한국어 키커 자간을 각 제품 뿌리에 맡긴 것과 같은 판단이다. 스펙 3.2절에 소비자가 둘 규칙과 이유를 적고, `tests/foundation-contracts.test.mjs`가 세 페이지의 규칙·요소별 `word-break` 없음·`dds-css/src`에 `keep-all` 없음을 함께 고정한다.
+
+**계기.** devslab.kr가 자기 페이지에 같은 규칙을 넣은 뒤(jlc488/devlab.kr#73) 남은 정적 하위 사이트를 Edge에서 글자 단위로 쟀더니, `devslab.kr/dds/`(이 쇼케이스의 사본)가 여전히 한글 음절 사이에서 줄을 바꿨다 — 375px/1440px에서 index 22/5곳, components 3/1곳, icons 3/0곳("브랜드 면 위 텍 / 스트는", "미달합 / 니다"). 브라우저 기본 CJK 규칙은 한글 음절 사이 어디서든 끊는다.
+
+**근거.**
+- 요소가 아니라 **언어를 선언한 뿌리**에 걸고 상속시킨다. 요소별 keep-all은 표 칸·목록을 놓치고, 요소별 `word-break: normal`이 그것을 되돌린다 — 같은 날 GitLinq 가이드(devslab.kr)가 휴대폰 미디어 쿼리 안에서 그렇게 풀어 375px에서 265곳이 쪼개졌다.
+- 전역 keep-all이 아니라 `[lang|="ko"]`: 일본어·중국어는 단어 사이 공백이 없어 keep-all이면 줄바꿈 자리가 사라진다. 다른 언어를 선언한 조각은 두 번째 줄이 기본값으로 되돌린다.
+- `overflow-wrap: break-word`이지 `anywhere`가 아니다: anywhere는 라틴 단어의 최소 폭까지 한 글자로 줄여 좁은 flex 칸에서 단어를 쪼갠다(devslab.kr에서 "cya / n"). break-word는 넘칠 때만 끊는다.
+- `:where()`로 명시도 0 — 페이지·컴포넌트의 어떤 규칙에도 진다.
+- 실측(320–1440px 8개 폭): 세 페이지 모두 음절 사이 줄바꿈 0, 가로 넘침·박스 밖 글자 증가 0. `icons.html` 320px의 가로 넘침(상단 nav 링크가 336px)은 규칙 전에도 같다.
+
+**반려한 대안.**
+- **`dds.css`(base.css) 기본값** — 쇼케이스 첫 페이지는 dds.css를 불러오지 않아 그것만으로는 고쳐지지 않고, dds.css를 쓰는 모든 제품(VisionLinq·AskLinq·BookLinq·TraceLinq·FM덴탈)의 한국어 줄바꿈이 다음 DDS 올림에서 요청 없이 바뀐다. keep-all은 한국어 칸의 최소 폭을 어절 길이로 늘리므로 표 칸·칩 폭이 달라질 수 있어 제품마다 375px 확인이 필요하다. D-029가 `html:lang(ko)` 키커 자간을 반려한 것과 같은 이유.
+
+**트레이드오프.**
+- 좁은 화면에서 줄 끝 여백이 는다(어절 단위로만 끊으므로). devslab.kr가 받아들인 것과 같은 대가.
+- Chromium의 keep-all은 글자·숫자끼리만 붙인다 — 닫는 따옴표·말줄임표·괄호 뒤 조사는 여전히 줄 머리로 갈 수 있다("‘내 변경’ / 으로").
+- 두 줄이 세 페이지에 복제된다. index는 dds.css를 쓰지 않는 단일 파일 페이지라 공유할 곳이 없다 — 테스트가 셋을 같은 모양으로 고정한다.
+
+**재검토 시점.** devslab.kr 다음으로 가족 제품이 하나 더 자기 뿌리에 같은 규칙을 넣을 때 — 그때 dds.css(또는 site-kit)의 기본값으로 올리고 각 제품의 375px을 함께 확인한다. D-029의 키커 자간 재검토와 같이 본다.
+
+---
+
 ## D-029 — 한 언어 랜딩과 사업자 정보 바닥글: 헤더·푸터 선택 props 9가지 (2026-09-24)
 
 **결정.** `SiteHeader`·`SiteFooter`에 선택 옵션을 더한다. 아무것도 넘기지 않는 소비자는 전과 같은 마크업을 받는다(모든 소비자에 적용되는 기본값 변화는 트레이드오프에).
