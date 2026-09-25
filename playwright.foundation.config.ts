@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/browser",
-  testMatch: ["foundation.spec.ts", "table.spec.ts"],
+  testMatch: ["foundation.spec.ts", "table.spec.ts", "showcase.spec.ts"],
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,
