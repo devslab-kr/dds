@@ -3,3 +3,4 @@ export * from "./catalog.mjs";
 export * from "./seo.mjs";
 export * from "./geo.mjs";
 export * from "./publisher.mjs";
+export * from "./gtm.mjs";

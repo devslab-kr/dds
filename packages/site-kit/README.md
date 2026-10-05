@@ -4,9 +4,9 @@ Public product-site infrastructure for DevsLab products. It provides strict cata
 
 ## Entry points
 
-- `@devslab/site-kit` — runtime-neutral locale, catalog, SEO, sitemap, robots, and verified-fact utilities.
+- `@devslab/site-kit` — runtime-neutral locale, catalog, SEO, sitemap, robots, verified-fact, and Google Tag Manager utilities.
 - `@devslab/site-kit/solid` — header, footer, locale/theme controls, marketing/legal/status/error layouts, and request-access form.
-- `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors.
+- `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors (with opt-in brand icons and Tag Manager loader).
 - `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles.
 
 Catalog construction is intentionally strict: every locale in the registry must have exactly the same keys and named placeholders. There is no runtime copy fallback.
@@ -81,6 +81,57 @@ toTanStackHead(metadata, { icons: { basePath: "/" } }); // /favicon.svg, /mark-4
 ```
 
 Omitted, the adapter emits no icon links: it cannot know where a product serves the files, and a head that links icons the server 404s is worse than one that links none.
+
+## Google Tag Manager
+
+Each product site loads Tag Manager on its public marketing and legal pages with its own container id; consoles, dashboards and the chat widget stay out. The snippet lives here once (D-031).
+
+| Export | Entry | What it is |
+|---|---|---|
+| `gtmHeadScript(id)` | `@devslab/site-kit` | the head loader's script body, no `<script>` tag, no nonce |
+| `gtmNoscriptIframe(id)` | `@devslab/site-kit` | the `<iframe>` HTML that goes inside `<noscript>` right after `<body>` opens |
+| `GTM_CSP_SOURCES` | `@devslab/site-kit` | the CSP sources Tag Manager + GA4 need, by directive |
+| `GTM_CONTAINER_ID_PATTERN` | `@devslab/site-kit` | `/^GTM-[A-Z0-9]+$/` |
+| `toTanStackHead(metadata, { gtm })` | `@devslab/site-kit/tanstack-start` | the route head with the loader as `scripts[0]` |
+| `gtmHeadEntry(id)` | `@devslab/site-kit/tanstack-start` | the same `scripts` entry, for a route that builds its own head |
+
+The loader is Google's nonce-aware snippet from [Use Tag Manager with a Content Security Policy](https://developers.google.com/tag-platform/security/guides/csp), byte for byte: the standard snippet plus one statement that copies the page's nonce onto the `gtm.js` element, so Tag Manager can pass it on to the scripts it adds. An id that does not match `GTM_CONTAINER_ID_PATTERN` throws `RangeError` before it can reach the script string. That includes `""`, so pass `undefined` (not an empty env var) for "no Tag Manager here".
+
+**Head, per route.** Opt in on the routes that should carry it:
+
+```ts
+// a public route
+head: () => toTanStackHead(metadata, { icons: true, gtm: GTM_ID }),
+```
+
+The entry carries no nonce of its own. `HeadContent` stamps `router.options.ssr.nonce` on every head script it renders, so the loader gets the request's nonce the same way the meta and link tags do. That puts two requirements on the router, both set when it is created (asklinq#427):
+
+- **server:** `ssr.nonce` is the request's nonce. Without it the loader renders with no nonce and the CSP blocks it.
+- **client:** `ssr.nonce` is `""`. Browsers hide a nonce from `getAttribute` once the page is under a header CSP, so the server-rendered loader reads back as `nonce=""`; the router's hydration check compares that with the client's `ssr.nonce` and, if they differ, appends a second copy. With `""` it finds the original and adds nothing; with anything else the copy is blocked by the CSP and logs a violation on every page load.
+
+The loader runs on a full page load of a route that has it. Client-side navigation away from such a page keeps Tag Manager loaded (use a History Change trigger for page views). Navigating client-side *into* one from a route without it does not load it: the copy the router appends then is blocked by the CSP, which also keeps Tag Manager from loading twice.
+
+**Body.** The shells render inside `<body>`, not `<body>` itself, so the product's root document renders the noscript as the first child of `<body>`, behind the same per-route condition:
+
+```tsx
+<body>
+  <Show when={gtmIdForThisRoute()}>{(id) => <noscript innerHTML={gtmNoscriptIframe(id())} />}</Show>
+  {props.children}
+</body>
+```
+
+`tests/site-kit-gtm-noscript-hydration.test.mjs` compiles exactly this with Solid's compiler and hydrates it under the development build: no mismatch, no lost key, and with JavaScript on the noscript stays text.
+
+**CSP.** Add each list in `GTM_CSP_SOURCES` to the directive of the same name:
+
+| Directive | Sources |
+|---|---|
+| `script-src` | `https://www.googletagmanager.com` |
+| `connect-src` | `https://www.googletagmanager.com https://*.google-analytics.com https://*.google.com` |
+| `img-src` | `https://www.googletagmanager.com https://*.google-analytics.com` |
+| `frame-src` | `https://www.googletagmanager.com` |
+
+These are Google's lists for the Tag Manager container and for "Google Analytics without any Ads features", plus `frame-src` for the noscript iframe. Google names `script-src-elem`; a policy without it falls back to `script-src`. `*.google.com` also covers `www.google.com` and GA4's `*.analytics.google.com` hosts. Not included (add them from the same guide if a container needs them): preview mode (`tagmanager.google.com`, `gstatic`, Google Fonts), Custom JavaScript variables (`'unsafe-eval'`), and Ads or Google signals hosts (`*.g.doubleclick.net`, `pagead2.googlesyndication.com`, `www.googleadservices.com`, `*.google.<TLD>`).
 
 ## Sections
 

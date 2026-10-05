@@ -1,11 +1,29 @@
 import { brandIconLinks } from "./core/seo.mjs";
+import { gtmHeadScript } from "./core/gtm.mjs";
+
+/**
+ * A route `head().scripts` entry that loads Google Tag Manager (D-031).
+ *
+ * Only `children`: no `nonce`, on purpose. The router's HeadContent stamps
+ * `router.options.ssr.nonce` on every head script it renders, after the
+ * entry's own attributes, so the per-request nonce reaches this script the
+ * same way it reaches the meta and link tags. A nonce written here would be
+ * overwritten anyway. The product sets `ssr.nonce` when it creates the
+ * router (asklinq#427); without it the loader renders with no nonce and the
+ * page's CSP blocks it.
+ */
+export function gtmHeadEntry(containerId) {
+  return { children: gtmHeadScript(containerId) };
+}
 
 // `icons` is opt-in: the adapter cannot know where (or whether) a product
 // serves the linq-brand files, and a head that links icons the server 404s
 // is worse than one that links none. `true` takes the /brand default.
+// `gtm` is opt-in the same way, and per route: the product decides which
+// pages carry Tag Manager (public marketing and legal pages, not consoles).
 export function toTanStackHead(metadata, options = {}) {
   const icons = options.icons === true ? brandIconLinks() : options.icons ? brandIconLinks(options.icons) : [];
-  return {
+  const head = {
     meta: [
       { title: metadata.title },
       { name: "description", content: metadata.description },
@@ -27,6 +45,8 @@ export function toTanStackHead(metadata, options = {}) {
       ...icons,
     ],
   };
+  if (options.gtm !== undefined) head.scripts = [gtmHeadEntry(options.gtm)];
+  return head;
 }
 
 export const toHtmlAttributes = (metadata) => ({ lang: metadata.html.lang, dir: metadata.html.dir });

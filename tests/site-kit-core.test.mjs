@@ -17,7 +17,15 @@ import {
   buildRobots,
   buildSitemap,
 } from "../packages/site-kit/src/core/seo.mjs";
-import { toTanStackHead } from "../packages/site-kit/src/tanstack-start.mjs";
+import { gtmHeadEntry, toTanStackHead } from "../packages/site-kit/src/tanstack-start.mjs";
+import {
+  GTM_CONTAINER_ID_PATTERN,
+  GTM_CSP_SOURCES,
+  gtmHeadScript,
+  gtmNoscriptIframe,
+} from "../packages/site-kit/src/core/gtm.mjs";
+import * as coreIndex from "../packages/site-kit/src/core/index.mjs";
+import { createRequire } from "node:module";
 import {
   VerifiedFactRegistry,
   buildVerifiedJsonLd,
@@ -294,4 +302,92 @@ test("the TanStack adapter appends the icon links only when asked, after canonic
   assert.deepEqual(withIcons.links.slice(0, bare.links.length), bare.links);
   assert.equal(toTanStackHead(metadata, { icons: { basePath: "/" } }).links.at(-1).href, "/apple-touch-icon.png");
   assert.deepEqual(toTanStackHead(metadata, { icons: false }), bare);
+});
+
+// Google's nonce-aware container snippet, as published in "Use Tag Manager
+// with a Content Security Policy"
+// (https://developers.google.com/tag-platform/security/guides/csp), with the
+// placeholder id. Pinned here so an edit to gtm.mjs that drifts from Google's
+// text fails, not just one that breaks the id.
+const GOOGLE_NONCE_AWARE_SNIPPET = `<script nonce='{SERVER-GENERATED-NONCE}'>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;var n=d.querySelector('[nonce]');
+n&&j.setAttribute('nonce',n.nonce||n.getAttribute('nonce'));f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-XXXXXX');</script>`;
+const GOOGLE_NOSCRIPT = `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXX"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>`;
+
+test("gtmHeadScript is Google's nonce-aware loader byte for byte, with only the container id substituted", () => {
+  const body = GOOGLE_NONCE_AWARE_SNIPPET.replace(/^<script nonce='\{SERVER-GENERATED-NONCE\}'>/, "").replace(/<\/script>$/, "");
+  assert.equal(gtmHeadScript("GTM-XXXXXX"), body);
+  assert.equal(gtmHeadScript("GTM-5VC3HXL4"), body.replace("'GTM-XXXXXX'", "'GTM-5VC3HXL4'"));
+  assert.doesNotMatch(gtmHeadScript("GTM-ABC"), /<\/?script|nonce=/, "the renderer owns the element and its nonce");
+});
+
+test("gtmNoscriptIframe is Google's noscript iframe for the id", () => {
+  const iframe = GOOGLE_NOSCRIPT.replace(/^<noscript>/, "").replace(/<\/noscript>$/, "").replace("\n", " ");
+  assert.equal(gtmNoscriptIframe("GTM-XXXXXX"), iframe);
+  assert.equal(gtmNoscriptIframe("GTM-AB12CD3"), '<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-AB12CD3" height="0" width="0" style="display:none;visibility:hidden"></iframe>');
+});
+
+test("a malformed container id never reaches a script string", () => {
+  for (const bad of [
+    "", "GTM-", "gtm-abc123", "GTM-abc123", "UA-12345-1", "G-ABC123", " GTM-ABC123", "GTM-ABC123 ",
+    "GTM-ABC123\n", "GTM-ABC'); alert(1); ('", "GTM-ABC</script><script>alert(1)</script>", "GTM-ABC\"", "GTM-A_B",
+    undefined, null, 123, ["GTM-ABC123"], { toString: () => "GTM-ABC123" },
+  ]) {
+    assert.throws(() => gtmHeadScript(bad), RangeError, `head script must refuse ${JSON.stringify(bad)}`);
+    assert.throws(() => gtmNoscriptIframe(bad), RangeError, `noscript must refuse ${JSON.stringify(bad)}`);
+    assert.throws(() => gtmHeadEntry(bad), RangeError);
+    // `gtm: undefined` is "no Tag Manager on this route", not a malformed id.
+    if (bad !== undefined) assert.throws(() => toTanStackHead(buildMetadata({ baseUrl: "https://example.com", path: "/", locale: "ko", defaultLocale: "ko", title: "t", description: "d", siteName: "s", image: "/og.png" }), { gtm: bad }), RangeError);
+  }
+  assert.equal(GTM_CONTAINER_ID_PATTERN.test("GTM-5VC3HXL4"), true);
+});
+
+test("the loader, run in a page with a nonced element, queues gtm.js and hands it the nonce", () => {
+  const require = createRequire(new URL("../packages/site-kit/package.json", import.meta.url));
+  const { JSDOM } = require("jsdom");
+  const dom = new JSDOM(`<!doctype html><html><head><meta property="csp-nonce" nonce="r4nd0m"><script src="/app.js"></script></head><body></body></html>`, { runScripts: "outside-only" });
+  dom.window.eval(gtmHeadScript("GTM-AB12CD3"));
+  assert.equal(dom.window.dataLayer[0].event, "gtm.js");
+  assert.equal(typeof dom.window.dataLayer[0]["gtm.start"], "number");
+  const loader = dom.window.document.querySelector('script[src^="https://www.googletagmanager.com/"]');
+  assert.equal(loader.async, true);
+  assert.equal(loader.src, "https://www.googletagmanager.com/gtm.js?id=GTM-AB12CD3");
+  assert.equal(loader.getAttribute("nonce"), "r4nd0m");
+  assert.equal(loader.nextElementSibling.getAttribute("src"), "/app.js", "inserted before the page's first script");
+});
+
+test("the CSP sources are Google's Tag Manager + GA4-without-Ads lists, plus frame-src for the noscript iframe", () => {
+  assert.deepEqual(GTM_CSP_SOURCES, {
+    "script-src": ["https://www.googletagmanager.com"],
+    "connect-src": ["https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.google.com"],
+    "img-src": ["https://www.googletagmanager.com", "https://*.google-analytics.com"],
+    "frame-src": ["https://www.googletagmanager.com"],
+  });
+  assert.ok(Object.isFrozen(GTM_CSP_SOURCES) && Object.values(GTM_CSP_SOURCES).every(Object.isFrozen));
+  const all = Object.values(GTM_CSP_SOURCES).flat().join(" ");
+  assert.doesNotMatch(all, /unsafe-|doubleclick|googlesyndication|googleadservices|tagmanager\.google\.com/, "preview mode, Custom JavaScript variables and Ads stay opt-in per product");
+  const iframeOrigin = new URL(gtmNoscriptIframe("GTM-ABC").match(/src="([^"]+)"/)[1]).origin;
+  assert.ok(GTM_CSP_SOURCES["frame-src"].includes(iframeOrigin), "frame-src admits the noscript iframe");
+  const loaderOrigin = new URL(gtmHeadScript("GTM-ABC").match(/'(https:[^']+)'/)[1]).origin;
+  assert.ok(GTM_CSP_SOURCES["script-src"].includes(loaderOrigin), "script-src admits gtm.js");
+});
+
+test("the core index exports the Tag Manager helpers", () => {
+  for (const name of ["GTM_CONTAINER_ID_PATTERN", "GTM_CSP_SOURCES", "gtmHeadScript", "gtmNoscriptIframe"]) assert.ok(name in coreIndex, name);
+});
+
+test("the TanStack adapter adds the Tag Manager loader as a head script only when asked, without a nonce of its own", () => {
+  const metadata = buildMetadata({ baseUrl: "https://example.com", path: "/", locale: "ko", defaultLocale: "ko", title: "Example", description: "Example site", siteName: "Example", image: "/og.png" });
+  const bare = toTanStackHead(metadata);
+  assert.equal("scripts" in bare, false, "no gtm, no scripts key — routes that spread the head keep their own");
+  const withGtm = toTanStackHead(metadata, { gtm: "GTM-AB12CD3", icons: true });
+  assert.deepEqual(withGtm.scripts, [{ children: gtmHeadScript("GTM-AB12CD3") }]);
+  assert.deepEqual(withGtm.scripts[0], gtmHeadEntry("GTM-AB12CD3"));
+  assert.equal("nonce" in withGtm.scripts[0], false, "the router stamps ssr.nonce on head scripts; the entry must not carry one");
+  assert.deepEqual(withGtm.meta, bare.meta);
+  assert.deepEqual(withGtm.links, toTanStackHead(metadata, { icons: true }).links);
 });

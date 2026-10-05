@@ -5,6 +5,42 @@
 
 ---
 
+## D-031 — Google Tag Manager 스니펫은 site-kit이 한 번 쓰고, nonce는 라우터가 찍는다 (2026-10-05)
+
+**결정.** `@devslab/site-kit`에 Tag Manager 도구를 둔다.
+
+- 코어(프레임워크 중립): `gtmHeadScript(id)`(head 로더 본문 — `<script>` 태그·nonce 없음), `gtmNoscriptIframe(id)`(`<noscript>` 안의 iframe HTML), `GTM_CSP_SOURCES`(지시어별 CSP 출처), `GTM_CONTAINER_ID_PATTERN`(`/^GTM-[A-Z0-9]+$/`).
+- TanStack 어댑터: `toTanStackHead(metadata, { gtm })`가 로더를 `scripts[0]`으로 더하고(생략하면 `scripts` 키 자체가 없음), `gtmHeadEntry(id)`는 head를 직접 만드는 라우트를 위한 같은 항목.
+- 로더는 구글 "Use Tag Manager with a Content Security Policy"(https://developers.google.com/tag-platform/security/guides/csp)의 **nonce 대응 스니펫**을 바이트 그대로 쓴다. 테스트가 가이드의 원문을 고정해 두고 비교한다.
+- ID는 스크립트 문자열에 들어가기 전에 패턴으로 검사하고, 맞지 않으면 `RangeError`. `""`도 거부 — "Tag Manager 없음"은 `undefined`.
+- 항목에는 nonce를 넣지 않는다. 라우터의 `HeadContent`가 항목 속성을 펼친 **뒤에** `router.options.ssr.nonce`를 찍으므로, 넣어도 덮인다.
+- body의 noscript는 컴포넌트로 내지 않는다. 셸(`MarketingShell` 등)은 `<body>` 안을 그릴 뿐 `<body>`를 소유하지 않으므로, 제품 루트 문서가 `<noscript innerHTML={gtmNoscriptIframe(id)} />`를 `<body>` 첫 자식으로 렌더한다(README에 패턴).
+
+**계기.** 가족 네 사이트(AskLinq·BookLinq·VisionLinq·TraceLinq, 모두 TanStack Start + Solid + nonce CSP)가 공개 마케팅·법적 페이지에 각자 컨테이너 ID로 Tag Manager를 실어야 한다. 콘솔·대시보드·채팅 위젯은 제외이고 어느 라우트인지는 제품이 정한다. 파비콘 링크가 네 가지로 갈라졌던 것(D-026)과 같은 일이 생기기 전에, head를 만드는 자리에 한 번 둔다.
+
+**근거.**
+- **nonce 대응 변형.** 표준 스니펫에 문장 하나(`var n=d.querySelector('[nonce]'); n&&j.setAttribute('nonce',n.nonce||n.getAttribute('nonce'))`)를 더해 페이지의 nonce를 `gtm.js` 요소에 옮긴다. 구글 가이드: Tag Manager는 그 nonce를 자기가 추가하는 스크립트에 넘긴다. 네 제품 모두 nonce CSP라 이 변형이 맞고, nonce 없는 페이지에서는 `[nonce]` 요소가 없어 아무 일도 안 한다. 브라우저는 헤더 CSP 아래에서 `getAttribute('nonce')`를 `""`로 숨기지만 `n.nonce`가 원래 값을 준다 — Chromium에서 직접 확인했고, jsdom 테스트가 로더를 실행해 `gtm.js` 요소에 nonce가 옮겨지는 것을 고정한다.
+- **nonce는 라우터 한 곳에서.** 실제 라우터로 서버 렌더하는 테스트(`tanstack-head.ssr.test.tsx`)가 `ssr.nonce`가 있으면 로더가 그 nonce로, 없으면 nonce 없이 렌더됨을 고정한다. 따라서 제품의 요구 사항은 이미 있는 것(asklinq#427 — 라우터 생성 시 `ssr.nonce`)과 같다.
+- **클라이언트 `ssr.nonce`는 `""`.** 라우터의 `Script`는 하이드레이션 때 같은 본문·type·nonce 속성을 가진 인라인 스크립트를 찾고, 없으면 사본을 붙인다. 서버가 렌더한 로더는 nonce 숨김 때문에 `nonce=""`로 읽히므로, 클라이언트 `ssr.nonce`가 `""`(AskLinq 방식)여야 원본을 찾는다. 다른 값이면 사본이 붙고 CSP가 막아 페이지마다 위반이 기록된다(두 번 로드되지는 않음 — Chromium 확인).
+- **CSP 출처는 구글 목록 그대로.** Tag Manager 컨테이너 + "Ads 기능 없는 Google Analytics" + noscript iframe용 `frame-src`. `connect-src`의 `https://*.google.com`은 구글이 적은 항목이고 `www.google.com`과 GA4의 `*.analytics.google.com`도 덮는다(CSP 와일드카드는 하위 도메인 깊이와 무관). 구글은 `script-src-elem`으로 적지만 가족 제품은 `script-src`에 nonce를 두므로 키는 `script-src`(`-elem`이 없으면 `script-src`로 넘어감).
+- **noscript 패턴도 검증.** 컴포넌트를 내지 않으니, README가 권하는 JSX 자체를 Solid의 실제 컴파일러(babel-preset-solid, ssr/dom 모두 hydratable)로 컴파일해 개발 빌드로 하이드레이션하는 테스트(`tests/site-kit-gtm-noscript-hydration.test.mjs`, `verify:site-kit:ui`)를 둔다 — 불일치 0, 잃은 키 0, 뒤따르는 요소는 서버 것을 그대로 채택, 스크립트가 켜져 있으면 iframe 없이 텍스트.
+
+**반려한 대안.**
+- **표준(비 nonce) 스니펫** — 요청서의 원안. `gtm.js` 자체는 `script-src` 호스트 허용으로 어차피 로드되지만, `gtm.js` 요소에 nonce가 없으니 Tag Manager가 자기가 추가하는 스크립트에 넘길 nonce도 없다. 구글이 CSP 페이지용으로 따로 게시한 변형이 있으니 그쪽을 쓴다.
+- **항목이 nonce를 받음(`gtmHeadEntry(id, nonce)`)** — 라우터가 덮어쓰므로 죽은 인자이고, 제품이 라우터와 다른 nonce를 넘길 여지만 만든다.
+- **`GtmNoscript` Solid 컴포넌트** — 한 줄짜리를 감쌀 뿐이고, 셸이 `<body>`를 소유하지 않아 "body 첫 자식"을 보장할 수 없다. 공개 API를 늘리는 대신 패턴을 문서화하고 그 패턴을 테스트로 고정한다.
+- **CSP 헤더 문자열을 만드는 헬퍼** — 네 제품의 CSP 조립 방식이 달라(문자열·객체·미들웨어) 출처 목록이 공통분모다.
+- **미리보기 모드·맞춤 JS 변수·Ads 출처 포함** — 미리보기는 `tagmanager.google.com`·`gstatic`·Google Fonts까지 열고, 맞춤 JS 변수는 `'unsafe-eval'`을 요구하며, Ads는 doubleclick·googlesyndication 등을 연다. 필요한 컨테이너만 같은 가이드에서 더한다.
+
+**트레이드오프.**
+- 로더는 head 끝(라우터가 meta·link·style 다음에 head 스크립트를 렌더)에 온다. 구글은 "가능한 한 head 위쪽"을 권하지만 `async`라 파싱을 막지 않는다.
+- 로더가 없는 라우트에서 클라이언트 내비게이션으로 로더가 있는 라우트에 들어오면 Tag Manager가 로드되지 않는다(라우터가 붙이는 사본은 CSP에 막힘). 전체 페이지 로드에서만 확실하다. 반대로 로더 있는 페이지에서 떠나는 내비게이션은 Tag Manager를 유지하므로 페이지뷰는 History Change 트리거로 잡는다.
+- 빈 문자열 ID도 던진다 — 환경 변수가 비면 공개 페이지 렌더가 실패한다. 조용히 빠지는 것보다 낫다고 판단했다(제품은 `undefined`로 끈다).
+
+**재검토 시점.** 구글이 컨테이너 스니펫이나 CSP 가이드를 바꿀 때(테스트의 원문 고정이 그 신호를 드러냄), 가족 사이트가 `<body>`를 소유하는 공용 문서 셸을 갖게 될 때(그때 noscript를 셸 옵션으로), 또는 Ads·미리보기를 쓰는 제품이 둘 이상이 될 때(그때 출처 목록에 단계 추가).
+
+---
+
 ## D-030 — 한국어 줄바꿈은 dds.css가 아니라 각 페이지의 언어 뿌리에서: 쇼케이스 3페이지부터 (2026-09-25)
 
 **결정.** 한국어를 음절이 아니라 어절에서 끊는 두 줄을 쇼케이스 세 페이지(`preview/index.html`·`components.html`·`icons.html`)의 인라인 `<style>`에 둔다.
