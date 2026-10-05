@@ -29,7 +29,7 @@ afterEach(() => {
 });
 
 function mount(consent?: ConsentManager) {
-  const controller = consent ?? createConsentManager({ policyVersion: "2026-10-05", gtm: GTM, onChange: (record) => { records.push(record); } });
+  const controller = consent ?? createConsentManager({ policyVersion: "2026-10-05", gtm: GTM, measurementIds: ["G-ABC123"], onChange: (record) => { records.push(record); } });
   const host = document.body.appendChild(document.createElement("div"));
   dispose = render(() => <>
     <ConsentBanner controller={controller} messages={CONSENT_MESSAGES_KO} privacyHref="/privacy" />

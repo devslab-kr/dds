@@ -36,6 +36,14 @@ export const CONSENT_MODE_DEFAULTS = Object.freeze({
 });
 /** Cookies Google Analytics writes: `_ga`, `_ga_<stream>`, and the older `_gid` / `_gat*`. */
 export const GA_COOKIE_PATTERN = /^(?:_ga|_gid|_gat)(?:_[0-9A-Za-z_-]+)?$/;
+/**
+ * Headers for every response whose HTML was rendered from the consent cookie
+ * (a TanStack route using `consent`). A granted visitor's head carries the
+ * Tag Manager loader; if a CDN or edge cache stored that page, visitors who
+ * never consented would be served the loader. `private, no-store` keeps it
+ * out of shared caches; `Vary: Cookie` covers a cache that honours it anyway.
+ */
+export const CONSENT_RESPONSE_HEADERS = Object.freeze({ "Cache-Control": "private, no-store", Vary: "Cookie" });
 /** A consent record body is a handful of short fields; anything longer is refused before parsing. */
 export const CONSENT_RECORD_MAX_BYTES = 1024;
 
@@ -290,6 +298,13 @@ export function createConsentManager(options) {
   const cookieDomain = options.cookieDomain === undefined ? undefined : checkDomain(options.cookieDomain);
   const maxAgeSeconds = checkMaxAge(options.maxAgeSeconds ?? CONSENT_MAX_AGE_SECONDS);
   const measurementIds = (options.measurementIds ?? []).map(checkMeasurementId);
+  // ga-disable-<id> is the only switch that stops a GA4 tag Tag Manager has
+  // already initialised: its own listeners (history page_view, scroll,
+  // outbound clicks) bypass the dataLayer gate and would keep sending
+  // cookieless pings to Google until the page reloads.
+  if (gtm !== undefined && measurementIds.length === 0) {
+    fail("a consent manager that loads Tag Manager needs measurementIds (the GA4 streams the container sends to), so a withdrawal can switch them off");
+  }
   const pendingKey = `${cookieName}_pending`;
   const listeners = new Set();
   const inFlight = new Set();

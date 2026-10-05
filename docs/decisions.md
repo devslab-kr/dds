@@ -19,7 +19,8 @@
 - 쿠키 `site_consent=v=<정책>&a=<0|1>&t=<유닉스 초>&id=<16진 32자>`: 퍼스트파티, `Path=/`, `SameSite=Lax`, `Secure`, 12개월, `HttpOnly` 아님. 파서는 이 네 키만 받는다. `t`가 12개월보다 오래됐거나 미래면 결정이 없는 것으로 본다.
 - 정책 버전이 다르면 다시 묻고, 답하기 전에는 아무것도 로드하지 않는다. 익명 id는 이어진다.
 - 허용: `consent update {analytics_storage: granted}` 뒤에 Tag Manager를 한 번, 페이지의 nonce(`csp-nonce` meta, 없으면 첫 `[nonce]` 요소의 `.nonce` 속성)로 로드한다.
-- 철회: `denied`로 업데이트, `ga-disable-<측정 ID>`, 호스트와 모든 상위 도메인에서 `_ga`·`_ga_*`·`_gid`·`_gat*` 삭제.
+- 철회: `denied`로 업데이트, `ga-disable-<측정 ID>`, 호스트와 모든 상위 도메인에서 `_ga`·`_ga_*`·`_gid`·`_gat*` 삭제. `gtm`을 주는 매니저는 `measurementIds`가 필수다(비면 `RangeError`). 이미 초기화된 GA4 태그는 자체 리스너(히스토리 페이지뷰·스크롤·외부 링크 클릭)로 `dataLayer` 게이트를 거치지 않고 새로고침 전까지 쿠키 없는 핑을 보내므로, 그것을 멈추는 유일한 스위치인 `ga-disable-<id>`를 빠뜨릴 수 없게 했다.
+- 캐시: head가 요청 쿠키로 달라지므로 `consent`를 쓰는 응답은 모두 `CONSENT_RESPONSE_HEADERS`(`Cache-Control: private, no-store`, `Vary: Cookie`)를 보낸다. 공유 캐시가 허용한 방문자의 HTML(로더 포함)을 저장해 동의하지 않은 방문자에게 주면 허용 전에 구글에 닿는다. 캐시되어야 하는 라우트는 거부 쪽 head만 렌더하고 하이드레이션 뒤에 매니저가 로드한다(정적 내보내기와 같은 길).
 - `dataLayer` 게이트: 분석이 허용되지 않은 동안 페이지의 `dataLayer.push`는 동의 명령만 통과시키고 나머지는 버린다. 동의 전에 쌓인 이벤트가 나중에 로드되는 Tag Manager로 흘러가지 않고, 철회 뒤의 이벤트는 이미 로드된 Tag Manager에 닿지 않는다.
 - 닫기(✕·Esc)는 결정이 아니다. 쿠키를 쓰지 않고, 다음 방문에 다시 묻는다.
 - 바의 세 선택(모두 허용·거부·설정)과 대화상자의 세 버튼은 같은 tone(secondary), 같은 트랙 폭이다. 브라우저 테스트가 폭·높이·색·굵기가 같음을 잰다.

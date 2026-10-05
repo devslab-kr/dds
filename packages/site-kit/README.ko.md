@@ -214,6 +214,7 @@ Tag Manager 컨테이너와 "Ads 기능 없는 Google Analytics"에 대한 구�
 | `readConsentCookie(cookie, { policyVersion })` / `consentCookieGrantsAnalytics(…)` | `@devslab/site-kit` | Cookie 헤더나 `document.cookie`에서 현재 버전의 유효한 결정(서버·브라우저 모두) |
 | `consentHeadScript({ granted, gtm })` | `@devslab/site-kit` | head 스크립트 본문: 기본값만, 또는 기본값 + 허용 + 구글 로더 |
 | `toTanStackHead(metadata, { consent })` / `consentHeadEntry(…)` | `@devslab/site-kit/tanstack-start` | 같은 스크립트를 라우트 `scripts` 항목으로. 요청의 쿠키로 정한다 |
+| `CONSENT_RESPONSE_HEADERS` | 둘 다 | 쿠키로 head를 정한 모든 응답에 보낼 `Cache-Control: private, no-store`와 `Vary: Cookie` |
 | `ConsentBanner`, `ConsentSettingsButton` | `@devslab/site-kit/solid` | 바와 설정 대화상자, 그리고 어디에나 둘 수 있는 "쿠키 설정" 버튼 |
 | `SiteFooter consentSettings` | `@devslab/site-kit/solid` | 같은 버튼을 바닥글 링크 끝에 |
 | `postConsentRecord(path)`, `parseConsentRecord(body, …)`, `isSameOriginRequest(…)` | `@devslab/site-kit` | 기록: 보내기, 서버에서 검증하기, 다른 사이트의 쓰기 거부하기 |
@@ -225,7 +226,7 @@ Tag Manager 컨테이너와 "Ads 기능 없는 Google Analytics"에 대한 구�
 - 쿠키: `site_consent=v=<정책>&a=<0|1>&t=<유닉스 초>&id=<16진 32자>`. 퍼스트파티, `Path=/`, `SameSite=Lax`, `Secure`, 12개월, `HttpOnly` 아님(배너가 읽는다). `id`는 무작위이고 방문자에게서 끌어낸 값이 아니다. 파서는 이 네 키만 받는다.
 - 정책 버전은 제품마다 문자열 하나(`"2026-10-05"`). 개인정보처리방침이 분석에 대해 하는 말이 바뀌면 올린다. 모든 방문자에게 다시 묻고, 답하기 전에는 아무것도 로드하지 않는다. 익명 id는 이어지므로 기록끼리 연결된다.
 - 허용하면 `gtag('consent','update',{analytics_storage:'granted'})`를 넣고 Tag Manager를 한 번, 페이지의 nonce로 로드한다(`csp-nonce` meta, 없으면 첫 `[nonce]` 요소, 없으면 `options.nonce`).
-- 철회하면 업데이트를 `denied`로 되돌리고, `measurementIds`에 대해 `ga-disable-<id>`를 켜고, 호스트와 모든 상위 도메인에서 `_ga`·`_ga_*`·`_gid`·`_gat*`를 지우고, `dataLayer`를 닫는다. 분석이 허용되지 않은 동안 페이지의 `dataLayer`는 동의 명령만 받고 나머지는 버린다. 그래서 동의 전에 넣은 이벤트가 나중에 로드될 Tag Manager를 기다리며 쌓이지 않고, 철회 뒤의 이벤트는 이미 로드된 Tag Manager에 닿지 않는다. Tag Manager 자체는 다음 페이지 로드까지 메모리에 남는다.
+- 철회하면 업데이트를 `denied`로 되돌리고, `measurementIds`의 모든 id에 `ga-disable-<id>`를 켜고(`gtm`을 주면 필수 — 이미 초기화된 GA4 태그의 자체 리스너(히스토리 페이지뷰·스크롤·외부 링크 클릭)를 멈추는 유일한 스위치라, 없으면 새로고침 전까지 쿠키 없는 핑이 계속 나간다. 없으면 `createConsentManager`가 던진다), 호스트와 모든 상위 도메인에서 `_ga`·`_ga_*`·`_gid`·`_gat*`를 지우고, `dataLayer`를 닫는다. 분석이 허용되지 않은 동안 페이지의 `dataLayer`는 동의 명령만 받고 나머지는 버린다. 그래서 동의 전에 넣은 이벤트가 나중에 로드될 Tag Manager를 기다리며 쌓이지 않고, 철회 뒤의 이벤트는 이미 로드된 Tag Manager에 닿지 않는다. Tag Manager 자체는 다음 페이지 로드까지 메모리에 남는다.
 - 기록의 action: `grant`(이 버전에서 분석이 허용됨), `deny`(첫 결정이 거부), `withdraw`(허용 → 거부), `update`(같은 선택을 다시 저장).
 
 **TanStack Start.** 매니저는 모듈 하나가 갖는다.
@@ -239,6 +240,7 @@ export const GTM_ID = "GTM-XXXXXXX";
 export const consent = createConsentManager({
   policyVersion: CONSENT_POLICY_VERSION,
   gtm: GTM_ID,
+  measurementIds: ["G-XXXXXXXXXX"], // 컨테이너가 보내는 GA4 스트림 전부. gtm을 주면 필수
   onChange: postConsentRecord("/api/consent"),
 });
 ```
@@ -260,6 +262,19 @@ head: () => toTanStackHead(metadata, {
 ```
 
 현재 버전의 허용이 없으면 항목은 기본값뿐이고 head 어디에도 구글 호스트가 나오지 않는다. 허용이 있으면 구글의 nonce 대응 로더를 더하되, `gtm.js`가 이미 페이지에 있으면 건너뛴다. 라우터는 맨 로더와 똑같이 `ssr.nonce`를 찍는다([Google Tag Manager](#google-tag-manager)의 nonce 요구 사항이 그대로 적용된다). `gtm`과 `consent`를 같이 넘기면 던진다. `gtm`만 쓰면 묻지 않고 Tag Manager를 로드하기 때문이다. noscript iframe은 `consentCookieGrantsAnalytics(requestCookie(), { policyVersion })`가 참일 때만 렌더한다. 자바스크립트가 없는 방문자는 허용할 방법이 없으니 받지 않는다.
+
+**이 페이지는 공유 캐시에 절대 들어가면 안 된다.** head가 방문자의 쿠키에 따라 달라진다. 허용한 방문자의 HTML에는 Tag Manager 로더가 들어 있어서, CDN이나 엣지 캐시가 그것을 저장하면 동의하지 않은 방문자도 로더를 받는다 — 허용 전에 구글에 닿는 것이다. `consent`를 쓰는 라우트는 모두 `CONSENT_RESPONSE_HEADERS`(`Cache-Control: private, no-store`와 `Vary: Cookie`)를 보낸다.
+
+```ts
+import { CONSENT_RESPONSE_HEADERS } from "@devslab/site-kit/tanstack-start";
+
+export const Route = createRootRoute({
+  headers: () => ({ ...CONSENT_RESPONSE_HEADERS }),
+  head: () => toTanStackHead(metadata, { consent: { … } }),
+});
+```
+
+캐시되어야 하는 라우트는 모두에게 거부 쪽 head(허용 없는 `consentHeadScript()`)를 렌더하고, 아래 정적 내보내기처럼 하이드레이션 뒤에 매니저가 Tag Manager를 로드하게 한다.
 
 배너는 `<body>`의 첫 요소로 한 번만 붙여 키보드 사용자가 가장 먼저 닿게 하고, 바닥글에 트리거를 둔다.
 
@@ -348,7 +363,7 @@ Postgres에서는 두 인자 `MIN`을 `LEAST`로 쓰고, 애플리케이션 역�
 ```tsx
 // src/consent.ts
 import { createConsentManager } from "@devslab/site-kit";
-export const consent = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-XXXXXXX" });
+export const consent = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-XXXXXXX", measurementIds: ["G-XXXXXXXXXX"] });
 
 // src/components/ConsentBar.tsx — 마크업은 제품 것, 동작과 문구는 킷 것
 import { useEffect, useState } from "react";

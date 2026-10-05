@@ -14,6 +14,8 @@ export declare const CONSENT_MODE_DEFAULTS: Readonly<Record<ConsentModeSignal, "
 /** `_ga`, `_ga_<stream>`, `_gid`, `_gat`, `_gat_<…>`. */
 export declare const GA_COOKIE_PATTERN: RegExp;
 export declare const CONSENT_RECORD_MAX_BYTES: number;
+/** `{ "Cache-Control": "private, no-store", Vary: "Cookie" }` — send on every response whose HTML was rendered from the consent cookie, so a shared cache never serves one visitor's granted head (with the Tag Manager loader) to another. */
+export declare const CONSENT_RESPONSE_HEADERS: Readonly<{ "Cache-Control": "private, no-store"; Vary: "Cookie" }>;
 
 /** What the consent cookie holds: policy version, analytics (1 granted / 0 not), unix seconds, anonymous id. */
 export interface ConsentState { readonly v: string; readonly a: 0 | 1; readonly t: number; readonly id: string }
@@ -90,7 +92,11 @@ export interface ConsentManagerOptions {
   /** Share the decision across subdomains. Default: host-only. */
   cookieDomain?: string;
   maxAgeSeconds?: number;
-  /** GA4 measurement ids to switch off with `ga-disable-<id>` on withdrawal. */
+  /**
+   * GA4 measurement ids (`G-…`) the container sends to, switched off with `ga-disable-<id>` on withdrawal.
+   * Required (non-empty) when `gtm` is given: it is the only switch that stops a GA4 tag Tag Manager has
+   * already initialised. Throws RangeError otherwise.
+   */
   measurementIds?: readonly string[];
   /** Called after every decision — POST it to your backend (see postConsentRecord). A rejection with `retryable !== false` is kept and resent on the next start(). */
   onChange?: (record: ConsentRecord) => void | Promise<void>;

@@ -85,7 +85,7 @@ it("server-renders a product's own languages alongside the family's", () => {
 });
 
 it("server-renders no consent bar — it comes in after mount, from the browser's own cookie (D-034)", () => {
-  const controller = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-AB12CD3" });
+  const controller = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-AB12CD3", measurementIds: ["G-ABC123"] });
   const html = renderToString(() => <>
     <ConsentBanner controller={controller} messages={CONSENT_MESSAGES_KO} privacyHref="/privacy" />
     <SiteFooter brand={{ name: "AskLinq", href: "/" }} links={[]} copyright="© DevsLab" messages={messages} consentSettings={{ controller, label: "쿠키 설정" }} />

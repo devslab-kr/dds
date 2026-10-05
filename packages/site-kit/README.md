@@ -214,6 +214,7 @@ Analytics is opt-in for the family (D-034). Until a visitor grants analytics for
 | `readConsentCookie(cookie, { policyVersion })` / `consentCookieGrantsAnalytics(…)` | `@devslab/site-kit` | the current, unexpired decision in a Cookie header or `document.cookie` (server or browser) |
 | `consentHeadScript({ granted, gtm })` | `@devslab/site-kit` | the head script body: defaults only, or defaults + grant + Google's loader |
 | `toTanStackHead(metadata, { consent })` / `consentHeadEntry(…)` | `@devslab/site-kit/tanstack-start` | the same script as a route `scripts` entry, decided from the request's cookie |
+| `CONSENT_RESPONSE_HEADERS` | both | `Cache-Control: private, no-store` and `Vary: Cookie` for every response whose head was decided from the cookie |
 | `ConsentBanner`, `ConsentSettingsButton` | `@devslab/site-kit/solid` | the bar, its settings dialog, and a "쿠키 설정" button for anywhere else |
 | `SiteFooter consentSettings` | `@devslab/site-kit/solid` | the same button at the end of the footer's links |
 | `postConsentRecord(path)`, `parseConsentRecord(body, …)`, `isSameOriginRequest(…)` | `@devslab/site-kit` | the record: send it, validate it on the server, refuse cross-site writes |
@@ -225,7 +226,7 @@ Analytics is opt-in for the family (D-034). Until a visitor grants analytics for
 - The cookie: `site_consent=v=<policy>&a=<0|1>&t=<unix seconds>&id=<32 hex>`, first-party, `Path=/`, `SameSite=Lax`, `Secure`, 12 months, not `HttpOnly` (the banner reads it). `id` is random, not derived from the visitor. The parser takes exactly those four keys.
 - The policy version is one string per product (`"2026-10-05"`). Change it when what the privacy policy says about analytics changes: every visitor is asked again, and nothing loads until they answer. The anonymous id carries over, so the records link.
 - Granting pushes `gtag('consent','update',{analytics_storage:'granted'})` and loads Tag Manager once, with the page's nonce (a `csp-nonce` meta, else the first `[nonce]` element, else `options.nonce`).
-- Withdrawing pushes the update back to `denied`, sets `ga-disable-<id>` for any `measurementIds`, deletes `_ga`, `_ga_*`, `_gid` and `_gat*` on the host and every parent domain, and closes the `dataLayer`: while analytics is not granted, the page's `dataLayer` keeps consent commands and drops everything else, so events pushed before consent are not queued for a Tag Manager that loads later, and events after a withdrawal never reach the one already loaded. Tag Manager itself stays in memory until the next page load.
+- Withdrawing pushes the update back to `denied`, sets `ga-disable-<id>` for every id in `measurementIds` (required whenever `gtm` is given — it is the only switch that stops the GA4 tag Tag Manager already initialised, whose own listeners for history page views, scrolls and outbound clicks would otherwise keep sending cookieless pings until the page reloads; `createConsentManager` throws without it), deletes `_ga`, `_ga_*`, `_gid` and `_gat*` on the host and every parent domain, and closes the `dataLayer`: while analytics is not granted, the page's `dataLayer` keeps consent commands and drops everything else, so events pushed before consent are not queued for a Tag Manager that loads later, and events after a withdrawal never reach the one already loaded. Tag Manager itself stays in memory until the next page load.
 - Actions in the record: `grant` (analytics becomes granted under this version), `deny` (first decision, refused), `withdraw` (granted → refused), `update` (the same choice saved again).
 
 **TanStack Start.** One module owns the manager:
@@ -239,6 +240,7 @@ export const GTM_ID = "GTM-XXXXXXX";
 export const consent = createConsentManager({
   policyVersion: CONSENT_POLICY_VERSION,
   gtm: GTM_ID,
+  measurementIds: ["G-XXXXXXXXXX"], // every GA4 stream the container sends to; required with gtm
   onChange: postConsentRecord("/api/consent"),
 });
 ```
@@ -260,6 +262,19 @@ head: () => toTanStackHead(metadata, {
 ```
 
 Without a current grant the entry is the defaults only and nothing in the head names a Google host; with one it adds Google's nonce-aware loader, skipped if `gtm.js` is already on the page. The router stamps `ssr.nonce` on it exactly as on the plain loader (the nonce requirements in [Google Tag Manager](#google-tag-manager) apply unchanged). Passing both `gtm` and `consent` throws: `gtm` alone loads Tag Manager without asking. Render the noscript iframe only when `consentCookieGrantsAnalytics(requestCookie(), { policyVersion })` is true; a visitor without JavaScript has no way to grant, so they never get it.
+
+**Never let a shared cache store these pages.** The head now depends on the visitor's cookie: a granted visitor's HTML carries the Tag Manager loader. If a CDN or edge cache stored it, visitors who never consented would get the loader — Google contact before a grant. Every route that uses `consent` sends `CONSENT_RESPONSE_HEADERS` (`Cache-Control: private, no-store` and `Vary: Cookie`):
+
+```ts
+import { CONSENT_RESPONSE_HEADERS } from "@devslab/site-kit/tanstack-start";
+
+export const Route = createRootRoute({
+  headers: () => ({ ...CONSENT_RESPONSE_HEADERS }),
+  head: () => toTanStackHead(metadata, { consent: { … } }),
+});
+```
+
+A route that must stay cacheable renders the denied head for everyone (`consentHeadScript()` with no grant) and lets the manager load Tag Manager after hydration, as the static export below does.
 
 Mount the banner once, as the first element in `<body>`, so it is the first thing keyboard users reach, and put the trigger in the footer:
 
@@ -348,7 +363,7 @@ In Postgres, write the two-argument `MIN` as `LEAST`, and keep the table append-
 ```tsx
 // src/consent.ts
 import { createConsentManager } from "@devslab/site-kit";
-export const consent = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-XXXXXXX" });
+export const consent = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-XXXXXXX", measurementIds: ["G-XXXXXXXXXX"] });
 
 // src/components/ConsentBar.tsx — the product's own markup, the kit's behaviour and strings
 import { useEffect, useState } from "react";
