@@ -223,6 +223,12 @@ D-029. FM덴탈서비스 랜딩 리뷰에서 kit으로 못 그리는 9건을 선
 - **다음(BookLinq·TraceLinq, 올릴 때)**: 휴대폰 헤더 89px → 65px — 375px 시각 확인. BookLinq는 `MarketingFrame`의 `SiteHeaderProps`를 `& { locale: LocaleState }`로 좁혀야 타입 검사가 통과.
 - **다음(fm-dental, 별도 세션)**: 랜딩 구현 때 이 버전을 쓴다 — 워드마크 `logo` + `name: ""` + `label`, `locale` 없음, `details`에 사업자 정보·주소, `linksLabel`, 개인정보처리방침 `emphasis`, 랜딩 뿌리에 `--site-hero-eyebrow-tracking: 0`.
 
+### 17. site-kit 분석 동의(옵트인) — `완료` (2026-10-05)
+D-034. 허용 전에는 구글에 닿는 것이 없다 — 코어 매니저·쿠키·Consent Mode·기록 도구, Solid 바·설정 대화상자·바닥글 "쿠키 설정", TanStack `consent` head.
+- [x] 테스트: 코어(소스 단계, 변이 5종으로 확인), 컴포넌트 jsdom + axe, SSR·실제 라우터 head, 개발 빌드 하이드레이션, 브라우저(nonce CSP·390/1280·라이트/다크·포커스 가둠·같은 무게).
+- **다음(제품마다, 각 레포)**: `gtm` → `consent` 옮기기, `ConsentBanner` + 바닥글 `consentSettings`, `/api/consent` 엔드포인트 + `consent_records` 마이그레이션 + 3년 정리 작업, 개인정보처리방침에 동의 기록 보관 기간, GTM 콘솔의 GA4 태그 "추가 동의 필요: analytics_storage".
+- **다음(devslab.kr)**: 정적 내보내기라 head는 기본값만, 매니저가 하이드레이션 뒤 로드(README "Solid 없이"). 백엔드가 없으므로 기록을 어디에 둘지 소유자 결정 필요.
+
 ---
 
 ## P3 — 모바일 이후

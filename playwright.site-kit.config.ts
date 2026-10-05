@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/browser",
-  testMatch: "site-kit.spec.ts",
+  testMatch: ["site-kit.spec.ts", "site-kit-consent.spec.ts"],
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,

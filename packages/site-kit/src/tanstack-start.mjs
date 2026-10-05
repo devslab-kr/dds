@@ -1,6 +1,7 @@
 import { brandIconLinks } from "./core/seo.mjs";
 import { gtmHeadScript } from "./core/gtm.mjs";
 import { fontPreloadLinks } from "./core/fonts.mjs";
+import { consentCookieGrantsAnalytics, consentHeadScript } from "./core/consent.mjs";
 
 /**
  * A route `head().scripts` entry that loads Google Tag Manager (D-031).
@@ -17,11 +18,33 @@ export function gtmHeadEntry(containerId) {
   return { children: gtmHeadScript(containerId) };
 }
 
+/**
+ * The consent-gated head entry (D-034): one inline script. Without a current
+ * analytics grant in `cookie` it only pushes Consent Mode defaults (all
+ * denied) into the page's dataLayer — nothing contacts Google. With one, it
+ * also grants `analytics_storage` and runs Google's Tag Manager loader.
+ *
+ * `cookie` is the Cookie header on the server and `document.cookie` in the
+ * browser (TanStack Start: createIsomorphicFn), so both sides of hydration
+ * render the same script. Only the consent cookie is read from it; nothing
+ * from it is written into the page. Like gtmHeadEntry, no nonce: the router
+ * stamps `ssr.nonce`.
+ */
+export function consentHeadEntry(options) {
+  const granted = consentCookieGrantsAnalytics(options?.cookie, {
+    policyVersion: options?.policyVersion,
+    ...(options.cookieName === undefined ? {} : { cookieName: options.cookieName }),
+  });
+  return { children: consentHeadScript({ granted, gtm: options.gtm }) };
+}
+
 // `icons` is opt-in: the adapter cannot know where (or whether) a product
 // serves the linq-brand files, and a head that links icons the server 404s
 // is worse than one that links none. `true` takes the /brand default.
 // `gtm` is opt-in the same way, and per route: the product decides which
 // pages carry Tag Manager (public marketing and legal pages, not consoles).
+// It loads Tag Manager unconditionally and stays for compatibility; products
+// switch to `consent` (D-034), which loads it only after an opt-in.
 // `fontPreload` is opt-in too: only the product knows the hashed URL its
 // bundler gave the face (D-033). Appended after the icons.
 export function toTanStackHead(metadata, options = {}) {
@@ -49,7 +72,11 @@ export function toTanStackHead(metadata, options = {}) {
       ...(options.fontPreload === undefined ? [] : fontPreloadLinks(options.fontPreload)),
     ],
   };
-  if (options.gtm !== undefined) head.scripts = [gtmHeadEntry(options.gtm)];
+  if (options.gtm !== undefined && options.consent !== undefined) {
+    throw new TypeError("toTanStackHead: pass the container id as consent.gtm, not both gtm and consent — gtm alone loads Tag Manager without consent");
+  }
+  if (options.consent !== undefined) head.scripts = [consentHeadEntry(options.consent)];
+  else if (options.gtm !== undefined) head.scripts = [gtmHeadEntry(options.gtm)];
   return head;
 }
 

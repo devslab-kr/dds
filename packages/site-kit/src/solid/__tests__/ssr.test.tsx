@@ -1,7 +1,8 @@
 import { renderToString } from "solid-js/web";
 import { expect, it } from "vitest";
 
-import { LocaleMenu, MarketingShell } from "../index";
+import { ConsentBanner, LocaleMenu, MarketingShell, SiteFooter } from "../index";
+import { CONSENT_MESSAGES_KO, createConsentManager } from "../../core/consent.mjs";
 import { LOCALE_FLAGS } from "../../core/flags.mjs";
 import { defineLocaleRegistry } from "../../core/locales.mjs";
 import { locale, messages } from "./fixtures";
@@ -81,4 +82,15 @@ it("server-renders a product's own languages alongside the family's", () => {
   const indiaPath = LOCALE_FLAGS.hi.body.match(/d="[^"]{20,}"/)?.[0];
   if (!indiaPath) throw new Error('expected a d="…" path fragment in LOCALE_FLAGS.hi.body');
   expect(html).toContain(indiaPath);
+});
+
+it("server-renders no consent bar — it comes in after mount, from the browser's own cookie (D-034)", () => {
+  const controller = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-AB12CD3" });
+  const html = renderToString(() => <>
+    <ConsentBanner controller={controller} messages={CONSENT_MESSAGES_KO} privacyHref="/privacy" />
+    <SiteFooter brand={{ name: "AskLinq", href: "/" }} links={[]} copyright="© DevsLab" messages={messages} consentSettings={{ controller, label: "쿠키 설정" }} />
+  </>);
+  expect(html).not.toContain("site-consent__");
+  expect(html).not.toContain("googletagmanager");
+  expect(html).toMatch(/<button[^>]*class="site-consent-trigger"[^>]*>쿠키 설정<\/button>/);
 });

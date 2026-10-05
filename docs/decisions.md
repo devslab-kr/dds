@@ -5,6 +5,54 @@
 
 ---
 
+## D-034 — 분석은 옵트인: 허용 전에는 구글에 닿는 것이 없고, 동의는 site-kit이 한 벌로 싣는다 (2026-10-05)
+
+**결정.** 소유자 결정(2026-10-05): 가족 사이트의 분석은 옵트인이다. 방문자가 현재 정책 버전에 대해 분석을 허용하기 전에는 Tag Manager 로더·gtag·GA 쿠키 어느 것도 돌지 않고, 동의하지 않아도 서비스는 그대로 동작한다. `@devslab/site-kit`이 그 동의를 한 벌로 싣는다.
+
+- 코어(프레임워크 중립, 의존성 0, `src/core/consent.mjs`): `createConsentManager`(쿠키 읽기·쓰기, Consent Mode, 허용 시 Tag Manager 동적 로드, 철회), `readConsentCookie`·`consentCookieGrantsAnalytics`(서버·브라우저 공통), `consentHeadScript`, `postConsentRecord`·`parseConsentRecord`·`isSameOriginRequest`(기록), 기본 문구 `CONSENT_MESSAGES_KO`·`CONSENT_MESSAGES_EN`.
+- Solid: `ConsentBanner`(아래 바 + 설정 대화상자), `ConsentSettingsButton`, `SiteFooter`의 `consentSettings`(바닥글 "쿠키 설정").
+- TanStack 어댑터: `toTanStackHead(metadata, { consent: { policyVersion, gtm, cookie } })`와 `consentHeadEntry`. 요청 쿠키가 현재 버전의 허용일 때만 로더를 싣고, 아니면 Consent Mode 기본값(전부 denied)만 싣는다.
+- 기존 `gtm` 옵션·`gtmHeadEntry`(D-031)는 호환으로 남긴다. 묻지 않고 로드하므로 가족 제품은 `consent`로 옮긴다(README). 둘을 같이 주면 `TypeError`.
+
+**약속(코드와 테스트가 고정).**
+- 항목은 둘. *필수*는 정보로만 보여 주고 조작 요소가 없다(설정 대화상자에서 체크박스가 아니라 배지). *분석*은 기본 꺼짐, 미리 체크하지 않음. 광고 항목이 없으므로 `ad_storage`·`ad_user_data`·`ad_personalization`은 늘 denied.
+- 쿠키 `site_consent=v=<정책>&a=<0|1>&t=<유닉스 초>&id=<16진 32자>`: 퍼스트파티, `Path=/`, `SameSite=Lax`, `Secure`, 12개월, `HttpOnly` 아님. 파서는 이 네 키만 받는다. `t`가 12개월보다 오래됐거나 미래면 결정이 없는 것으로 본다.
+- 정책 버전이 다르면 다시 묻고, 답하기 전에는 아무것도 로드하지 않는다. 익명 id는 이어진다.
+- 허용: `consent update {analytics_storage: granted}` 뒤에 Tag Manager를 한 번, 페이지의 nonce(`csp-nonce` meta, 없으면 첫 `[nonce]` 요소의 `.nonce` 속성)로 로드한다.
+- 철회: `denied`로 업데이트, `ga-disable-<측정 ID>`, 호스트와 모든 상위 도메인에서 `_ga`·`_ga_*`·`_gid`·`_gat*` 삭제.
+- `dataLayer` 게이트: 분석이 허용되지 않은 동안 페이지의 `dataLayer.push`는 동의 명령만 통과시키고 나머지는 버린다. 동의 전에 쌓인 이벤트가 나중에 로드되는 Tag Manager로 흘러가지 않고, 철회 뒤의 이벤트는 이미 로드된 Tag Manager에 닿지 않는다.
+- 닫기(✕·Esc)는 결정이 아니다. 쿠키를 쓰지 않고, 다음 방문에 다시 묻는다.
+- 바의 세 선택(모두 허용·거부·설정)과 대화상자의 세 버튼은 같은 tone(secondary), 같은 트랙 폭이다. 브라우저 테스트가 폭·높이·색·굵기가 같음을 잰다.
+- 배너는 서버에서도 하이드레이션 중에도 렌더하지 않고 마운트 뒤에 나온다. 자바스크립트가 없으면 바도 분석도 없다.
+- 기록: 결정마다 `{policyVersion, analytics, action, anonymousId, decidedAt, source, path}`를 제품 백엔드로 POST(같은 출처 경로만 허용). action은 `grant`(이 버전에서 허용됨)·`deny`(첫 결정이 거부)·`withdraw`(허용 → 거부)·`update`(같은 선택 재저장). 네트워크·429·5xx 실패는 `localStorage`에 남겼다가 다음 `start()`에서 다시 보낸다. 서버의 `parseConsentRecord`는 일곱 키 정확히, `analytics`와 맞는 action, 쿼리 없는 경로, 31일 이내 `decidedAt`만 받는다. 참고 테이블(추가 전용)과 "유효 기간 + 3년" 정리 SQL은 README에 있다. 주체(로그인 사용자 id·로그인 id 사본)·IP·UA는 서버가 붙인다.
+
+**계기.** GTM을 가족 네 사이트와 devslab.kr에 실은 날(D-031, devslab.kr #83–#88) 소유자가 동의 팝업과 동의 기록을 요구했다. 네 제품이 각자 만들면 네 가지 쿠키 형식, 네 가지 "필수" 표현, 네 가지 철회 동작이 생긴다 — 파비콘(D-026)과 같은 모양이고, 여기서는 잘못 만든 쪽이 법적 문제가 된다.
+
+**근거.**
+- **기본값만이 아니라 로더 자체를 막는다.** Consent Mode의 "고급" 방식(Tag Manager는 늘 로드하고 denied 상태에서 쿠키 없는 핑을 보냄)은 동의 전에 `gtm.js` 요청과 핑이 구글로 간다 — 옵트인 계약 위반. 그래서 기본값(전부 denied)은 이중 장치일 뿐이고, 주 장치는 "허용 전에는 로더를 그리지도 넣지도 않는다"이다. 테스트가 거부 쪽 head 문자열에 구글 호스트가 없음을, 브라우저에서 구글 요청이 0건임을 잰다.
+- **로더는 서버가 쿠키를 보고 고르고, 브라우저가 허용 순간에 넣는다.** 서버 렌더는 요청 쿠키로, 하이드레이션은 `document.cookie`로 같은 스크립트를 낸다(`createIsomorphicFn`). 허용 순간에는 매니저가 같은 페이지에서 새로고침 없이 `gtm.js`를 넣는다. 둘 다 `gtm.js`가 이미 있으면 건너뛰어 한 번만 로드된다.
+- **nonce.** 동적으로 넣는 `gtm.js`는 nonce CSP(가족 제품 전부)에서 nonce가 있어야 돈다. 헤더 CSP 아래에서 브라우저는 `getAttribute('nonce')`를 숨기지만 `.nonce` 속성은 남는다(D-031). 브라우저 테스트가 `script-src 'nonce-…'`만 있는 CSP 아래에서 `gtm.js`가 실행됨을 확인한다.
+- **배너는 마운트 뒤에.** 서버 렌더면 제품마다 쿠키를 넘기는 방식에 배너가 묶이고, 하이드레이션 키 위험(D-027/D-028)을 새로 진다. 비용은 바가 한 프레임 늦게 뜨는 것뿐이다. 개발 빌드 하이드레이션 테스트가 바닥글 버튼이 서버 것 그대로 채택되고 잃은 키가 0임을 고정한다.
+- **같은 무게.** 개인정보 보호법의 선택 동의는 따로 받고, 미리 체크하지 않고, 서비스와 묶지 않는다. 허용만 강조색인 바는 그 취지에 어긋난다.
+
+**반려한 대안.**
+- **기존 `gtm` 옵션을 동의 게이트로 바꿈** — 0.x minor에서 소비자 네 곳의 동작이 조용히 바뀐다. 명시적 `consent` 옵션 + 둘 다 주면 에러로 간다.
+- **localStorage에 동의 저장** — 서버가 읽지 못해 로더를 서버에서 걸러낼 수 없다.
+- **철회 시 페이지 새로고침** — 확실하지만 작성 중인 입력을 잃는다. 대신 게이트 + `ga-disable` + 콘솔의 추가 동의 설정.
+- **기록 엔드포인트를 킷이 소유** — 제품마다 백엔드(D1·Supabase·Spring)가 다르다. 킷은 보내기·검증·참고 스키마까지.
+- **제3자 동의 관리 플랫폼(CMP)** — 처리자와 스크립트가 하나 더 늘고, 항목이 둘뿐인 사이트에 과하다.
+
+**트레이드오프.**
+- 동의 전 이벤트는 버려진다(재생 없음). 허용한 페이지의 통계는 `gtm.js`가 로드된 뒤부터다.
+- 철회 뒤에도 Tag Manager는 그 페이지의 메모리에 남는다. 게이트가 `dataLayer`를 막지만 Tag Manager 내부 리스너까지 막는다고 장담하지 않는다 — 그래서 GA4 태그마다 "태그 실행에 추가 동의 필요: `analytics_storage`" 콘솔 설정이 필요하다(소유자 작업, README).
+- 저장소가 막히고 POST가 계속 실패하면 쿠키에는 결정이 있는데 기록이 없을 수 있다.
+- 상위 도메인(`.devslab.kr`)의 GA 쿠키를 지우면 같은 쿠키를 쓰는 형제 하위 도메인의 GA 식별자도 지워진다.
+- 정적 내보내기 사이트(devslab.kr)는 빌드 때 쿠키를 모르므로 허용한 방문자도 하이드레이션 뒤에야 로드된다.
+
+**재검토 시점.** 광고 항목이 생길 때, 로그인 제품이 이 킷을 쓸 때(기록 주체가 사용자), 구글이 Consent Mode 요구를 바꿀 때, 동의율 데이터가 쌓여 바 문구·위치를 다시 볼 때.
+
+---
+
 ## D-033 — 가족 서체 파일은 site-kit이 한 번 싣고, face 이름은 토큰 이름 그대로 (2026-10-05)
 
 **결정.** `@devslab/site-kit`이 가족 서체의 woff2와 `@font-face`를 싣는다(소유자 결정 "공용 글꼴 패키지로 통일").

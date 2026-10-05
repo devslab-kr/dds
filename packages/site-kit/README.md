@@ -4,9 +4,9 @@ Public product-site infrastructure for DevsLab products. It provides strict cata
 
 ## Entry points
 
-- `@devslab/site-kit` — runtime-neutral locale, catalog, SEO, sitemap, robots, verified-fact, and Google Tag Manager utilities.
-- `@devslab/site-kit/solid` — header, footer, locale/theme controls, marketing/legal/status/error layouts, and request-access form.
-- `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors (with opt-in brand icons and Tag Manager loader).
+- `@devslab/site-kit` — runtime-neutral locale, catalog, SEO, sitemap, robots, verified-fact, Google Tag Manager and analytics-consent utilities.
+- `@devslab/site-kit/solid` — header, footer, locale/theme controls, marketing/legal/status/error layouts, request-access form, and the consent bar.
+- `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors (with opt-in brand icons and the consent-gated Tag Manager loader).
 - `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles. It also gives the page root the family face (`:where(html) { font-family: var(--dds-font-family-sans) }`), so bare headings and paragraphs are not left in the browser's serif. The rule has zero specificity: a product's own rule on `html`, `:root`, `body` or `:lang()` wins.
 - `@devslab/site-kit/fonts.css` — the family font (Geist, Geist Mono, Pretendard) as self-hosted woff2 under the token's family names; see [Family font](#family-font).
 
@@ -56,6 +56,7 @@ For a single-language product, and for a footer that has to print business detai
 - Touch (`pointer: coarse`): the brand link, navigation, footer and footer-language links are 44px targets, as buttons already are. At 720px and below the open menu's links are 44px rows, and the closed header's first row keeps its 64px height.
 - `SiteFooter` `details`: a block under the brand line (business registration, an `<address>`), its lines 4px apart with no paragraph margins. `linksLabel` wraps the links in `<nav aria-label>`; name it differently from the header's navigation. A footer wordmark passed as `logo` (with `name: ""`) keeps its own size — the 16px size is for an icon mark beside a printed name — and carries its own accessible text (`<img alt>`, or text), because `label` names only the header link.
 - `SiteLink.emphasis` draws a link heavier (header navigation, footer links, family links) — for a Korean site's privacy policy, which the law asks to stand out.
+- `SiteFooter` `consentSettings: { controller, label }` adds a "쿠키 설정" button after the links, before the copyright, that reopens the consent settings (D-034). It reads as one of the links and is a 44px target on touch; see [Consent](#consent-opt-in-analytics).
 - Sections (and the hero) stop below the sticky header when an in-page link targets them: `scroll-margin-block-start` is the header height plus 8px. The header height is `--site-header-block-size` (default 64px); set it on `:root` or `.site-shell` — an ancestor of both the header and `<main>` — not on `.site-header`, or the sections keep the 64px offset.
 - `--site-hero-eyebrow-tracking` (default `.18em`) and `--site-hero-eyebrow-weight` (default `normal`) tune the hero eyebrow. Wide mono tracking suits Latin capitals; a product whose eyebrow is Korean sets the tracking to `0` on its landing root.
 
@@ -154,6 +155,8 @@ Omitted, the adapter emits no icon links: it cannot know where a product serves 
 
 Each product site loads Tag Manager on its public marketing and legal pages with its own container id; consoles, dashboards and the chat widget stay out. The snippet lives here once (D-031).
 
+**Analytics is opt-in (D-034).** `toTanStackHead(…, { gtm })` and `gtmHeadEntry` below load Tag Manager on every page load without asking. They stay for compatibility; family products switch to the consent-gated path in [Consent](#consent-opt-in-analytics), which emits the same loader only after a grant.
+
 | Export | Entry | What it is |
 |---|---|---|
 | `gtmHeadScript(id)` | `@devslab/site-kit` | the head loader's script body, no `<script>` tag, no nonce |
@@ -200,6 +203,183 @@ The loader runs on a full page load of a route that has it. Client-side navigati
 | `frame-src` | `https://www.googletagmanager.com` |
 
 These are Google's lists for the Tag Manager container and for "Google Analytics without any Ads features", plus `frame-src` for the noscript iframe. Google names `script-src-elem`; a policy without it falls back to `script-src`. `*.google.com` also covers `www.google.com` and GA4's `*.analytics.google.com` hosts. Not included (add them from the same guide if a container needs them): preview mode (`tagmanager.google.com`, `gstatic`, Google Fonts), Custom JavaScript variables (`'unsafe-eval'`), and Ads or Google signals hosts (`*.g.doubleclick.net`, `pagead2.googlesyndication.com`, `www.googleadservices.com`, `*.google.<TLD>`).
+
+## Consent (opt-in analytics)
+
+Analytics is opt-in for the family (D-034). Until a visitor grants analytics for the current policy version, nothing that contacts Google runs: no Tag Manager loader, no gtag, no GA cookies. The page only pushes Consent Mode v2 defaults (all four signals denied) into its own `dataLayer`. No decision, "거부", a dismissed bar and a decision made under an older policy version all mean the same: nothing loads. Every feature works without consent.
+
+| Export | Entry | What it is |
+|---|---|---|
+| `createConsentManager(options)` | `@devslab/site-kit` | the browser side: reads and writes the consent cookie, Consent Mode, loads Tag Manager on a grant, withdraws |
+| `readConsentCookie(cookie, { policyVersion })` / `consentCookieGrantsAnalytics(…)` | `@devslab/site-kit` | the current, unexpired decision in a Cookie header or `document.cookie` (server or browser) |
+| `consentHeadScript({ granted, gtm })` | `@devslab/site-kit` | the head script body: defaults only, or defaults + grant + Google's loader |
+| `toTanStackHead(metadata, { consent })` / `consentHeadEntry(…)` | `@devslab/site-kit/tanstack-start` | the same script as a route `scripts` entry, decided from the request's cookie |
+| `ConsentBanner`, `ConsentSettingsButton` | `@devslab/site-kit/solid` | the bar, its settings dialog, and a "쿠키 설정" button for anywhere else |
+| `SiteFooter consentSettings` | `@devslab/site-kit/solid` | the same button at the end of the footer's links |
+| `postConsentRecord(path)`, `parseConsentRecord(body, …)`, `isSameOriginRequest(…)` | `@devslab/site-kit` | the record: send it, validate it on the server, refuse cross-site writes |
+| `CONSENT_MESSAGES_KO`, `CONSENT_MESSAGES_EN` | `@devslab/site-kit` | default strings; pass your own with the same keys |
+
+**The contract.**
+
+- Categories: *necessary* (always on, shown as information, never a control) and *analytics* (Google Analytics 4 through Tag Manager; off until switched on, never pre-ticked). No advertising category: `ad_storage`, `ad_user_data` and `ad_personalization` stay denied.
+- The cookie: `site_consent=v=<policy>&a=<0|1>&t=<unix seconds>&id=<32 hex>`, first-party, `Path=/`, `SameSite=Lax`, `Secure`, 12 months, not `HttpOnly` (the banner reads it). `id` is random, not derived from the visitor. The parser takes exactly those four keys.
+- The policy version is one string per product (`"2026-10-05"`). Change it when what the privacy policy says about analytics changes: every visitor is asked again, and nothing loads until they answer. The anonymous id carries over, so the records link.
+- Granting pushes `gtag('consent','update',{analytics_storage:'granted'})` and loads Tag Manager once, with the page's nonce (a `csp-nonce` meta, else the first `[nonce]` element, else `options.nonce`).
+- Withdrawing pushes the update back to `denied`, sets `ga-disable-<id>` for any `measurementIds`, deletes `_ga`, `_ga_*`, `_gid` and `_gat*` on the host and every parent domain, and closes the `dataLayer`: while analytics is not granted, the page's `dataLayer` keeps consent commands and drops everything else, so events pushed before consent are not queued for a Tag Manager that loads later, and events after a withdrawal never reach the one already loaded. Tag Manager itself stays in memory until the next page load.
+- Actions in the record: `grant` (analytics becomes granted under this version), `deny` (first decision, refused), `withdraw` (granted → refused), `update` (the same choice saved again).
+
+**TanStack Start.** One module owns the manager:
+
+```ts
+// src/consent.ts
+import { createConsentManager, postConsentRecord } from "@devslab/site-kit";
+
+export const CONSENT_POLICY_VERSION = "2026-10-05"; // bump with the privacy policy's analytics terms
+export const GTM_ID = "GTM-XXXXXXX";
+export const consent = createConsentManager({
+  policyVersion: CONSENT_POLICY_VERSION,
+  gtm: GTM_ID,
+  onChange: postConsentRecord("/api/consent"),
+});
+```
+
+Each public route decides its head from the request's cookie. The same cookie is read on both sides of hydration, so both render the same script:
+
+```ts
+import { createIsomorphicFn } from "@tanstack/solid-start";
+import { getRequestHeader } from "@tanstack/solid-start/server";
+
+export const requestCookie = createIsomorphicFn()
+  .server(() => getRequestHeader("cookie"))
+  .client(() => document.cookie);
+
+head: () => toTanStackHead(metadata, {
+  icons: true,
+  consent: { policyVersion: CONSENT_POLICY_VERSION, gtm: GTM_ID, cookie: requestCookie() },
+}),
+```
+
+Without a current grant the entry is the defaults only and nothing in the head names a Google host; with one it adds Google's nonce-aware loader, skipped if `gtm.js` is already on the page. The router stamps `ssr.nonce` on it exactly as on the plain loader (the nonce requirements in [Google Tag Manager](#google-tag-manager) apply unchanged). Passing both `gtm` and `consent` throws: `gtm` alone loads Tag Manager without asking. Render the noscript iframe only when `consentCookieGrantsAnalytics(requestCookie(), { policyVersion })` is true; a visitor without JavaScript has no way to grant, so they never get it.
+
+Mount the banner once, as the first element in `<body>`, so it is the first thing keyboard users reach, and put the trigger in the footer:
+
+```tsx
+<body>
+  <ConsentBanner controller={consent} messages={lang() === "ko" ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN} privacyHref={`/${lang()}/privacy`} />
+  <MarketingShell
+    footer={{ …, consentSettings: { controller: consent, label: t("cookieSettings") } }}
+    …
+  />
+</body>
+```
+
+The banner renders nothing on the server and nothing during hydration; the bar comes in after mount, from the browser's own cookie (`tests/site-kit-consent-hydration.test.mjs` hydrates exactly this under the development build). Its three choices — 모두 허용, 거부, 설정 — are the same button at the same size. ✕ and Escape close it without a decision. The settings dialog traps focus, closes on Escape without saving, and shows *necessary* as text and *analytics* as an unticked switch. The footer button (or `ConsentSettingsButton`, or `consent.openSettings()`) reopens it to change or withdraw at any time.
+
+A path that carries a secret goes into the record redacted: `createConsentManager({ …, recordPath: (path) => path.replace(/\/k\/[^/]+/, "/k/:key") })`.
+
+**Recording consent (server).** Every decision POSTs a record to the product's own backend:
+
+```json
+{ "policyVersion": "2026-10-05", "analytics": true, "action": "grant", "anonymousId": "<32 hex>", "decidedAt": 1759650000, "source": "web", "path": "/ko/pricing" }
+```
+
+The endpoint must not become a tracking vector: same origin only, the exact payload, rate-limited.
+
+```ts
+import { CONSENT_RECORD_MAX_BYTES, isSameOriginRequest, parseConsentRecord } from "@devslab/site-kit";
+
+if (request.method !== "POST") return new Response(null, { status: 405 });
+if (!isSameOriginRequest(request, "https://getasklinq.app")) return new Response(null, { status: 403 });
+if (Number(request.headers.get("content-length") ?? 0) > CONSENT_RECORD_MAX_BYTES) return new Response(null, { status: 413 });
+const ip = request.headers.get("cf-connecting-ip") ?? "";
+if (!(await env.CONSENT_RATE_LIMIT.limit({ key: ip })).success) return new Response(null, { status: 429 });
+const record = parseConsentRecord(await request.text(), { policyVersion: CONSENT_POLICY_VERSION });
+if (!record) return new Response(null, { status: 400 });
+await insertConsentRecord(env, { ...record, receivedAt: new Date().toISOString(), ip, userAgent: (request.headers.get("user-agent") ?? "").slice(0, 256) });
+return new Response(null, { status: 204 });
+```
+
+`parseConsentRecord` takes the exact seven keys, a known policy version (pass a list while records made under the previous one may still arrive), an action that agrees with `analytics`, a path with no query, and a `decidedAt` neither in the future nor older than 31 days. A failed POST (network, 429, 5xx) is kept in `localStorage` and sent again on the next page; a 4xx is dropped. A reference table, append-only for the application:
+
+```sql
+CREATE TABLE consent_records (
+  id             TEXT PRIMARY KEY,                -- server-generated
+  received_at    TEXT NOT NULL,                   -- server clock, UTC
+  decided_at     INTEGER NOT NULL,                -- the record's decidedAt (the cookie's t)
+  subject_type   TEXT NOT NULL CHECK (subject_type IN ('user', 'anonymous')),
+  subject_id     TEXT NOT NULL,                   -- internal user id when logged in, else the anonymous id
+  login_id       TEXT,                            -- login id snapshot when logged in
+  anonymous_id   TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  analytics      INTEGER NOT NULL CHECK (analytics IN (0, 1)),
+  action         TEXT NOT NULL CHECK (action IN ('grant', 'deny', 'withdraw', 'update')),
+  source         TEXT NOT NULL CHECK (source IN ('web', 'app')),
+  path           TEXT NOT NULL,
+  ip             TEXT,
+  user_agent     TEXT                             -- first 256 characters
+);
+CREATE INDEX consent_records_by_visitor ON consent_records (anonymous_id, decided_at);
+CREATE TRIGGER consent_records_append_only BEFORE UPDATE ON consent_records
+BEGIN SELECT RAISE(ABORT, 'consent records are append-only'); END;
+```
+
+Keep each record while its consent is in effect and for a retention period after it ends (3 years by default — make it a setting, and say it in the privacy policy). A consent ends when the same visitor decides again or when it expires 12 months after `decided_at`, whichever is first. The retention sweep is the only `DELETE`:
+
+```sql
+DELETE FROM consent_records AS r
+WHERE MIN(
+  COALESCE((SELECT MIN(n.decided_at) FROM consent_records AS n
+            WHERE n.anonymous_id = r.anonymous_id AND n.decided_at > r.decided_at), r.decided_at + 31536000),
+  r.decided_at + 31536000
+) + :retention_seconds < :now_seconds;
+```
+
+In Postgres, write the two-argument `MIN` as `LEAST`, and keep the table append-only by granting the application role `SELECT, INSERT` only (the sweep runs as a separate role).
+
+**Without Solid (devslab.kr, Next.js static export).** A static page cannot read the cookie when it is built, so its head carries only the defaults and the manager loads Tag Manager after hydration when the cookie grants:
+
+```tsx
+// pages/_document.tsx — replaces the Tag Manager loader and the noscript iframe
+<Head>
+  <script dangerouslySetInnerHTML={{ __html: consentHeadScript() }} />
+</Head>
+```
+
+```tsx
+// src/consent.ts
+import { createConsentManager } from "@devslab/site-kit";
+export const consent = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-XXXXXXX" });
+
+// src/components/ConsentBar.tsx — the product's own markup, the kit's behaviour and strings
+import { useEffect, useState } from "react";
+import { CONSENT_MESSAGES_KO as m } from "@devslab/site-kit";
+import { consent } from "../consent";
+
+export function ConsentBar() {
+  const [ask, setAsk] = useState(false);
+  const [settings, setSettings] = useState(false);
+  useEffect(() => {
+    consent.start(); // applies a stored grant: loads Tag Manager, once
+    const sync = () => setAsk(consent.needsDecision() && !consent.dismissed());
+    sync();
+    const off = consent.subscribe((event) => (event.type === "open-settings" ? setSettings(true) : sync()));
+    const unbind = consent.bindTriggers(); // any [data-consent-settings] opens the settings
+    return () => { off(); unbind(); };
+  }, []);
+  // Render the bar while `ask`: m.title, m.body, a link to /privacy, and three equal buttons —
+  // consent.acceptAll(), consent.rejectAll(), setSettings(true). Escape → consent.dismiss().
+  // The settings dialog: m.necessaryTitle as text, an unticked switch for m.analyticsSwitch,
+  // and consent.save({ analytics }) / acceptAll() / rejectAll().
+  return null;
+}
+
+// In the footer:
+// <a href="#cookie-settings" data-consent-settings>{m.trigger}</a>
+```
+
+The cookie is per host and `Path=/`, so plain HTML pages on the same host that load no React only need `consent.start()` from a module script: a decision made on any page of the host applies to them.
+
+**Console steps the code cannot do.** In Tag Manager, set each GA4 tag's consent settings to *Require additional consent for tag to fire: `analytics_storage`*, so a tag never fires on a denied page even if Tag Manager is still in memory after a withdrawal. In GA4, keep data retention at 14 months (the default strings say so) and Google signals and ads personalisation off (there is no advertising category).
 
 ## Sections
 
