@@ -39,6 +39,7 @@ test("Solid adapter exports every shared public-site shell", async () => {
     "LegalLayout", "StatusBanner", "RequestAccessForm", "NotFoundLayout", "ErrorLayout",
     "OssProductMark", "OssProductMarkProps",
     "SectionBlock", "SectionHead", "HeroSplit", "StepFlow", "FeatureRows", "PricingNote",
+    "ConsentBanner", "ConsentSettingsButton", "ConsentBannerProps",
   ]) assert.match(source, new RegExp(`\\b${symbol}\\b`), `${symbol} missing`);
 });
 
@@ -202,8 +203,10 @@ test("the TanStack adapter accepts metadata built from a product registry", asyn
   assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>, options\?: TanStackHeadOptions\)/);
   assert.match(dts, /toHtmlAttributes: <Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
   // D-031: the Tag Manager option and the standalone head entry are typed, and the result's `scripts` is optional (absent unless asked).
-  // D-033 adds the font preload between them.
-  assert.match(dts, /interface TanStackHeadOptions \{ icons\?: [^;]+; fontPreload\?: string \| readonly string\[\] \| undefined; gtm\?: string \| undefined \}/);
+  // D-033 adds the font preload between them; D-034 the consent-gated path after them.
+  assert.match(dts, /interface TanStackHeadOptions \{ icons\?: [^;]+; fontPreload\?: string \| readonly string\[\] \| undefined; gtm\?: string \| undefined; consent\?: ConsentHeadOptions \| undefined \}/);
+  assert.match(dts, /interface ConsentHeadOptions \{ policyVersion: string; cookie: string \| null \| undefined; gtm\?: string \| undefined; cookieName\?: string \| undefined \}/);
+  assert.match(dts, /export declare function consentHeadEntry\(options: ConsentHeadOptions\): GtmHeadEntry;/);
   assert.match(dts, /export declare function gtmHeadEntry\(containerId: string\): GtmHeadEntry;/);
   assert.match(dts, /scripts\?: GtmHeadEntry\[\]/);
 });

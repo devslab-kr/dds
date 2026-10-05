@@ -139,7 +139,7 @@ try {
     "src/core/index.mjs", "src/core/index.d.mts",
     "src/core/publisher.mjs", "src/core/publisher.d.mts", "src/core/devslab.mjs", "src/core/devslab.d.mts",
     "src/core/flags.mjs", "src/core/flags.d.mts",
-    "src/core/gtm.mjs", "src/core/gtm.d.mts",
+    "src/core/gtm.mjs", "src/core/gtm.d.mts", "src/core/consent.mjs", "src/core/consent.d.mts",
     "src/tanstack-start.mjs", "src/tanstack-start.d.mts",
     "styles.css", "site-sections.css", "flags/LICENSE-flag-icons.txt",
     "src/core/fonts.mjs", "src/core/fonts.d.mts", "fonts.css", "fonts/manifest.json",
@@ -152,6 +152,8 @@ try {
   const core = await import(pathToFileURL(join(installedRoot, "src", "core", "index.mjs")));
   assert.equal(core.LOCALES.length, 14);
   assert.match(core.gtmHeadScript("GTM-ABC123"), /'GTM-ABC123'\);$/, "the packed core must export the Tag Manager loader");
+  assert.doesNotMatch(core.consentHeadScript({ granted: false, gtm: "GTM-ABC123" }), /googletagmanager/, "the packed core gates Tag Manager behind consent (D-034)");
+  assert.equal(typeof core.createConsentManager, "function", "the packed core must export the consent manager");
   const { DEVSLAB_PUBLISHER } = await import(pathToFileURL(join(installedRoot, "src/core/devslab.mjs")));
   assert.equal(core.buildPublisher(DEVSLAB_PUBLISHER).link.label, "데브스랩(DevsLab)");
   assert.equal(manifest.exports["./devslab"].types, "./src/core/devslab.d.mts");

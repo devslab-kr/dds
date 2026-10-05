@@ -4,4 +4,5 @@ export { ErrorLayout, LegalLayout, MarketingShell, NotFoundLayout, StatusBanner,
 export { RequestAccessForm, type RequestAccessFormProps, type RequestAccessMessages } from "./request-access";
 export { OssProductMark, type OssProductMarkProps } from "./oss-product-mark";
 export { SectionBlock, SectionHead, HeroSplit, StepFlow, FeatureRows, PricingNote, type SectionBlockProps, type SectionHeadProps, type HeroSplitProps, type StepFlowProps, type StepFlowStep, type FeatureRow, type FeatureRowsProps, type PricingNoteProps } from "./sections";
+export { ConsentBanner, ConsentSettingsButton, type ConsentBannerProps, type ConsentSettingsButtonProps } from "./consent";
 export type { LocaleState, SiteBrand, SiteLink, SiteMessages, ThemePreference } from "./types";

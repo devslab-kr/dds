@@ -5,3 +5,4 @@ export * from "./geo.mjs";
 export * from "./publisher.mjs";
 export * from "./gtm.mjs";
 export * from "./fonts.mjs";
+export * from "./consent.mjs";

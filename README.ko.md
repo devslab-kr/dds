@@ -17,7 +17,7 @@
 | [`packages/dds-css/`](packages/dds-css/) | `@devslab/dds-css` — CSS 컴포넌트 레이어, 스펙 §4.3 v1 인벤토리 (Button, IconButton, TextField, Textarea, Select, Checkbox/Radio, Switch, Badge, Chip, Avatar, Spinner/Skeleton, Divider, Card, ListRow, Tabs, Dialog, Toast, Tooltip, EmptyState); 가이드는 [`docs/components.ko.md`](docs/components.ko.md) |
 | [`packages/dds-icons/`](packages/dds-icons/) | `@devslab/dds-icons` — 아이콘 세트: 코어 40종(24 그리드·1.6 스트로크) + devslab.kr `site-` 7종. SVG 파일·스프라이트·path 데이터 맵 3형태 출하 |
 | [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — controlled/uncontrolled 상태, SSR·hydration, 키보드, 포커스, 수명주기 계약을 갖춘 SolidJS 접근성 primitive |
-| [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — 엄격한 14개 로케일 i18n, SEO/GEO 생성기, TanStack Start 메타데이터 어댑터, 접근 가능한 SolidJS 공통 셸을 담은 공개 제품 사이트 인프라 |
+| [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — 엄격한 14개 로케일 i18n, SEO/GEO 생성기, TanStack Start 메타데이터 어댑터, 옵트인 분석 동의(D-034), 접근 가능한 SolidJS 공통 셸을 담은 공개 제품 사이트 인프라 |
 | [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림 — `components.html`, `icons.html`도 함께) |
 | [`brand/index.html`](brand/index.html) | 브랜드 아이덴티티 가이드: 로고 규정, Electric Cyan, 모티프, 보이스 & 톤 |
 

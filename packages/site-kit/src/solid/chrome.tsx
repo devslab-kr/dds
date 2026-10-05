@@ -2,6 +2,8 @@ import { Button, Icon, IconButton } from "@devslab/dds-solid";
 import { For, Show, createMemo, createSignal, onMount, type JSX } from "solid-js";
 
 import { LocaleMenu, type LocaleMenuProps, type LocaleMenuVariant } from "./locale-menu";
+import { ConsentSettingsButton } from "./consent";
+import type { ConsentManager } from "../core/consent.mjs";
 import { FAMILY_LOCALES, type LocaleRegistry, type SiteLocale } from "../core/locales.mjs";
 import type { LocaleState, SiteBrand, SiteLink, SiteMessages, ThemePreference } from "./types";
 
@@ -237,6 +239,12 @@ export interface SiteFooterProps {
    * header's navigation. Without it the list stays a plain list.
    */
   linksLabel?: string;
+  /**
+   * A "쿠키 설정" button at the end of the link list, before the copyright,
+   * that re-opens the consent settings (D-034). The page's ConsentBanner
+   * listens on the same controller.
+   */
+  consentSettings?: { controller: ConsentManager; label: string };
 }
 
 /**
@@ -272,6 +280,9 @@ export function SiteFooter(props: SiteFooterProps) {
   const linkList = () => (
     <ul class="site-footer__links">
       <For each={props.links}>{(item) => <li><a class={linkClass(item)} href={item.href}>{item.label}</a></li>}</For>
+      <Show when={props.consentSettings}>{(settings) => (
+        <li><ConsentSettingsButton controller={settings().controller}>{settings().label}</ConsentSettingsButton></li>
+      )}</Show>
       {/*
         A copyright like "© 2026 DevsLab" mixes neutral, digit and Latin
         runs, which the bidi algorithm reorders on an RTL page into

@@ -4,9 +4,9 @@ DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. �
 
 ## 진입점
 
-- `@devslab/site-kit` — 런타임 중립 로케일·카탈로그·SEO·사이트맵·robots·검증된 사실·Google Tag Manager 유틸리티
-- `@devslab/site-kit/solid` — 헤더·푸터·언어/테마 컨트롤·마케팅/법률/상태/오류 레이아웃·접근 요청 폼
-- `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환(브랜드 아이콘·Tag Manager 로더는 옵트인)
+- `@devslab/site-kit` — 런타임 중립 로케일·카탈로그·SEO·사이트맵·robots·검증된 사실·Google Tag Manager·분석 동의 유틸리티
+- `@devslab/site-kit/solid` — 헤더·푸터·언어/테마 컨트롤·마케팅/법률/상태/오류 레이아웃·접근 요청 폼·동의 바
+- `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환(브랜드 아이콘과 동의 게이트를 거친 Tag Manager 로더는 옵트인)
 - `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일. 페이지 뿌리에 가족 서체(`:where(html) { font-family: var(--dds-font-family-sans) }`)도 주어 맨 제목·문단이 브라우저 세리프로 남지 않는다. 명시도가 0이라 제품이 `html`·`:root`·`body`·`:lang()`에 둔 규칙이 이긴다.
 - `@devslab/site-kit/fonts.css` — 가족 서체(Geist·Geist Mono·Pretendard)를 토큰의 패밀리 이름으로 등록한 자체 호스팅 woff2. [가족 서체](#가족-서체) 참고
 
@@ -56,6 +56,7 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 - 터치(`pointer: coarse`): 브랜드 링크·내비게이션·푸터·푸터 언어 링크가 버튼처럼 44px 누르는 면이다. 720px 이하에서 열린 메뉴의 링크는 44px 줄이고, 닫힌 헤더의 첫 줄은 64px 그대로다.
 - `SiteFooter`의 `details`: 브랜드 줄 아래 블록(사업자 정보, `<address>`), 줄 간격 4px·문단 여백 없음. `linksLabel`은 링크를 `<nav aria-label>`로 감싼다 — 헤더 내비게이션과 다른 이름으로. `logo`로 넘긴 푸터 워드마크(`name: ""`)는 자기 크기를 지킨다 — 16px은 이름 옆 아이콘 마크용 — 그리고 접근 가능한 이름을 스스로 가진다(`<img alt>`나 글자). `label`은 헤더 링크의 이름일 뿐이다.
 - `SiteLink.emphasis`는 링크를 굵게 그린다(헤더 내비게이션·푸터 링크·패밀리 링크). 법이 눈에 띄게 하라는 개인정보처리방침용.
+- `SiteFooter` `consentSettings: { controller, label }`는 링크 뒤, 저작권 앞에 동의 설정을 다시 여는 "쿠키 설정" 버튼을 둔다(D-034). 다른 링크와 같아 보이고 터치에서는 44px 대상이다. [동의](#동의-옵트인-분석) 참고.
 - 섹션(그리고 히어로)은 같은 페이지 링크로 이동하면 붙어 있는 헤더 아래에 멈춘다: `scroll-margin-block-start` = 헤더 높이 + 8px. 헤더 높이는 `--site-header-block-size`(기본 64px) — `:root`나 `.site-shell`(헤더와 `<main>`의 공통 조상)에 정한다. `.site-header`에 정하면 섹션은 64px 간격 그대로다.
 - `--site-hero-eyebrow-tracking`(기본 `.18em`)과 `--site-hero-eyebrow-weight`(기본 `normal`)로 히어로 키커를 조정한다. 넓은 모노 자간은 라틴 대문자에 맞고, 키커가 한국어인 제품은 랜딩 뿌리에서 자간을 `0`으로 둔다.
 
@@ -154,6 +155,8 @@ toTanStackHead(metadata, { icons: { basePath: "/" } }); // /favicon.svg, /mark-4
 
 제품 사이트마다 자기 컨테이너 ID로 공개 마케팅·법적 페이지에 Tag Manager를 싣는다. 콘솔·대시보드·채팅 위젯은 제외한다. 스니펫은 여기 한 곳에 둔다(D-031).
 
+**분석은 옵트인이다(D-034).** 아래의 `toTanStackHead(…, { gtm })`와 `gtmHeadEntry`는 묻지 않고 페이지를 열 때마다 Tag Manager를 로드한다. 호환을 위해 남겨 두며, 가족 제품은 [동의](#동의-옵트인-분석)의 동의 게이트 경로로 옮긴다. 같은 로더를 허용 뒤에만 낸다.
+
 | 내보내기 | 진입점 | 무엇인가 |
 |---|---|---|
 | `gtmHeadScript(id)` | `@devslab/site-kit` | head 로더의 스크립트 본문. `<script>` 태그도 nonce도 없음 |
@@ -200,6 +203,183 @@ head: () => toTanStackHead(metadata, { icons: true, gtm: GTM_ID }),
 | `frame-src` | `https://www.googletagmanager.com` |
 
 Tag Manager 컨테이너와 "Ads 기능 없는 Google Analytics"에 대한 구글의 목록에, noscript iframe용 `frame-src`를 더한 것이다. 구글은 `script-src-elem`으로 적지만 그 지시어가 없는 정책은 `script-src`로 넘어간다. `*.google.com`은 `www.google.com`과 GA4의 `*.analytics.google.com` 호스트도 덮는다. 포함하지 않은 것(컨테이너가 필요로 하면 같은 가이드에서 더한다): 미리보기 모드(`tagmanager.google.com`, `gstatic`, Google Fonts), 맞춤 자바스크립트 변수(`'unsafe-eval'`), Ads·Google 신호 호스트(`*.g.doubleclick.net`, `pagead2.googlesyndication.com`, `www.googleadservices.com`, `*.google.<TLD>`).
+
+## 동의 (옵트인 분석)
+
+가족 사이트의 분석은 옵트인이다(D-034). 방문자가 현재 정책 버전에 대해 분석을 허용하기 전에는 구글에 닿는 것이 하나도 돌지 않는다. Tag Manager 로더도, gtag도, GA 쿠키도 없다. 페이지는 Consent Mode v2 기본값(신호 넷 모두 거부)을 자기 `dataLayer`에 넣을 뿐이다. 결정 없음, "거부", 닫아 버린 바, 예전 정책 버전에서 한 결정은 모두 같은 뜻이다. 아무것도 로드하지 않는다. 동의하지 않아도 모든 기능이 동작한다.
+
+| 내보내기 | 진입점 | 무엇인가 |
+|---|---|---|
+| `createConsentManager(options)` | `@devslab/site-kit` | 브라우저 쪽: 동의 쿠키 읽기·쓰기, Consent Mode, 허용 시 Tag Manager 로드, 철회 |
+| `readConsentCookie(cookie, { policyVersion })` / `consentCookieGrantsAnalytics(…)` | `@devslab/site-kit` | Cookie 헤더나 `document.cookie`에서 현재 버전의 유효한 결정(서버·브라우저 모두) |
+| `consentHeadScript({ granted, gtm })` | `@devslab/site-kit` | head 스크립트 본문: 기본값만, 또는 기본값 + 허용 + 구글 로더 |
+| `toTanStackHead(metadata, { consent })` / `consentHeadEntry(…)` | `@devslab/site-kit/tanstack-start` | 같은 스크립트를 라우트 `scripts` 항목으로. 요청의 쿠키로 정한다 |
+| `ConsentBanner`, `ConsentSettingsButton` | `@devslab/site-kit/solid` | 바와 설정 대화상자, 그리고 어디에나 둘 수 있는 "쿠키 설정" 버튼 |
+| `SiteFooter consentSettings` | `@devslab/site-kit/solid` | 같은 버튼을 바닥글 링크 끝에 |
+| `postConsentRecord(path)`, `parseConsentRecord(body, …)`, `isSameOriginRequest(…)` | `@devslab/site-kit` | 기록: 보내기, 서버에서 검증하기, 다른 사이트의 쓰기 거부하기 |
+| `CONSENT_MESSAGES_KO`, `CONSENT_MESSAGES_EN` | `@devslab/site-kit` | 기본 문구. 같은 키로 자기 문구를 넘겨도 된다 |
+
+**약속.**
+
+- 항목: *필수*(항상 켜짐, 정보로만 보여 주고 조작 요소가 아님)와 *분석*(Tag Manager를 거친 Google Analytics 4. 켜기 전까지 꺼짐, 미리 체크하지 않음). 광고 항목은 없다. `ad_storage`·`ad_user_data`·`ad_personalization`은 늘 거부.
+- 쿠키: `site_consent=v=<정책>&a=<0|1>&t=<유닉스 초>&id=<16진 32자>`. 퍼스트파티, `Path=/`, `SameSite=Lax`, `Secure`, 12개월, `HttpOnly` 아님(배너가 읽는다). `id`는 무작위이고 방문자에게서 끌어낸 값이 아니다. 파서는 이 네 키만 받는다.
+- 정책 버전은 제품마다 문자열 하나(`"2026-10-05"`). 개인정보처리방침이 분석에 대해 하는 말이 바뀌면 올린다. 모든 방문자에게 다시 묻고, 답하기 전에는 아무것도 로드하지 않는다. 익명 id는 이어지므로 기록끼리 연결된다.
+- 허용하면 `gtag('consent','update',{analytics_storage:'granted'})`를 넣고 Tag Manager를 한 번, 페이지의 nonce로 로드한다(`csp-nonce` meta, 없으면 첫 `[nonce]` 요소, 없으면 `options.nonce`).
+- 철회하면 업데이트를 `denied`로 되돌리고, `measurementIds`에 대해 `ga-disable-<id>`를 켜고, 호스트와 모든 상위 도메인에서 `_ga`·`_ga_*`·`_gid`·`_gat*`를 지우고, `dataLayer`를 닫는다. 분석이 허용되지 않은 동안 페이지의 `dataLayer`는 동의 명령만 받고 나머지는 버린다. 그래서 동의 전에 넣은 이벤트가 나중에 로드될 Tag Manager를 기다리며 쌓이지 않고, 철회 뒤의 이벤트는 이미 로드된 Tag Manager에 닿지 않는다. Tag Manager 자체는 다음 페이지 로드까지 메모리에 남는다.
+- 기록의 action: `grant`(이 버전에서 분석이 허용됨), `deny`(첫 결정이 거부), `withdraw`(허용 → 거부), `update`(같은 선택을 다시 저장).
+
+**TanStack Start.** 매니저는 모듈 하나가 갖는다.
+
+```ts
+// src/consent.ts
+import { createConsentManager, postConsentRecord } from "@devslab/site-kit";
+
+export const CONSENT_POLICY_VERSION = "2026-10-05"; // 개인정보처리방침의 분석 조항이 바뀌면 올린다
+export const GTM_ID = "GTM-XXXXXXX";
+export const consent = createConsentManager({
+  policyVersion: CONSENT_POLICY_VERSION,
+  gtm: GTM_ID,
+  onChange: postConsentRecord("/api/consent"),
+});
+```
+
+공개 라우트마다 요청의 쿠키로 head를 정한다. 하이드레이션 양쪽이 같은 쿠키를 읽으므로 같은 스크립트를 렌더한다.
+
+```ts
+import { createIsomorphicFn } from "@tanstack/solid-start";
+import { getRequestHeader } from "@tanstack/solid-start/server";
+
+export const requestCookie = createIsomorphicFn()
+  .server(() => getRequestHeader("cookie"))
+  .client(() => document.cookie);
+
+head: () => toTanStackHead(metadata, {
+  icons: true,
+  consent: { policyVersion: CONSENT_POLICY_VERSION, gtm: GTM_ID, cookie: requestCookie() },
+}),
+```
+
+현재 버전의 허용이 없으면 항목은 기본값뿐이고 head 어디에도 구글 호스트가 나오지 않는다. 허용이 있으면 구글의 nonce 대응 로더를 더하되, `gtm.js`가 이미 페이지에 있으면 건너뛴다. 라우터는 맨 로더와 똑같이 `ssr.nonce`를 찍는다([Google Tag Manager](#google-tag-manager)의 nonce 요구 사항이 그대로 적용된다). `gtm`과 `consent`를 같이 넘기면 던진다. `gtm`만 쓰면 묻지 않고 Tag Manager를 로드하기 때문이다. noscript iframe은 `consentCookieGrantsAnalytics(requestCookie(), { policyVersion })`가 참일 때만 렌더한다. 자바스크립트가 없는 방문자는 허용할 방법이 없으니 받지 않는다.
+
+배너는 `<body>`의 첫 요소로 한 번만 붙여 키보드 사용자가 가장 먼저 닿게 하고, 바닥글에 트리거를 둔다.
+
+```tsx
+<body>
+  <ConsentBanner controller={consent} messages={lang() === "ko" ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN} privacyHref={`/${lang()}/privacy`} />
+  <MarketingShell
+    footer={{ …, consentSettings: { controller: consent, label: t("cookieSettings") } }}
+    …
+  />
+</body>
+```
+
+배너는 서버에서도, 하이드레이션 중에도 아무것도 렌더하지 않는다. 바는 마운트 뒤에 브라우저 자신의 쿠키를 보고 나온다(`tests/site-kit-consent-hydration.test.mjs`가 바로 이 구성을 개발 빌드로 하이드레이션한다). 세 선택 — 모두 허용, 거부, 설정 — 은 같은 버튼, 같은 크기다. ✕와 Esc는 결정 없이 닫는다. 설정 대화상자는 포커스를 가두고, Esc로 저장 없이 닫히고, *필수*는 글로, *분석*은 꺼진 스위치로 보여 준다. 바닥글 버튼(또는 `ConsentSettingsButton`, 또는 `consent.openSettings()`)으로 언제든 다시 열어 바꾸거나 철회한다.
+
+비밀을 담은 경로는 가려서 기록한다: `createConsentManager({ …, recordPath: (path) => path.replace(/\/k\/[^/]+/, "/k/:key") })`.
+
+**동의 기록(서버).** 결정마다 제품 자기 백엔드로 기록을 POST한다.
+
+```json
+{ "policyVersion": "2026-10-05", "analytics": true, "action": "grant", "anonymousId": "<16진 32자>", "decidedAt": 1759650000, "source": "web", "path": "/ko/pricing" }
+```
+
+이 엔드포인트가 추적 통로가 되면 안 된다. 같은 출처만, 정확히 이 페이로드만, 요청 수 제한.
+
+```ts
+import { CONSENT_RECORD_MAX_BYTES, isSameOriginRequest, parseConsentRecord } from "@devslab/site-kit";
+
+if (request.method !== "POST") return new Response(null, { status: 405 });
+if (!isSameOriginRequest(request, "https://getasklinq.app")) return new Response(null, { status: 403 });
+if (Number(request.headers.get("content-length") ?? 0) > CONSENT_RECORD_MAX_BYTES) return new Response(null, { status: 413 });
+const ip = request.headers.get("cf-connecting-ip") ?? "";
+if (!(await env.CONSENT_RATE_LIMIT.limit({ key: ip })).success) return new Response(null, { status: 429 });
+const record = parseConsentRecord(await request.text(), { policyVersion: CONSENT_POLICY_VERSION });
+if (!record) return new Response(null, { status: 400 });
+await insertConsentRecord(env, { ...record, receivedAt: new Date().toISOString(), ip, userAgent: (request.headers.get("user-agent") ?? "").slice(0, 256) });
+return new Response(null, { status: 204 });
+```
+
+`parseConsentRecord`는 정확히 일곱 키, 아는 정책 버전(이전 버전에서 만든 기록이 아직 올 수 있는 동안에는 목록으로 넘긴다), `analytics`와 맞는 action, 쿼리 없는 경로, 미래도 아니고 31일보다 오래되지도 않은 `decidedAt`만 받는다. 실패한 POST(네트워크·429·5xx)는 `localStorage`에 남았다가 다음 페이지에서 다시 보낸다. 4xx는 버린다. 참고용 테이블(애플리케이션에는 추가만 허용):
+
+```sql
+CREATE TABLE consent_records (
+  id             TEXT PRIMARY KEY,                -- 서버가 만든 값
+  received_at    TEXT NOT NULL,                   -- 서버 시각, UTC
+  decided_at     INTEGER NOT NULL,                -- 기록의 decidedAt (쿠키의 t)
+  subject_type   TEXT NOT NULL CHECK (subject_type IN ('user', 'anonymous')),
+  subject_id     TEXT NOT NULL,                   -- 로그인했으면 내부 사용자 id, 아니면 익명 id
+  login_id       TEXT,                            -- 로그인했을 때의 로그인 id 사본
+  anonymous_id   TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  analytics      INTEGER NOT NULL CHECK (analytics IN (0, 1)),
+  action         TEXT NOT NULL CHECK (action IN ('grant', 'deny', 'withdraw', 'update')),
+  source         TEXT NOT NULL CHECK (source IN ('web', 'app')),
+  path           TEXT NOT NULL,
+  ip             TEXT,
+  user_agent     TEXT                             -- 앞 256자
+);
+CREATE INDEX consent_records_by_visitor ON consent_records (anonymous_id, decided_at);
+CREATE TRIGGER consent_records_append_only BEFORE UPDATE ON consent_records
+BEGIN SELECT RAISE(ABORT, 'consent records are append-only'); END;
+```
+
+기록은 그 동의가 유효한 동안과, 끝난 뒤 보관 기간(기본 3년 — 설정으로 두고 개인정보처리방침에 적는다) 동안 둔다. 동의는 같은 방문자가 다시 결정하거나 `decided_at`에서 12개월이 지나 만료될 때 중 먼저 오는 때에 끝난다. 보관 기간 정리 작업만 `DELETE`를 한다.
+
+```sql
+DELETE FROM consent_records AS r
+WHERE MIN(
+  COALESCE((SELECT MIN(n.decided_at) FROM consent_records AS n
+            WHERE n.anonymous_id = r.anonymous_id AND n.decided_at > r.decided_at), r.decided_at + 31536000),
+  r.decided_at + 31536000
+) + :retention_seconds < :now_seconds;
+```
+
+Postgres에서는 두 인자 `MIN`을 `LEAST`로 쓰고, 애플리케이션 역할에 `SELECT, INSERT`만 주어 추가 전용으로 둔다(정리 작업은 다른 역할로 돈다).
+
+**Solid 없이 (devslab.kr, Next.js 정적 내보내기).** 정적 페이지는 빌드할 때 쿠키를 읽을 수 없으므로 head에는 기본값만 싣고, 쿠키가 허용하면 매니저가 하이드레이션 뒤에 Tag Manager를 로드한다.
+
+```tsx
+// pages/_document.tsx — Tag Manager 로더와 noscript iframe을 대신한다
+<Head>
+  <script dangerouslySetInnerHTML={{ __html: consentHeadScript() }} />
+</Head>
+```
+
+```tsx
+// src/consent.ts
+import { createConsentManager } from "@devslab/site-kit";
+export const consent = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-XXXXXXX" });
+
+// src/components/ConsentBar.tsx — 마크업은 제품 것, 동작과 문구는 킷 것
+import { useEffect, useState } from "react";
+import { CONSENT_MESSAGES_KO as m } from "@devslab/site-kit";
+import { consent } from "../consent";
+
+export function ConsentBar() {
+  const [ask, setAsk] = useState(false);
+  const [settings, setSettings] = useState(false);
+  useEffect(() => {
+    consent.start(); // 저장된 허용을 적용: Tag Manager를 한 번 로드
+    const sync = () => setAsk(consent.needsDecision() && !consent.dismissed());
+    sync();
+    const off = consent.subscribe((event) => (event.type === "open-settings" ? setSettings(true) : sync()));
+    const unbind = consent.bindTriggers(); // 어떤 [data-consent-settings]든 설정을 연다
+    return () => { off(); unbind(); };
+  }, []);
+  // `ask`인 동안 바를 렌더: m.title, m.body, /privacy 링크, 같은 무게의 버튼 셋 —
+  // consent.acceptAll(), consent.rejectAll(), setSettings(true). Esc → consent.dismiss().
+  // 설정 대화상자: m.necessaryTitle은 글로, m.analyticsSwitch는 꺼진 스위치로,
+  // 그리고 consent.save({ analytics }) / acceptAll() / rejectAll().
+  return null;
+}
+
+// 바닥글:
+// <a href="#cookie-settings" data-consent-settings>{m.trigger}</a>
+```
+
+쿠키는 호스트 단위이고 `Path=/`이므로, 같은 호스트에서 React를 싣지 않는 정적 HTML 페이지는 모듈 스크립트에서 `consent.start()`만 부르면 된다. 그 호스트의 어느 페이지에서 한 결정이든 그 페이지에도 적용된다.
+
+**코드로 할 수 없는 콘솔 작업.** Tag Manager에서 GA4 태그마다 동의 설정을 *태그 실행에 추가 동의 필요: `analytics_storage`*로 둔다. 철회 뒤 Tag Manager가 메모리에 남아 있어도 거부된 페이지에서 태그가 실행되지 않는다. GA4에서는 데이터 보관 기간을 14개월로 두고(기본 문구가 그렇게 말한다), Google 신호 데이터와 광고 개인 최적화는 끈다(광고 항목이 없다).
 
 ## 섹션
 
