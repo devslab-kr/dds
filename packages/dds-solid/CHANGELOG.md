@@ -1,5 +1,13 @@
 # @devslab/dds-solid
 
+## 0.14.1
+
+### Patch Changes
+
+- @devslab/dds-tokens@0.14.1
+- @devslab/dds-css@0.14.1
+- @devslab/dds-icons@0.14.1
+
 ## 0.14.0
 
 ### Patch Changes
