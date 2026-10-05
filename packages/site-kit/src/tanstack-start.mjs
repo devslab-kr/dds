@@ -4,6 +4,13 @@ import { fontPreloadLinks } from "./core/fonts.mjs";
 import { consentCookieGrantsAnalytics, consentHeadScript } from "./core/consent.mjs";
 
 /**
+ * Send these on every route that uses `consent` (TanStack Start: the route's
+ * `headers` option). The head differs per visitor's cookie, so the page must
+ * never sit in a shared cache.
+ */
+export { CONSENT_RESPONSE_HEADERS } from "./core/consent.mjs";
+
+/**
  * A route `head().scripts` entry that loads Google Tag Manager (D-031).
  *
  * Only `children`: no `nonce`, on purpose. The router's HeadContent stamps

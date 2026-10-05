@@ -8,6 +8,7 @@ import {
   CONSENT_MESSAGES_EN,
   CONSENT_MESSAGES_KO,
   CONSENT_MODE_DEFAULTS,
+  CONSENT_RESPONSE_HEADERS,
   analyticsConsented,
   consentCookieGrantsAnalytics,
   consentHeadScript,
@@ -24,6 +25,8 @@ import {
 import { gtmHeadScript } from "../packages/site-kit/src/core/gtm.mjs";
 import { buildMetadata } from "../packages/site-kit/src/core/seo.mjs";
 import * as core from "../packages/site-kit/src/core/index.mjs";
+import { readFileSync } from "node:fs";
+import * as tanstack from "../packages/site-kit/src/tanstack-start.mjs";
 import { consentHeadEntry, toTanStackHead } from "../packages/site-kit/src/tanstack-start.mjs";
 
 /*
@@ -40,6 +43,7 @@ const GTM = "GTM-AB12CD3";
 const NOW = Date.UTC(2026, 9, 5, 12, 0, 0);
 const GOOGLE = /googletagmanager|google-analytics|\.google\./;
 const ID = "0123456789abcdef0123456789abcdef";
+const MEASUREMENT = "G-ABC123";
 
 function fakeBrowser({ hostname = "www.example.com", cookies = [], nonce, metaNonce, blockCookies = false } = {}) {
   const jar = new Map();
@@ -127,7 +131,7 @@ const isArgs = (item) => Object.prototype.toString.call(item) === "[object Argum
 // JSON round trip: the head script runs in a vm realm whose objects have another Object.prototype.
 const commands = (browser) => JSON.parse(JSON.stringify(Array.from(browser.layer()).filter(isArgs).map((item) => [...item])));
 const events = (browser) => Array.from(browser.layer()).filter((item) => !isArgs(item));
-const manager = (browser, extra = {}) => createConsentManager({ policyVersion: VERSION, gtm: GTM, window: browser.window, now: () => NOW, ...extra });
+const manager = (browser, extra = {}) => createConsentManager({ policyVersion: VERSION, gtm: GTM, measurementIds: [MEASUREMENT], window: browser.window, now: () => NOW, ...extra });
 const cookieOf = (browser, name = CONSENT_COOKIE_NAME) => [...browser.jar].find(([key]) => key.startsWith(`${name}|`))?.[1];
 const stateAt = (overrides = {}) => ({ v: VERSION, a: 1, t: Math.floor(NOW / 1000), id: ID, ...overrides });
 const header = (state) => `theme=dark; ${CONSENT_COOKIE_NAME}=${formatConsentCookie(state)}; session=abc`;
@@ -497,6 +501,44 @@ test("the TanStack head loads Tag Manager only when the request's cookie grants 
   assert.deepEqual(consentHeadEntry({ policyVersion: VERSION, cookie: undefined }), { children: consentHeadScript({ granted: false }) });
   assert.throws(() => toTanStackHead(metadata, { gtm: GTM, consent: { policyVersion: VERSION, cookie: "" } }), TypeError, "both would load Tag Manager without consent");
   assert.throws(() => toTanStackHead(metadata, { consent: { policyVersion: "", gtm: GTM, cookie: "" } }), RangeError, "a missing policy version is an error, not silence");
+});
+
+test("a manager that loads Tag Manager must name the GA4 streams it switches off on withdrawal", () => {
+  // Without ga-disable-<id>, the GA4 tag Tag Manager already initialised keeps
+  // its own listeners (history page_view, scroll, outbound clicks) and sends
+  // cookieless pings to Google until the page reloads — withdrawal would not stop sending.
+  const browser = fakeBrowser();
+  for (const measurementIds of [undefined, []]) {
+    assert.throws(() => createConsentManager({ policyVersion: VERSION, gtm: GTM, measurementIds, window: browser.window }), RangeError, `measurementIds ${JSON.stringify(measurementIds)}`);
+  }
+  assert.throws(() => createConsentManager({ policyVersion: VERSION, gtm: GTM, measurementIds: ["UA-1"], window: browser.window }), RangeError);
+  assert.doesNotThrow(() => createConsentManager({ policyVersion: VERSION, gtm: GTM, measurementIds: [MEASUREMENT], window: browser.window }));
+  assert.doesNotThrow(() => createConsentManager({ policyVersion: VERSION, window: browser.window }), "without Tag Manager there is no GA4 tag to switch off");
+  const consent = manager(browser);
+  consent.acceptAll();
+  consent.withdraw();
+  assert.equal(browser.window[`ga-disable-${MEASUREMENT}`], true);
+});
+
+test("a response whose head depends on the consent cookie is never stored by a shared cache", () => {
+  // One visitor's granted head (with the Tag Manager loader) must not be served to another.
+  assert.deepEqual({ ...CONSENT_RESPONSE_HEADERS }, { "Cache-Control": "private, no-store", Vary: "Cookie" });
+  assert.ok(Object.isFrozen(CONSENT_RESPONSE_HEADERS));
+  assert.equal(core.CONSENT_RESPONSE_HEADERS, CONSENT_RESPONSE_HEADERS);
+  assert.equal(tanstack.CONSENT_RESPONSE_HEADERS, CONSENT_RESPONSE_HEADERS);
+  for (const file of ["packages/site-kit/README.md", "packages/site-kit/README.ko.md", "docs/decisions.md"]) {
+    const text = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+    assert.match(text, /CONSENT_RESPONSE_HEADERS/, `${file} tells products to send the headers`);
+    assert.match(text, /private, no-store/, file);
+  }
+  for (const file of ["packages/site-kit/README.md", "packages/site-kit/README.ko.md"]) {
+    const text = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+    const withGtm = [...text.matchAll(/createConsentManager\(\{[\s\S]*?\}\)/g)].map(([example]) => example).filter((example) => /\bgtm:/.test(example));
+    assert.equal(withGtm.length, 2, `${file}: the TanStack and static examples both load Tag Manager`);
+    for (const example of withGtm) {
+      assert.match(example, /measurementIds:/, `${file}: every example that loads Tag Manager names its GA4 streams`);
+    }
+  }
 });
 
 test("the core barrel exports the consent API and both message sets have the same keys", () => {

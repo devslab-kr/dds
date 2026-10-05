@@ -51,7 +51,7 @@ import { ConsentBanner, SiteFooter } from ${JSON.stringify(pathToFileURL(join(ki
 import { CONSENT_MESSAGES_KO, createConsentManager } from ${JSON.stringify(consentModule)};
 import { page } from "./page.mjs";
 const MESSAGES = ${JSON.stringify(MESSAGES)};
-const controller = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-AB12CD3" });
+const controller = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-AB12CD3", measurementIds: ["G-ABC123"] });
 const html = renderToString(() => page({ createComponent, ConsentBanner, SiteFooter, controller, CONSENT_MESSAGES_KO, MESSAGES }));
 process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html }));
 `;
@@ -80,7 +80,7 @@ const { ConsentBanner, SiteFooter } = await import(${JSON.stringify(pathToFileUR
 const { CONSENT_MESSAGES_KO, createConsentManager } = await import(${JSON.stringify(consentModule)});
 const { page } = await import("./page.mjs");
 const MESSAGES = ${JSON.stringify(MESSAGES)};
-const controller = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-AB12CD3" });
+const controller = createConsentManager({ policyVersion: "2026-10-05", gtm: "GTM-AB12CD3", measurementIds: ["G-ABC123"] });
 const diagnostics = [];
 const warn = console.warn, error = console.error;
 console.warn = (...v) => diagnostics.push(v.join(" "));

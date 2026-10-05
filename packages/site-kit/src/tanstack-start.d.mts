@@ -21,6 +21,8 @@ export interface TanStackHeadOptions { icons?: boolean | { basePath?: string }; 
 export interface ConsentHeadOptions { policyVersion: string; cookie: string | null | undefined; gtm?: string | undefined; cookieName?: string | undefined }
 /** The consent-gated `scripts` entry (inline script body only; the router adds `ssr.nonce`). Throws RangeError for a malformed id or policy version. */
 export declare function consentHeadEntry(options: ConsentHeadOptions): GtmHeadEntry;
+/** Send on every route that uses `consent` (the route's `headers` option): the head differs per visitor, so the page must never sit in a shared cache. */
+export { CONSENT_RESPONSE_HEADERS } from "./core/consent.mjs";
 /** A route `head().scripts` entry: the loader body only. The router adds `ssr.nonce` when it renders the tag. Throws RangeError for a malformed id. */
 export interface GtmHeadEntry { children: string }
 export declare function gtmHeadEntry(containerId: string): GtmHeadEntry;
