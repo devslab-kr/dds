@@ -46,6 +46,48 @@ const sectionFixture = `<!doctype html><html lang="en"><head><meta charset="utf-
 <section class="site-section" data-tone="band"><div class="site-section__shell"><h2>Band</h2></div></section>
 </body></html>`;
 
+// Bare text (a hero h1, a legal page's paragraphs) has no dds-* class, so
+// only the root can give it the family face. Without the kit default it fell
+// to the browser's serif on every AskLinq page.
+const fontFixture = (productCss = "", lang = "en") => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><style>${productCss}\n${tokens}\n${css}\n${site}</style></head><body>
+<div class="site-shell"><main class="site-main"><h1>Heading</h1><p>Body copy</p></main></div>
+</body></html>`;
+
+function fontsOf(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const probe = document.createElement("span");
+    probe.style.fontFamily = "var(--dds-font-family-sans)";
+    document.body.appendChild(probe);
+    const token = getComputedStyle(probe).fontFamily;
+    probe.remove();
+    const of = (selector: string) => getComputedStyle(document.querySelector(selector)!).fontFamily;
+    return { token, html: of("html"), body: of("body"), shell: of(".site-shell"), h1: of("h1"), p: of("p") };
+  });
+}
+
+test("bare page text takes the DDS sans stack from the root, not the browser's serif", async ({ page }) => {
+  await page.setContent(fontFixture());
+  const fonts = await fontsOf(page);
+  expect(fonts.token).toMatch(/^Geist,/);
+  for (const element of ["html", "body", "shell", "h1", "p"] as const) expect(fonts[element], element).toBe(fonts.token);
+});
+
+test("the root font default loses to any product rule on html, :root, body or :lang", async ({ page }) => {
+  // Product CSS sits BEFORE the kit here, so it has to win on specificity, not
+  // source order. The shapes the siblings already ship: TraceLinq `html {}`, BookLinq/VisionLinq
+  // `:root {}`, VisionLinq `html:lang(ko) body {}`, TraceLinq/BookLinq `:lang(ko) {}`.
+  for (const [productCss, lang] of [
+    ["html { font-family: ProductFace, serif; }", "en"],
+    [":root { font-family: ProductFace, serif; }", "en"],
+    ["html:lang(ko) body { font-family: ProductFace, serif; }", "ko"],
+    [":lang(ko) { font-family: ProductFace, serif; }", "ko"],
+  ] as const) {
+    await page.setContent(fontFixture(productCss, lang));
+    const fonts = await fontsOf(page);
+    for (const element of ["body", "shell", "h1", "p"] as const) expect(fonts[element], `${productCss} → ${element}`).toBe("ProductFace, serif");
+  }
+});
+
 test("a band-tone section resolves to the family's subtle background token", async ({ page }) => {
   await page.setContent(sectionFixture);
   const [bandBackground, subtleToken] = await page.evaluate(() => {
