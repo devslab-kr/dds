@@ -354,7 +354,8 @@ test("accepting loads Tag Manager once, with the page's nonce, records the grant
   await expect(bar(page)).toHaveCount(0);
   await expect.poll(() => harness.records.length).toBe(1);
   expect(harness.google.map((request) => request.url())).toEqual(["https://www.googletagmanager.com/gtm.js?id=GTM-AB12CD3"]);
-  expect(await page.evaluate(() => (window as unknown as { __gtmRuns?: number }).__gtmRuns), "the CSP let gtm.js run: it carried the nonce").toBe(1);
+  // The request is seen when it is routed; the script runs a moment later. Poll, as the reload below does.
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __gtmRuns?: number }).__gtmRuns), { message: "the CSP let gtm.js run: it carried the nonce" }).toBe(1);
   const [{ body, origin }] = harness.records as [{ body: Record<string, unknown>; origin: string }];
   expect(origin).toBe(ORIGIN);
   expect(body).toMatchObject({ policyVersion: VERSION, analytics: true, action: "grant", source: "web", path: "/ko/pricing" });
