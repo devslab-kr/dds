@@ -335,3 +335,47 @@ test.describe("landing chrome footer, coarse pointer, one row", () => {
     expect(copyrightText).toBe(linkText);
   });
 });
+
+// D-033: loading fonts.css is all it takes for the token stacks to resolve to
+// the self-hosted faces — no product rule renames anything. Served from one
+// origin, as a product serves its own /assets.
+const fontsRoot = new URL("../../packages/site-kit/", import.meta.url);
+const fontPage = `<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link rel="preload" href="/fonts/geist/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="stylesheet" href="/fonts.css">
+<style>${tokens}\n${css}\n${site}\ncode { font-family: var(--dds-font-family-mono); }</style></head><body>
+<div class="site-shell"><main class="site-main"><h1>DevsLab 디자인 시스템</h1><p>가족 서체는 한 곳에서 나갑니다. Version 0.15.0</p><code>pnpm add @devslab/site-kit</code></main></div>
+</body></html>`;
+
+test("fonts.css makes the token stacks resolve to the self-hosted faces, fetching only the subsets the page uses", async ({ page }) => {
+  const fetched: { path: string; bytes: number }[] = [];
+  await page.route("http://fonts.test/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/") return route.fulfill({ contentType: "text/html", body: fontPage });
+    try {
+      const body = await readFile(new URL(`.${path}`, fontsRoot));
+      if (path.endsWith(".woff2")) fetched.push({ path, bytes: body.length });
+      return route.fulfill({ contentType: path.endsWith(".css") ? "text/css" : "font/woff2", body });
+    } catch {
+      return route.fulfill({ status: 404, body: "" });
+    }
+  });
+  await page.goto("http://fonts.test/");
+  const loaded = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return [...document.fonts].filter((face) => face.status === "loaded").map((face) => face.family.replace(/^"|"$/g, ""));
+  });
+  expect(new Set(loaded)).toEqual(new Set(["Geist", "Pretendard", "Geist Mono"]));
+  const paths = fetched.map(({ path }) => path);
+  // The preload carries crossorigin, so the @font-face fetch reuses it: one request.
+  expect(paths.filter((path) => path === "/fonts/geist/geist-latin-wght-normal.woff2")).toHaveLength(1);
+  expect(paths).toContain("/fonts/geist-mono/geist-mono-latin-wght-normal.woff2");
+  expect(paths.some((path) => /cyrillic|vietnamese/.test(path)), "no script the page does not use").toBe(false);
+  const pretendard = paths.filter((path) => path.startsWith("/fonts/pretendard/"));
+  expect(pretendard.length).toBeGreaterThan(0);
+  expect(pretendard.length, "a short Korean page fetches a handful of the 92 subsets").toBeLessThan(15);
+  const rendered = await page.evaluate(() => ["h1", "p", "code"].map((selector) => getComputedStyle(document.querySelector(selector)!).fontFamily));
+  expect(rendered[0]).toMatch(/^Geist, Pretendard,/);
+  expect(rendered[2]).toMatch(/^"Geist Mono",/);
+  test.info().annotations.push({ type: "font bytes", description: `${fetched.length} files, ${fetched.reduce((sum, { bytes }) => sum + bytes, 0)} bytes` });
+});

@@ -6,7 +6,8 @@
   "license": "SEE LICENSE IN LICENSE",
   "sideEffects": [
     "./styles.css",
-    "./site-sections.css"
+    "./site-sections.css",
+    "./fonts.css"
   ],
   "repository": {
     "type": "git",
@@ -21,11 +22,13 @@
   "files": [
     "dist",
     "flags",
+    "fonts",
     "src/core",
     "src/tanstack-start.mjs",
     "src/tanstack-start.d.mts",
     "styles.css",
     "site-sections.css",
+    "fonts.css",
     "README.md",
     "README.ko.md"
   ],
@@ -57,11 +60,13 @@
       "import": "./src/tanstack-start.mjs"
     },
     "./styles.css": "./styles.css",
-    "./site-sections.css": "./site-sections.css"
+    "./site-sections.css": "./site-sections.css",
+    "./fonts.css": "./fonts.css",
+    "./fonts/*": "./fonts/*"
   },
   "scripts": {
     "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "check": "node scripts/build-flags.mjs --check && tsc -p tsconfig.json --noEmit && tsc -p fixtures/bundle-probe/tsconfig.json && node scripts/check-client-bundle.mjs",
+    "check": "node scripts/build-flags.mjs --check && node scripts/build-fonts.mjs --check && tsc -p tsconfig.json --noEmit && tsc -p fixtures/bundle-probe/tsconfig.json && node scripts/check-client-bundle.mjs",
     "test": "vitest run --config vitest.config.ts && vitest run --config vitest.ssr.config.ts",
     "test:a11y": "vitest run --config vitest.config.ts src/solid/__tests__/a11y.test.tsx",
     "test:worker": "wrangler deploy --dry-run --config fixtures/worker/wrangler.jsonc --outdir dist-worker"

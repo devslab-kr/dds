@@ -8,6 +8,7 @@ Public product-site infrastructure for DevsLab products. It provides strict cata
 - `@devslab/site-kit/solid` — header, footer, locale/theme controls, marketing/legal/status/error layouts, and request-access form.
 - `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors (with opt-in brand icons and Tag Manager loader).
 - `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles. It also gives the page root the family face (`:where(html) { font-family: var(--dds-font-family-sans) }`), so bare headings and paragraphs are not left in the browser's serif. The rule has zero specificity: a product's own rule on `html`, `:root`, `body` or `:lang()` wins.
+- `@devslab/site-kit/fonts.css` — the family font (Geist, Geist Mono, Pretendard) as self-hosted woff2 under the token's family names; see [Family font](#family-font).
 
 Catalog construction is intentionally strict: every locale in the registry must have exactly the same keys and named placeholders. There is no runtime copy fallback.
 
@@ -61,6 +62,73 @@ For a single-language product, and for a footer that has to print business detai
 Defaults that apply to every product, with or without the new props: the 44px touch targets above; the narrow header's first row is `--site-header-block-size` (64px) with no block padding — a product without a global `box-sizing: border-box` reset loses 24px of phone header height (it was 64px plus 12px padding each side), and one whose menu button is 44px loses 4px; the open menu's links are 44px rows with no gap and its controls row has 12px below it; sections and the hero get the scroll offset; the menu closes on Escape and on following a link; footer links are baseline-aligned, and a row with details aligns on the first line.
 
 Type note: `SiteHeaderProps["locale"]` is now `LocaleState | undefined`. Code that reads it from a `SiteHeaderProps` value (`header.locale.locale`) must narrow it — for example type the value as `SiteHeaderProps & { locale: LocaleState }` where the product always sets it.
+
+## Family font
+
+The family face — Geist for Latin and digits, Geist Mono for code and labels, Pretendard for Korean — ships here once, as woff2 files plus one stylesheet (D-033). Every product serves the same files from its own origin, so a CSP of `font-src 'self'` holds and no font request leaves the product's domain.
+
+| Family | Files | Upstream | License |
+|---|---|---|---|
+| `Geist` | 5 subsets by script (latin 29 KB, latin-ext, vietnamese, cyrillic, cyrillic-ext), variable 100–900 | `@fontsource-variable/geist` 5.3.0 | SIL OFL 1.1 — `fonts/geist/LICENSE.txt` |
+| `Geist Mono` | 6 subsets (latin 23 KB, …, symbols2), variable 100–900 | `@fontsource-variable/geist-mono` 5.3.0 | SIL OFL 1.1 — `fonts/geist-mono/LICENSE.txt` |
+| `Pretendard` | 92 dynamic subsets (8–44 KB each, 2.9 MB in all), variable 45–920 | `pretendard` 1.3.9 | SIL OFL 1.1 — `fonts/pretendard/LICENSE.txt` |
+
+**The family names are the token's names.** `--dds-font-family-sans` is `Geist, Pretendard, …` and `--dds-font-family-mono` is `'Geist Mono', …`, and `fonts.css` registers exactly `"Geist"`, `"Pretendard"` and `"Geist Mono"`. Load the stylesheet and the tokens (and the page-root rule in `styles.css`) resolve to these files with nothing renamed. Not `"Geist Variable"` / `"Pretendard Variable"`: those are what the upstream packages call their own copies, and a stack naming them would not pick these files up.
+
+**A page fetches only what it draws.** Every face has a `unicode-range`, so the browser downloads a file only when the page contains a character in its range. An English page fetches Geist latin (29 KB). A Korean landing page also fetches 12–16 Pretendard subsets — 305 KB for getasklinq.app, 347 KB for gettracelinq.app/ko, 424 KB for getbooklinq.app in Korean (measured in Chromium) — instead of the 2 MB single `PretendardVariable.woff2`. All faces use `font-display: swap`: text paints at once in the fallback and switches when the face arrives.
+
+### Adopting it (Vite, TanStack Start on Workers)
+
+Import the stylesheet once, from the CSS (or the entry) every page loads:
+
+```css
+/* src/styles/app.css */
+@import "@devslab/site-kit/fonts.css";
+```
+
+Vite follows each relative `url()` into `node_modules/@devslab/site-kit/fonts/`, copies the faces it finds into the build's `assets/` with hashed names and rewrites the stylesheet to `/assets/…woff2`. The Worker serves them as static assets from the product's own origin. Every face is larger than Vite's 4 KB inlining limit, so none becomes a `data:` URI (which `font-src 'self'` would block) — if a product raises `build.assetsInlineLimit`, exclude fonts: `assetsInlineLimit: (file) => (file.endsWith(".woff2") ? false : undefined)`.
+
+Optionally preload the Latin face, which every page uses. Import it with `?url` — the same hashed URL the stylesheet ends up with — and pass it to the head:
+
+```ts
+import geistLatin from "@devslab/site-kit/fonts/geist/geist-latin-wght-normal.woff2?url";
+
+head: () => toTanStackHead(metadata, { icons: true, fontPreload: geistLatin }),
+```
+
+`fontPreload` appends `fontPreloadLinks(geistLatin)` — `{ rel: "preload", as: "font", type: "font/woff2", crossorigin: "anonymous" }`. The `crossorigin` is required even on the same origin: fonts are fetched in CORS mode, and a preload without it is downloaded a second time. Only same-origin paths ending in `.woff2` are accepted. `FAMILY_FONT_PRELOAD_FILE` names the file's path inside the package. Preload nothing else: which Pretendard subsets a page needs depends on its text.
+
+### Without a bundler
+
+Copy `fonts.css` and `fonts/` next to each other into the directory the site serves, keeping the layout, and link the stylesheet:
+
+```js
+// scripts/copy-fonts.mjs
+import { cpSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { createRequire } from "node:module";
+
+const kit = dirname(createRequire(import.meta.url).resolve("@devslab/site-kit/fonts.css"));
+cpSync(join(kit, "fonts.css"), "public/site-kit/fonts.css");
+cpSync(join(kit, "fonts"), "public/site-kit/fonts", { recursive: true });
+```
+
+```html
+<link rel="stylesheet" href="/site-kit/fonts.css">
+```
+
+The `url()`s are relative to `fonts.css`, so they resolve to `/site-kit/fonts/…` wherever the pair is copied. `fonts/manifest.json` (copied along) records each file's upstream package, version, size and sha256.
+
+### Moving off a product's own copy
+
+1. Delete the product's `@font-face` rules for Geist, Geist Mono and Pretendard, the script that copies woff2 into `public/fonts/` (and its `.gitignore` lines), any `@fontsource-variable/*` imports, and the `@fontsource-variable/geist`, `@fontsource-variable/geist-mono` and `pretendard` dependencies.
+2. Import `@devslab/site-kit/fonts.css` as above.
+3. In the product's own stacks, rename `"Geist Variable"` → `Geist`, `"Geist Mono Variable"` → `"Geist Mono"`, `"Pretendard Variable"` → `Pretendard` — or drop a root rule that only restated the token stack: `styles.css` already sets `:where(html) { font-family: var(--dds-font-family-sans) }` (D-032). A Korean-first order such as `:lang(ko) { font-family: Pretendard, Geist, … }` stays the product's choice and works with these faces.
+4. Replace a hand-written `<link rel="preload" href="/fonts/geist.woff2">` with `fontPreload`, and update tests that load or check fonts by the old names (`document.fonts.check('1rem "Pretendard Variable"')` → `"Pretendard"`).
+
+### Licenses
+
+All three families are under the SIL Open Font License 1.1; each directory under `fonts/` carries its license text, and the package redistributes the files unmodified. Pretendard reserves its font name, so a modified version (a subset cut by someone else, for example) may not be called Pretendard: these are the author's own subsets, and `scripts/build-fonts.mjs` copies them byte for byte from the published package, never re-cuts them. `node scripts/build-fonts.mjs --check` (part of `check`) fails if a file differs from the manifest; `--vendor` refetches the pinned upstream tarballs (verifying their npm integrity) when a version is bumped.
 
 ## Brand icons
 

@@ -8,6 +8,7 @@ DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. �
 - `@devslab/site-kit/solid` — 헤더·푸터·언어/테마 컨트롤·마케팅/법률/상태/오류 레이아웃·접근 요청 폼
 - `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환(브랜드 아이콘·Tag Manager 로더는 옵트인)
 - `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일. 페이지 뿌리에 가족 서체(`:where(html) { font-family: var(--dds-font-family-sans) }`)도 주어 맨 제목·문단이 브라우저 세리프로 남지 않는다. 명시도가 0이라 제품이 `html`·`:root`·`body`·`:lang()`에 둔 규칙이 이긴다.
+- `@devslab/site-kit/fonts.css` — 가족 서체(Geist·Geist Mono·Pretendard)를 토큰의 패밀리 이름으로 등록한 자체 호스팅 woff2. [가족 서체](#가족-서체) 참고
 
 카탈로그 생성은 의도적으로 엄격하다. 레지스트리의 모든 로케일이 동일한 키와 이름 기반 placeholder를 가져야 하며 런타임 문구 폴백은 없다.
 
@@ -61,6 +62,73 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 새 props를 쓰든 안 쓰든 모든 제품에 적용되는 기본값: 위의 44px 터치 누르는 면, 좁은 헤더 첫 줄이 `--site-header-block-size`(64px)이고 위아래 패딩 없음 — 전역 `box-sizing: border-box` 리셋이 없는 제품은 휴대폰 헤더가 24px 낮아지고(64px에 위아래 12px 패딩이었음), 메뉴 버튼이 44px인 제품은 4px 낮아진다 — 열린 메뉴의 링크는 간격 없는 44px 줄이고 컨트롤 줄 아래 12px, 섹션·히어로의 스크롤 간격, Esc·링크로 메뉴 닫힘, 푸터 링크의 기준선 정렬과 details가 있는 줄의 첫 줄 정렬.
 
 타입 메모: `SiteHeaderProps["locale"]`은 이제 `LocaleState | undefined`다. `SiteHeaderProps` 값에서 읽는 코드(`header.locale.locale`)는 좁혀야 한다 — 예를 들어 제품이 늘 넘긴다면 그 값을 `SiteHeaderProps & { locale: LocaleState }`로 타입한다.
+
+## 가족 서체
+
+가족 서체 — 라틴·숫자는 Geist, 코드·라벨은 Geist Mono, 한글은 Pretendard — 를 woff2 파일과 스타일시트 하나로 여기서 한 번만 싣는다(D-033). 모든 제품이 같은 파일을 자기 도메인에서 서빙하므로 `font-src 'self'` CSP가 그대로 유지되고, 글꼴 요청이 제품 도메인 밖으로 나가지 않는다.
+
+| 패밀리 | 파일 | 원본 | 라이선스 |
+|---|---|---|---|
+| `Geist` | 문자권별 5개(latin 29 KB, latin-ext, vietnamese, cyrillic, cyrillic-ext), 가변 100–900 | `@fontsource-variable/geist` 5.3.0 | SIL OFL 1.1 — `fonts/geist/LICENSE.txt` |
+| `Geist Mono` | 6개(latin 23 KB, …, symbols2), 가변 100–900 | `@fontsource-variable/geist-mono` 5.3.0 | SIL OFL 1.1 — `fonts/geist-mono/LICENSE.txt` |
+| `Pretendard` | 동적 서브셋 92개(각 8–44 KB, 전체 2.9 MB), 가변 45–920 | `pretendard` 1.3.9 | SIL OFL 1.1 — `fonts/pretendard/LICENSE.txt` |
+
+**패밀리 이름이 곧 토큰의 이름이다.** `--dds-font-family-sans`는 `Geist, Pretendard, …`, `--dds-font-family-mono`는 `'Geist Mono', …`이고, `fonts.css`는 정확히 `"Geist"`·`"Pretendard"`·`"Geist Mono"`를 등록한다. 스타일시트를 불러오기만 하면 토큰(과 `styles.css`의 페이지 뿌리 규칙)이 이름을 바꾸지 않고 이 파일들로 이어진다. `"Geist Variable"`·`"Pretendard Variable"`이 아니다: 그것은 원본 패키지가 자기 사본에 붙인 이름이고, 그 이름을 적은 스택은 이 파일들을 집지 않는다.
+
+**페이지는 그리는 글자만큼만 받는다.** 모든 face에 `unicode-range`가 있어, 페이지에 그 범위의 글자가 있을 때만 파일을 받는다. 영어 페이지는 Geist latin(29 KB)만 받는다. 한국어 랜딩은 Pretendard 서브셋 12–16개를 더 받는다 — getasklinq.app 305 KB, gettracelinq.app/ko 347 KB, getbooklinq.app 한국어 424 KB(Chromium 실측) — 2 MB짜리 단일 `PretendardVariable.woff2` 대신. 모든 face가 `font-display: swap`이라 글자는 폴백 서체로 바로 그려지고 face가 도착하면 바뀐다.
+
+### 적용 (Vite, Workers 위의 TanStack Start)
+
+모든 페이지가 불러오는 CSS(또는 엔트리)에서 스타일시트를 한 번 import한다.
+
+```css
+/* src/styles/app.css */
+@import "@devslab/site-kit/fonts.css";
+```
+
+Vite가 상대 `url()`을 따라 `node_modules/@devslab/site-kit/fonts/`의 face를 빌드의 `assets/`로 해시 이름을 붙여 복사하고, 스타일시트를 `/assets/…woff2`로 고쳐 쓴다. Worker가 그것을 제품 자기 도메인의 정적 자산으로 서빙한다. 모든 face가 Vite의 인라인 한도(4 KB)보다 커서 `data:` URI(`font-src 'self'`가 막는다)가 되는 것은 없다 — 제품이 `build.assetsInlineLimit`을 올렸다면 글꼴은 빼 둔다: `assetsInlineLimit: (file) => (file.endsWith(".woff2") ? false : undefined)`.
+
+모든 페이지가 쓰는 라틴 face는 미리 받아 둘 수 있다. `?url`로 import하면 스타일시트가 쓰게 되는 바로 그 해시 URL이 나오고, 그것을 head에 넘긴다.
+
+```ts
+import geistLatin from "@devslab/site-kit/fonts/geist/geist-latin-wght-normal.woff2?url";
+
+head: () => toTanStackHead(metadata, { icons: true, fontPreload: geistLatin }),
+```
+
+`fontPreload`는 `fontPreloadLinks(geistLatin)` — `{ rel: "preload", as: "font", type: "font/woff2", crossorigin: "anonymous" }` — 를 덧붙인다. 같은 도메인이어도 `crossorigin`은 필요하다: 글꼴은 CORS 모드로 받기 때문에, 이것이 없는 preload는 한 번 더 내려받힌다. `.woff2`로 끝나는 같은 도메인 경로만 받는다. `FAMILY_FONT_PRELOAD_FILE`이 패키지 안의 파일 경로다. 다른 것은 preload하지 않는다: 어느 Pretendard 서브셋이 필요한지는 페이지 글자에 달렸다.
+
+### 번들러 없이
+
+`fonts.css`와 `fonts/`를 구조를 유지한 채 나란히, 사이트가 서빙하는 디렉터리에 복사하고 스타일시트를 링크한다.
+
+```js
+// scripts/copy-fonts.mjs
+import { cpSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { createRequire } from "node:module";
+
+const kit = dirname(createRequire(import.meta.url).resolve("@devslab/site-kit/fonts.css"));
+cpSync(join(kit, "fonts.css"), "public/site-kit/fonts.css");
+cpSync(join(kit, "fonts"), "public/site-kit/fonts", { recursive: true });
+```
+
+```html
+<link rel="stylesheet" href="/site-kit/fonts.css">
+```
+
+`url()`은 `fonts.css` 기준 상대 경로라, 둘을 어디에 복사하든 `/site-kit/fonts/…`로 풀린다. 함께 복사되는 `fonts/manifest.json`에 파일마다 원본 패키지·버전·크기·sha256이 적혀 있다.
+
+### 제품 자체 사본에서 옮겨 오기
+
+1. 제품의 Geist·Geist Mono·Pretendard `@font-face` 규칙, woff2를 `public/fonts/`로 복사하는 스크립트(와 `.gitignore` 줄), `@fontsource-variable/*` import, 그리고 `@fontsource-variable/geist`·`@fontsource-variable/geist-mono`·`pretendard` 의존성을 지운다.
+2. 위처럼 `@devslab/site-kit/fonts.css`를 import한다.
+3. 제품 자체 스택에서 `"Geist Variable"` → `Geist`, `"Geist Mono Variable"` → `"Geist Mono"`, `"Pretendard Variable"` → `Pretendard`로 바꾼다 — 또는 토큰 스택을 되풀이할 뿐인 뿌리 규칙은 지운다: `styles.css`가 이미 `:where(html) { font-family: var(--dds-font-family-sans) }`를 준다(D-032). `:lang(ko) { font-family: Pretendard, Geist, … }` 같은 한글 우선 순서는 제품의 선택으로 남고, 이 face들로 그대로 동작한다.
+4. 손으로 쓴 `<link rel="preload" href="/fonts/geist.woff2">`는 `fontPreload`로 바꾸고, 옛 이름으로 글꼴을 불러오거나 확인하는 테스트(`document.fonts.check('1rem "Pretendard Variable"')` → `"Pretendard"`)를 고친다.
+
+### 라이선스
+
+세 패밀리 모두 SIL Open Font License 1.1이다. `fonts/` 아래 디렉터리마다 라이선스 원문이 있고, 패키지는 파일을 수정 없이 재배포한다. Pretendard는 글꼴 이름을 예약(Reserved Font Name)했으므로 수정본(예: 다른 사람이 잘라 낸 서브셋)은 Pretendard라고 부를 수 없다: 이 파일들은 저작자 자신의 서브셋이고, `scripts/build-fonts.mjs`는 배포된 패키지에서 바이트 그대로 복사할 뿐 다시 자르지 않는다. `node scripts/build-fonts.mjs --check`(`check`에 포함)는 파일이 매니페스트와 다르면 실패하고, `--vendor`는 버전을 올릴 때 고정된 원본 tarball을 npm integrity를 확인하며 다시 받는다.
 
 ## 브랜드 아이콘
 
