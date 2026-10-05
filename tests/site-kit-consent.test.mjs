@@ -24,6 +24,7 @@ import {
 } from "../packages/site-kit/src/core/consent.mjs";
 import { gtmHeadScript } from "../packages/site-kit/src/core/gtm.mjs";
 import { buildMetadata } from "../packages/site-kit/src/core/seo.mjs";
+import * as consentModule from "../packages/site-kit/src/core/consent.mjs";
 import * as core from "../packages/site-kit/src/core/index.mjs";
 import { readFileSync } from "node:fs";
 import * as tanstack from "../packages/site-kit/src/tanstack-start.mjs";
@@ -541,22 +542,45 @@ test("a response whose head depends on the consent cookie is never stored by a s
   }
 });
 
-test("the core barrel exports the consent API and both message sets have the same keys", () => {
-  for (const name of ["createConsentManager", "consentHeadScript", "readConsentCookie", "consentCookieGrantsAnalytics", "parseConsentRecord", "postConsentRecord", "isSameOriginRequest", "CONSENT_MESSAGES_KO", "CONSENT_MESSAGES_EN"]) {
+test("the core barrel exports the whole consent API and both message sets have the same keys", () => {
+  // Every name, not a hand-picked few: a picked list is how 0.16.0 declared
+  // CONSENT_RECORD_MAX_BYTES and nine others on the root while leaving them
+  // undefined there. The packed-tarball check is scripts/verify-site-kit-release.mjs.
+  const names = Object.keys(consentModule);
+  assert.ok(names.length >= 23);
+  for (const name of names) {
     assert.ok(name in core, `${name} missing from @devslab/site-kit`);
+    assert.equal(core[name], consentModule[name], name);
   }
+  assert.equal(core.CONSENT_RECORD_MAX_BYTES, 1024);
+  // The runtime barrel and its declarations re-export the same modules, the same way.
+  const reexports = (file) => readFileSync(new URL(`../packages/site-kit/src/core/${file}`, import.meta.url), "utf8")
+    .split("\n").filter((line) => line.startsWith("export"));
+  assert.deepEqual(reexports("index.mjs"), reexports("index.d.mts"));
+  for (const line of reexports("index.mjs")) assert.match(line, /^export \* from "\.\/[a-z-]+\.mjs";$/);
   assert.deepEqual(Object.keys(CONSENT_MESSAGES_EN).sort(), Object.keys(CONSENT_MESSAGES_KO).sort());
   for (const messages of [CONSENT_MESSAGES_KO, CONSENT_MESSAGES_EN]) {
     for (const [key, value] of Object.entries(messages)) assert.ok(typeof value === "string" && value.trim().length > 0, key);
-    // What, why, who, where and how long — the banner names all of them.
-    assert.match(messages.body, /Google LLC/);
-    assert.match(messages.body, /14/);
-    assert.match(messages.analyticsBody, /Google LLC/);
-    assert.match(messages.analyticsBody, /14/);
-    assert.doesNotMatch(JSON.stringify(messages), /§/);
+    // Owner decision (2026-10-06): the kit's strings stay short. Who receives the data, where it
+    // goes and how long it is kept are the product's privacy policy section (learnMoreHref), not
+    // defaults a product could ship without its own policy saying so.
+    assert.doesNotMatch(JSON.stringify(messages), /Google|LLC|미국|United States|14|개월|months|§/);
   }
-  assert.match(CONSENT_MESSAGES_KO.body, /미국/);
-  assert.match(CONSENT_MESSAGES_EN.body, /United States/);
+  assert.equal(CONSENT_MESSAGES_KO.title, "이용 통계 수집 동의 (선택)");
+  assert.equal(CONSENT_MESSAGES_KO.body, "서비스를 더 낫게 만들기 위해 이용 통계를 수집합니다. 동의는 선택이며, 동의하지 않아도 모든 기능을 쓸 수 있습니다.");
+  assert.equal(CONSENT_MESSAGES_KO.learnMore, "자세히 보기");
+  assert.equal(CONSENT_MESSAGES_EN.title, "Analytics (optional)");
+  assert.equal(CONSENT_MESSAGES_EN.body, "We collect usage statistics to improve the service. It's optional, and everything works without it.");
+  assert.equal(CONSENT_MESSAGES_EN.learnMore, "Learn more");
+  // The settings: one line each, and cancel / save.
+  for (const messages of [CONSENT_MESSAGES_KO, CONSENT_MESSAGES_EN]) {
+    for (const key of ["settingsIntro", "necessaryBody", "analyticsBody"]) assert.equal(messages[key].split(/[.?!]\s/).length, 1, `${key} is one sentence`);
+  }
+  assert.equal(CONSENT_MESSAGES_KO.cancel, "취소");
+  assert.equal(CONSENT_MESSAGES_EN.cancel, "Cancel");
+  // How to come back and withdraw: the footer button, named as the footer names it.
+  assert.ok(CONSENT_MESSAGES_KO.settingsIntro.includes(CONSENT_MESSAGES_KO.trigger));
+  assert.ok(CONSENT_MESSAGES_EN.settingsIntro.includes(CONSENT_MESSAGES_EN.trigger));
   assert.equal(CONSENT_MESSAGES_KO.acceptAll, "모두 허용");
   assert.equal(CONSENT_MESSAGES_KO.rejectAll, "거부");
   assert.equal(CONSENT_MESSAGES_KO.settings, "설정");

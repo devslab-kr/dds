@@ -7,7 +7,10 @@ import { ConsentBanner, SiteFooter } from "@devslab/site-kit/solid";
 import { CONSENT_MESSAGES_EN, CONSENT_MESSAGES_KO, createConsentManager, postConsentRecord } from "@devslab/site-kit";
 
 const korean = document.documentElement.lang === "ko";
-const consentMessages = korean ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN;
+// A product's own strings (its other locales), set by the test before this
+// module runs; the kit's defaults otherwise.
+const productMessages = (window as unknown as { __consentMessages?: Partial<typeof CONSENT_MESSAGES_EN> }).__consentMessages;
+const consentMessages = { ...(korean ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN), ...productMessages };
 const siteMessages = {
   navigationLabel: "Menu", localeLabel: "Language", themeLabel: "Theme", themeSystem: "System", themeLight: "Light",
   themeDark: "Dark", menuOpen: "Menu", menuClose: "Close", footerLabel: "Footer", skipToContent: "Skip to content",
@@ -24,7 +27,7 @@ const consent = createConsentManager({
 (window as unknown as { __consent: typeof consent }).__consent = consent;
 
 render(() => <>
-  <ConsentBanner controller={consent} messages={consentMessages} privacyHref="/privacy" />
+  <ConsentBanner controller={consent} messages={consentMessages} learnMoreHref="/privacy#analytics" privacyHref="/privacy" />
   <div class="site-shell">
     <main id="main-content" class="site-main" tabIndex={-1}>
       <h1>{korean ? "문서에서 답을 찾는 AI 에이전트" : "An AI agent that answers from your documents"}</h1>

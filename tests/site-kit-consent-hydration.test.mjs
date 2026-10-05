@@ -32,7 +32,7 @@ const MESSAGES = {
 const PAGE_SOURCE = `
 export function page({ createComponent, ConsentBanner, SiteFooter, controller, CONSENT_MESSAGES_KO, MESSAGES }) {
   return [
-    createComponent(ConsentBanner, { controller, messages: CONSENT_MESSAGES_KO, privacyHref: "/privacy" }),
+    createComponent(ConsentBanner, { controller, messages: CONSENT_MESSAGES_KO, learnMoreHref: "/privacy#analytics", privacyHref: "/privacy" }),
     createComponent(SiteFooter, {
       brand: { name: "AskLinq", href: "/" },
       links: [{ href: "/privacy", label: "개인정보처리방침", emphasis: true }],

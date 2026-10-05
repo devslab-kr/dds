@@ -32,7 +32,7 @@ function mount(consent?: ConsentManager) {
   const controller = consent ?? createConsentManager({ policyVersion: "2026-10-05", gtm: GTM, measurementIds: ["G-ABC123"], onChange: (record) => { records.push(record); } });
   const host = document.body.appendChild(document.createElement("div"));
   dispose = render(() => <>
-    <ConsentBanner controller={controller} messages={CONSENT_MESSAGES_KO} privacyHref="/privacy" />
+    <ConsentBanner controller={controller} messages={CONSENT_MESSAGES_KO} learnMoreHref="/ko/privacy#analytics" privacyHref="/ko/privacy" />
     <main id="main-content"><h1>본문</h1></main>
     <SiteFooter
       brand={{ name: "AskLinq", href: "/" }}
@@ -60,7 +60,12 @@ it("asks with three equal choices and loads nothing before one is made", () => {
   // Equal weight: one class list for all three, so no choice is drawn heavier.
   expect(new Set(actions.map((element) => element.className)).size).toBe(1);
   expect(actions[0]!.className).toContain("dds-btn--secondary");
-  expect(bar()!.querySelector('a[href="/privacy"]')?.textContent).toBe("개인정보처리방침");
+  // Short copy; the disclosure is the policy section "자세히 보기" links to.
+  expect(bar()!.querySelector(".site-consent__title")?.textContent).toBe("이용 통계 수집 동의 (선택)");
+  const more = bar()!.querySelector<HTMLAnchorElement>(".site-consent__body a")!;
+  expect(more.textContent).toBe("자세히 보기");
+  expect(more.getAttribute("href")).toBe("/ko/privacy#analytics");
+  expect(bar()!.querySelectorAll("a")).toHaveLength(1);
   expect(googleScripts()).toEqual([]);
   expect(document.cookie).not.toContain("site_consent");
 });
@@ -113,8 +118,9 @@ it("the settings show necessary as information and analytics as an unticked swit
   expect(toggle.checked).toBe(false);
   expect(toggle.getAttribute("aria-describedby")).toBe("site-consent-analytics-body");
   expect(panel.querySelector(".site-consent-dialog__close")?.getAttribute("aria-label")).toBe("닫기");
+  expect(panel.querySelector<HTMLAnchorElement>(".site-consent-dialog__policy a")?.getAttribute("href")).toBe("/ko/privacy");
   const footer = [...panel.querySelectorAll(".dds-dialog__actions button")];
-  expect(footer.map((element) => element.textContent)).toEqual(["모두 허용", "거부", "선택 저장"]);
+  expect(footer.map((element) => element.textContent)).toEqual(["취소", "선택 저장"]);
   expect(new Set(footer.map((element) => element.className)).size).toBe(1);
   toggle.click();
   button(panel, "선택 저장").click();
@@ -156,6 +162,28 @@ it("Escape closes the settings without saving", async () => {
   expect(dialog()).toBeNull();
   expect(bar()).not.toBeNull();
   expect(records).toEqual([]);
+});
+
+it("취소 closes the settings without saving, like Escape", async () => {
+  mount();
+  button(bar()!, "설정").click();
+  await flush();
+  dialog()!.querySelector<HTMLInputElement>('input[role="switch"]')!.click();
+  button(dialog()!, "취소").click();
+  await flush();
+  expect(dialog()).toBeNull();
+  expect(bar()).not.toBeNull();
+  expect(records).toEqual([]);
+  expect(document.cookie).not.toContain("site_consent");
+});
+
+it("refuses a learn-more link that is not a policy section", () => {
+  const controller = createConsentManager({ policyVersion: "2026-10-05" });
+  const host = document.body.appendChild(document.createElement("div"));
+  for (const learnMoreHref of ["/privacy", "/privacy#", "", undefined]) {
+    expect(() => render(() => <ConsentBanner controller={controller} messages={CONSENT_MESSAGES_KO} learnMoreHref={learnMoreHref as string} privacyHref="/privacy" />, host)).toThrow(RangeError);
+    host.replaceChildren();
+  }
 });
 
 it("the bar and the settings dialog have no detectable axe violations", async () => {

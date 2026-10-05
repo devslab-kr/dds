@@ -1,11 +1,15 @@
-export { FAMILY_LOCALES, LOCALES, canonicalLocale, defineLocaleRegistry, localeAttributes, resolveLocale } from "./locales.mjs";
-export { CatalogValidationError, createTranslator, validateCatalogs } from "./catalog.mjs";
-export { BRAND_ICON_FILES, ROBOTS_USER_AGENTS, brandIconLinks, buildMetadata, buildRobots, buildSitemap, localizedPath, localizedUrl, renderSitemapXml } from "./seo.mjs";
-export { VerifiedFactRegistry, buildVerifiedJsonLd, renderLlmsTxt } from "./geo.mjs";
-export { definePublisher, buildPublisher, serializeJsonLd, renderPublisherHtml } from "./publisher.mjs";
-export { GTM_CONTAINER_ID_PATTERN, GTM_CSP_SOURCES, gtmHeadScript, gtmNoscriptIframe } from "./gtm.mjs";
-export { FAMILY_FONT_PRELOAD_FILE, fontPreloadLinks } from "./fonts.mjs";
-export {
-  CONSENT_COOKIE_NAME, CONSENT_MESSAGES_EN, CONSENT_MESSAGES_KO, CONSENT_MODE_DEFAULTS, CONSENT_RESPONSE_HEADERS, analyticsConsented, consentCookieGrantsAnalytics,
-  consentHeadScript, createConsentManager, isSameOriginRequest, parseConsentRecord, postConsentRecord, readConsentCookie,
-} from "./consent.mjs";
+// The root barrel re-exports each module whole, statement for statement the
+// same as index.d.mts. It used to name every export by hand, and the consent
+// list fell behind its own declarations: CONSENT_RECORD_MAX_BYTES and nine
+// other names type-checked from "@devslab/site-kit" and were undefined at
+// runtime. A module that should stay off the root (flags, devslab) is simply
+// not listed here; scripts/verify-site-kit-release.mjs checks the packed
+// tarball's declared exports against what each entry point really exports.
+export * from "./locales.mjs";
+export * from "./catalog.mjs";
+export * from "./seo.mjs";
+export * from "./geo.mjs";
+export * from "./publisher.mjs";
+export * from "./gtm.mjs";
+export * from "./fonts.mjs";
+export * from "./consent.mjs";
