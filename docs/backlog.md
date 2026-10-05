@@ -227,7 +227,7 @@ D-029. FM덴탈서비스 랜딩 리뷰에서 kit으로 못 그리는 9건을 선
 D-034. 허용 전에는 구글에 닿는 것이 없다 — 코어 매니저·쿠키·Consent Mode·기록 도구, Solid 바·설정 대화상자·바닥글 "쿠키 설정", TanStack `consent` head.
 - [x] 테스트: 코어(소스 단계, 변이 5종으로 확인), 컴포넌트 jsdom + axe, SSR·실제 라우터 head, 개발 빌드 하이드레이션, 브라우저(nonce CSP·390/1280·라이트/다크·포커스 가둠·같은 무게).
 - [x] BookLinq 적용에서 나온 결함 둘(2026-10-06, D-034 추가): 루트가 선언한 동의 export 10개가 실행 시 `undefined` → 배럴을 `export *`로, 릴리스 검사가 tarball의 선언 대 실제 export를 진입점마다 비교. 긴 라벨이 390px 세 칸에서 단어 중간에 끊김 → 공백에서만 줄바꿈(한국어 keep-all), 바 너비 36rem 이하에서 세로로 쌓기, 한 줄 경계 60rem — 6개 언어 × 320–1280px 브라우저 테스트. 소유자 결정으로 바 문구를 짧게, "자세히 보기"는 제품 방침의 이용 통계 절로 가는 필수 `learnMoreHref`, 설정은 한 줄씩 + 취소·선택 저장.
-- **다음(제품마다)**: 0.16.1로 올릴 때 `learnMoreHref` 넘기기, 방침의 그 절에 전체 고지(Google Analytics 4·Google LLC·미국 이전·보관 기간·광고 미사용·철회 방법), 다른 로케일을 같은 톤으로 + `learnMore`·`cancel` 키.
+- **다음(제품마다)**: 0.17.0으로 올릴 때(필수 prop·새 메시지 키라 minor) `learnMoreHref` 넘기기, 방침의 그 절에 전체 고지(Google Analytics 4·Google LLC·미국 이전·보관 기간·광고 미사용·철회 방법), 다른 로케일을 같은 톤으로 + `learnMore`·`cancel` 키.
 - **다음(제품마다, 각 레포)**: `gtm` → `consent` 옮기기, `ConsentBanner` + 바닥글 `consentSettings`, `/api/consent` 엔드포인트 + `consent_records` 마이그레이션 + 3년 정리 작업, 개인정보처리방침에 동의 기록 보관 기간, GTM 콘솔의 GA4 태그 "추가 동의 필요: analytics_storage".
 - **다음(devslab.kr)**: 정적 내보내기라 head는 기본값만, 매니저가 하이드레이션 뒤 로드(README "Solid 없이"). 백엔드가 없으므로 기록을 어디에 둘지 소유자 결정 필요.
 
