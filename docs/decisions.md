@@ -5,6 +5,37 @@
 
 ---
 
+## D-032 — 페이지 뿌리의 가족 서체는 site-kit이 명시도 0으로 준다 (2026-10-05)
+
+**결정.** `@devslab/site-kit`의 `styles.css`에 한 줄을 둔다.
+
+```css
+:where(html) { font-family: var(--dds-font-family-sans); }
+```
+
+`.site-shell`이 아니라 뿌리에, `:where()`로 명시도 0. 제품이 `html`·`:root`·`body`·`:lang()`에 둔 서체 규칙은 소스 순서와 상관없이 이긴다. `tests/browser/site-kit.spec.ts`가 실제 Chromium에서 두 방향을 고정한다 — 제품 규칙이 없으면 `html`·`body`·`.site-shell`·`h1`·`p`의 계산된 서체가 토큰 스택과 같고, 형제 제품이 쓰는 네 모양(`html {}`·`:root {}`·`html:lang(ko) body {}`·`:lang(ko) {}`)을 **킷보다 앞에** 두어도 제품 서체가 이긴다.
+
+**계기.** AskLinq 공개 페이지 전부(`/`·`/privacy`·`/terms`·`/signup`·`/admin` 로그인)가 라틴 글자를 브라우저 기본 세리프로 그리고 있었다 — 헤드리스 Chromium에서 `body`와 `h1`이 `"Times New Roman"`. 한국어 페이지는 Chrome의 한국어 기본 글꼴(맑은 고딕) 덕에 고딕으로 보였을 뿐이다. `dds.css`는 모든 규칙을 `dds-*` 클래스에 한정하고, site-kit의 `.site-shell`은 배경·글자색은 칠하지만 서체는 정하지 않는다. 그래서 클래스 없는 텍스트는 뿌리에서 서체를 받을 곳이 없었고, 킷의 섹션 원시 컴포넌트(`HeroSplit`·`SectionHead`)의 `h1`·`h2`·`p`도 마찬가지였다. 형제 셋은 각자 손으로 막아 두었다(VisionLinq·BookLinq `:root`, TraceLinq `html`, 셋 다 자기 리터럴 스택) — 네 제품 중 하나가 빠뜨린 것이고, 빠뜨리면 아무 신호 없이 세리프가 된다.
+
+**근거.**
+- **뿌리에, `.site-shell`이 아니라.** 셸에 직접 선언하면 상속값을 무조건 이긴다. VisionLinq의 `html:lang(ko) body`(한국어는 Pretendard 먼저)와 TraceLinq·VisionLinq가 자체 호스팅하는 `"Geist Variable"`이 토큰의 `Geist`로 바뀌어, 그 이름의 글꼴이 설치되지 않은 기기에서는 시스템 글꼴로 떨어진다. 뮤테이션으로 확인: `.site-shell` 버전은 두 테스트 모두 실패.
+- **명시도 0.** 맨 `html {}`은 제품 CSS가 킷 **뒤에** 올 때만 진다. 테스트 픽스처가 제품 CSS를 킷 앞에 두므로 맨 `html {}`은 실패하고 `:where(html)`만 통과한다.
+- **D-030과의 관계.** D-030은 뿌리 기본값(한국어 keep-all)을 dds.css에 싣지 않았다 — 다음 올림에서 제품들의 줄바꿈이 요청 없이 바뀌기 때문이다. 이번 규칙은 그 반론에 걸리지 않는다: 형제 셋은 모두 이기는 규칙이 이미 있어 렌더가 바뀌지 않고, 바뀌는 것은 규칙이 없던 제품(세리프였던 제품)뿐이다. 그리고 dds.css가 아니라 페이지 셸을 맡은 site-kit에 둔다 — dds.css는 여전히 클래스 밖을 건드리지 않는다.
+- **내려받기 없음.** 토큰 스택은 기기에 설치된 글꼴 이름뿐이다(`Geist, Pretendard, -apple-system, …, 'Malgun Gothic', sans-serif`). `@font-face`는 제품 몫으로 남는다(AskLinq은 개인정보처리방침이 "기기에 이미 있는 글꼴"이라고 적고 CSP가 `font-src 'self'`).
+
+**반려한 대안.**
+- **`.site-shell { font-family: … }`** — 위의 형제 회귀.
+- **AskLinq에만 한 줄** — 고치는 것은 그 제품뿐이고, 다음 제품과 킷 자신의 섹션 원시 컴포넌트는 여전히 규칙 하나를 기억해야 세리프를 피한다. 네 제품이 네 모양으로 같은 일을 하던 것이 이미 신호다(D-026 파비콘과 같은 모양).
+- **`dds.css`(base.css)의 `:where(html)`** — 효과는 같지만 dds.css는 컴포넌트 라이브러리이고 D-030이 뿌리를 건드리지 않는다고 정했다. 페이지 바탕(배경·글자색)을 이미 맡은 site-kit이 서체도 맡는다.
+
+**트레이드오프.**
+- site-kit `styles.css`를 콘솔 화면에서도 불러오는 제품은 그 화면도 뿌리 서체를 받는다. 지금 그런 제품은 모두 자기 뿌리 규칙이 있어 바뀌지 않는다.
+- 줄 길이가 바뀐다 — 세리프에서 산세리프로 가는 제품은 375px 확인이 필요하다(AskLinq은 소비 PR에서 확인).
+
+**재검토 시점.** 가족이 자체 호스팅 글꼴(`Geist Variable` 등)을 공용으로 싣게 될 때 — 그때 토큰 스택의 이름과 제품들의 리터럴 스택을 하나로 합치고 제품 뿌리 규칙을 걷어낸다. D-030의 keep-all을 site-kit으로 올릴지 볼 때 같이 본다.
+
+---
+
 ## D-031 — Google Tag Manager 스니펫은 site-kit이 한 번 쓰고, nonce는 라우터가 찍는다 (2026-10-05)
 
 **결정.** `@devslab/site-kit`에 Tag Manager 도구를 둔다.

@@ -7,7 +7,7 @@ Public product-site infrastructure for DevsLab products. It provides strict cata
 - `@devslab/site-kit` — runtime-neutral locale, catalog, SEO, sitemap, robots, verified-fact, and Google Tag Manager utilities.
 - `@devslab/site-kit/solid` — header, footer, locale/theme controls, marketing/legal/status/error layouts, and request-access form.
 - `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors (with opt-in brand icons and Tag Manager loader).
-- `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles.
+- `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles. It also gives the page root the family face (`:where(html) { font-family: var(--dds-font-family-sans) }`), so bare headings and paragraphs are not left in the browser's serif. The rule has zero specificity: a product's own rule on `html`, `:root`, `body` or `:lang()` wins.
 
 Catalog construction is intentionally strict: every locale in the registry must have exactly the same keys and named placeholders. There is no runtime copy fallback.
 

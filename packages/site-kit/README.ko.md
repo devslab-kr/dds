@@ -7,7 +7,7 @@ DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. �
 - `@devslab/site-kit` — 런타임 중립 로케일·카탈로그·SEO·사이트맵·robots·검증된 사실·Google Tag Manager 유틸리티
 - `@devslab/site-kit/solid` — 헤더·푸터·언어/테마 컨트롤·마케팅/법률/상태/오류 레이아웃·접근 요청 폼
 - `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환(브랜드 아이콘·Tag Manager 로더는 옵트인)
-- `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일
+- `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일. 페이지 뿌리에 가족 서체(`:where(html) { font-family: var(--dds-font-family-sans) }`)도 주어 맨 제목·문단이 브라우저 세리프로 남지 않는다. 명시도가 0이라 제품이 `html`·`:root`·`body`·`:lang()`에 둔 규칙이 이긴다.
 
 카탈로그 생성은 의도적으로 엄격하다. 레지스트리의 모든 로케일이 동일한 키와 이름 기반 placeholder를 가져야 하며 런타임 문구 폴백은 없다.
 
