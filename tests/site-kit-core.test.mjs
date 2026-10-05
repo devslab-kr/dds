@@ -25,7 +25,7 @@ import {
   gtmNoscriptIframe,
 } from "../packages/site-kit/src/core/gtm.mjs";
 import * as coreIndex from "../packages/site-kit/src/core/index.mjs";
-import { createRequire } from "node:module";
+import vm from "node:vm";
 import {
   VerifiedFactRegistry,
   buildVerifiedJsonLd,
@@ -346,18 +346,67 @@ test("a malformed container id never reaches a script string", () => {
   assert.equal(GTM_CONTAINER_ID_PATTERN.test("GTM-5VC3HXL4"), true);
 });
 
-test("the loader, run in a page with a nonced element, queues gtm.js and hands it the nonce", () => {
-  const require = createRequire(new URL("../packages/site-kit/package.json", import.meta.url));
-  const { JSDOM } = require("jsdom");
-  const dom = new JSDOM(`<!doctype html><html><head><meta property="csp-nonce" nonce="r4nd0m"><script src="/app.js"></script></head><body></body></html>`, { runScripts: "outside-only" });
-  dom.window.eval(gtmHeadScript("GTM-AB12CD3"));
-  assert.equal(dom.window.dataLayer[0].event, "gtm.js");
-  assert.equal(typeof dom.window.dataLayer[0]["gtm.start"], "number");
-  const loader = dom.window.document.querySelector('script[src^="https://www.googletagmanager.com/"]');
-  assert.equal(loader.async, true);
-  assert.equal(loader.src, "https://www.googletagmanager.com/gtm.js?id=GTM-AB12CD3");
-  assert.equal(loader.getAttribute("nonce"), "r4nd0m");
-  assert.equal(loader.nextElementSibling.getAttribute("src"), "/app.js", "inserted before the page's first script");
+// Runs the loader in a node:vm context against a minimal fake document —
+// only Node built-ins, because this file runs in the source-contracts CI job,
+// which installs no packages. The fake models what the snippet touches:
+// getElementsByTagName, createElement, querySelector('[nonce]') and
+// insertBefore. The nonced element hides its attribute the way a browser does
+// under a header CSP (getAttribute returns ""), so the test proves the loader
+// reads the `nonce` property, not the attribute.
+function runLoader(id, { nonce } = {}) {
+  const inserted = [];
+  const element = (tag) => {
+    const attributes = {};
+    return { tagName: tag.toUpperCase(), attributes, setAttribute: (name, value) => { attributes[name] = String(value); }, getAttribute: (name) => attributes[name] ?? null };
+  };
+  const firstScript = { ...element("script"), src: "/app.js", parentNode: { insertBefore: (node, before) => inserted.push({ node, before }) } };
+  const nonced = nonce === undefined ? null : { nonce, getAttribute: (name) => (name === "nonce" ? "" : null) };
+  const queries = [];
+  const document = {
+    getElementsByTagName: (tag) => (tag === "script" ? [firstScript] : []),
+    createElement: element,
+    querySelector: (selector) => { queries.push(selector); return selector === "[nonce]" ? nonced : null; },
+  };
+  const window = {};
+  vm.runInNewContext(gtmHeadScript(id), { window, document });
+  return { window, inserted, firstScript, queries };
+}
+
+test("the loader queues gtm.js before the page's first script and hands it the page nonce", () => {
+  const { window, inserted, firstScript, queries } = runLoader("GTM-AB12CD3", { nonce: "r4nd0m" });
+  assert.equal(window.dataLayer.length, 1);
+  assert.equal(window.dataLayer[0].event, "gtm.js");
+  assert.equal(typeof window.dataLayer[0]["gtm.start"], "number");
+  assert.equal(inserted.length, 1);
+  const [{ node, before }] = inserted;
+  assert.equal(node.tagName, "SCRIPT");
+  assert.equal(node.src, "https://www.googletagmanager.com/gtm.js?id=GTM-AB12CD3");
+  assert.equal(node.async, true);
+  assert.equal(before, firstScript, "inserted before the page's first script");
+  assert.deepEqual(queries, ["[nonce]"]);
+  assert.equal(node.getAttribute("nonce"), "r4nd0m", "copied from the nonce property, which survives the browser hiding the attribute");
+});
+
+test("the loader on a page without nonces loads gtm.js and sets no nonce", () => {
+  const { window, inserted } = runLoader("GTM-AB12CD3");
+  assert.equal(window.dataLayer[0].event, "gtm.js");
+  assert.equal(inserted.length, 1);
+  assert.equal(inserted[0].node.src, "https://www.googletagmanager.com/gtm.js?id=GTM-AB12CD3");
+  assert.equal(inserted[0].node.getAttribute("nonce"), null);
+});
+
+test("the loader keeps an existing dataLayer and appends to it", () => {
+  const inserted = [];
+  const window = { dataLayer: [{ event: "consent" }] };
+  const document = {
+    getElementsByTagName: () => [{ parentNode: { insertBefore: (node) => inserted.push(node) } }],
+    createElement: () => ({ setAttribute() {} }),
+    querySelector: () => null,
+  };
+  vm.runInNewContext(gtmHeadScript("GTM-AB12CD3"), { window, document });
+  assert.equal(window.dataLayer.length, 2);
+  assert.equal(window.dataLayer[0].event, "consent");
+  assert.equal(window.dataLayer[1].event, "gtm.js");
 });
 
 test("the CSP sources are Google's Tag Manager + GA4-without-Ads lists, plus frame-src for the noscript iframe", () => {
