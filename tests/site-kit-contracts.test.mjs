@@ -201,6 +201,10 @@ test("the TanStack adapter accepts metadata built from a product registry", asyn
   const dts = await readFile(new URL("../packages/site-kit/src/tanstack-start.d.mts", import.meta.url), "utf8");
   assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>, options\?: TanStackHeadOptions\)/);
   assert.match(dts, /toHtmlAttributes: <Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
+  // D-031: the Tag Manager option and the standalone head entry are typed, and the result's `scripts` is optional (absent unless asked).
+  assert.match(dts, /interface TanStackHeadOptions \{ icons\?: [^;]+; gtm\?: string \| undefined \}/);
+  assert.match(dts, /export declare function gtmHeadEntry\(containerId: string\): GtmHeadEntry;/);
+  assert.match(dts, /scripts\?: GtmHeadEntry\[\]/);
 });
 
 test("the landing chrome keeps its touch targets, scroll offset and eyebrow hooks (D-029)", async () => {

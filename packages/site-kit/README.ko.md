@@ -4,9 +4,9 @@ DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. �
 
 ## 진입점
 
-- `@devslab/site-kit` — 런타임 중립 로케일·카탈로그·SEO·사이트맵·robots·검증된 사실 유틸리티
+- `@devslab/site-kit` — 런타임 중립 로케일·카탈로그·SEO·사이트맵·robots·검증된 사실·Google Tag Manager 유틸리티
 - `@devslab/site-kit/solid` — 헤더·푸터·언어/테마 컨트롤·마케팅/법률/상태/오류 레이아웃·접근 요청 폼
-- `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환
+- `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환(브랜드 아이콘·Tag Manager 로더는 옵트인)
 - `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일
 
 카탈로그 생성은 의도적으로 엄격하다. 레지스트리의 모든 로케일이 동일한 키와 이름 기반 placeholder를 가져야 하며 런타임 문구 폴백은 없다.
@@ -81,6 +81,57 @@ toTanStackHead(metadata, { icons: { basePath: "/" } }); // /favicon.svg, /mark-4
 ```
 
 옵션을 생략하면 어댑터는 아이콘 링크를 내지 않는다. 제품이 파일을 어디서 서빙하는지 어댑터가 알 수 없고, 서버가 404를 내는 아이콘을 링크한 head는 아무것도 링크하지 않은 head보다 나쁘기 때문이다.
+
+## Google Tag Manager
+
+제품 사이트마다 자기 컨테이너 ID로 공개 마케팅·법적 페이지에 Tag Manager를 싣는다. 콘솔·대시보드·채팅 위젯은 제외한다. 스니펫은 여기 한 곳에 둔다(D-031).
+
+| 내보내기 | 진입점 | 무엇인가 |
+|---|---|---|
+| `gtmHeadScript(id)` | `@devslab/site-kit` | head 로더의 스크립트 본문. `<script>` 태그도 nonce도 없음 |
+| `gtmNoscriptIframe(id)` | `@devslab/site-kit` | `<body>`가 열리자마자 오는 `<noscript>` 안의 `<iframe>` HTML |
+| `GTM_CSP_SOURCES` | `@devslab/site-kit` | Tag Manager + GA4에 필요한 CSP 출처, 지시어별 |
+| `GTM_CONTAINER_ID_PATTERN` | `@devslab/site-kit` | `/^GTM-[A-Z0-9]+$/` |
+| `toTanStackHead(metadata, { gtm })` | `@devslab/site-kit/tanstack-start` | 로더를 `scripts[0]`에 담은 라우트 head |
+| `gtmHeadEntry(id)` | `@devslab/site-kit/tanstack-start` | 같은 `scripts` 항목. head를 직접 만드는 라우트용 |
+
+로더는 구글의 [Use Tag Manager with a Content Security Policy](https://developers.google.com/tag-platform/security/guides/csp)에 실린 nonce 대응 스니펫을 바이트 그대로 쓴다. 표준 스니펫에 문장 하나를 더한 것으로, 페이지의 nonce를 `gtm.js` 요소에 옮겨 Tag Manager가 자기가 추가하는 스크립트에 넘길 수 있게 한다. `GTM_CONTAINER_ID_PATTERN`에 맞지 않는 ID는 스크립트 문자열에 닿기 전에 `RangeError`를 던진다. `""`도 마찬가지이니 "여기는 Tag Manager 없음"은 빈 환경 변수가 아니라 `undefined`로 넘긴다.
+
+**Head, 라우트별.** 실을 라우트에서만 켠다.
+
+```ts
+// 공개 라우트
+head: () => toTanStackHead(metadata, { icons: true, gtm: GTM_ID }),
+```
+
+항목에는 자기 nonce가 없다. `HeadContent`가 렌더하는 모든 head 스크립트에 `router.options.ssr.nonce`를 찍으므로, 로더는 meta·link 태그와 같은 길로 요청의 nonce를 받는다. 그래서 라우터에 요구 사항이 둘 생기고, 둘 다 라우터를 만들 때 정한다(asklinq#427).
+
+- **서버:** `ssr.nonce`는 요청의 nonce. 없으면 로더가 nonce 없이 렌더되고 CSP가 막는다.
+- **클라이언트:** `ssr.nonce`는 `""`. 헤더로 CSP를 받은 페이지에서 브라우저는 `getAttribute`로부터 nonce를 숨기므로, 서버가 렌더한 로더는 `nonce=""`로 읽힌다. 라우터의 하이드레이션 검사는 이것을 클라이언트의 `ssr.nonce`와 비교해 다르면 사본을 하나 더 붙인다. `""`이면 원본을 찾아 아무것도 붙이지 않고, 다른 값이면 그 사본이 CSP에 막혀 페이지를 열 때마다 위반을 기록한다.
+
+로더는 그것을 가진 라우트의 전체 페이지 로드에서 돈다. 그런 페이지에서 클라이언트 내비게이션으로 떠나도 Tag Manager는 살아 있다(페이지뷰는 History Change 트리거로). 반대로 로더가 없는 라우트에서 클라이언트 내비게이션으로 들어오면 로드되지 않는다. 그때 라우터가 붙이는 사본은 CSP에 막히고, 그 덕에 Tag Manager가 두 번 로드되는 일도 없다.
+
+**Body.** 셸은 `<body>` 자체가 아니라 그 안을 렌더하므로, 제품의 루트 문서가 같은 라우트 조건 뒤에서 noscript를 `<body>`의 첫 자식으로 렌더한다.
+
+```tsx
+<body>
+  <Show when={gtmIdForThisRoute()}>{(id) => <noscript innerHTML={gtmNoscriptIframe(id())} />}</Show>
+  {props.children}
+</body>
+```
+
+`tests/site-kit-gtm-noscript-hydration.test.mjs`가 바로 이 코드를 Solid 컴파일러로 컴파일해 개발 빌드로 하이드레이션한다. 불일치 없음, 잃은 키 없음, 자바스크립트가 켜져 있으면 noscript는 텍스트로 남는다.
+
+**CSP.** `GTM_CSP_SOURCES`의 각 목록을 같은 이름의 지시어에 더한다.
+
+| 지시어 | 출처 |
+|---|---|
+| `script-src` | `https://www.googletagmanager.com` |
+| `connect-src` | `https://www.googletagmanager.com https://*.google-analytics.com https://*.google.com` |
+| `img-src` | `https://www.googletagmanager.com https://*.google-analytics.com` |
+| `frame-src` | `https://www.googletagmanager.com` |
+
+Tag Manager 컨테이너와 "Ads 기능 없는 Google Analytics"에 대한 구글의 목록에, noscript iframe용 `frame-src`를 더한 것이다. 구글은 `script-src-elem`으로 적지만 그 지시어가 없는 정책은 `script-src`로 넘어간다. `*.google.com`은 `www.google.com`과 GA4의 `*.analytics.google.com` 호스트도 덮는다. 포함하지 않은 것(컨테이너가 필요로 하면 같은 가이드에서 더한다): 미리보기 모드(`tagmanager.google.com`, `gstatic`, Google Fonts), 맞춤 자바스크립트 변수(`'unsafe-eval'`), Ads·Google 신호 호스트(`*.g.doubleclick.net`, `pagead2.googlesyndication.com`, `www.googleadservices.com`, `*.google.<TLD>`).
 
 ## 섹션
 

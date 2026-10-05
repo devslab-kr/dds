@@ -13,7 +13,7 @@ export default defineConfig({
 
   test: {
     environment: "node",
-    include: ["src/solid/__tests__/ssr.test.tsx"],
+    include: ["src/solid/__tests__/ssr.test.tsx", "src/solid/__tests__/tanstack-head.ssr.test.tsx"],
     setupFiles: [],
   },
 });
