@@ -26,7 +26,7 @@
 - **Electric Cyan** `#06B6D4` (hover `#22D3EE`) + **zinc** 뉴트럴 —
   devslab.kr 실제 스타일에서 추출
 - 라이트 기본 + 다크 토글, 두 시맨틱 매핑 모두 1급
-- Geist / Geist Mono, 한글은 Pretendard → 시스템 고딕 폴백
+- Geist / Geist Mono, 한글은 Pretendard → 시스템 고딕 폴백. 세 패밀리의 woff2는 `@devslab/site-kit/fonts.css`로 한 번만 싣는다(자체 호스팅, D-033)
 - cyan 면 위 텍스트는 흰색이 아니라 `zinc.950` (WCAG AA: 2.3:1 vs 약 8:1)
 
 ## 개발

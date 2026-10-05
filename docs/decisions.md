@@ -5,6 +5,45 @@
 
 ---
 
+## D-033 — 가족 서체 파일은 site-kit이 한 번 싣고, face 이름은 토큰 이름 그대로 (2026-10-05)
+
+**결정.** `@devslab/site-kit`이 가족 서체의 woff2와 `@font-face`를 싣는다(소유자 결정 "공용 글꼴 패키지로 통일").
+
+- `fonts.css`(새 진입점 `@devslab/site-kit/fonts.css`) + `fonts/{geist,geist-mono,pretendard}/*.woff2` + 디렉터리마다 `LICENSE.txt`(SIL OFL 1.1) + `fonts/manifest.json`(원본 패키지·버전·tarball integrity·파일별 크기·sha256·unicode-range). `exports`에 `./fonts.css`와 `./fonts/*`.
+- **face 이름 = 토큰 이름.** `"Geist"`·`"Geist Mono"`·`"Pretendard"`. 토큰(`--dds-font-family-sans` = `Geist, Pretendard, …`, `-mono` = `'Geist Mono', …`)은 바꾸지 않는다. 스타일시트를 불러오면 D-032의 뿌리 규칙과 토큰을 쓰는 모든 곳이 이름을 바꾸지 않고 이 파일로 이어진다.
+- 파일: Geist·Geist Mono는 `@fontsource-variable/geist{,-mono}@5.3.0`의 문자권별 normal 서브셋(5개·6개, 가변 100–900), Pretendard는 `pretendard@1.3.9`의 **저작자 동적 서브셋** 92개(가변 45–920). 모두 `unicode-range`, `font-display: swap`, `format("woff2")`, url은 `fonts.css` 기준 상대 경로.
+- `fonts.css`는 매니페스트에서 생성한다(`scripts/build-fonts.mjs`). `--check`(site-kit `check`와 소스 단계 계약 테스트)는 의존성 없이 파일·라이선스·스타일시트가 매니페스트와 일치하는지, 매니페스트 밖 파일이 없는지 본다. `--vendor`는 버전을 올릴 때 npm 레지스트리에서 원본 tarball을 받아 sha512 integrity를 확인하고 다시 쓴다.
+- 미리 받기는 옵트인: 코어 `fontPreloadLinks(href)`·`FAMILY_FONT_PRELOAD_FILE`, `toTanStackHead(metadata, { fontPreload })`. href는 제품 번들러가 준 같은 도메인 경로(`?url` import)이고 `crossorigin="anonymous"`를 붙인다.
+
+**계기.** 네 제품이 같은 서체를 네 가지로 다루고 있었다. BookLinq는 스크립트로 `public/fonts/`에 복사(그중 Pretendard는 2 MB 단일 파일), TraceLinq는 빌드 스크립트 복사 + 자체 `@font-face`(Pretendard 역시 2 MB 단일 파일), VisionLinq는 `@fontsource-variable/geist` 스타일시트를 링크하고 Pretendard는 기기에 맡김, AskLinq는 글꼴 파일이 없다. 그리고 셋 다 `"Geist Variable"`·`"Pretendard Variable"`로 등록해 토큰의 `Geist`·`Pretendard`와 이름이 달랐다 — 자체 호스팅 face가 토큰 스택에 잡히지 않는다. D-032가 재검토 조건으로 적은 바로 그 상황이다.
+
+**근거.**
+- **이름을 토큰에 맞추고 토큰은 그대로.** 토큰 값을 `"Geist Variable", …`로 바꾸면 소비자 사본(D-009, `check-consumers`)이 모두 낡고, 그 이름은 원본 패키지가 자기 사본에 붙인 이름일 뿐 서체의 이름이 아니다. 반대로 face를 토큰 이름으로 등록하면 토큰을 쓰는 모든 곳이 바뀌지 않고, 제품이 옮겨 올 때 할 일은 자기 리터럴 스택의 이름 셋을 바꾸는 것(또는 지우는 것)뿐이다. 브라우저 테스트가 실제 Chromium에서 토큰 스택으로 세 패밀리가 `loaded` 됨을 고정하고, face 이름을 `"Geist Variable"`로 바꾸는 뮤테이션은 실패한다.
+- **site-kit에.** 이미 제3자 자산을 라이선스와 함께 싣고 생성·`--check`하는 패키지다(국기, D-017/D-020). 네 제품이 모두 의존하고, D-032가 페이지 뿌리 서체를 site-kit에 두었다. 새 패키지는 npm Trusted Publisher를 패키지마다 소유자가 등록해야 한다(0.12.2 발행 사고).
+- **Pretendard는 저작자의 동적 서브셋.** OFL의 예약 글꼴 이름(Reserved Font Name "Pretendard") 때문에 우리가 잘라 낸 서브셋은 Pretendard라는 이름을 쓸 수 없다. 저작자가 배포한 서브셋을 수정 없이 재배포하면 쓸 수 있다. 크기: 단일 `PretendardVariable.woff2` 2,057,688 B 대신, 한국어 랜딩이 실제로 받는 양은 Chromium 실측 getasklinq.app 12개 305 KB, gettracelinq.app/ko 14개 347 KB, getbooklinq.app 16개 424 KB, 이 결정 로그 2만 자 21개 527 KB. 서브셋 범위는 서로 겹치지 않고 한글 음절 11,172자와 호환 자모를 모두 덮는다(테스트).
+- **Geist는 문자권별 서브셋.** 전체 가변 파일 69.6 KB 대신 latin 29.4 KB(Mono 71.4 KB 대신 23.1 KB). 베트남어(가족 로케일 vi)·라틴 확장·키릴은 그 글자가 있을 때만 받는다.
+- **상대 url + 번들러.** Vite(TanStack Start)는 `@import "@devslab/site-kit/fonts.css"`의 url을 `node_modules`에서 따라가 제품 자기 `/assets/`에 해시 이름으로 낸다 — `font-src 'self'`가 그대로다. 모든 face가 Vite 기본 인라인 한도 4,096 B보다 크다(최소 5,812 B) — 작으면 `data:` URI가 되어 CSP에 막힌다. 테스트가 이 하한을 고정한다. 릴리스 검증이 실제 tarball을 새 소비자에 설치해 Vite로 빌드하고, face 103개가 `dist/assets`에 있고 스타일시트가 그것만 가리키며 `?url` preload가 같은 파일임을 확인한다.
+
+**반려한 대안.**
+- **토큰을 `"Geist Variable"`·`"Pretendard Variable"`로** — 위의 소비자 사본 낡음, 그리고 원본 패키지 사정에 토큰을 맞추는 일.
+- **두 이름 모두 등록(별칭 `@font-face`)** — 규칙 206개, 옮겨 오지 않은 제품이 옛 이름을 계속 써도 아무 신호가 없다. 옮겨 오는 일은 제품당 이름 셋 바꾸기다.
+- **새 패키지 `@devslab/dds-fonts`** — 위의 Trusted Publisher 등록 부담. 모바일 앱 등 site-kit 밖 소비자가 생기면 다시 본다.
+- **`styles.css`가 `fonts.css`를 `@import`** — 지금 기기 글꼴만 쓰는 제품(AskLinq: 개인정보처리방침이 "기기에 이미 있는 글꼴"이라고 적음)이 다음 올림에서 요청 없이 3 MB 자산과 내려받기를 얻는다. 옵트인.
+- **Pretendard 단일 가변 파일** — 한국어 한 페이지에 2 MB. 형제 둘이 지금 이렇게 한다.
+- **의존성(`pretendard`, `@fontsource-variable/*`)으로 두고 url을 그 패키지로** — 소스 단계(의존성 미설치)에서 검사할 수 없고, 제품마다 이 세 패키지의 버전이 따로 놀게 된다. `pretendard` 패키지는 97 MB다.
+- **`src: local(...)`** — 기기의 다른 버전 Pretendard가 섞이고 지문 채취 표면이다.
+
+**트레이드오프.**
+- site-kit tarball이 약 3 MB 커진다(woff2 3,104,592 B). 옵트인한 제품의 빌드 산출물도 103개 파일 약 3 MB가 늘지만, 방문자는 쓰는 서브셋만 받는다.
+- `fonts.css`는 57 KB(gzip 13.6 KB) — Pretendard `unicode-range` 목록이 대부분. 제품 CSS에 합쳐져 렌더를 막는 CSS가 그만큼 는다.
+- `font-display: swap`은 descriptor라 제품이 덮을 수 없다. BookLinq가 CLS 때문에 `optional`을 썼던 이력이 있다(BookLinq 5f213c4) — 필요해지면 그 제품은 이 파일을 쓰면서 자기 `@font-face`를 다른 이름으로 둔다.
+- 기울임꼴 face는 싣지 않는다(브라우저가 기울여 그림). 가족 제품에 기울임 본문이 생기면 fontsource의 `wght-italic` 서브셋을 더한다.
+- 한국어 페이지가 Pretendard를 새로 받게 되는 제품(VisionLinq — 지금은 기기 글꼴)은 첫 방문에 수백 KB가 는다. 대신 기기에 Pretendard가 없는 대부분의 방문자도 같은 글자를 본다.
+
+**재검토 시점.** 원본(Geist·Pretendard)이 새 버전을 낼 때(`--vendor`로 올림), site-kit 밖의 소비자(모바일 앱, 콘솔 전용 앱)가 같은 파일을 원할 때(그때 별도 패키지), 또는 한 제품이라도 `swap` 대신 다른 표시 전략이 필요할 때.
+
+---
+
 ## D-032 — 페이지 뿌리의 가족 서체는 site-kit이 명시도 0으로 준다 (2026-10-05)
 
 **결정.** `@devslab/site-kit`의 `styles.css`에 한 줄을 둔다.

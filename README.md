@@ -27,7 +27,7 @@ React Native are consumers.
 - **Electric Cyan** `#06B6D4` (hover `#22D3EE`) on **zinc** neutrals — extracted
   from devslab.kr's live styles
 - Light default + dark toggle; both semantic mappings are first-class
-- Geist / Geist Mono; Korean falls back to Pretendard → system gothic
+- Geist / Geist Mono; Korean falls back to Pretendard → system gothic. The woff2 for all three ship once, self-hosted, as `@devslab/site-kit/fonts.css` (D-033)
 - Text on cyan surfaces is `zinc.950`, not white (WCAG AA: 2.3:1 vs ~8:1)
 
 ## Development

@@ -202,7 +202,8 @@ test("the TanStack adapter accepts metadata built from a product registry", asyn
   assert.match(dts, /toTanStackHead<Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>, options\?: TanStackHeadOptions\)/);
   assert.match(dts, /toHtmlAttributes: <Code extends string = SiteLocale>\(metadata: SiteMetadata<Code>\)/);
   // D-031: the Tag Manager option and the standalone head entry are typed, and the result's `scripts` is optional (absent unless asked).
-  assert.match(dts, /interface TanStackHeadOptions \{ icons\?: [^;]+; gtm\?: string \| undefined \}/);
+  // D-033 adds the font preload between them.
+  assert.match(dts, /interface TanStackHeadOptions \{ icons\?: [^;]+; fontPreload\?: string \| readonly string\[\] \| undefined; gtm\?: string \| undefined \}/);
   assert.match(dts, /export declare function gtmHeadEntry\(containerId: string\): GtmHeadEntry;/);
   assert.match(dts, /scripts\?: GtmHeadEntry\[\]/);
 });
@@ -237,4 +238,125 @@ test("the landing chrome keeps its touch targets, scroll offset and eyebrow hook
   assert.equal((chrome.match(/const brand = createMemo\(\(\) => props\.brand\)/g) ?? []).length, 2, "header and footer each read brand once");
   assert.doesNotMatch(chrome, /props\.details(?!\))/, "details is read only through the memo");
   assert.doesNotMatch(chrome, /props\.brand\./, "brand is read only through the memo");
+});
+
+// D-033: the family font ships once, here. Node built-ins only — this file
+// runs in the source stage, before any dependency is installed.
+const familyNames = (stack) => stack.split(",").map((name) => name.trim().replace(/^['"]|['"]$/g, ""));
+const fontFaces = (css) =>
+  [...css.matchAll(/@font-face\s*\{([^}]*)\}/g)].map(([, body]) => ({
+    family: body.match(/font-family:\s*"([^"]+)";/)?.[1],
+    style: body.match(/font-style:\s*([^;]+);/)?.[1],
+    weight: body.match(/font-weight:\s*([^;]+);/)?.[1],
+    display: body.match(/font-display:\s*([^;]+);/)?.[1],
+    src: body.match(/src:\s*([^;]+);/)?.[1],
+    range: body.match(/unicode-range:\s*([^;]+);/)?.[1],
+  }));
+const parseRange = (range) =>
+  range.split(/\s*,\s*/).map((part) => {
+    const match = part.match(/^U\+([0-9A-F]{1,6})(?:-([0-9A-F]{1,6}))?$/i);
+    assert.ok(match, `unicode-range part ${part} is not U+XXXX or U+XXXX-YYYY`);
+    const start = Number.parseInt(match[1], 16);
+    const end = Number.parseInt(match[2] ?? match[1], 16);
+    assert.ok(start <= end && end <= 0x10ffff, `unicode-range part ${part} is out of order or past U+10FFFF`);
+    return [start, end];
+  });
+const covers = (ranges, codePoint) => ranges.some(([start, end]) => codePoint >= start && codePoint <= end);
+
+test("fonts.css names the faces exactly as the token stacks do", async () => {
+  const foundation = await json("tokens/foundation.json");
+  const sans = familyNames(foundation.font.family.sans.$value);
+  const mono = familyNames(foundation.font.family.mono.$value);
+  const faces = fontFaces(await read("packages/site-kit/fonts.css"));
+  assert.deepEqual([...new Set(faces.map(({ family }) => family))], ["Geist", "Geist Mono", "Pretendard"]);
+  // The token's first sans name, its Korean fallback, and its first mono name
+  // are the faces — so `var(--dds-font-family-sans)` resolves to these files
+  // with no product rule in between.
+  assert.equal(sans[0], "Geist");
+  assert.equal(sans[1], "Pretendard");
+  assert.equal(mono[0], "Geist Mono");
+  for (const face of faces) {
+    assert.equal(face.style, "normal");
+    assert.equal(face.display, "swap", `${face.family} must swap, not block`);
+    assert.match(face.weight, /^\d+ \d+$/, `${face.family} is a variable face with a weight range`);
+    assert.match(face.src, /^url\("\.\/fonts\/(geist|geist-mono|pretendard)\/[\w.-]+\.woff2"\) format\("woff2"\)$/);
+    assert.ok(face.range, `${face.family} ${face.src} has a unicode-range`);
+  }
+});
+
+test("every url() in fonts.css is package-relative and names a real woff2 the pack ships", async () => {
+  const { readFileSync, readdirSync, existsSync } = await import("node:fs");
+  const pkg = new URL("../packages/site-kit/", import.meta.url);
+  const css = await read("packages/site-kit/fonts.css");
+  const urls = [...css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url);
+  assert.ok(urls.length > 0);
+  for (const url of urls) {
+    assert.ok(url.startsWith("./fonts/"), `${url}: relative to fonts.css, so a bundler rewrites it to the product's own /assets`);
+    assert.doesNotMatch(url, /^(?:[a-z][a-z0-9+.-]*:|\/)/i, `${url}: no absolute, external or data: URL — font-src 'self'`);
+    const file = new URL(url, pkg);
+    assert.ok(existsSync(file), `${url} is missing`);
+    const bytes = readFileSync(file);
+    assert.equal(bytes.subarray(0, 4).toString("latin1"), "wOF2", `${url} is not a woff2`);
+    // Vite inlines assets under 4096 bytes as data: URIs by default, and a
+    // product CSP of font-src 'self' blocks those. No face may be that small.
+    assert.ok(bytes.length > 4096, `${url} is ${bytes.length} bytes — a bundler would inline it as data:`);
+  }
+  assert.equal(new Set(urls).size, urls.length, "each face is referenced once");
+  const shipped = ["geist", "geist-mono", "pretendard"].flatMap((dir) =>
+    readdirSync(new URL(`fonts/${dir}/`, pkg)).filter((name) => name.endsWith(".woff2")).map((name) => `./fonts/${dir}/${name}`),
+  );
+  assert.deepEqual([...shipped].sort(), [...urls].sort(), "fonts/ holds exactly the faces fonts.css references");
+  const manifest = await json("packages/site-kit/package.json");
+  assert.ok(manifest.files.includes("fonts") && manifest.files.includes("fonts.css"), "the pack must carry fonts/ and fonts.css");
+  assert.equal(manifest.exports["./fonts.css"], "./fonts.css");
+  assert.equal(manifest.exports["./fonts/*"], "./fonts/*", "a product imports a face with ?url to preload it");
+  assert.ok(manifest.sideEffects.includes("./fonts.css"));
+  assert.match(manifest.scripts.check, /build-fonts\.mjs --check/);
+});
+
+test("the faces' unicode ranges are well formed and split the way pages need", async () => {
+  const faces = fontFaces(await read("packages/site-kit/fonts.css"));
+  const byFamily = (family) => faces.filter((face) => face.family === family).map((face) => parseRange(face.range));
+  for (const family of ["Geist", "Geist Mono"]) {
+    const ranges = byFamily(family);
+    assert.ok(ranges.length > 1, `${family} is split by script, not one file`);
+    for (const codePoint of [..."AZaz09@€"].map((c) => c.codePointAt(0))) {
+      assert.ok(ranges.some((face) => covers(face, codePoint)), `${family} covers U+${codePoint.toString(16)}`);
+    }
+  }
+  const pretendard = byFamily("Pretendard");
+  assert.ok(pretendard.length > 50, "Pretendard is the dynamic-subset build, not the 2 MB single file");
+  // No code point in two Pretendard subsets: a page would fetch both files.
+  const all = pretendard.flat().sort(([a], [b]) => a - b);
+  for (let index = 1; index < all.length; index += 1) {
+    assert.ok(all[index][0] > all[index - 1][1], `Pretendard subsets overlap at U+${all[index][0].toString(16)}`);
+  }
+  // Every precomposed Hangul syllable and compatibility jamo has a subset.
+  for (let codePoint = 0xac00; codePoint <= 0xd7a3; codePoint += 1) {
+    if (!covers(all, codePoint)) assert.fail(`no Pretendard subset covers U+${codePoint.toString(16)}`);
+  }
+  for (let codePoint = 0x3131; codePoint <= 0x318e; codePoint += 1) {
+    if (!covers(all, codePoint)) assert.fail(`no Pretendard subset covers U+${codePoint.toString(16)}`);
+  }
+});
+
+test("the font files match their manifest and ship their OFL licenses", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const result = spawnSync(process.execPath, ["packages/site-kit/scripts/build-fonts.mjs", "--check"], {
+    cwd: new URL("..", import.meta.url),
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, `build-fonts --check failed\n${result.stdout}\n${result.stderr}`);
+  const fontsManifest = await json("packages/site-kit/fonts/manifest.json");
+  for (const family of fontsManifest.families) {
+    assert.equal(family.source.license, "OFL-1.1", family.family);
+    assert.match(family.source.integrity, /^sha512-/, `${family.family} records the upstream tarball's integrity`);
+    const license = await read(`packages/site-kit/fonts/${family.dir}/LICENSE.txt`);
+    assert.match(license, /SIL Open Font License, Version 1\.1/, `${family.family} license text`);
+  }
+  for (const readme of ["packages/site-kit/README.md", "packages/site-kit/README.ko.md"]) {
+    const text = await read(readme);
+    assert.match(text, /fonts\.css/, `${readme} documents fonts.css`);
+    assert.match(text, /OFL|Open Font License/, `${readme} names the font licenses`);
+  }
 });

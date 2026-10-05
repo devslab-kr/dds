@@ -1,5 +1,6 @@
 import { brandIconLinks } from "./core/seo.mjs";
 import { gtmHeadScript } from "./core/gtm.mjs";
+import { fontPreloadLinks } from "./core/fonts.mjs";
 
 /**
  * A route `head().scripts` entry that loads Google Tag Manager (D-031).
@@ -21,6 +22,8 @@ export function gtmHeadEntry(containerId) {
 // is worse than one that links none. `true` takes the /brand default.
 // `gtm` is opt-in the same way, and per route: the product decides which
 // pages carry Tag Manager (public marketing and legal pages, not consoles).
+// `fontPreload` is opt-in too: only the product knows the hashed URL its
+// bundler gave the face (D-033). Appended after the icons.
 export function toTanStackHead(metadata, options = {}) {
   const icons = options.icons === true ? brandIconLinks() : options.icons ? brandIconLinks(options.icons) : [];
   const head = {
@@ -43,6 +46,7 @@ export function toTanStackHead(metadata, options = {}) {
       { rel: "canonical", href: metadata.canonical },
       ...metadata.alternates.map(({ hreflang, href }) => ({ rel: "alternate", hreflang, href })),
       ...icons,
+      ...(options.fontPreload === undefined ? [] : fontPreloadLinks(options.fontPreload)),
     ],
   };
   if (options.gtm !== undefined) head.scripts = [gtmHeadEntry(options.gtm)];

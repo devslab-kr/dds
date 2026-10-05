@@ -440,3 +440,31 @@ test("the TanStack adapter adds the Tag Manager loader as a head script only whe
   assert.deepEqual(withGtm.meta, bare.meta);
   assert.deepEqual(withGtm.links, toTanStackHead(metadata, { icons: true }).links);
 });
+
+test("font preload links are same-origin woff2 preloads in CORS mode, and nothing else", async () => {
+  const { FAMILY_FONT_PRELOAD_FILE, fontPreloadLinks } = await import("../packages/site-kit/src/core/fonts.mjs");
+  assert.equal(FAMILY_FONT_PRELOAD_FILE, "fonts/geist/geist-latin-wght-normal.woff2");
+  assert.deepEqual(fontPreloadLinks("/assets/geist-latin-wght-normal-AbC123.woff2"), [
+    { rel: "preload", href: "/assets/geist-latin-wght-normal-AbC123.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" },
+  ]);
+  assert.deepEqual(fontPreloadLinks(["/a.woff2", "/b.woff2?v=1"]).map(({ href }) => href), ["/a.woff2", "/b.woff2?v=1"]);
+  assert.deepEqual(fontPreloadLinks([]), []);
+  // The CSP is font-src 'self': another origin, a protocol-relative URL, a
+  // data: URI (what a bundler's inlining would produce) or a relative path
+  // that resolves differently on every route are all refused.
+  for (const bad of ["https://cdn.example.com/geist.woff2", "//cdn.example.com/geist.woff2", "data:font/woff2;base64,AAAA", "assets/geist.woff2", "./geist.woff2", "/assets/geist.ttf", ""]) {
+    assert.throws(() => fontPreloadLinks(bad), RangeError, bad);
+  }
+  for (const name of ["FAMILY_FONT_PRELOAD_FILE", "fontPreloadLinks"]) assert.ok(name in coreIndex, name);
+});
+
+test("the TanStack adapter appends font preloads only when asked, after the icons", () => {
+  const metadata = buildMetadata({ baseUrl: "https://example.com", path: "/", locale: "ko", defaultLocale: "ko", title: "Example", description: "Example site", siteName: "Example", image: "/og.png" });
+  const bare = toTanStackHead(metadata, { icons: true });
+  assert.ok(!bare.links.some(({ rel }) => rel === "preload"));
+  assert.deepEqual(toTanStackHead(metadata, { icons: true, fontPreload: undefined }), bare);
+  const withFont = toTanStackHead(metadata, { icons: true, fontPreload: "/assets/geist-latin.woff2" });
+  assert.deepEqual(withFont.links.slice(0, bare.links.length), bare.links);
+  assert.deepEqual(withFont.links.at(-1), { rel: "preload", href: "/assets/geist-latin.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" });
+  assert.throws(() => toTanStackHead(metadata, { fontPreload: "https://fonts.example.com/geist.woff2" }), RangeError);
+});

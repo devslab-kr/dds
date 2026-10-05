@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -48,8 +49,72 @@ const publishDryRun = (tarball, cwd) => {
   throw new Error(`publish ${basename(tarball)} --dry-run failed\n${output}`);
 };
 
+/**
+ * D-033: the packed fonts.css must name only files the tarball carries, and a
+ * fresh Vite app that imports it must end up serving every face from its own
+ * dist/assets — never a data: URI (font-src 'self' blocks those), never a
+ * node_modules path — with the `?url` preload pointing at the same file the
+ * stylesheet uses. Vite is the workspace's; the app and its node_modules are
+ * the fresh consumer's.
+ */
+async function verifyFamilyFonts(installedRoot, manifest) {
+  assert.equal(manifest.exports["./fonts.css"], "./fonts.css");
+  assert.equal(manifest.exports["./fonts/*"], "./fonts/*");
+  const css = await readFile(join(installedRoot, "fonts.css"), "utf8");
+  const urls = [...css.matchAll(/url\("([^"]+)"\)/g)].map(([, url]) => url);
+  const fontsManifest = JSON.parse(await readFile(join(installedRoot, "fonts", "manifest.json"), "utf8"));
+  const faces = fontsManifest.families.flatMap((family) => family.faces.map((face) => `./fonts/${family.dir}/${face.file}`));
+  assert.deepEqual([...urls].sort(), [...faces].sort(), "the packed fonts.css references exactly the manifest's faces");
+  for (const url of urls) await access(join(installedRoot, url));
+  for (const family of fontsManifest.families) await access(join(installedRoot, "fonts", family.dir, "LICENSE.txt"));
+
+  const app = join(temp, "font-app");
+  await mkdir(join(app, "src"), { recursive: true });
+  await writeFile(join(app, "index.html"), '<!doctype html><html lang="ko"><head><meta charset="utf-8"><script type="module" src="/src/main.js"></script></head><body><p>DevsLab 데브스랩 0123</p><code>mono</code></body></html>\n', "utf8");
+  await writeFile(
+    join(app, "src", "main.js"),
+    'import "./app.css";\nimport geistLatin from "@devslab/site-kit/fonts/geist/geist-latin-wght-normal.woff2?url";\ndocument.documentElement.dataset.preload = geistLatin;\n',
+    "utf8",
+  );
+  // The README's path: the product's own stylesheet @imports the kit's, so
+  // each url() has to be rebased onto node_modules, not onto the product CSS.
+  await writeFile(join(app, "src", "app.css"), '@import "@devslab/site-kit/fonts.css";\nhtml { font-family: var(--dds-font-family-sans, sans-serif); }\n', "utf8");
+  const vitePath = createRequire(join(workspace, "package.json")).resolve("vite");
+  const { build } = await import(pathToFileURL(vitePath));
+  await build({ root: app, configFile: false, logLevel: "warn", build: { outDir: join(app, "dist"), emptyOutDir: true } });
+  const assets = await readdir(join(app, "dist", "assets"));
+  const woff2 = assets.filter((name) => name.endsWith(".woff2"));
+  assert.equal(woff2.length, faces.length, `every face lands in dist/assets (${woff2.length} of ${faces.length})`);
+  const builtCss = (await Promise.all(assets.filter((name) => name.endsWith(".css")).map((name) => readFile(join(app, "dist", "assets", name), "utf8")))).join("\n");
+  const builtUrls = [...builtCss.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url);
+  assert.equal(builtUrls.length, faces.length, "the built stylesheet keeps one url() per face");
+  for (const url of builtUrls) {
+    assert.match(url, /^\/assets\/[\w.-]+\.woff2$/, `${url}: rewritten to the app's own /assets, not inlined or left on node_modules`);
+    assert.ok(woff2.includes(url.slice("/assets/".length)), `${url} exists in dist/assets`);
+  }
+  assert.doesNotMatch(builtCss, /data:font|data:application\/font|node_modules/, "no inlined face, no node_modules path");
+  for (const family of ["Geist", "Geist Mono", "Pretendard"]) assert.match(builtCss, new RegExp(`font-family:\\s*"?${family}"?[;}]`), `${family} survives the build`);
+  const js = (await Promise.all(assets.filter((name) => name.endsWith(".js")).map((name) => readFile(join(app, "dist", "assets", name), "utf8")))).join("\n");
+  const preload = js.match(/["'`](\/assets\/geist-latin-wght-normal[^"'`]*\.woff2)["'`]/)?.[1];
+  assert.ok(preload, `the ?url import yields an /assets URL\n${js.slice(0, 800)}`);
+  assert.ok(builtUrls.includes(preload), "the preload URL is the very file the stylesheet uses");
+  // The README's no-bundler path: copy fonts.css + fonts/ side by side; the
+  // relative url()s must then resolve inside the copy.
+  const copyScript = join(temp, "copy-fonts.mjs");
+  await writeFile(
+    copyScript,
+    'import { cpSync } from "node:fs";\nimport { dirname, join } from "node:path";\nimport { createRequire } from "node:module";\n\nconst kit = dirname(createRequire(import.meta.url).resolve("@devslab/site-kit/fonts.css"));\ncpSync(join(kit, "fonts.css"), "public/site-kit/fonts.css");\ncpSync(join(kit, "fonts"), "public/site-kit/fonts", { recursive: true });\n',
+    "utf8",
+  );
+  const copied = spawnSync(process.execPath, [copyScript], { cwd: temp, encoding: "utf8" });
+  if (copied.status !== 0) throw new Error(`the README copy script failed\n${copied.stdout}\n${copied.stderr}`);
+  for (const url of urls) await access(join(temp, "public", "site-kit", url));
+  const sizes = await Promise.all(woff2.map(async (name) => (await stat(join(app, "dist", "assets", name))).size));
+  console.log(`fresh Vite consumer: ${woff2.length} faces in dist/assets (${Math.round(sizes.reduce((a, b) => a + b, 0) / 1024)} KB), preload ${preload}`);
+}
+
 try {
-  const packageNames = ["dds-tokens", "dds-css", "dds-icons", "dds-solid", "site-kit"];
+  const packageNames =["dds-tokens", "dds-css", "dds-icons", "dds-solid", "site-kit"];
   const tarballs = [];
   let siteKitTarball = "";
   for (const packageName of packageNames) {
@@ -77,6 +142,7 @@ try {
     "src/core/gtm.mjs", "src/core/gtm.d.mts",
     "src/tanstack-start.mjs", "src/tanstack-start.d.mts",
     "styles.css", "site-sections.css", "flags/LICENSE-flag-icons.txt",
+    "src/core/fonts.mjs", "src/core/fonts.d.mts", "fonts.css", "fonts/manifest.json",
   ]) {
     await access(join(installedRoot, path));
   }
@@ -103,7 +169,8 @@ try {
   );
   const subpathResult = spawnSync(process.execPath, [subpathProbe], { cwd: temp, encoding: "utf8" });
   if (subpathResult.status !== 0) throw new Error(`@devslab/site-kit/flags subpath resolution failed\n${subpathResult.stdout}\n${subpathResult.stderr}`);
-  console.log("site-kit pack, public publish dry-run, and fresh consumer import passed");
+  await verifyFamilyFonts(installedRoot, manifest);
+  console.log("site-kit pack, public publish dry-run, fresh consumer import and font build passed");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

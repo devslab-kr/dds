@@ -147,9 +147,13 @@ devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴�
       한 소스, ThemeProvider가 class+data-theme 동시 스위치, ::selection
       on-brand 규칙 적용(기존 흰 글자 2.3:1 수정).
 
-### 9. 폰트 전략 확정 — `대기`
+### 9. 폰트 전략 확정 — `웹 완료` (2026-10-05)
 Geist/Geist Mono 셀프호스팅 여부, Pretendard 서브셋, RN 번들 전략.
 결정을 `docs/decisions.md`에 기록.
+- [x] 웹: D-033 — `@devslab/site-kit/fonts.css` + `fonts/`(Geist·Geist Mono는
+      fontsource 문자권 서브셋, Pretendard는 저작자의 동적 서브셋 92개), face 이름 =
+      토큰 이름. 네 제품의 자체 사본 걷어내기는 각 레포 몫.
+- [ ] RN(네이티브 번들) 전략 — 네이티브 앱이 생길 때.
 
 ### 12. site-kit 국기 로케일 피커 — `완료` (2026-09-02)
 D-017. `LocaleMenu variant="flag"` + 국기 데이터 14개. 첫 소비자 TraceLinq 랜딩.

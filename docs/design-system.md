@@ -268,6 +268,14 @@ Hangul glyphs, so Korean falls back to
 (stack: `Geist, Pretendard, system-ui, …`). Screens where numbers matter
 (dashboard stats) enable tabular figures.
 
+**Font files.** The three families' woff2 ship as one stylesheet,
+`@devslab/site-kit/fonts.css` (D-033). Its `@font-face` names are the token's
+names (`Geist`, `Pretendard`, `Geist Mono`), so loading it makes the token
+stacks resolve to the self-hosted files with nothing renamed. Each product
+serves the files from its own origin (`font-src 'self'`). Pretendard is the
+dynamic-subset build — 92 files split by `unicode-range` — so a page fetches
+only the subsets its text uses.
+
 **Korean line breaking.** By default browsers break Hangul between any two
 syllables ("확 / 인하세요"). Korean pages put the two rules below on the
 element that declares the language (`<html lang="ko">`, …) — set per element,
