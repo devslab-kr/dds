@@ -1,5 +1,17 @@
 # @devslab/site-kit
 
+## 0.15.0
+
+### Minor Changes
+
+- 4b4bfd1: The family font ships here once: `@devslab/site-kit/fonts.css` plus `fonts/` — Geist and Geist Mono (fontsource script subsets, variable 100–900) and Pretendard (the author's 92 dynamic subsets, variable 45–920) as woff2, each with its SIL OFL 1.1 license and a manifest of upstream versions and checksums (D-033). The `@font-face` names are the token's names (`Geist`, `Geist Mono`, `Pretendard`), so importing the stylesheet makes `--dds-font-family-sans` / `-mono` and the page-root rule resolve to the self-hosted files with nothing renamed. Every face has a `unicode-range` and `font-display: swap`; a Korean landing page fetches 12–16 Pretendard subsets (305–424 KB measured) instead of the 2 MB single file. The `url()`s are package-relative, so Vite/TanStack Start copies the faces into the product's own `/assets` (`font-src 'self'` holds); without a bundler, copy `fonts.css` and `fonts/` side by side. New: `fontPreloadLinks()`, `FAMILY_FONT_PRELOAD_FILE`, and `toTanStackHead(metadata, { fontPreload })` for a same-origin `crossorigin` preload of the Latin face. Opt-in — `styles.css` does not import it, so a product that loads nothing renders as before. Products that registered `"Geist Variable"` / `"Pretendard Variable"` themselves rename those to `Geist` / `Pretendard` when they move over (README: "Moving off a product's own copy").
+
+  가족 서체를 여기서 한 번 싣는다: `@devslab/site-kit/fonts.css`와 `fonts/` — Geist·Geist Mono(fontsource 문자권 서브셋, 가변 100–900)와 Pretendard(저작자의 동적 서브셋 92개, 가변 45–920) woff2, 패밀리마다 SIL OFL 1.1 라이선스, 원본 버전·체크섬 매니페스트(D-033). `@font-face` 이름이 토큰의 이름(`Geist`·`Geist Mono`·`Pretendard`)이라 스타일시트를 import하면 `--dds-font-family-sans`/`-mono`와 페이지 뿌리 규칙이 이름을 바꾸지 않고 자체 호스팅 파일로 이어진다. 모든 face에 `unicode-range`와 `font-display: swap`이 있고, 한국어 랜딩은 2 MB 단일 파일 대신 Pretendard 서브셋 12–16개(실측 305–424 KB)를 받는다. `url()`이 패키지 기준 상대 경로라 Vite/TanStack Start가 face를 제품 자기 `/assets`로 복사한다(`font-src 'self'` 유지). 번들러가 없으면 `fonts.css`와 `fonts/`를 나란히 복사한다. 새 API: 라틴 face를 같은 도메인·`crossorigin`으로 미리 받는 `fontPreloadLinks()`, `FAMILY_FONT_PRELOAD_FILE`, `toTanStackHead(metadata, { fontPreload })`. 옵트인 — `styles.css`가 import하지 않으므로 아무것도 불러오지 않는 제품은 전과 같다. `"Geist Variable"`·`"Pretendard Variable"`을 직접 등록하던 제품은 옮겨 올 때 그 이름을 `Geist`·`Pretendard`로 바꾼다(README "제품 자체 사본에서 옮겨 오기").
+
+### Patch Changes
+
+- @devslab/dds-solid@0.15.0
+
 ## 0.14.1
 
 ### Patch Changes
