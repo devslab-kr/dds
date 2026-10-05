@@ -280,7 +280,7 @@ Mount the banner once, as the first element in `<body>`, so it is the first thin
 
 ```tsx
 <body>
-  <ConsentBanner controller={consent} messages={lang() === "ko" ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN} privacyHref={`/${lang()}/privacy`} />
+  <ConsentBanner controller={consent} messages={lang() === "ko" ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN} learnMoreHref={`/${lang()}/privacy#analytics`} privacyHref={`/${lang()}/privacy`} />
   <MarketingShell
     footer={{ …, consentSettings: { controller: consent, label: t("cookieSettings") } }}
     …
@@ -288,7 +288,7 @@ Mount the banner once, as the first element in `<body>`, so it is the first thin
 </body>
 ```
 
-The banner renders nothing on the server and nothing during hydration; the bar comes in after mount, from the browser's own cookie (`tests/site-kit-consent-hydration.test.mjs` hydrates exactly this under the development build). Its three choices — 모두 허용, 거부, 설정 — are the same button at the same size. ✕ and Escape close it without a decision. The settings dialog traps focus, closes on Escape without saving, and shows *necessary* as text and *analytics* as an unticked switch. The footer button (or `ConsentSettingsButton`, or `consent.openSettings()`) reopens it to change or withdraw at any time.
+The banner renders nothing on the server and nothing during hydration; the bar comes in after mount, from the browser's own cookie (`tests/site-kit-consent-hydration.test.mjs` hydrates exactly this under the development build). Its text is short — a title, one or two sentences on what is collected, why, and that it is optional — and its *자세히 보기* (`learnMore`) is a plain link to `learnMoreHref`, **your privacy policy's section on analytics and its overseas transfer, with the anchor** (required; without a `#fragment` the banner throws `RangeError`). The kit's default strings name no recipient, country or retention period: that section must carry the full disclosure — Google Analytics 4, the recipient Google LLC, the transfer to the United States, the retention period, that it is not used for advertising, and how to withdraw (the footer's 쿠키 설정). Its three choices — 모두 허용, 거부, 설정 — are the same button at the same size. Your own labels may be longer than these: the bar follows its own width — one row on a wide screen, the copy above a row of three below 60rem, and at 36rem and below the three stacked full width at equal height (the settings dialog likewise) — and a label wraps only at a space, never inside a word (Korean keeps whole words). ✕ and Escape close it without a decision. The settings dialog traps focus, closes on Escape without saving, and shows *necessary* as text and *analytics* as an unticked switch, one line each, then a link to `privacyHref` and two equal buttons: 취소 (close without saving, like ✕) and 선택 저장. The footer button (or `ConsentSettingsButton`, or `consent.openSettings()`) reopens it to change or withdraw at any time.
 
 A path that carries a secret goes into the record redacted: `createConsentManager({ …, recordPath: (path) => path.replace(/\/k\/[^/]+/, "/k/:key") })`.
 
@@ -381,10 +381,10 @@ export function ConsentBar() {
     const unbind = consent.bindTriggers(); // any [data-consent-settings] opens the settings
     return () => { off(); unbind(); };
   }, []);
-  // Render the bar while `ask`: m.title, m.body, a link to /privacy, and three equal buttons —
+  // Render the bar while `ask`: m.title, m.body, an m.learnMore link to /privacy#analytics, and three equal buttons —
   // consent.acceptAll(), consent.rejectAll(), setSettings(true). Escape → consent.dismiss().
   // The settings dialog: m.necessaryTitle as text, an unticked switch for m.analyticsSwitch,
-  // and consent.save({ analytics }) / acceptAll() / rejectAll().
+  // a link to /privacy, and two equal buttons: m.cancel (close) and m.save → consent.save({ analytics }).
   return null;
 }
 
@@ -394,7 +394,7 @@ export function ConsentBar() {
 
 The cookie is per host and `Path=/`, so plain HTML pages on the same host that load no React only need `consent.start()` from a module script: a decision made on any page of the host applies to them.
 
-**Console steps the code cannot do.** In Tag Manager, set each GA4 tag's consent settings to *Require additional consent for tag to fire: `analytics_storage`*, so a tag never fires on a denied page even if Tag Manager is still in memory after a withdrawal. In GA4, keep data retention at 14 months (the default strings say so) and Google signals and ads personalisation off (there is no advertising category).
+**Console steps the code cannot do.** In Tag Manager, set each GA4 tag's consent settings to *Require additional consent for tag to fire: `analytics_storage`*, so a tag never fires on a denied page even if Tag Manager is still in memory after a withdrawal. In GA4, keep data retention at what your policy section says (14 months on the family sites) and Google signals and ads personalisation off (there is no advertising category).
 
 ## Sections
 

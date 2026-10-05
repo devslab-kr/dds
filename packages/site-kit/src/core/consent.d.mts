@@ -134,10 +134,17 @@ export interface ConsentManager {
 }
 export declare function createConsentManager(options: ConsentManagerOptions): ConsentManager;
 
+/**
+ * The bar is short: `title`, `body` (what, why, that it is optional) and `learnMore`, a link to the
+ * privacy policy's analytics section (ConsentBanner's `learnMoreHref`), which carries the full disclosure.
+ * The settings dialog: one line each for necessary and analytics, a policy link, cancel and save.
+ */
 export interface ConsentMessages {
   regionLabel: string;
   title: string;
   body: string;
+  /** "자세히 보기" / "Learn more": the bar's link to the policy section. */
+  learnMore: string;
   privacyLink: string;
   acceptAll: string;
   rejectAll: string;
@@ -152,6 +159,8 @@ export interface ConsentMessages {
   analyticsBody: string;
   analyticsSwitch: string;
   save: string;
+  /** Closes the settings dialog without saving, like ✕ and Escape. */
+  cancel: string;
   close: string;
   saved: string;
   trigger: string;

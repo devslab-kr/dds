@@ -280,7 +280,7 @@ export const Route = createRootRoute({
 
 ```tsx
 <body>
-  <ConsentBanner controller={consent} messages={lang() === "ko" ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN} privacyHref={`/${lang()}/privacy`} />
+  <ConsentBanner controller={consent} messages={lang() === "ko" ? CONSENT_MESSAGES_KO : CONSENT_MESSAGES_EN} learnMoreHref={`/${lang()}/privacy#analytics`} privacyHref={`/${lang()}/privacy`} />
   <MarketingShell
     footer={{ …, consentSettings: { controller: consent, label: t("cookieSettings") } }}
     …
@@ -288,7 +288,7 @@ export const Route = createRootRoute({
 </body>
 ```
 
-배너는 서버에서도, 하이드레이션 중에도 아무것도 렌더하지 않는다. 바는 마운트 뒤에 브라우저 자신의 쿠키를 보고 나온다(`tests/site-kit-consent-hydration.test.mjs`가 바로 이 구성을 개발 빌드로 하이드레이션한다). 세 선택 — 모두 허용, 거부, 설정 — 은 같은 버튼, 같은 크기다. ✕와 Esc는 결정 없이 닫는다. 설정 대화상자는 포커스를 가두고, Esc로 저장 없이 닫히고, *필수*는 글로, *분석*은 꺼진 스위치로 보여 준다. 바닥글 버튼(또는 `ConsentSettingsButton`, 또는 `consent.openSettings()`)으로 언제든 다시 열어 바꾸거나 철회한다.
+배너는 서버에서도, 하이드레이션 중에도 아무것도 렌더하지 않는다. 바는 마운트 뒤에 브라우저 자신의 쿠키를 보고 나온다(`tests/site-kit-consent-hydration.test.mjs`가 바로 이 구성을 개발 빌드로 하이드레이션한다). 바의 글은 짧다 — 제목과, 무엇을 왜 수집하는지·선택이라는 한두 문장 — 그리고 *자세히 보기*(`learnMore`)는 `learnMoreHref`로 가는 평범한 링크다. **개인정보처리방침에서 이용 통계와 국외 이전을 다루는 절, 앵커까지**(필수 — `#fragment`가 없으면 배너가 `RangeError`를 던진다). 킷의 기본 문구는 받는 곳·국가·보관 기간을 말하지 않는다. 그 절에 전부 있어야 한다 — Google Analytics 4, 받는 곳 Google LLC, 미국으로의 이전, 보관 기간, 광고에 쓰지 않는다는 것, 철회 방법(바닥글의 쿠키 설정). 세 선택 — 모두 허용, 거부, 설정 — 은 같은 버튼, 같은 크기다. 제품의 라벨은 이보다 길 수 있다: 바는 자기 너비를 따라 넓으면 한 줄, 60rem 이하는 문구 아래 세 칸 한 줄, 36rem 이하는 세 선택을 전체 너비·같은 높이로 쌓고(설정 대화상자도 같다), 라벨은 공백에서만 줄을 바꾸며 단어 중간에서는 끊지 않는다(한국어는 단어를 통째로). ✕와 Esc는 결정 없이 닫는다. 설정 대화상자는 포커스를 가두고, Esc로 저장 없이 닫히고, *필수*는 글로, *분석*은 꺼진 스위치로 한 줄씩 보여 주고, `privacyHref` 링크와 같은 무게의 버튼 둘 — 취소(✕처럼 저장 없이 닫기)·선택 저장 — 을 둔다. 바닥글 버튼(또는 `ConsentSettingsButton`, 또는 `consent.openSettings()`)으로 언제든 다시 열어 바꾸거나 철회한다.
 
 비밀을 담은 경로는 가려서 기록한다: `createConsentManager({ …, recordPath: (path) => path.replace(/\/k\/[^/]+/, "/k/:key") })`.
 
@@ -381,10 +381,10 @@ export function ConsentBar() {
     const unbind = consent.bindTriggers(); // 어떤 [data-consent-settings]든 설정을 연다
     return () => { off(); unbind(); };
   }, []);
-  // `ask`인 동안 바를 렌더: m.title, m.body, /privacy 링크, 같은 무게의 버튼 셋 —
+  // `ask`인 동안 바를 렌더: m.title, m.body, /privacy#analytics로 가는 m.learnMore 링크, 같은 무게의 버튼 셋 —
   // consent.acceptAll(), consent.rejectAll(), setSettings(true). Esc → consent.dismiss().
   // 설정 대화상자: m.necessaryTitle은 글로, m.analyticsSwitch는 꺼진 스위치로,
-  // 그리고 consent.save({ analytics }) / acceptAll() / rejectAll().
+  // /privacy 링크, 같은 무게의 버튼 둘: m.cancel(닫기)과 m.save → consent.save({ analytics }).
   return null;
 }
 
@@ -394,7 +394,7 @@ export function ConsentBar() {
 
 쿠키는 호스트 단위이고 `Path=/`이므로, 같은 호스트에서 React를 싣지 않는 정적 HTML 페이지는 모듈 스크립트에서 `consent.start()`만 부르면 된다. 그 호스트의 어느 페이지에서 한 결정이든 그 페이지에도 적용된다.
 
-**코드로 할 수 없는 콘솔 작업.** Tag Manager에서 GA4 태그마다 동의 설정을 *태그 실행에 추가 동의 필요: `analytics_storage`*로 둔다. 철회 뒤 Tag Manager가 메모리에 남아 있어도 거부된 페이지에서 태그가 실행되지 않는다. GA4에서는 데이터 보관 기간을 14개월로 두고(기본 문구가 그렇게 말한다), Google 신호 데이터와 광고 개인 최적화는 끈다(광고 항목이 없다).
+**코드로 할 수 없는 콘솔 작업.** Tag Manager에서 GA4 태그마다 동의 설정을 *태그 실행에 추가 동의 필요: `analytics_storage`*로 둔다. 철회 뒤 Tag Manager가 메모리에 남아 있어도 거부된 페이지에서 태그가 실행되지 않는다. GA4에서는 데이터 보관 기간을 방침의 그 절이 말하는 값으로 두고(가족 사이트는 14개월), Google 신호 데이터와 광고 개인 최적화는 끈다(광고 항목이 없다).
 
 ## 섹션
 

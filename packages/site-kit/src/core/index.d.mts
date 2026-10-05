@@ -1,3 +1,4 @@
+// Mirrors index.mjs statement for statement: each module re-exported whole.
 export * from "./locales.mjs";
 export * from "./catalog.mjs";
 export * from "./seo.mjs";

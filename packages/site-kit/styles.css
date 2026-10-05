@@ -110,22 +110,28 @@
 .site-locale-flag__option[aria-current="true"] { font-weight: 700; }
 @media (max-width: 720px) { .site-locale-flag__list { position: static; inline-size: 100%; max-block-size: none; box-shadow: none; } }
 
-/* Consent (D-034): a bottom bar with three equal choices, and a settings dialog.
-   The three buttons share one tone and one grid track width, so no choice is
-   drawn heavier than another. */
+/* Consent (D-034): a bottom bar with three equal choices, and a settings dialog
+   with two (cancel, save). Each set shares one tone and one grid track width,
+   so no choice is drawn heavier than another. Products bring their own, longer labels, so the
+   layout follows the bar's own width (a container), in three steps: one row
+   (copy, choices, close); copy above a row of three; copy above the three
+   stacked full width. A label wraps only at a space, never inside a word. */
 /* Room under the page while the bar is up (ConsentBanner sets the height); zero specificity, so a product body rule wins. */
 :where(body) { padding-block-end: var(--site-consent-block-size, 0px); }
-.site-consent { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 900; max-block-size: 100dvh; overflow-y: auto; border-block-start: 1px solid var(--dds-color-border-default); background: var(--dds-color-bg-elevated); color: var(--dds-color-text-primary); box-shadow: var(--dds-elevation-3); }
-.site-consent__inner { inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; padding-block: var(--dds-space-16); display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "copy actions close"; align-items: center; gap: var(--dds-space-12) var(--dds-space-24); }
+.site-consent { container: site-consent / inline-size; position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 900; max-block-size: 100dvh; overflow-y: auto; border-block-start: 1px solid var(--dds-color-border-default); background: var(--dds-color-bg-elevated); color: var(--dds-color-text-primary); box-shadow: var(--dds-elevation-3); }
+.site-consent__inner { inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; padding-block: var(--dds-space-16); display: grid; grid-template-columns: minmax(0, 1fr) fit-content(50%) auto; grid-template-areas: "copy actions close"; align-items: center; gap: var(--dds-space-12) var(--dds-space-24); }
 .site-consent__copy { grid-area: copy; display: grid; gap: var(--dds-space-4); min-inline-size: 0; }
 .site-consent__title { margin: 0; font-size: var(--dds-typo-body-1-font-size); line-height: var(--dds-typo-body-1-line-height); font-weight: 700; }
 .site-consent__body { margin: 0; max-inline-size: 72ch; font-size: var(--dds-typo-body-2-font-size); line-height: var(--dds-typo-body-2-line-height); color: var(--dds-color-text-secondary); }
 .site-consent__link { color: var(--dds-color-text-brand); text-decoration: underline; text-underline-offset: 2px; }
 .site-consent__link:focus-visible, .site-consent-trigger:focus-visible { outline: 2px solid var(--dds-color-border-focus); outline-offset: 2px; border-radius: var(--dds-radius-sm); }
 .site-consent__actions { grid-area: actions; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--dds-space-8); }
-.site-consent__action { inline-size: 100%; min-inline-size: 7rem; }
+/* dds.css lets a button label break anywhere (overflow-wrap: anywhere); here a
+   line ends only at a space. Korean keeps whole words, whatever the page root says. */
+.site-consent__action { inline-size: 100%; min-inline-size: 7rem; overflow-wrap: normal; word-break: normal; text-align: center; }
+.site-consent__action:lang(ko) { word-break: keep-all; }
 .site-consent__dismiss { grid-area: close; align-self: start; }
-.dds-dialog.site-consent-dialog { position: relative; max-inline-size: 36rem; max-block-size: calc(100dvh - 2 * var(--dds-space-16)); overflow-y: auto; }
+.dds-dialog.site-consent-dialog { container: site-consent-dialog / inline-size; position: relative; max-inline-size: 36rem; max-block-size: calc(100dvh - 2 * var(--dds-space-16)); overflow-y: auto; }
 .site-consent-dialog .dds-dialog__title { padding-inline-end: var(--dds-space-40); }
 .site-consent-dialog__close { position: absolute; inset-block-start: var(--dds-space-12); inset-inline-end: var(--dds-space-12); }
 .site-consent-categories { display: grid; margin: 0 0 var(--dds-space-12); padding: 0; list-style: none; }
@@ -137,18 +143,24 @@
 .site-consent-category__status, .site-consent-category__switch { justify-self: end; }
 .site-consent-category__status { background: var(--dds-color-bg-subtle); color: var(--dds-color-text-secondary); }
 .site-consent-dialog__policy { margin: 0 0 var(--dds-space-16); font-size: var(--dds-typo-body-2-font-size); }
-.site-consent-dialog .dds-dialog__actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.site-consent-dialog .dds-dialog__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 /* The footer's "쿠키 설정" reads as one of its links. */
 .site-consent-trigger { appearance: none; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: var(--dds-color-text-secondary); cursor: pointer; }
 .site-consent-trigger:hover { color: var(--dds-color-text-primary); text-decoration: underline; }
-@media (max-width: 720px) {
+/* One row only while the copy keeps a readable measure beside the choices
+   (fit-content caps them at half the bar; their labels then wrap at spaces). */
+@container site-consent (max-width: 60rem) {
   .site-consent__inner { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "copy close" "actions actions"; align-items: start; }
   .site-consent__actions { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .site-consent__action { min-inline-size: 0; }
 }
-@media (max-width: 480px) {
-  .site-consent-dialog .dds-dialog__actions { grid-template-columns: minmax(0, 1fr); }
+/* A phone: a third of the bar is too narrow for a long word (Tamil, Telugu,
+   German), so the choices stack — full width, every row as tall as the tallest. */
+@container site-consent (max-width: 36rem) {
+  .site-consent__actions { grid-template-columns: minmax(0, 1fr); grid-auto-rows: 1fr; }
 }
-@media (max-width: 340px) {
-  .site-consent__actions { grid-template-columns: minmax(0, 1fr); }
+/* The same in the settings dialog. A container query measures the content box:
+   the dialog's 36rem less its padding is 536px. */
+@container site-consent-dialog (max-width: 32rem) {
+  .site-consent-dialog .dds-dialog__actions { grid-template-columns: minmax(0, 1fr); grid-auto-rows: 1fr; }
 }

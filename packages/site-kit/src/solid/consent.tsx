@@ -10,9 +10,19 @@ export interface ConsentBannerProps {
   controller: ConsentManager;
   /** CONSENT_MESSAGES_KO / CONSENT_MESSAGES_EN, or the product's own strings. */
   messages: ConsentMessages;
-  /** The privacy policy page, linked from the bar and from the settings dialog. */
+  /**
+   * The bar's "자세히 보기" / "Learn more": the privacy policy's section on analytics and its
+   * overseas transfer, with its anchor (`/ko/privacy#analytics`). The bar itself is short, so that
+   * section is where the visitor reads Google Analytics, the recipient, the transfer, the retention
+   * and how to withdraw. Without a `#fragment` the banner throws RangeError.
+   */
+  learnMoreHref: string;
+  /** The privacy policy page, linked from the settings dialog. */
   privacyHref: string;
 }
+
+/** A link with a non-empty `#fragment`: the policy section, not the top of the page. */
+const POLICY_SECTION_HREF = /^[^#\s]*#[^#\s]+$/;
 
 /**
  * The consent bar and its settings dialog (D-034).
@@ -24,9 +34,15 @@ export interface ConsentBannerProps {
  *
  * The bar's three choices are the same button, the same size: "모두 허용",
  * "거부", "설정". Closing it any other way (✕, Escape) is no decision —
- * nothing loads, and the next visit asks again.
+ * nothing loads, and the next visit asks again. Its text is short; the
+ * disclosure lives in the policy section `learnMoreHref` points at.
  */
 export function ConsentBanner(props: ConsentBannerProps) {
+  // Checked where the product renders it (on the server too), not left to a
+  // link that quietly lands on the top of the policy.
+  if (typeof props.learnMoreHref !== "string" || !POLICY_SECTION_HREF.test(props.learnMoreHref)) {
+    throw new RangeError(`ConsentBanner: learnMoreHref must link to the privacy policy's analytics section with its #anchor (e.g. /privacy#analytics), got ${JSON.stringify(props.learnMoreHref)}`);
+  }
   const [mounted, setMounted] = createSignal(false);
   const [undecided, setUndecided] = createSignal(false);
   const [dismissed, setDismissed] = createSignal(false);
@@ -102,7 +118,7 @@ export function ConsentBanner(props: ConsentBannerProps) {
               <h2 class="site-consent__title">{props.messages.title}</h2>
               <p class="site-consent__body">
                 {props.messages.body}{" "}
-                <a class="site-consent__link" href={props.privacyHref}>{props.messages.privacyLink}</a>
+                <a class="site-consent__link" href={props.learnMoreHref}>{props.messages.learnMore}</a>
               </p>
             </div>
             <div class="site-consent__actions">
@@ -124,8 +140,7 @@ export function ConsentBanner(props: ConsentBannerProps) {
         title={props.messages.settingsTitle}
         description={props.messages.settingsIntro}
         actions={<>
-          <Button class="site-consent__action" tone="secondary" onClick={acceptAll}>{props.messages.acceptAll}</Button>
-          <Button class="site-consent__action" tone="secondary" onClick={rejectAll}>{props.messages.rejectAll}</Button>
+          <Button class="site-consent__action" tone="secondary" onClick={() => setSettingsOpen(false)}>{props.messages.cancel}</Button>
           <Button class="site-consent__action" tone="secondary" onClick={() => decide(() => props.controller.save({ analytics: analytics() }))}>{props.messages.save}</Button>
         </>}
       >
