@@ -132,6 +132,82 @@ test("desktop navigation remains centered when localized controls change width",
   expect(Math.abs(initial - 720)).toBeLessThanOrEqual(0.5);
 });
 
+// A product whose actions are wide and fixed beside a nav with long localized
+// labels — VisionLinq's German header: a 118px brand, four links, and actions of
+// a 44px flag, a 40px theme toggle, a 7rem sign-in and a 9rem CTA (364px). The
+// boxes have fixed widths so the geometry is the same on every runner's fonts.
+// Centring the nav there needs 2 × 364 + 448 + 2 × 16 = 1208px, more than the
+// 1120px the header has at 1440px, so with side columns that could shrink below
+// their content the actions spilled over the last link (D-036).
+const wideHeaderFixture = (dir: "ltr" | "rtl", links = 4) => `<!doctype html><html lang="${dir === "rtl" ? "ar" : "de"}" dir="${dir}"><head><meta charset="utf-8"><style>${tokens}\n${css}\n${site}
+.site-brand { display: inline-block; inline-size: 118px; }
+.site-nav__list a { display: inline-block; inline-size: 100px; }
+.wide-action { display: inline-block; block-size: 40px; }
+</style></head><body>
+<div class="site-shell"><header class="site-header"><div class="site-header__inner">
+<a class="site-brand" href="/">VisionLinq</a>
+<button type="button" class="dds-btn dds-btn--ghost site-menu-button" aria-expanded="false" aria-controls="site-navigation">Menü</button>
+<nav id="site-navigation" class="site-nav" data-open="false" aria-label="Hauptnavigation"><ul class="site-nav__list">${["Produkt", "Bereitstellung", "Dokumente", "API-Dokumentation"].slice(0, links).map((label) => `<li><a href="#${label}">${label}</a></li>`).join("")}</ul></nav>
+<div class="site-header__controls" data-open="false">${[44, 40, 112, 144].map((size) => `<span class="wide-action" style="inline-size: ${size}px"></span>`).join("")}</div>
+</div></header></div></body></html>`;
+
+function headerLayout(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const inner = document.querySelector(".site-header__inner")!;
+    const style = getComputedStyle(inner);
+    const rtl = style.direction === "rtl";
+    const box = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+    const [frame, brand, nav, actions] = [box(".site-header__inner"), box(".site-brand"), box(".site-nav"), box(".site-header__controls")];
+    return {
+      gutter: Number.parseFloat(style.columnGap),
+      offCentre: nav.left + nav.width / 2 - (frame.left + frame.width / 2),
+      // Everything stays inside the header's own box: no side gave way by leaving it.
+      inside: brand.left >= frame.left - 0.5 && brand.right <= frame.right + 0.5 && actions.left >= frame.left - 0.5 && actions.right <= frame.right + 0.5,
+      links: [...document.querySelectorAll<HTMLAnchorElement>(".site-nav__list a")].map((link) => {
+        const rect = link.getBoundingClientRect();
+        const probe = (x: number) => document.elementFromPoint(x, rect.top + rect.height / 2) === link;
+        return {
+          text: link.textContent,
+          row: Math.round(link.closest("li")!.getBoundingClientRect().top),
+          fromBrand: rtl ? brand.left - rect.right : rect.left - brand.right,
+          toActions: rtl ? rect.left - actions.right : actions.left - rect.right,
+          uncovered: probe(rect.left + 1) && probe(rect.right - 1),
+        };
+      }),
+    };
+  });
+}
+
+for (const dir of ["ltr", "rtl"] as const) {
+  // 1440 and 1024 have room for one row once the nav gives up the centre; 800 has
+  // not, so the nav wraps — and still nothing is painted over it.
+  for (const width of [1440, 1024, 800]) {
+    test(`wide actions never cover the nav — the nav gives up the centre first (${dir}, ${width}px)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.setContent(wideHeaderFixture(dir));
+      const layout = await headerLayout(page);
+      expect(layout.inside).toBe(true);
+      for (const link of layout.links) {
+        expect(link.fromBrand, `"${link.text}" from the brand`).toBeGreaterThanOrEqual(layout.gutter - 0.5);
+        expect(link.toActions, `"${link.text}" to the actions`).toBeGreaterThanOrEqual(layout.gutter - 0.5);
+        expect(link.uncovered, `"${link.text}" is painted over`).toBe(true);
+      }
+      if (width >= 1024) {
+        expect(new Set(layout.links.map((link) => link.row)).size, "one row").toBe(1);
+        // Off-centre by exactly the shortfall, toward the brand: the actions sit a
+        // gutter from the nav, no further.
+        expect(Math.min(...layout.links.map((link) => link.toActions))).toBeCloseTo(layout.gutter, 0);
+      }
+    });
+  }
+
+  test(`wide actions beside a short nav still leave it centred (${dir})`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setContent(wideHeaderFixture(dir, 2));
+    expect(Math.abs((await headerLayout(page)).offCentre)).toBeLessThanOrEqual(0.5);
+  });
+}
+
 for (const width of [1280, 375]) {
   test(`Arabic RTL navigation remains usable without overflow at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 812 });
