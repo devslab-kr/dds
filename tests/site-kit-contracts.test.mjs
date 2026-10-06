@@ -230,6 +230,10 @@ test("the landing chrome keeps its touch targets, scroll offset and eyebrow hook
   // The sticky header's height is one property, and sections stop below it.
   assert.match(styles, /\.site-header__inner \{[^}]*min-block-size: var\(--site-header-block-size, 64px\)/);
   assert.match(sections, /scroll-margin-block-start: calc\(var\(--site-header-block-size, 64px\)/);
+  // Any other #fragment target after a kit header stops below it too (D-035) — at zero specificity, so the
+  // sections' own 8px offset wins over it instead of adding to it.
+  assert.match(styles, /:where\(\.site-header ~ \[id\], \.site-header ~ \* \[id\]\) \{ scroll-margin-block-start: calc\(var\(--site-header-block-size, 64px\) \+ 1px \+ var\(--dds-space-16\)\); \}/);
+  assert.doesNotMatch(styles + sections, /scroll-padding/, "a scroll-padding on the root would add to the sections' scroll-margin");
   // The 16px icon-mark size applies only beside a printed name, so a wordmark logo keeps its size.
   assert.match(styles, /\.site-footer__brand:has\(> strong\) :is\(img, svg\) \{[^}]*16px/);
   assert.doesNotMatch(styles, /\.site-footer__brand img, \.site-footer__brand svg/);

@@ -13,6 +13,12 @@
 .site-main { flex: 1; inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; }
 .site-main--bleed { inline-size: 100%; }
 .site-header { position: sticky; inset-block-start: 0; z-index: 100; border-block-end: 1px solid var(--dds-color-border-default); background: var(--dds-color-bg-default); }
+/* Anything a link can land on (#analytics on a privacy page) stops below the sticky header instead of
+   under it: the header row, its 1px border, then 16px of air. Only after a kit header, through the
+   shell's sibling structure (MarketingShell: header, then <main> and the footer), so it reads
+   --site-header-block-size wherever sections do (:root or .site-shell). Zero specificity: sections and
+   the hero keep their own 8px offset (site-sections.css), and any product rule on a target wins. */
+:where(.site-header ~ [id], .site-header ~ * [id]) { scroll-margin-block-start: calc(var(--site-header-block-size, 64px) + 1px + var(--dds-space-16)); }
 .site-header__inner { min-block-size: var(--site-header-block-size, 64px); inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--dds-space-16); }
 .site-brand { justify-self: start; color: var(--dds-color-text-primary); font-weight: 700; text-decoration: none; }
 .site-nav { grid-column: 2; justify-self: center; min-inline-size: 0; }

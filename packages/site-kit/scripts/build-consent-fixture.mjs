@@ -1,6 +1,6 @@
 /**
- * Bundles fixtures/consent-page/main.tsx into one ES module string for the
- * consent browser test (tests/browser/site-kit-consent.spec.ts), with the
+ * Bundles a fixtures/<name>/main.tsx page into one ES module string for the
+ * browser tests (tests/browser/site-kit-consent.spec.ts, site-kit.spec.ts), with the
  * consumer's toolchain (Vite + vite-plugin-solid) against the built dist/ —
  * the same way check-client-bundle.mjs builds its probes. Nothing is written
  * to disk. Run after `pnpm build`.
@@ -11,9 +11,10 @@ import { build } from "vite";
 import solid from "vite-plugin-solid";
 
 const pkg = join(dirname(fileURLToPath(import.meta.url)), "..");
-const fixture = join(pkg, "fixtures", "consent-page");
 
-export async function buildConsentFixture() {
+/** Bundles fixtures/<name>/main.tsx (consent-page, anchor-page). */
+export async function buildFixture(name) {
+  const fixture = join(pkg, "fixtures", name);
   const result = await build({
     configFile: false,
     logLevel: "warn",
@@ -34,6 +35,8 @@ export async function buildConsentFixture() {
   });
   const outputs = (Array.isArray(result) ? result : [result]).flatMap((entry) => entry.output);
   const entry = outputs.find((chunk) => chunk.type === "chunk" && chunk.isEntry);
-  if (!entry) throw new Error("consent fixture: no entry chunk");
+  if (!entry) throw new Error(`${name} fixture: no entry chunk`);
   return entry.code;
 }
+
+export const buildConsentFixture = () => buildFixture("consent-page");

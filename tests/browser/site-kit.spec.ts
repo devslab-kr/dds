@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const tokens = await readFile(new URL("../../packages/dds-tokens/dist/tokens.css", import.meta.url), "utf8");
 const css = await readFile(new URL("../../packages/dds-css/dist/dds.css", import.meta.url), "utf8");
@@ -378,4 +380,67 @@ test("fonts.css makes the token stacks resolve to the self-hosted faces, fetchin
   expect(rendered[0]).toMatch(/^Geist, Pretendard,/);
   expect(rendered[2]).toMatch(/^"Geist Mono",/);
   test.info().annotations.push({ type: "font bytes", description: `${fetched.length} files, ${fetched.reduce((sum, { bytes }) => sum + bytes, 0)} bytes` });
+});
+
+// A link from elsewhere to a heading on a page ("자세히 보기" in the consent
+// bar → /ko/privacy#analytics). The browser scrolls the target to the top of
+// the viewport, and the sticky header covered it: TraceLinq's heading landed
+// at 0 and AskLinq's at 48, both under a 65px header (2026-10-06). The page is
+// the real MarketingShell from dist/ on a real origin, so the header is
+// whatever SiteHeader renders at that width — not a number the test assumes.
+test.describe("a #fragment target clears the sticky header", () => {
+  const ORIGIN = "https://anchor.test";
+  let app = "";
+  test.beforeAll(async () => {
+    const root = fileURLToPath(new URL("../..", import.meta.url));
+    const { buildFixture } = await import(pathToFileURL(join(root, "packages/site-kit/scripts/build-consent-fixture.mjs")).href);
+    app = await buildFixture("anchor-page");
+  });
+
+  async function openAt(page: import("@playwright/test").Page, path: string) {
+    await page.route(/.*/, (route) => route.abort());
+    await page.route(`${ORIGIN}/**`, (route) => new URL(route.request().url()).pathname === "/app.js"
+      ? route.fulfill({ status: 200, contentType: "text/javascript", body: app })
+      : route.fulfill({
+        status: 200,
+        contentType: "text/html; charset=utf-8",
+        body: `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>${tokens}\n${css}\n${site}\nbody { margin: 0; }</style></head><body><script type="module" src="/app.js"></script></body></html>`,
+      }));
+    await page.goto(`${ORIGIN}${path}`);
+    await expect(page.locator(".site-header")).toBeVisible();
+  }
+
+  const geometry = (page: import("@playwright/test").Page, selector: string) => page.evaluate((target) => ({
+    headerBottom: document.querySelector(".site-header")!.getBoundingClientRect().bottom,
+    top: document.querySelector(target)!.getBoundingClientRect().top,
+    scrollY: window.scrollY,
+  }), selector);
+
+  for (const width of [360, 390, 1440]) {
+    test(`at ${width}px, opening the page at #analytics stops the heading below the header`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await openAt(page, "/ko/privacy#analytics");
+      // The module renders after the parser; let the browser finish its fragment scroll.
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+      const at = await geometry(page, "#analytics");
+      test.info().annotations.push({ type: `${width}px #analytics`, description: JSON.stringify(at) });
+      expect(at.top, `heading top ${at.top} vs header bottom ${at.headerBottom}`).toBeGreaterThanOrEqual(at.headerBottom + 8);
+    });
+
+    test(`at ${width}px, an in-page link stops a heading below the header and a section keeps its own offset`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await openAt(page, "/ko/privacy");
+      await page.locator('a[href="#retention"]').click();
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe("#retention");
+      const heading = await geometry(page, "#retention");
+      expect(heading.top, `heading top ${heading.top} vs header bottom ${heading.headerBottom}`).toBeGreaterThanOrEqual(heading.headerBottom + 8);
+      // Sections already stop 8px under the header (scroll-margin); the
+      // heading offset must not stack on top of theirs.
+      await page.evaluate(() => { location.hash = "#faq"; });
+      const section = await geometry(page, "#faq");
+      test.info().annotations.push({ type: `${width}px #retention / #faq`, description: JSON.stringify({ heading, section }) });
+      expect(section.top).toBeGreaterThan(section.headerBottom);
+      expect(section.top).toBeLessThanOrEqual(section.headerBottom + 8);
+    });
+  }
 });
