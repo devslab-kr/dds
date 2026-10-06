@@ -19,7 +19,14 @@
    --site-header-block-size wherever sections do (:root or .site-shell). Zero specificity: sections and
    the hero keep their own 8px offset (site-sections.css), and any product rule on a target wins. */
 :where(.site-header ~ [id], .site-header ~ * [id]) { scroll-margin-block-start: calc(var(--site-header-block-size, 64px) + 1px + var(--dds-space-16)); }
-.site-header__inner { min-block-size: var(--site-header-block-size, 64px); inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--dds-space-16); }
+/* Equal side columns centre the nav — while both sides fit. A side column never
+   goes below its content: when the brand or the actions need more than half the
+   room left beside the nav, that column keeps its width and the nav moves toward
+   the other side by the shortfall, then wraps. With a 0 minimum the actions were
+   painted over the last link instead (VisionLinq in French, German, Portuguese
+   and Spanish at 1440px; D-036). max-content, not auto: a .dds-btn may break
+   anywhere, so its min-content is a single letter. */
+.site-header__inner { min-block-size: var(--site-header-block-size, 64px); inline-size: min(100% - var(--dds-space-32), 1120px); margin-inline: auto; display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: center; gap: var(--dds-space-16); }
 .site-brand { justify-self: start; color: var(--dds-color-text-primary); font-weight: 700; text-decoration: none; }
 .site-nav { grid-column: 2; justify-self: center; min-inline-size: 0; }
 .site-nav__list, .site-footer__links { display: flex; flex-wrap: wrap; gap: var(--dds-space-16); padding: 0; margin: 0; list-style: none; }
