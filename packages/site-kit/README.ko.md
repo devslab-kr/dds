@@ -58,6 +58,7 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 - `SiteLink.emphasis`는 링크를 굵게 그린다(헤더 내비게이션·푸터 링크·패밀리 링크). 법이 눈에 띄게 하라는 개인정보처리방침용.
 - `SiteFooter` `consentSettings: { controller, label }`는 링크 뒤, 저작권 앞에 동의 설정을 다시 여는 "쿠키 설정" 버튼을 둔다(D-034). 다른 링크와 같아 보이고 터치에서는 44px 대상이다. [동의](#동의-옵트인-분석) 참고.
 - 섹션(그리고 히어로)은 같은 페이지 링크로 이동하면 붙어 있는 헤더 아래에 멈춘다: `scroll-margin-block-start` = 헤더 높이 + 8px. 헤더 높이는 `--site-header-block-size`(기본 64px) — `:root`나 `.site-shell`(헤더와 `<main>`의 공통 조상)에 정한다. `.site-header`에 정하면 섹션은 64px 간격 그대로다.
+- 킷 헤더 뒤의 다른 모든 `id` 요소(개인정보처리방침의 `#analytics` 제목, `<main id="main-content">`)도 링크로 이동하면(다른 페이지에서 오든 같은 페이지 안이든) 헤더와 그 테두리 아래 16px에 멈춘다: `scroll-margin-block-start` = 헤더 높이 + 1px + 16px(D-035). 명시도 0이라 제품이 대상에 준 `scroll-margin`이 이기고, 섹션은 8px 그대로다. 닫힌 헤더 기준이다 — 어떤 폭에서 헤더가 두 줄로 접히는 제품은 그 폭에서 `--site-header-block-size`를 올린다.
 - `--site-hero-eyebrow-tracking`(기본 `.18em`)과 `--site-hero-eyebrow-weight`(기본 `normal`)로 히어로 키커를 조정한다. 넓은 모노 자간은 라틴 대문자에 맞고, 키커가 한국어인 제품은 랜딩 뿌리에서 자간을 `0`으로 둔다.
 
 새 props를 쓰든 안 쓰든 모든 제품에 적용되는 기본값: 위의 44px 터치 누르는 면, 좁은 헤더 첫 줄이 `--site-header-block-size`(64px)이고 위아래 패딩 없음 — 전역 `box-sizing: border-box` 리셋이 없는 제품은 휴대폰 헤더가 24px 낮아지고(64px에 위아래 12px 패딩이었음), 메뉴 버튼이 44px인 제품은 4px 낮아진다 — 열린 메뉴의 링크는 간격 없는 44px 줄이고 컨트롤 줄 아래 12px, 섹션·히어로의 스크롤 간격, Esc·링크로 메뉴 닫힘, 푸터 링크의 기준선 정렬과 details가 있는 줄의 첫 줄 정렬.

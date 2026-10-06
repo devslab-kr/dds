@@ -5,6 +5,25 @@
 
 ---
 
+## D-035 — 링크가 닿는 모든 `id`는 붙는 헤더 아래에 멈춘다: 루트 `scroll-padding`이 아니라 대상의 명시도 0 `scroll-margin` (2026-10-06)
+
+**결정.** `styles.css`에 `:where(.site-header ~ [id], .site-header ~ * [id]) { scroll-margin-block-start: calc(var(--site-header-block-size, 64px) + 1px + var(--dds-space-16)) }`. 킷 헤더 뒤(`MarketingShell`의 `<main>`·바닥글과 그 안)의 `id` 요소는 링크로 이동하면 헤더(64px) + 테두리(1px) + 16px, 즉 뷰포트 위에서 81px에 멈춘다. 섹션·히어로의 기존 8px 간격(`site-sections.css`)은 그대로다.
+
+**계기.** 2026-10-06 프로덕션: 동의 바의 "자세히 보기"(`/ko/privacy#analytics`)로 들어가면 제목이 붙는 헤더(65px) 밑에 깔렸다 — TraceLinq 0px, AskLinq 48px. 섹션에만 간격이 있었고 일반 제목에는 없었다. BookLinq는 자기 `app.css`에 `[id]` `scroll-margin`을 따로 두고 있었다 — 같은 고침이 제품마다 하나씩 생기는 모양.
+
+**근거.**
+- **루트 `scroll-padding`을 반려한 이유.** `scroll-padding`은 대상의 `scroll-margin`과 더해진다. `html`에 헤더 높이만큼 주면 이미 `scroll-margin`이 있는 섹션이 72px → 153px로 밀린다. 섹션 쪽을 `:has()`로 0으로 되돌리는 규칙을 더하면 두 규칙이 서로를 알아야 한다. 또 `html`에 둔 값은 `.site-shell`에 정한 `--site-header-block-size`를 읽지 못한다(README가 허락한 위치).
+- **대상의 `scroll-margin`, 형제 결합자, 명시도 0.** `.site-header ~` 는 `MarketingShell` 구조(헤더 다음에 `<main>`·바닥글)만으로 "킷 헤더가 있는 페이지"를 고르므로 `:has()`가 필요 없고, 값을 섹션과 같은 자리(`.site-shell` 아래)에서 읽는다. `:where()`라 섹션 규칙(0,1,0)이 더해지지 않고 이기며, 제품 규칙도 이긴다(D-032와 같은 이유).
+- **16px.** 섹션은 자기 안쪽 여백(64px)이 있어 8px로 충분했지만 제목은 여백이 없어 헤더 선에 붙어 보인다.
+
+**측정(Playwright, 실제 `MarketingShell` dist, 360·390·1440px).** 닫힌 헤더 아래 끝은 세 폭 모두 65px. 고치기 전: `#analytics`·`#retention` 제목 위 끝 −0.2 ~ −0.4px(헤더 밑). 고친 뒤: 80.6 ~ 80.8px. 섹션 `#faq`는 전후 모두 71.5px.
+
+**트레이드오프.** 닫힌 헤더 높이 기준이다. 데스크톱에서 메뉴가 줄바꿈되어 헤더가 두 줄이 되는 제품은 그 폭에서 `--site-header-block-size`를 올려야 한다(킷은 실제 헤더 높이를 재지 않는다 — 하이드레이션 전, 첫 스크롤에 이미 맞아야 하므로 CSS만). `MarketingShell` 없이 헤더와 본문을 형제가 아닌 구조로 짠 제품에는 적용되지 않는다.
+
+**재검토 시점.** 헤더가 여러 줄이 되는 제품이 생길 때, `MarketingShell`의 헤더·`<main>` 구조가 바뀔 때.
+
+---
+
 ## D-034 — 분석은 옵트인: 허용 전에는 구글에 닿는 것이 없고, 동의는 site-kit이 한 벌로 싣는다 (2026-10-05)
 
 **결정.** 소유자 결정(2026-10-05): 가족 사이트의 분석은 옵트인이다. 방문자가 현재 정책 버전에 대해 분석을 허용하기 전에는 Tag Manager 로더·gtag·GA 쿠키 어느 것도 돌지 않고, 동의하지 않아도 서비스는 그대로 동작한다. `@devslab/site-kit`이 그 동의를 한 벌로 싣는다.
