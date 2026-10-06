@@ -1,5 +1,12 @@
 # @devslab/dds-table
 
+## 0.17.1
+
+### Patch Changes
+
+- @devslab/dds-tokens@0.17.1
+- @devslab/dds-css@0.17.1
+
 ## 0.17.0
 
 ### Patch Changes
