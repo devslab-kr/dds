@@ -9,7 +9,7 @@ export default defineConfig({
     emptyOutDir: false,
     sourcemap: true,
     rollupOptions: {
-      external: [/^solid-js(?:\/|$)/, /^@devslab\//],
+      external: [/^solid-js(?:\/|$)/, /^@devslab\//, /^@ark-ui\//, /^@zag-js\//],
       output: { entryFileNames: "server.js" },
     },
   },

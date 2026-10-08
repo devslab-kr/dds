@@ -1,2 +1,18 @@
 @import "@devslab/dds-tokens/tokens.css";
 @import "@devslab/dds-css/dds.css";
+
+/* Keep the former context-only Tabs layout while Ark owns its DOM contract. */
+.dds-tabs-root { display: contents; }
+
+/* Ark positions the wrapper; DDS continues to own the bubble appearance. */
+.dds-tooltip__bubble[data-scope="tooltip"] {
+  position: relative;
+  inset: auto;
+  transform: none;
+  opacity: 1;
+}
+
+.dds-toast[data-scope="toast"] {
+  transform: translate(var(--x), var(--y));
+  opacity: var(--opacity);
+}

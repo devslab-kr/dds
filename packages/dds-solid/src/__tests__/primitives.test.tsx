@@ -3,7 +3,7 @@ import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
-  Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, Select, Switch,
+  Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, RadioGroup, Select, Switch,
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip, useToast,
 } from "../index";
 import { createStatusPill } from "../status-pill";
@@ -13,6 +13,107 @@ let dispose: (() => void) | undefined;
 afterEach(() => { vi.useRealTimers(); dispose?.(); dispose = undefined; document.body.replaceChildren(); });
 
 describe("native control behavior", () => {
+  it("composes the tab root onto the consumer layout without an extra wrapper", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <Tabs defaultValue="a" unstyled asChild={attrs => <div {...attrs} class="consumer-layout" />}>
+      <main><TabList><Tab value="a">A</Tab></TabList><TabPanel value="a">Page</TabPanel></main>
+    </Tabs>, host);
+    expect(host.children).toHaveLength(1);
+    expect(host.firstElementChild?.className).toBe("consumer-layout");
+    expect(host.querySelector(".consumer-layout > main")).not.toBeNull();
+    expect(host.querySelector('[role="tab"]')?.getAttribute("aria-selected")).toBe("true");
+  });
+  it("supports manual tabs, consumer IDs and custom native triggers without changing selection on arrow focus", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const changed = vi.fn();
+    const clicked = vi.fn();
+    let custom!: HTMLButtonElement;
+    dispose = render(() => <Tabs defaultValue="a" activationMode="manual" onValueChange={changed}
+      tabId={value => `consumer-tab-${value}`} panelId={value => `consumer-panel-${value}`}>
+      <TabList unstyled><Tab value="a" unstyled>A</Tab><Tab value="b" unstyled ref={custom} onClick={clicked}
+        asChild={attrs => <button {...attrs} data-custom="true">B</button>} /></TabList>
+      <TabPanel value="a" style="display:flex">First</TabPanel><TabPanel value="b" style={{ display: "grid" }}>Second</TabPanel>
+    </Tabs>, host);
+    const first = host.querySelector<HTMLButtonElement>('#consumer-tab-a')!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    await vi.waitFor(() => expect(document.activeElement).toBe(custom));
+    expect(changed).not.toHaveBeenCalled();
+    expect(first.getAttribute("aria-selected")).toBe("true");
+    expect(host.querySelector<HTMLDivElement>('#consumer-panel-a')!.style.display).toBe("flex");
+    expect(host.querySelector<HTMLDivElement>('#consumer-panel-b')!.style.display).toBe("none");
+    expect(custom.id).toBe("consumer-tab-b");
+    expect(custom.classList.contains("dds-tab")).toBe(false);
+    expect(host.querySelector('[role="tablist"]')?.classList.contains("dds-tabs")).toBe(false);
+    custom.click();
+    await vi.waitFor(() => expect(changed).toHaveBeenCalledWith("b"));
+    expect(custom.getAttribute("aria-controls")).toBe("consumer-panel-b");
+    await vi.waitFor(() => expect(host.querySelector<HTMLDivElement>('#consumer-panel-a')!.style.display).toBe("none"));
+    expect(host.querySelector<HTMLDivElement>('#consumer-panel-b')!.style.display).toBe("grid");
+    expect(clicked).toHaveBeenCalledOnce();
+  });
+  it("preserves checkable consumer ARIA, focus handlers and click bubbling", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const clicked = vi.fn();
+    const focused = vi.fn();
+    dispose = render(() => <div onClick={clicked}><span id="custom-label">Custom</span><Checkbox label="Agree" aria-labelledby="custom-label" aria-invalid="true" onFocusIn={focused} /></div>, host);
+    const input = host.querySelector("input")!;
+    input.focus(); input.click();
+    await Promise.resolve();
+    expect(input.getAttribute("aria-labelledby")).toBe("custom-label");
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+    expect(focused).toHaveBeenCalledOnce();
+    expect(clicked).toHaveBeenCalledOnce();
+  });
+
+  it("keeps multiple toast providers independent with unique region IDs", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    let one!: ReturnType<typeof useToast>;
+    let two!: ReturnType<typeof useToast>;
+    const One = () => { one = useToast(); return null; };
+    const Two = () => { two = useToast(); return null; };
+    dispose = render(() => <><ToastProvider defaultDuration={0}><One /></ToastProvider><ToastProvider defaultDuration={0}><Two /></ToastProvider></>, host);
+    one.show({ message: "First" }); two.show({ message: "Second" });
+    await Promise.resolve();
+    const regions = [...host.querySelectorAll(".dds-toast-region")];
+    expect(new Set(regions.map((region) => region.id)).size).toBe(2);
+    one.clear();
+    await Promise.resolve();
+    expect(regions[0]?.textContent).toBe("");
+    expect(regions[1]?.textContent).toContain("Second");
+    expect(regions[0]?.getAttribute("aria-label")).toBe("");
+  });
+
+  it("preserves the legacy zero-argument tooltip trigger callbacks", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    let focus!: () => void;
+    let blur!: () => void;
+    dispose = render(() => <Tooltip content="Legacy">{(trigger) => {
+      focus = trigger.onFocus; blur = trigger.onBlur;
+      return <button {...trigger}>Legacy trigger</button>;
+    }}</Tooltip>, host);
+    focus();
+    await vi.waitFor(() => expect(host.querySelector('[role="tooltip"]:not([hidden])')?.textContent).toBe("Legacy"));
+    blur();
+    await vi.waitFor(() => expect(host.querySelector('[role="tooltip"]:not([hidden])')).toBeNull());
+  });
+  it("submits grouped radios and resets native checkable values", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <form>
+      <Checkbox name="agree" label="Agree" defaultChecked />
+      <Switch name="enabled" label="Enabled" defaultChecked />
+      <RadioGroup name="choice" label="Choice" defaultValue="a" options={[{ value: "a", label: "A" }, { value: "b", label: "B" }]} />
+    </form>, host);
+    const form = host.querySelector("form")!;
+    const checkboxes = [...form.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
+    checkboxes.forEach((input) => input.click());
+    form.querySelector<HTMLInputElement>('input[value="b"]')!.click();
+    await vi.waitFor(() => expect(new FormData(form).get("choice")).toBe("b"));
+    expect(new FormData(form).has("agree")).toBe(false);
+    form.reset();
+    await vi.waitFor(() => expect(checkboxes.every((input) => input.checked)).toBe(true));
+    await vi.waitFor(() => expect(new FormData(form).get("choice")).toBe("a"));
+  });
   it("renders loading Button with native disabled semantics", () => {
     const host = document.body.appendChild(document.createElement("div"));
     dispose = render(() => <Button loading>Save</Button>, host);
@@ -83,9 +184,11 @@ describe("native control behavior", () => {
       </>;
     }, host);
     const buttons = [...host.querySelectorAll("button")];
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
     buttons[0]?.focus();
     buttons[1]?.focus();
-    await Promise.resolve();
+    await vi.waitFor(() => expect(controlled()).toBe(true));
+    await vi.waitFor(() => expect(host.querySelectorAll('[role="tooltip"]:not([hidden])')).toHaveLength(1));
     const visibleTooltips = host.querySelectorAll('[role="tooltip"]:not([hidden])');
     expect(visibleTooltips).toHaveLength(1);
     expect(visibleTooltips[0]?.textContent).toBe("Controlled help");
@@ -93,20 +196,124 @@ describe("native control behavior", () => {
   });
 
   it("ToastProvider uses a localized dismiss label and clears timer lifecycle", async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date", "performance"] });
     let api!: ReturnType<typeof useToast>;
     const Capture = () => { api = useToast(); return null; };
     const host = document.body.appendChild(document.createElement("div"));
     dispose = render(() => <ToastProvider dismissLabel="Cerrar notificación" defaultDuration={1000}><Capture /></ToastProvider>, host);
     api.show({ message: "Guardado" });
+    await vi.advanceTimersByTimeAsync(0);
     expect(host.querySelector("button")?.getAttribute("aria-label")).toBe("Cerrar notificación");
-    vi.advanceTimersByTime(1000);
-    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(1100);
+    expect(host.querySelector('[role="status"]')).toBeNull();
+  });
+
+  it("pauses toast expiry while the user is reading it", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date", "performance"] });
+    let api!: ReturnType<typeof useToast>;
+    const Capture = () => { api = useToast(); return null; };
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <ToastProvider defaultDuration={1000}><Capture /></ToastProvider>, host);
+    api.show({ message: "Read this" });
+    await vi.advanceTimersByTimeAsync(100);
+    host.querySelector(".dds-toast-region")!.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(host.querySelector('[role="status"]')?.textContent).toContain("Read this");
+    host.querySelector(".dds-toast-region")!.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await vi.advanceTimersByTimeAsync(1000);
     expect(host.querySelector('[role="status"]')).toBeNull();
   });
 });
 
 describe("keyboard lifecycle", () => {
+  it("keeps an authorized external retry region in the dialog focus and accessibility scope", async () => {
+    const rectangles = vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(() => [new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList);
+    const background = document.body.appendChild(document.createElement("div"));
+    background.textContent = "Background";
+    const opener = background.appendChild(document.createElement("button")); opener.textContent = "Open"; opener.focus();
+    const region = document.body.appendChild(document.createElement("div"));
+    const retry = region.appendChild(document.createElement("button")); retry.textContent = "Retry";
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <Dialog defaultOpen title="Retry task" additionalFocusContainers={() => [region]}><button>First</button><button>Last</button></Dialog>, host);
+    const buttons = [...host.querySelectorAll<HTMLButtonElement>("button")];
+    await vi.waitFor(() => expect(document.activeElement).toBe(buttons[0]));
+    await vi.waitFor(() => expect(background.getAttribute("aria-hidden")).toBe("true"));
+    expect(region.closest('[aria-hidden="true"]')).toBeNull();
+    buttons[1]!.focus(); buttons[1]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    expect(document.activeElement).toBe(retry);
+    retry.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    expect(document.activeElement).toBe(buttons[0]);
+    buttons[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
+    expect(document.activeElement).toBe(retry);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+    expect(background.getAttribute("aria-hidden")).toBeNull();
+    rectangles.mockRestore();
+  });
+
+  it("supports a portalled custom dialog frame, focus targets and cancellable Escape", async () => {
+    const rectangles = vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(() => [new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList);
+    const host = document.body.appendChild(document.createElement("div"));
+    const destination = document.body.appendChild(document.createElement("div"));
+    const final = document.body.appendChild(document.createElement("button")); final.textContent = "Fallback";
+    let initial!: HTMLInputElement;
+    const escape = vi.fn((event: KeyboardEvent) => event.preventDefault());
+    dispose = render(() => <Dialog defaultOpen title="Custom task" role="alertdialog" portal portalMount={destination}
+      initialFocus={() => initial} finalFocus={() => final} onEscapeKeyDown={escape}
+      unstyled class="custom-panel" overlayClass="custom-overlay" titleClass="custom-title"
+      frame={(parts) => <><header>{parts.title}</header><main>{parts.children}</main></>}>
+      <button>Earlier button</button><input ref={initial} aria-label="First field" />
+    </Dialog>, host);
+    await vi.waitFor(() => expect(document.activeElement).toBe(initial));
+    expect(host.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(destination.querySelector('.custom-panel[role="alertdialog"]')).not.toBeNull();
+    expect(destination.querySelector("header .custom-title")?.textContent).toBe("Custom task");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await vi.waitFor(() => expect(escape).toHaveBeenCalledTimes(1));
+    expect(destination.querySelector('[role="alertdialog"]')).not.toBeNull();
+    dispose?.(); dispose = undefined;
+    await vi.waitFor(() => expect(document.activeElement).toBe(final));
+    rectangles.mockRestore();
+  });
+  it("inherits RTL tab direction without requiring an Ark provider", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    host.dir = "rtl";
+    dispose = render(() => <Tabs defaultValue="one"><TabList><Tab value="one">One</Tab><Tab value="two">Two</Tab><Tab value="three">Three</Tab></TabList><TabPanel value="one">First</TabPanel><TabPanel value="two">Second</TabPanel><TabPanel value="three">Third</TabPanel></Tabs>, host);
+    const tabs = [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    tabs[0]!.focus();
+    tabs[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
+    await vi.waitFor(() => expect(tabs[1]!.getAttribute("aria-selected")).toBe("true"));
+  });
+  it("does not let ToastProvider steal focus from application keys", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <ToastProvider><input aria-label="Typing" /></ToastProvider>, host);
+    const input = host.querySelector("input")!;
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "a", code: "KeyA", bubbles: true }));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    expect(document.activeElement).toBe(input);
+  });
+  it("skips tabs disabled after mount and preserves inactive panel instances", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    let disable!: () => void;
+    let mounts = 0;
+    const Page = () => { mounts++; return <input value="retained" />; };
+    dispose = render(() => {
+      const [disabled, setDisabled] = createSignal(false);
+      disable = () => setDisabled(true);
+      return <Tabs defaultValue="one"><TabList><Tab value="one">One</Tab><Tab value="two" disabled={disabled()}>Two</Tab><Tab value="three">Three</Tab></TabList><TabPanel value="one"><Page /></TabPanel><TabPanel value="three">Third</TabPanel></Tabs>;
+    }, host);
+    const tabs = [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const input = host.querySelector("input");
+    disable();
+    tabs[0]!.focus();
+    tabs[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    await vi.waitFor(() => expect(document.activeElement).toBe(tabs[2]));
+    await vi.waitFor(() => expect(tabs[2]!.getAttribute("aria-selected")).toBe("true"));
+    tabs[0]!.click();
+    expect(host.querySelector("input")).toBe(input);
+    expect(mounts).toBe(1);
+  });
   it("closes Dialog on Escape and returns focus", async () => {
     const host = document.body.appendChild(document.createElement("div"));
     const opener = document.body.appendChild(document.createElement("button"));
@@ -125,20 +332,22 @@ describe("keyboard lifecycle", () => {
   });
 
   it("Dialog completes the focus trap cycle and returns focus during lifecycle cleanup", async () => {
+    // jsdom has no layout. Supply visible rectangles for the trap's tabbable scan.
+    const rectangles = vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(() => [new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList);
     const host = document.body.appendChild(document.createElement("div"));
     const opener = document.body.appendChild(document.createElement("button"));
     opener.focus();
     dispose = render(() => <Dialog defaultOpen title="Cycle"><button>First</button><button>Last</button></Dialog>, host);
-    await Promise.resolve();
     const buttons = [...host.querySelectorAll<HTMLButtonElement>("button")];
+    await vi.waitFor(() => expect(document.activeElement).toBe(buttons[0]));
     buttons[1]?.focus();
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    buttons[1]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
     expect(document.activeElement).toBe(buttons[0]);
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
+    buttons[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
     expect(document.activeElement).toBe(buttons[1]);
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-    await Promise.resolve();
-    expect(document.activeElement).toBe(opener);
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+    rectangles.mockRestore();
   });
 
   it("moves Tabs with arrow keys and exposes linked panels", async () => {
@@ -147,14 +356,28 @@ describe("keyboard lifecycle", () => {
     const tabs = [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     tabs[0]!.focus();
     tabs[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
-    await Promise.resolve();
-    expect(tabs[1]!.getAttribute("aria-selected")).toBe("true");
-    expect(host.querySelector<HTMLElement>('[role="tabpanel"]:not([hidden])')?.textContent).toBe("Second");
+    await vi.waitFor(() => expect(tabs[1]!.getAttribute("aria-selected")).toBe("true"));
+    await vi.waitFor(() => expect(host.querySelector<HTMLElement>('[role="tabpanel"]:not([hidden])')?.textContent).toBe("Second"));
     tabs[1]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
-    expect(tabs[0]).toBe(document.activeElement);
+    await vi.waitFor(() => expect(tabs[0]).toBe(document.activeElement));
     tabs[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
-    expect(tabs[1]).toBe(document.activeElement);
+    await vi.waitFor(() => expect(tabs[1]).toBe(document.activeElement));
   });
+});
+
+it("keeps native section dialog presence and ordinary Ark dismissal", async () => {
+  const host = document.body.appendChild(document.createElement("div"));
+  const [open, setOpen] = createSignal(false);
+  dispose = render(() => <>
+    <button onClick={() => setOpen(true)}>Open section</button>
+    <Dialog contentAs="section" open={open()} onOpenChange={setOpen} title="Native task"><button>Action</button></Dialog>
+  </>, host);
+  host.querySelector<HTMLButtonElement>("button")!.click();
+  await vi.waitFor(() => expect(host.querySelector('section[role="dialog"]')?.getAttribute("aria-labelledby")).toBeTruthy());
+  await new Promise(resolve => requestAnimationFrame(() => resolve(undefined)));
+  host.querySelector('section[role="dialog"]')!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+  await vi.waitFor(() => expect(host.querySelector('[role="dialog"]')).toBeNull());
+  expect(open()).toBe(false);
 });
 
 describe("createStatusPill", () => {

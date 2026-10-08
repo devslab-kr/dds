@@ -1,35 +1,8 @@
-import {
-  createContext,
-  createUniqueId,
-  onCleanup,
-  onMount,
-  splitProps,
-  useContext,
-  type Accessor,
-  type JSX,
-  type ParentProps,
-} from "solid-js";
-
-import { createControllableSignal } from "./controllable";
+import { Tabs as ArkTabs, useTabsContext } from "@ark-ui/solid/tabs";
+import { LocaleProvider } from "@ark-ui/solid/locale";
+import { createUniqueId, mergeProps, splitProps, type JSX, type ParentProps } from "solid-js";
 import { classes } from "./utils";
-
-interface RegisteredTab { value: string; element: HTMLButtonElement; disabled: boolean }
-interface TabsContextValue {
-  value: Accessor<string>;
-  setValue: (value: string) => void;
-  orientation: "horizontal" | "vertical";
-  register: (tab: RegisteredTab) => () => void;
-  tabs: () => RegisteredTab[];
-  tabId: (value: string) => string;
-  panelId: (value: string) => string;
-}
-
-const TabsContext = createContext<TabsContextValue>();
-const useTabs = () => {
-  const context = useContext(TabsContext);
-  if (!context) throw new Error("Tab components must be rendered inside <Tabs>");
-  return context;
-};
+import { useDirection, type Direction } from "./direction";
 
 export interface TabsProps {
   value?: string;
@@ -38,110 +11,63 @@ export interface TabsProps {
   orientation?: "horizontal" | "vertical";
   children: JSX.Element;
   id?: string;
+  dir?: Direction;
+  activationMode?: "automatic" | "manual";
+  tabId?: (value: string) => string;
+  panelId?: (value: string) => string;
+  unstyled?: boolean;
+  asChild?: (props: JSX.HTMLAttributes<HTMLDivElement>) => JSX.Element;
 }
 
 export function Tabs(props: TabsProps) {
   const generated = createUniqueId();
   const id = () => props.id ?? `dds-tabs-${generated}`;
-  const [value, setValue] = createControllableSignal({
-    value: () => props.value,
-    defaultValue: props.defaultValue,
-    onChange: props.onValueChange,
-  });
-  const registered: RegisteredTab[] = [];
-  const context: TabsContextValue = {
-    value,
-    setValue,
-    orientation: props.orientation ?? "horizontal",
-    register(tab) {
-      registered.push(tab);
-      return () => {
-        const index = registered.indexOf(tab);
-        if (index >= 0) registered.splice(index, 1);
-      };
-    },
-    tabs: () => registered,
-    tabId: (tabValue) => `${id()}-tab-${tabValue}`,
-    panelId: (tabValue) => `${id()}-panel-${tabValue}`,
-  };
-  return <TabsContext.Provider value={context}>{props.children}</TabsContext.Provider>;
+  let root: HTMLDivElement | undefined;
+  const direction = useDirection(() => root, () => props.dir);
+  const child = props.asChild ? (merge: unknown) => props.asChild!(mergeProps(
+    (merge as (props: JSX.HTMLAttributes<HTMLDivElement>) => JSX.HTMLAttributes<HTMLDivElement>)({}),
+    { ref: (element: HTMLDivElement) => { root = element; } },
+  )) : undefined;
+  return <LocaleProvider locale={direction() === "rtl" ? "ar" : "en"}><ArkTabs.Root ref={root}
+    id={id()} value={props.value} defaultValue={props.defaultValue}
+    orientation={props.orientation ?? "horizontal"} activationMode={props.activationMode ?? "automatic"}
+    onValueChange={(details) => props.onValueChange?.(details.value)}
+    lazyMount={false} unmountOnExit={false} class={props.unstyled ? undefined : "dds-tabs-root"}
+    {...(child ? { asChild: child } : {})}
+    ids={{ trigger: (value) => props.tabId?.(value) ?? `${id()}-tab-${value}`, content: (value) => props.panelId?.(value) ?? `${id()}-panel-${value}` }}
+  >{props.children}</ArkTabs.Root></LocaleProvider>;
 }
 
-export function TabList(props: ParentProps<JSX.HTMLAttributes<HTMLDivElement>>) {
-  const context = useTabs();
-  const [local, rest] = splitProps(props, ["class", "children", "onKeyDown"]);
-  const onKeyDown: JSX.EventHandler<HTMLDivElement, KeyboardEvent> = (event) => {
-    if (typeof local.onKeyDown === "function") local.onKeyDown(event);
-    if (event.defaultPrevented) return;
-    const tabs = context.tabs().filter((tab) => !tab.disabled);
-    if (!tabs.length) return;
-    const current = tabs.findIndex((tab) => tab.element === document.activeElement);
-    let next = current;
-    const rtl = document.documentElement.dir === "rtl";
-    if (event.key === "Home") next = 0;
-    else if (event.key === "End") next = tabs.length - 1;
-    else if (event.key === "ArrowRight" && context.orientation === "horizontal") next = (current + (rtl ? -1 : 1) + tabs.length) % tabs.length;
-    else if (event.key === "ArrowLeft" && context.orientation === "horizontal") next = (current + (rtl ? 1 : -1) + tabs.length) % tabs.length;
-    else if (event.key === "ArrowDown" && context.orientation === "vertical") next = (current + 1) % tabs.length;
-    else if (event.key === "ArrowUp" && context.orientation === "vertical") next = (current - 1 + tabs.length) % tabs.length;
-    else return;
-    event.preventDefault();
-    const target = tabs[next];
-    if (target) {
-      target.element.focus();
-      context.setValue(target.value);
-    }
-  };
-  return <div {...rest} class={classes("dds-tabs", local.class)} role="tablist" aria-orientation={context.orientation} onKeyDown={onKeyDown}>{local.children}</div>;
+export function TabList(props: ParentProps<JSX.HTMLAttributes<HTMLDivElement> & { unstyled?: boolean }>) {
+  const [local, rest] = splitProps(props, ["class", "children", "unstyled"]);
+  return <ArkTabs.List {...rest} class={classes(!local.unstyled && "dds-tabs", local.class)}>{local.children}</ArkTabs.List>;
 }
 
 export interface TabProps extends Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, "value" | "class"> {
   value: string;
   class?: string;
+  unstyled?: boolean;
+  asChild?: (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => JSX.Element;
 }
 
 export function Tab(props: ParentProps<TabProps>) {
-  const context = useTabs();
-  const [local, rest] = splitProps(props, ["value", "class", "children", "disabled", "onClick"]);
-  let element!: HTMLButtonElement;
-  onMount(() => {
-    const unregister = context.register({ value: local.value, element, disabled: Boolean(local.disabled) });
-    onCleanup(unregister);
-  });
-  return (
-    <button
-      {...rest}
-      ref={element}
-      id={context.tabId(local.value)}
-      type="button"
-      role="tab"
-      class={classes("dds-tab", local.class)}
-      aria-selected={context.value() === local.value}
-      aria-controls={context.panelId(local.value)}
-      tabindex={context.value() === local.value ? 0 : -1}
-      disabled={local.disabled}
-      onClick={(event) => {
-        if (typeof local.onClick === "function") local.onClick(event);
-        if (!event.defaultPrevented) context.setValue(local.value);
-      }}
-    >{local.children}</button>
-  );
+  const [local, rest] = splitProps(props, ["class", "children", "value", "unstyled", "asChild"]);
+  // Ark's factory supplies a merger; DDS exposes native button attributes.
+  const child = local.asChild ? (merge: unknown) => local.asChild!(mergeProps(
+    (merge as (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => JSX.ButtonHTMLAttributes<HTMLButtonElement>)({}),
+    { ref: props.ref },
+  )) : undefined;
+  return <ArkTabs.Trigger {...rest} value={local.value} class={classes(!local.unstyled && "dds-tab", local.class)} {...(child ? { asChild: child } : {})}>{local.children}</ArkTabs.Trigger>;
 }
 
 export interface TabPanelProps extends JSX.HTMLAttributes<HTMLDivElement> { value: string }
 
 export function TabPanel(props: ParentProps<TabPanelProps>) {
-  const context = useTabs();
-  const [local, rest] = splitProps(props, ["value", "class", "children"]);
-  return (
-    <div
-      {...rest}
-      id={context.panelId(local.value)}
-      role="tabpanel"
-      class={local.class}
-      aria-labelledby={context.tabId(local.value)}
-      hidden={context.value() !== local.value}
-      tabindex="0"
-    >{local.children}</div>
-  );
+  const [local, rest] = splitProps(props, ["value", "children", "style"]);
+  const tabs = useTabsContext();
+  const inactive = () => tabs().value !== local.value;
+  const style = () => !inactive() ? local.style : typeof local.style === "string"
+    ? `${local.style.replace(/;+\s*$/, "")};display:none;`
+    : { ...local.style, display: "none" };
+  return <ArkTabs.Content {...rest} value={local.value} style={style()} hidden={inactive()} inert={inactive()}>{local.children}</ArkTabs.Content>;
 }

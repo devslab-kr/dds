@@ -1,7 +1,7 @@
 // @vitest-environment-options {"url": "https://example.test/ko/pricing?utm=1"}
 import axe from "axe-core";
 import { render } from "solid-js/web";
-import { afterEach, beforeEach, expect, it } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { CONSENT_MESSAGES_KO, createConsentManager, type ConsentManager, type ConsentRecord } from "../../core/consent.mjs";
 import { ConsentBanner, SiteFooter } from "../index";
@@ -123,9 +123,12 @@ it("the settings show necessary as information and analytics as an unticked swit
   expect(footer.map((element) => element.textContent)).toEqual(["취소", "선택 저장"]);
   expect(new Set(footer.map((element) => element.className)).size).toBe(1);
   toggle.click();
+  // Separate browser click events have a microtask checkpoint; Zag applies
+  // the native checked-state event there before the user presses Save.
+  await flush();
   button(panel, "선택 저장").click();
   await flush();
-  expect(dialog()).toBeNull();
+  await vi.waitFor(() => expect(dialog()).toBeNull());
   expect(bar()).toBeNull();
   expect(records.map((record) => record.action)).toEqual(["grant"]);
   expect(googleScripts()).toHaveLength(1);
@@ -145,6 +148,7 @@ it("the footer's 쿠키 설정 re-opens the settings to withdraw", async () => {
   const toggle = dialog()!.querySelector<HTMLInputElement>('input[role="switch"]')!;
   expect(toggle.checked).toBe(true);
   toggle.click();
+  await flush();
   button(dialog()!, "선택 저장").click();
   await flush();
   expect(records.map((record) => record.action)).toEqual(["withdraw"]);
@@ -157,9 +161,11 @@ it("Escape closes the settings without saving", async () => {
   mount();
   button(bar()!, "설정").click();
   await flush();
+  // Keyboard input begins after the modal's deferred initial focus is ready.
+  await vi.waitFor(() => expect(dialog()?.contains(document.activeElement)).toBe(true));
   document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   await flush();
-  expect(dialog()).toBeNull();
+  await vi.waitFor(() => expect(dialog()).toBeNull());
   expect(bar()).not.toBeNull();
   expect(records).toEqual([]);
 });
@@ -169,9 +175,10 @@ it("취소 closes the settings without saving, like Escape", async () => {
   button(bar()!, "설정").click();
   await flush();
   dialog()!.querySelector<HTMLInputElement>('input[role="switch"]')!.click();
+  await flush();
   button(dialog()!, "취소").click();
   await flush();
-  expect(dialog()).toBeNull();
+  await vi.waitFor(() => expect(dialog()).toBeNull());
   expect(bar()).not.toBeNull();
   expect(records).toEqual([]);
   expect(document.cookie).not.toContain("site_consent");

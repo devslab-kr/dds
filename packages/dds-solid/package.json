@@ -43,19 +43,22 @@
     "test:a11y": "vitest run --config vitest.config.ts src/__tests__/a11y.test.tsx"
   },
   "dependencies": {
+    "@ark-ui/solid": "5.39.3",
     "@devslab/dds-css": "workspace:0.17.1",
     "@devslab/dds-icons": "workspace:0.17.1",
-    "@devslab/dds-tokens": "workspace:0.17.1"
+    "@devslab/dds-tokens": "workspace:0.17.1",
+    "@zag-js/aria-hidden": "1.45.0",
+    "@zag-js/focus-trap": "1.45.0"
   },
   "peerDependencies": {
     "solid-js": "1.9.15"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "6.9.1",
     "@types/node": "26.3.0",
     "axe-core": "4.13.0",
     "jsdom": "30.0.1",
     "solid-js": "1.9.15",
-    "@testing-library/jest-dom": "6.9.1",
     "typescript": "7.0.2",
     "vite": "8.2.1",
     "vite-plugin-solid": "2.11.14",
