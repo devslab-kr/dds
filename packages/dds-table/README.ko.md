@@ -1,5 +1,15 @@
 # @devslab/dds-table
 
+## 선택적으로 사용하는 업무 화면 기능
+
+- `resizing={{ label: "{column} 너비 조절", minWidth: 80, maxWidth: 1200, onChange }}`로 컬럼 드래그와 키보드 너비 조절을 켭니다. `Column.resizable = false`인 컬럼은 제외합니다.
+- 방향키는 12px, Shift와 함께 누르면 50px씩 조절합니다. Home/End는 최소·최대 너비입니다. 더블클릭 또는 Escape는 **전체 컬럼**의 조절값을 지우고 원래 선언한 너비로 복원합니다.
+- `onChange(widths, reason)`은 조절 완료(`resize`) 또는 초기화(`reset`) 때 호출합니다. 분석 이벤트와 너비 저장은 사용하는 앱에서 처리합니다.
+- `sort={{ value, onChange }}`는 서버 정렬을 위한 제어 방식입니다. 오름차순 → 내림차순 → `null` 순서로 요청하며, 서버에서 받은 현재 페이지를 브라우저에서 재정렬하지 않습니다. 서버 조회와 결과 전달은 앱이 맡습니다. 기존 `sort="client"`와 `{ statedOrder }` 방식은 유지합니다.
+- `selection={{ rowId, selectedId, onSelect }}`로 행 선택을 켭니다. 클릭·Enter·Space를 지원하고, 행 안의 버튼·링크·입력 요소와 충돌하지 않습니다. 상세 화면 열기 등 업무 동작은 앱의 콜백에서 연결합니다.
+- `SortValue`, `SortMode`, `ColumnResizing`, `RowSelection` 타입을 제공합니다. 기존 사용처는 새 옵션 없이 그대로 동작합니다.
+
+
 TanStack Table 기반 DDS 데이터 테이블 패키지(정확히 `9.2.4` 버전에 고정 —
 고정 이유는 `docs/decisions.md` D-021 참고). `DataTable` 컴포넌트 하나와
 이를 기술하는 `Column<T>`·`DataTableLabels` 타입만 제공한다. 테이블 자체는

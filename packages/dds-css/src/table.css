@@ -50,6 +50,30 @@
   table-layout: fixed;
 }
 
+/* The header owns its resize handle; the handle stays separate from sorting. */
+.dds-table thead th { position: relative; }
+.dds-table__resize {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block: 0;
+  inline-size: 12px;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+}
+.dds-table__resize::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 5px;
+  inset-block: 8px;
+  border-inline-start: 2px solid var(--dds-color-border-default);
+}
+.dds-table__resize:focus-visible { outline: 2px solid var(--dds-color-border-default); outline-offset: -2px; }
+/* Row selection is opt-in and must remain perceptible without color alone. */
+.dds-table tbody tr[aria-selected] { cursor: pointer; }
+.dds-table tbody tr[aria-selected="true"] { outline: 2px solid var(--dds-color-border-default); outline-offset: -2px; }
+.dds-table tbody tr[tabindex]:focus-visible { outline: 2px solid var(--dds-color-border-default); outline-offset: -2px; }
+
 .dds-table [data-numeric] {
   text-align: end;
   font-variant-numeric: tabular-nums;
