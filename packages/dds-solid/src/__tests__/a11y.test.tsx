@@ -3,7 +3,7 @@ import { render } from "solid-js/web";
 import { afterEach, expect, it } from "vitest";
 
 import {
-  Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, Select, Switch,
+  Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, RadioGroup, Select, Switch,
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip, useToast,
 } from "../index";
 
@@ -20,6 +20,7 @@ it("common form primitives have no detectable axe violations", async () => {
     <Field label="Country" helpText="Choose one">{(control) => <Select {...control}><option>Korea</option></Select>}</Field>
     <Checkbox label="Accept terms" />
     <Radio label="Email" name="contact" defaultChecked />
+    <RadioGroup label="Choice" name="choice" options={[{ value: "a", label: "Choice A" }, { value: "b", label: "Choice B" }]} defaultValue="a" />
     <Switch label="Notifications" />
     <Dialog defaultOpen title="Confirm" description="Review the action"><button>Continue</button></Dialog>
     <Tabs defaultValue="one"><TabList><Tab value="one">One</Tab><Tab value="two">Two</Tab></TabList><TabPanel value="one">First</TabPanel><TabPanel value="two">Second</TabPanel></Tabs>

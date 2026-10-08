@@ -38,7 +38,7 @@ test("native controls preserve semantic elements and accessible names", async ()
   assert.match(controls, /<button/);
   assert.match(controls, /type="checkbox"/);
   assert.match(controls, /type="radio"/);
-  assert.match(controls, /role="switch"/);
+  assert.match(controls, /useSwitch/);
   assert.match(controls, /<select/);
   assert.match(controls, /aria-invalid/);
   assert.match(controls, /aria-describedby/);
@@ -56,22 +56,22 @@ test("stateful primitives expose controlled and uncontrolled contracts", async (
     assert.match(source, /defaultOpen|defaultValue/);
     assert.match(source, /onOpenChange|onValueChange/);
   }
-  assert.match(toast, /setTimeout/);
-  assert.match(toast, /clearTimeout/);
+  assert.match(toast, /createToaster/);
+  assert.match(toast, /onCleanup\(api.clear\)/);
   assert.match(toast, /role=.*alert/);
 });
 
-test("Dialog and Tabs implement the required keyboard and focus lifecycle", async () => {
+test("Dialog and Tabs delegate keyboard and focus lifecycle to Ark through DDS contracts", async () => {
   const dialog = await read("packages/dds-solid/src/dialog.tsx");
   const tabs = await read("packages/dds-solid/src/tabs.tsx");
   assert.match(dialog, /Escape/);
-  assert.match(dialog, /Tab/);
-  assert.match(dialog, /focusable/);
-  assert.match(dialog, /previouslyFocused/);
-  assert.match(dialog, /aria-modal="true"/);
-  for (const key of ["ArrowLeft", "ArrowRight", "Home", "End"]) assert.match(tabs, new RegExp(key));
-  assert.match(tabs, /aria-controls/);
-  assert.match(tabs, /aria-labelledby/);
+  assert.match(dialog, /@ark-ui\/solid\/dialog/);
+  assert.match(dialog, /modal trapFocus preventScroll/);
+  assert.match(dialog, /details.open/);
+  assert.match(tabs, /@ark-ui\/solid\/tabs/);
+  assert.match(tabs, /activationMode="automatic"/);
+  assert.match(tabs, /lazyMount=\{false\} unmountOnExit=\{false\}/);
+  assert.match(tabs, /details.value/);
 });
 
 test("Icon and style adapters consume DDS framework-neutral contracts", async () => {

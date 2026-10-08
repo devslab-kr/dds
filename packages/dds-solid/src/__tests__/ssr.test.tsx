@@ -2,7 +2,7 @@ import { renderToString } from "solid-js/web";
 import { expect, it } from "vitest";
 
 import {
-  Button, Checkbox, ConsoleShell, Dialog, Field, Icon, IconButton, Radio, Select, Switch,
+  Button, Checkbox, ConsoleShell, Dialog, Field, Icon, IconButton, Radio, RadioGroup, Select, Switch,
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip,
 } from "../index";
 
@@ -12,6 +12,7 @@ const AllPrimitives = () => <div>
   <Field label="Country">{(control) => <Select {...control}><option>Korea</option></Select>}</Field>
   <Checkbox label="Check" defaultChecked />
   <Radio label="Radio" name="ssr-radio" />
+  <RadioGroup label="Choice" name="ssr-choice" defaultValue="a" options={[{ value: "a", label: "A" }]} />
   <Switch label="Switch" />
   <Dialog defaultOpen title="Dialog"><button>Action</button></Dialog>
   <Tabs defaultValue="one"><TabList><Tab value="one">One</Tab></TabList><TabPanel value="one">Panel</TabPanel></Tabs>

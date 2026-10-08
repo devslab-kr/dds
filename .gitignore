@@ -3,6 +3,7 @@ packages/*/dist/
 storybook-static/
 test-results/
 playwright-report/
+.playwright-cli/
 .wrangler/
 dist-worker/
 *storybook.log
