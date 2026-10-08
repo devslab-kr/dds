@@ -10,6 +10,9 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // The DDS source alias reaches Ark's browser JSX; keep it in Vite's
+    // Solid transformation pipeline instead of handing .jsx to Node.
+    server: { deps: { inline: [/\/@ark-ui\/solid\//] } },
     include: [
       "src/solid/__tests__/a11y.test.tsx",
       "src/solid/__tests__/locale-menu.test.tsx",

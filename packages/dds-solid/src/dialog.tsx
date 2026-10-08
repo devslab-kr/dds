@@ -1,8 +1,9 @@
 import { Dialog as ArkDialog, useDialog } from "@ark-ui/solid/dialog";
+import { usePresenceContext } from "@ark-ui/solid/presence";
 import { FocusTrap } from "@zag-js/focus-trap";
 import { ariaHidden } from "@zag-js/aria-hidden";
 import { createEffect, createMemo, createSignal, createUniqueId, onCleanup, Show, type JSX } from "solid-js";
-import { isServer, Portal } from "solid-js/web";
+import { Dynamic, isServer, Portal } from "solid-js/web";
 import { classes } from "./utils";
 
 export const focusable = [
@@ -23,6 +24,7 @@ export interface DialogProps {
   class?: string;
   id?: string;
   role?: "dialog" | "alertdialog";
+  contentAs?: "div" | "section";
   portal?: boolean;
   portalMount?: HTMLElement;
   unstyled?: boolean;
@@ -30,7 +32,7 @@ export interface DialogProps {
   titleClass?: string;
   descriptionClass?: string;
   actionsClass?: string;
-  contentProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "children" | "class" | "id" | "role" | "ref">;
+  contentProps?: Omit<JSX.HTMLAttributes<HTMLElement>, "children" | "class" | "id" | "role" | "ref">;
   initialFocus?: () => HTMLElement | null | undefined;
   finalFocus?: () => HTMLElement | null | undefined;
   restoreFocus?: boolean;
@@ -51,7 +53,7 @@ export interface DialogFrameParts {
 export function Dialog(props: DialogProps) {
   const generated = createUniqueId();
   const id = () => props.id ?? `dds-dialog-${generated}`;
-  const [panel, setPanel] = createSignal<HTMLDivElement>();
+  const [panel, setPanel] = createSignal<HTMLElement>();
   const api = useDialog(() => ({
     id: id(), open: props.open, defaultOpen: props.defaultOpen,
     onOpenChange: (details) => props.onOpenChange?.(details.open),
@@ -104,8 +106,20 @@ export function Dialog(props: DialogProps) {
     });
   });
   const cls = (base: string, extra?: string) => classes(props.unstyled ? undefined : base, extra);
-  const Content = () => <ArkDialog.Positioner class={cls("dds-dialog-overlay", props.overlayClass)}>
+  const Content = () => {
+    const presence = usePresenceContext();
+    const nativeContent = (merge: unknown) => <Dynamic component={props.contentAs ?? "div"}
+      {...(merge as (props: JSX.HTMLAttributes<HTMLElement>) => JSX.HTMLAttributes<HTMLElement>)({})}
+      ref={(element: HTMLElement) => {
+        // Ark's asChild merger omits refs. Register both its presence node and
+        // DDS's shared focus container on the actual native content element.
+        presence().ref(element);
+        setPanel(element);
+      }}
+    />;
+    return <ArkDialog.Positioner class={cls("dds-dialog-overlay", props.overlayClass)}>
     <ArkDialog.Content {...props.contentProps} ref={setPanel} class={cls("dds-dialog", props.class)}
+      {...(props.contentAs ? { asChild: nativeContent } : {})}
       role={props.role ?? "dialog"} aria-modal="true" aria-describedby={props.description ? `${id()}-description` : undefined}>
       {(() => {
         const parts: DialogFrameParts = {
@@ -118,6 +132,7 @@ export function Dialog(props: DialogProps) {
       })()}
     </ArkDialog.Content>
   </ArkDialog.Positioner>;
+  };
   return <ArkDialog.RootProvider value={api} lazyMount unmountOnExit>
     <Show when={props.portal} fallback={<Content />}><Portal {...(props.portalMount ? { mount: props.portalMount } : {})}><Content /></Portal></Show>
   </ArkDialog.RootProvider>;

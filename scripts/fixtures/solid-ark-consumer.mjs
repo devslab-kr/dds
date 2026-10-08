@@ -3,6 +3,13 @@ import { Button, Checkbox, Dialog, Field, RadioGroup, Select, Switch, Tabs, TabL
 
 export const events = [];
 
+export function NativeSectionApp() {
+  return createComponent(Dialog, {
+    defaultOpen: true, contentAs: "section", id: "native-section", title: "Native section",
+    get children() { return createComponent(Button, { children: "Section action" }); },
+  });
+}
+
 export function App() {
   const [open, setOpen] = createSignal(false);
   return createComponent(ToastProvider, {

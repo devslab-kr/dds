@@ -34,6 +34,13 @@ it("does not evaluate browser-only focus targets or additional dialog containers
   expect(html).toContain("Scoped SSR");
 });
 
+it("server-renders a requested native section dialog with DDS labels", () => {
+  const native = { contentAs: "section" as const };
+  const html = renderToString(() => <Dialog {...native} defaultOpen id="native-section" title="Section dialog"><button>Action</button></Dialog>);
+  expect(html).toMatch(/<section[^>]*role="dialog"[^>]*id="native-section"/);
+  expect(html).toContain('aria-labelledby="native-section-title"');
+});
+
 it("server-renders ConsoleShell without the client-only hydration claim", () => {
   const nav = [{ label: "Build", items: [{ id: "projects", href: "/dashboard/projects", label: "Projects" }] }];
   const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", nav: "Dashboard navigation", badge: "{count} pending" };

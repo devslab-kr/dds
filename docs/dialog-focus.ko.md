@@ -4,6 +4,7 @@
 
 - `portal`은 `document.body` 아래에 렌더링하며 `portalMount`로 다른 마운트된 요소를 지정할 수 있다. 기본값은 기존 인라인 렌더링이다.
 - `role`은 `dialog` 또는 `alertdialog`를 받는다.
+- `contentAs`로 네이티브 `div`(기본값) 또는 `section`을 선택한다. 생성된 모달 속성, presence 수명과 포커스 등록은 그대로 유지한다.
 - `unstyled`는 DDS 컴포넌트 클래스를 제거한다. `class`, `overlayClass`, `titleClass`, `descriptionClass`, `actionsClass`로 앱 클래스를 지정한다.
 - `frame(parts)`는 제공된 `title`, `description`, `children`, `actions` 노드를 배치한다. 제목·설명 노드를 각각 한 번 렌더링하면 자동 접근성 연결을 유지한다. DDS가 제공한 노드이므로 앱에서 Ark 컴포넌트를 import할 필요가 없다.
 - `contentProps`로 `aria-busy`, `onKeyDown` 같은 네이티브 콘텐츠 속성·이벤트를 전달한다.
@@ -34,4 +35,4 @@
 
 브라우저 전용 포커스·컨테이너 getter는 SSR에서 실행하지 않는다. Portal 콘텐츠는 클라이언트에서 마운트된다. 일반 모달은 Ark의 포커스·접근성 격리를 유지하고, 외부 영역을 허용한 모달은 Zag의 다중 컨테이너 트랩과 공유 격리 처리를 사용한다.
 
-DOM 테스트는 Tab/Shift+Tab 순환, 배경 격리, 포커스 복귀, 사용자 프레임·Portal, Escape 취소를 검증한다. SSR 테스트는 실행 시 예외를 내는 브라우저 전용 getter로 서버 실행 여부를 확인한다. 실제 브라우저 회귀 검증은 `node packages/dds-solid/src/__tests__/dialog-browser.test.mjs`로 실행한다. 모달이 열린 뒤 재시도 버튼을 추가하고, 실제 포커스 이동·허용 영역 클릭·작업 중 Escape·닫기 후 격리 정리를 확인한다.
+DOM 테스트는 네이티브 section의 presence·닫기, Tab/Shift+Tab 순환, 배경 격리, 포커스 복귀, 사용자 프레임·Portal, Escape 취소를 검증한다. SSR 테스트는 section 렌더링과 실행 시 예외를 내는 브라우저 전용 getter로 서버 실행 여부를 확인한다. 실제 브라우저 회귀 검증은 `node packages/dds-solid/src/__tests__/dialog-browser.test.mjs`로 실행한다. section 모달이 열린 뒤 재시도 버튼과 반응형 외부 팝업 영역을 추가하고 최초 포커스를 다시 설정하지 않는지, 실제 포커스 이동·허용 영역 클릭·작업 중 Escape·닫기 후 격리 정리를 확인한다.

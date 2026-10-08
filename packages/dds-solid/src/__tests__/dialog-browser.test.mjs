@@ -14,19 +14,21 @@ const fixture = `
   const [open, setOpen] = createSignal(false);
   const [busy, setBusy] = createSignal(false);
   const [retry, setRetry] = createSignal(false);
+  const [popup, setPopup] = createSignal(false);
   let field: HTMLInputElement; let fallback: HTMLButtonElement;
-  Object.assign(window, { addRetry: () => setRetry(true), setDialogBusy: setBusy });
+  Object.assign(window, { addRetry: () => setRetry(true), setDialogBusy: setBusy, setPopup });
   render(() => <>
     <button id="opener" onClick={() => setOpen(true)}>Open task</button>
     <p id="background">Background work</p>
     <button ref={fallback} id="fallback">Fallback focus</button>
     <div id="retry-region"><Show when={retry()}><button id="retry" onClick={() => { setRetry(false); field.focus(); }}>Retry failed task</button></Show></div>
+    <Show when={popup()}><div id="popup-region"><button id="popup-action">Popup action</button></div></Show>
     <Dialog open={open()} onOpenChange={setOpen} title="Scoped task" role="alertdialog"
-      portal unstyled class="task-panel" overlayClass="task-overlay" closeOnOutside={false}
+      portal unstyled contentAs="section" class="task-panel" overlayClass="task-overlay" closeOnOutside={false}
       initialFocus={() => field} finalFocus={() => fallback}
-      additionalFocusContainers={() => [document.getElementById('retry-region')]}
+      additionalFocusContainers={() => [document.getElementById('retry-region'), popup() ? document.getElementById('popup-region') : null]}
       onEscapeKeyDown={event => { if (busy()) event.preventDefault(); }}
-      frame={parts => <><header>{parts.title}</header><section>{parts.children}</section><footer>{parts.actions}</footer></>}
+      frame={parts => <><header>{parts.title}<button id="header-close">Header close</button></header><section>{parts.children}</section><footer>{parts.actions}</footer></>}
       actions={<button id="last">Last action</button>}>
       <input ref={field} aria-label="Task field" /><button>Submit task</button>
     </Dialog>
@@ -57,6 +59,7 @@ try {
   await page.getByRole('button', { name: 'Open task' }).click();
   const dialog = page.getByRole('alertdialog', { name: 'Scoped task' });
   await dialog.waitFor();
+  assert.equal(await dialog.evaluate(element => element.tagName), 'SECTION');
   await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Task field');
   assert.equal(await page.locator('#background').evaluate(element => Boolean(element.closest('[aria-hidden="true"]'))), true);
   assert.equal(await page.locator('#retry-region').evaluate(element => Boolean(element.closest('[aria-hidden="true"]'))), false);
@@ -64,12 +67,24 @@ try {
   await page.locator('#last').focus(); await page.keyboard.press('Tab');
   assert.equal(await page.locator('#retry').evaluate(element => element === document.activeElement), true);
   await page.keyboard.press('Tab');
-  assert.equal(await page.getByRole('textbox', { name: 'Task field' }).evaluate(element => element === document.activeElement), true);
+  assert.equal(await page.locator('#header-close').evaluate(element => element === document.activeElement), true);
   await page.keyboard.press('Shift+Tab');
   assert.equal(await page.locator('#retry').evaluate(element => element === document.activeElement), true);
   await page.getByRole('button', { name: 'Retry failed task' }).click();
   await page.locator('#retry').waitFor({ state: 'detached' });
   assert.equal(await dialog.isVisible(), true);
+  await page.evaluate(() => window.setPopup(true));
+  await page.locator('#popup-action').waitFor();
+  assert.equal(await page.getByRole('textbox', { name: 'Task field' }).evaluate(element => element === document.activeElement), true);
+  await page.locator('#popup-action').focus();
+  assert.equal(await page.locator('#popup-action').evaluate(element => element === document.activeElement), true);
+  assert.equal(await page.locator('#popup-region').evaluate(element => Boolean(element.closest('[aria-hidden="true"]'))), false);
+  await page.keyboard.press('Tab');
+  assert.equal(await page.locator('#header-close').evaluate(element => element === document.activeElement), true);
+  await page.evaluate(() => window.setPopup(false));
+  await page.locator('#popup-region').waitFor({ state: 'detached' });
+  assert.equal(await page.locator('#header-close').evaluate(element => element === document.activeElement), true);
+  assert.equal(await page.locator('#background').evaluate(element => Boolean(element.closest('[aria-hidden="true"]'))), true);
   await page.evaluate(() => window.setDialogBusy(true)); await page.keyboard.press('Escape');
   assert.equal(await dialog.isVisible(), true);
   await page.evaluate(() => window.setDialogBusy(false)); await page.keyboard.press('Escape');

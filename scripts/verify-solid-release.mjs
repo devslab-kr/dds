@@ -124,16 +124,19 @@ if (diagnostics.length) throw new Error('fresh consumer hydration diagnostics: '
   await writeFile(join(temp, "ark-ssr.mjs"), `
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
-import { App } from "./ark-app.mjs";
-process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html: renderToString(() => createComponent(App, {})) }));
+import { App, NativeSectionApp } from "./ark-app.mjs";
+const component = process.argv[2] === "section" ? NativeSectionApp : App;
+process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html: renderToString(() => createComponent(component, {})) }));
 `);
   await writeFile(join(temp, "ark-ssr.json"), runNode([join(temp, "ark-ssr.mjs")], temp));
+  await writeFile(join(temp, "section-ssr.json"), runNode([join(temp, "ark-ssr.mjs"), "section"], temp));
   await writeFile(join(temp, "ark-client-app.mjs"), (await readFile(join(temp, "ark-app.mjs"), "utf8")).replace('"@devslab/dds-solid"', JSON.stringify(browserEntry)));
   await writeFile(join(temp, "ark-hydrate.mjs"), `
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { JSDOM } from "jsdom";
-const { bootstrap, html } = JSON.parse(await readFile(new URL("./ark-ssr.json", import.meta.url), "utf8"));
+const sectionMode = process.argv[2] === "section";
+const { bootstrap, html } = JSON.parse(await readFile(new URL(sectionMode ? "./section-ssr.json" : "./ark-ssr.json", import.meta.url), "utf8"));
 const dom = new JSDOM('<!doctype html><html><head>' + bootstrap + '</head><body><main id="root">' + html + '</main></body></html>', { runScripts: "dangerously", pretendToBeVisual: true });
 for (const key of ["window", "document", "Node", "Element", "HTMLElement", "HTMLInputElement", "HTMLFormElement", "SVGElement", "Document", "ShadowRoot", "MutationObserver", "navigator", "CustomEvent", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame"]) {
   const value = dom.window[key];
@@ -142,14 +145,25 @@ for (const key of ["window", "document", "Node", "Element", "HTMLElement", "HTML
 Object.defineProperty(globalThis, "_$HY", { value: dom.window._$HY, configurable: true, writable: true });
 const { hydrate } = await import("solid-js/web");
 const { createComponent } = await import("solid-js");
-const { App, events } = await import("./ark-client-app.mjs");
+const { App, NativeSectionApp, events } = await import("./ark-client-app.mjs");
 const host = document.querySelector("#root");
 const input = host.querySelector('input[name="agree"]');
+const section = host.querySelector('section[role="dialog"]');
+const title = host.querySelector('#native-section-title');
+const action = section?.querySelector("button");
 const diagnostics = []; const warn = console.warn; const error = console.error;
 console.warn = (...values) => diagnostics.push(values.join(" "));
 console.error = (...values) => diagnostics.push(values.join(" "));
-const dispose = hydrate(() => createComponent(App, {}), host);
+const dispose = hydrate(() => createComponent(sectionMode ? NativeSectionApp : App, {}), host);
 await new Promise(resolve => setTimeout(resolve, 40));
+if (sectionMode) {
+  assert.ok(section, "Native section was absent from server HTML");
+  assert.equal(host.querySelector('section[role="dialog"]'), section, "Hydration replaced the native section");
+  assert.equal(host.querySelector('#native-section-title'), title, "Hydration replaced the labelled title");
+  assert.equal(section.querySelector("button"), action, "Hydration replaced the section action");
+  assert.equal(section.id, "native-section");
+  assert.equal(section.getAttribute("aria-labelledby"), "native-section-title");
+} else {
 assert.equal(host.querySelector('input[name="agree"]'), input, "Hydration replaced the server input");
 assert.equal(input.checked, true);
 input.click();
@@ -165,11 +179,13 @@ assert.ok(host.querySelector('[role="dialog"]'), "Hydrated dialog did not open")
 [...host.querySelectorAll("button")].find(button => button.textContent === "Close confirmation").click();
 await new Promise(resolve => setTimeout(resolve, 40));
 assert.equal(host.querySelector('[role="dialog"]'), null);
+}
 dispose(); console.warn = warn; console.error = error;
 assert.deepEqual(diagnostics, []);
 dom.window.close();
 `);
   runNode(["--conditions=browser", join(temp, "ark-hydrate.mjs")], temp);
+  runNode(["--conditions=browser", join(temp, "ark-hydrate.mjs"), "section"], temp);
   console.log("dds-solid pack, publish dry-run, and fresh consumer import, SSR, and hydration passed");
 } finally {
   await rm(temp, { recursive: true, force: true });

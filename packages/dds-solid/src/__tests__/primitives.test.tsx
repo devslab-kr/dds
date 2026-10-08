@@ -365,6 +365,21 @@ describe("keyboard lifecycle", () => {
   });
 });
 
+it("keeps native section dialog presence and ordinary Ark dismissal", async () => {
+  const host = document.body.appendChild(document.createElement("div"));
+  const [open, setOpen] = createSignal(false);
+  dispose = render(() => <>
+    <button onClick={() => setOpen(true)}>Open section</button>
+    <Dialog contentAs="section" open={open()} onOpenChange={setOpen} title="Native task"><button>Action</button></Dialog>
+  </>, host);
+  host.querySelector<HTMLButtonElement>("button")!.click();
+  await vi.waitFor(() => expect(host.querySelector('section[role="dialog"]')?.getAttribute("aria-labelledby")).toBeTruthy());
+  await new Promise(resolve => requestAnimationFrame(() => resolve(undefined)));
+  host.querySelector('section[role="dialog"]')!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+  await vi.waitFor(() => expect(host.querySelector('[role="dialog"]')).toBeNull());
+  expect(open()).toBe(false);
+});
+
 describe("createStatusPill", () => {
   const pill = createStatusPill({
     tones: { key: { active: "success", revoked: "danger" }, role: { owner: "brand" } },

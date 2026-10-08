@@ -4,6 +4,7 @@
 
 - `portal` renders under `document.body`; `portalMount` chooses another mounted element. The default remains inline rendering.
 - `role` accepts `dialog` or `alertdialog`.
+- `contentAs` selects the native `div` (default) or `section` while keeping the generated dialog attributes, presence lifecycle, and focus registration.
 - `unstyled` removes DDS component classes. `class`, `overlayClass`, `titleClass`, `descriptionClass`, and `actionsClass` add application classes.
 - `frame(parts)` arranges the supplied `title`, `description`, `children`, and `actions` nodes. Render each supplied title/description once to retain its generated accessible association. These are DDS-owned nodes; applications do not import Ark components.
 - `contentProps` supplies native content attributes and handlers, such as `aria-busy` and `onKeyDown`.
@@ -34,4 +35,4 @@ Authorize only the intended regions in the same document. The getter can read re
 
 Browser-only focus/container getters are not evaluated during SSR. The portalled content mounts on the client. Normal dialogs retain Ark's focus and isolation behavior; external-scope dialogs reuse Zag's multi-container trap and shared modal isolation bookkeeping.
 
-Validation: DOM tests cover the combined Tab/Shift+Tab cycle, background isolation, restoration, custom frame/portal and Escape cancellation. An SSR test uses throwing browser-only getters. Run the real-browser regression with `node packages/dds-solid/src/__tests__/dialog-browser.test.mjs`; it additionally adds retry controls after opening and checks real focus, authorized clicks, busy Escape and isolation cleanup.
+Validation: DOM tests cover native section presence/dismissal, the combined Tab/Shift+Tab cycle, background isolation, restoration, custom frame/portal and Escape cancellation. SSR tests cover native sections and throwing browser-only getters. Run the real-browser regression with `node packages/dds-solid/src/__tests__/dialog-browser.test.mjs`; it additionally mounts a section, adds retry controls and a reactive external popup region after opening without resetting focus, and checks real focus, authorized clicks, busy Escape and isolation cleanup.
