@@ -50,7 +50,9 @@ const labels: DataTableLabels = {
 | `columns` | `readonly Column<T>[]` | required | Column declarations — see `Column<T>` below. |
 | `caption` | `string` | required | The table's accessible name, rendered visually hidden (`<caption class="dds-visually-hidden">`). |
 | `labels` | `DataTableLabels` | required | Every word the component can render — see "Labels are required" below. |
-| `sort` | `"client" \| { statedOrder: string }` | optional, no sort buttons or order text when omitted | See Sorting below. |
+| `sort` | `SortMode` | optional, no sort buttons or order text when omitted | Client sorting, a server-order description, or controlled server sorting. |
+| `resizing` | `ColumnResizing` | optional, disabled by default | Header resize handles, bounds, accessible label, and commit/reset callback. |
+| `selection` | `RowSelection<T>` | optional, disabled by default | Stable row identity, controlled selection, and selection callback. |
 | `density` | `"comfortable" \| "dense"` | optional, default `"comfortable"` (40px rows) | `"dense"` adds `.dds-table--dense` (36px rows, tighter cell padding). Either way, row actions and small buttons in cells are held to the row height (32px buttons in 40px rows, 24px in 36px rows; 44px on touch) — see `docs/components.md` Table. |
 | `scroll` | `"auto" \| "tall"` | optional, default `"auto"` | `"tall"` adds `.dds-table-wrap--tall`: a `max-block-size: 70vh` scrolling body with a sticky header, for a long in-page list that shouldn't push the rest of the page down. |
 | `minWidth` | `string` (a CSS length) | optional | Sets the `<table>`'s `min-inline-size`, so narrow viewports scroll the table horizontally (inside `.dds-table-wrap`) instead of crushing its columns. |
@@ -68,17 +70,17 @@ const labels: DataTableLabels = {
 | `cell` | `(row: T) => JSX.Element` | Renders the cell body. Visual markup stays yours; the column def TanStack sees carries nothing but the sort accessor. |
 | `sortBy?` | `(row: T) => string \| number \| null` | Present → the column is sortable (in `sort="client"` mode only) and gets a sort button. Absent → a plain header, never a button. Return `null` for "no value"; those rows sort last (`sortUndefined: "last"`), never first. |
 | `width?` | `string` | A CSS width. Setting it on any column switches the whole table to `table-layout: fixed` and emits a `<colgroup>`. |
+| `resizable?` | `boolean` | Set to `false` to omit this column's handle when resizing is enabled. |
 | `fold?` | `boolean` | Marks the column droppable on narrow viewports (see Folding below). |
 | `numeric?` | `boolean` | Right-aligns the column and applies tabular figures. |
 | `rowHeader?` | `boolean` | Renders this column's cell as `<th scope="row">` instead of `<td>` — exactly one column per table should set it. |
 
 ## Sorting: `sort`
 
-`sort` accepts one of two shapes — this type is not exported (write the
-values inline; there is nothing to import):
+`SortMode` is exported and accepts three shapes:
 
 ```ts
-"client" | { statedOrder: string }
+"client" | { statedOrder: string } | { value: SortValue; onChange: (value: SortValue) => void; statedOrder?: string }
 ```
 
 - **`sort="client"`** — the table holds its whole list in memory. Columns
@@ -99,6 +101,41 @@ There is no third mode that lets a server-ordered table opt into client
 sorting for "just this column" — the failure mode (silently reporting a
 per-page order as the whole list's order) is the same regardless of how many
 columns are involved.
+
+## Optional workspace interactions
+
+All interactions below are opt-in; existing tables retain their behavior.
+
+```tsx
+const [sort, setSort] = createSignal<SortValue>(null);
+const [selectedId, setSelectedId] = createSignal<string | null>(null);
+<DataTable rows={rows} columns={columns} caption="Jobs" labels={labels}
+  sort={{ value: sort(), onChange: setSort }}
+  resizing={{ label: "Resize {column}", minWidth: 80, maxWidth: 1200,
+    onChange: (widths, reason) => recordLayoutChange(widths, reason) }}
+  selection={{ rowId: row => row.id, selectedId: selectedId(),
+    onSelect: row => setSelectedId(row.id) }} />;
+```
+
+Import `SortValue`, `ColumnResizing`, and `RowSelection` from this package for
+typed application adapters. Controlled sorting cycles ascending, descending,
+then `null`. It only requests a change; the application must fetch and supply
+the correctly ordered server result. It never sorts the current page locally.
+The existing `{ statedOrder }` mode remains a description without sort buttons.
+
+`resizing.label` is the application-owned accessible label (`{column}` is
+replaced with the column name). Drag a header separator to change its width.
+Left/Right change width by 12px (Shift: 50px); Home/End use the bounds.
+Double-click or Escape clears **all** width overrides, restoring declared
+column widths and the original layout. Set `column.resizable = false` to omit
+an individual handle. Pointer cancellation restores the pre-drag layout;
+unmounting removes pending pointer listeners. Resize callbacks fire on commit
+or reset, rather than every pointer move. Width overrides last for this mounted
+table only; persistence and application analytics remain application-owned.
+
+Selection is controlled by a stable row ID. Click, Enter, and Space select a
+row; embedded buttons, links and form controls keep their own behavior.
+Selection does not navigate, open dialogs, or change business data by itself.
 
 ## Paging: `page`
 

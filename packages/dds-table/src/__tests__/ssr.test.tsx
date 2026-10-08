@@ -13,3 +13,10 @@ it("server-renders rows without touching the DOM", () => {
   expect(html).toContain("<table");
   expect(html).toContain("alpha");
 });
+
+it("server-renders optional selection and resizing without DOM measurements", () => {
+  const html = renderToString(() => <DataTable rows={[{ name: "alpha" }]} columns={columns} caption="Keys"
+    labels={{ sortBy: "Sort by {column}", actions: "Actions", nextPage: "Next page" }}
+    resizing={{ label: "Resize {column}" }} selection={{ rowId: row => row.name, selectedId: "alpha", onSelect: () => {} }} />);
+  expect(html).toContain('role="separator"'); expect(html).toContain('aria-selected="true"');
+});

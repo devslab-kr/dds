@@ -1,8 +1,16 @@
-import { createMemo, For, Show, type JSX } from "solid-js";
+import { createMemo, createSignal, onCleanup, onMount, For, Show, type JSX } from "solid-js";
 import { createTable } from "@tanstack/solid-table";
 import { tableFeatureSet, toColumnDefs, type Column, type DataTableLabels, type TableFeatureSet } from "./columns";
 
-export type SortMode = "client" | { statedOrder: string };
+export type SortValue = { id: string; desc: boolean } | null;
+export type SortMode = "client" | { statedOrder: string } | { value: SortValue; onChange: (value: SortValue) => void; statedOrder?: string };
+export type ColumnResizing = {
+  label: string;
+  minWidth?: number;
+  maxWidth?: number;
+  onChange?: (widths: Readonly<Record<string, number>>, reason: "resize" | "reset") => void;
+};
+export type RowSelection<T> = { rowId: (row: T) => string; selectedId?: string | null; onSelect: (row: T) => void };
 
 /** Fills the `{column}` placeholder in a consumer-supplied label template.
  *  A function replacer, not `template.replace("{column}", value)` — a
@@ -26,10 +34,59 @@ export function DataTable<T>(props: {
   detail?: (row: T) => JSX.Element;
   page?: { nextHref?: string | undefined };
   empty?: JSX.Element;
+  resizing?: ColumnResizing;
+  selection?: RowSelection<T>;
 }): JSX.Element {
   const clientSorted = () => props.sort === "client";
+  const controlledSort = () => typeof props.sort === "object" && "onChange" in props.sort ? props.sort : undefined;
+  const sortable = () => clientSorted() || Boolean(controlledSort());
   const statedOrder = () => (typeof props.sort === "object" ? props.sort.statedOrder : undefined);
-  const fixed = () => props.columns.some((column) => column.width !== undefined);
+  const [widths, setWidths] = createSignal<Record<string, number>>({});
+  const fixed = () => Boolean(props.resizing) || props.columns.some((column) => column.width !== undefined);
+  const headers = new Map<string, HTMLTableCellElement>();
+  const [measurements, setMeasurements] = createSignal<Record<string, number>>({});
+  onMount(() => {
+    if (!props.resizing || typeof ResizeObserver === "undefined") return;
+    const measure = () => setMeasurements(Object.fromEntries([...headers].map(([id, node]) => [id, node.getBoundingClientRect().width])));
+    const observer = new ResizeObserver(measure);
+    headers.forEach(node => observer.observe(node)); measure();
+    onCleanup(() => observer.disconnect());
+  });
+  const minWidth = () => props.resizing?.minWidth ?? 80;
+  const maxWidth = () => Math.max(minWidth(), props.resizing?.maxWidth ?? 1200);
+  const clamp = (width: number) => Math.max(minWidth(), Math.min(maxWidth(), width));
+  const measuredWidth = (column: Column<T>) => widths()[column.id] ?? clamp(measurements()[column.id] || headers.get(column.id)?.getBoundingClientRect().width ||
+    (column.width?.endsWith("px") ? Number.parseFloat(column.width) : minWidth()));
+  const columnWidth = (column: Column<T>) => widths()[column.id] !== undefined ? `${widths()[column.id]}px` : column.width;
+  let cancelDrag: (() => void) | undefined;
+  onCleanup(() => cancelDrag?.());
+  function resetWidths() {
+    cancelDrag?.(); setWidths({}); props.resizing?.onChange?.({}, "reset");
+  }
+  function resizeKey(event: KeyboardEvent, column: Column<T>) {
+    const step = event.shiftKey ? 50 : 12;
+    const next = event.key === "ArrowLeft" ? measuredWidth(column) - step : event.key === "ArrowRight" ? measuredWidth(column) + step
+      : event.key === "Home" ? minWidth() : event.key === "End" ? maxWidth() : undefined;
+    if (next === undefined && event.key !== "Escape") return;
+    event.preventDefault(); event.stopPropagation();
+    if (event.key === "Escape") resetWidths();
+    else { cancelDrag?.(); const updated = { ...widths(), [column.id]: clamp(next!) }; setWidths(updated); props.resizing?.onChange?.(updated, "resize"); }
+  }
+  function beginResize(event: PointerEvent, column: Column<T>) {
+    if (event.button !== 0 || !props.resizing) return;
+    event.preventDefault(); event.stopPropagation(); cancelDrag?.();
+    const before = widths();
+    const initial = Object.fromEntries(props.columns.map(c => [c.id, measuredWidth(c)]));
+    const start = event.clientX; const pointerId = event.pointerId;
+    const rtl = getComputedStyle(headers.get(column.id)!).direction === "rtl";
+    const cleanup = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", finish); window.removeEventListener("pointercancel", cancel); cancelDrag = undefined; };
+    const move = (e: PointerEvent) => { if (e.pointerId === pointerId) setWidths({ ...initial, [column.id]: clamp(initial[column.id]! + (e.clientX - start) * (rtl ? -1 : 1)) }); };
+    const finish = (e: PointerEvent) => { if (e.pointerId !== pointerId) return; move(e); cleanup(); props.resizing?.onChange?.(widths(), "resize"); };
+    const cancel = (e?: PointerEvent) => { if (e && e.pointerId !== pointerId) return; cleanup(); setWidths(before); };
+    cancelDrag = cancel;
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", finish); window.addEventListener("pointercancel", cancel);
+  }
+  const interactive = (event: Event) => event.target instanceof Element && Boolean(event.target.closest('button,a,input,select,textarea,summary,[contenteditable],[role="button"],[role="link"]'));
 
   /* `toColumnDefs` builds fresh column objects on every read; a table model
      that sees a new column identity on every access can lose sorting state
@@ -52,10 +109,17 @@ export function DataTable<T>(props: {
   const ordered = createMemo(() => (clientSorted() ? table.getRowModel().rows.map((row) => row.original as T) : [...props.rows]));
 
   const sortState = (id: string) => {
-    const current = table.store.state.sorting?.[0];
+    const external = controlledSort();
+    const current = external ? external.value : table.store.state.sorting?.[0];
     if (!current || current.id !== id) return "none";
     return current.desc ? "descending" : "ascending";
   };
+  function toggleSort(id: string) {
+    const external = controlledSort();
+    if (!external) { table.getColumn(id)?.toggleSorting(); return; }
+    const current = external.value?.id === id ? external.value : null;
+    external.onChange(current?.desc ? null : { id, desc: current !== null });
+  }
 
   return (
     <>
@@ -69,30 +133,38 @@ export function DataTable<T>(props: {
         <div class={props.scroll === "tall" ? "dds-table-wrap dds-table-wrap--tall" : "dds-table-wrap"}>
           <table
             class={`dds-table${props.density === "dense" ? " dds-table--dense" : ""}${fixed() ? " dds-table--fixed" : ""}`}
-            style={props.minWidth ? { "min-inline-size": props.minWidth } : undefined}
+            style={{ "min-inline-size": props.minWidth, "table-layout": props.resizing ? "fixed" : undefined,
+              width: Object.keys(widths()).length === props.columns.length && !props.actions ? `${Object.values(widths()).reduce((a, b) => a + b, 0)}px` : undefined }}
           >
             <caption class="dds-visually-hidden">{props.caption}</caption>
             <Show when={fixed()}>
               <colgroup>
-                <For each={props.columns}>{(column) => <col data-fold={column.fold ? "" : undefined} style={column.width ? { width: column.width } : undefined} />}</For>
+                <For each={props.columns}>{(column) => <col data-fold={column.fold ? "" : undefined} style={{ width: columnWidth(column) }} />}</For>
                 <Show when={props.actions}><col /></Show>
               </colgroup>
             </Show>
             <thead>
               <tr>
                 <For each={props.columns}>{(column) => (
-                  <th scope="col" data-column={column.id} data-fold={column.fold ? "" : undefined} data-numeric={column.numeric ? "" : undefined} aria-sort={clientSorted() && column.sortBy ? sortState(column.id) : undefined}>
-                    <Show when={clientSorted() && column.sortBy} fallback={column.label}>
+                  <th ref={node => headers.set(column.id, node)} scope="col" data-column={column.id} data-fold={column.fold ? "" : undefined} data-numeric={column.numeric ? "" : undefined} aria-sort={sortable() && column.sortBy ? sortState(column.id) : undefined}>
+                    <Show when={sortable() && column.sortBy} fallback={column.label}>
                       <button
                         type="button"
                         class="dds-table__sort"
                         data-action="sort"
                         aria-label={fillLabel(props.labels.sortBy, column.label)}
-                        onClick={() => table.getColumn(column.id)?.toggleSorting()}
+                        onClick={() => toggleSort(column.id)}
                       >
                         {column.label}
                         <span class="dds-table__sort-mark" aria-hidden="true" data-sort-state={sortState(column.id)} />
                       </button>
+                    </Show>
+                    <Show when={props.resizing && column.resizable !== false}>
+                      <span role="separator" tabindex={0} class="dds-table__resize" aria-orientation="vertical"
+                        aria-label={fillLabel(props.resizing!.label, column.label)} aria-valuemin={minWidth()} aria-valuemax={maxWidth()}
+                        aria-valuenow={measuredWidth(column)} onPointerDown={event => beginResize(event, column)}
+                        onDblClick={event => { event.preventDefault(); event.stopPropagation(); resetWidths(); }}
+                        onKeyDown={event => resizeKey(event, column)} />
                     </Show>
                   </th>
                 )}</For>
@@ -104,7 +176,10 @@ export function DataTable<T>(props: {
             <tbody>
               <For each={ordered()}>{(row) => (
                 <>
-                  <tr>
+                  <tr tabindex={props.selection ? 0 : undefined}
+                    aria-selected={props.selection ? props.selection.selectedId === props.selection.rowId(row) : undefined}
+                    onClick={event => { if (!interactive(event)) props.selection?.onSelect(row); }}
+                    onKeyDown={event => { if (props.selection && (event.key === "Enter" || event.key === " ") && !interactive(event)) { event.preventDefault(); props.selection.onSelect(row); } }}>
                     <For each={props.columns}>{(column) => (
                       <Show
                         when={column.rowHeader}

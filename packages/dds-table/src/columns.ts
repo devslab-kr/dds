@@ -21,6 +21,7 @@ export type Column<T> = {
   cell: (row: T) => JSX.Element;
   sortBy?: (row: T) => string | number | null;
   width?: string;
+  resizable?: boolean;
   fold?: boolean;
   numeric?: boolean;
   rowHeader?: boolean;

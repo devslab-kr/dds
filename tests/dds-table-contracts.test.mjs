@@ -18,6 +18,8 @@ test("dds-table pins TanStack exactly and ships the worker condition", async () 
     Object.keys(manifest.exports["."]).indexOf("worker") < Object.keys(manifest.exports["."]).indexOf("browser"),
     "Worker SSR must win when worker and browser conditions are both active",
   );
+  assert.ok(Object.keys(manifest.exports["."]).indexOf("browser") < Object.keys(manifest.exports["."]).indexOf("node"),
+    "An explicit browser condition must win over Node when testing hydration");
 });
 
 /** Every rule in a stylesheet as { selectors, body, comment } — the comment

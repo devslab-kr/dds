@@ -22,3 +22,11 @@ it("a sortable DataTable has no detectable axe violations", async () => {
   const result = await axe.run(host, { rules: { "color-contrast": { enabled: false } } });
   expect(result.violations).toEqual([]);
 });
+
+it("resize handles and selectable rows have no detectable axe violations", async () => {
+  const host = document.body.appendChild(document.createElement("main"));
+  dispose = render(() => <DataTable rows={rows} columns={columns} caption="Keys" labels={labels}
+    resizing={{ label: "Resize {column}" }} selection={{ rowId: r => r.name, selectedId: "alpha", onSelect: () => {} }} />, host);
+  const result = await axe.run(host, { rules: { "color-contrast": { enabled: false } } });
+  expect(result.violations).toEqual([]);
+});

@@ -1,5 +1,6 @@
 import { render } from "solid-js/web";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { createSignal } from "solid-js";
 import { DataTable } from "../data-table";
 import type { Column } from "../columns";
 
@@ -13,6 +14,65 @@ const columns: Column<Row>[] = [
 
 let dispose: (() => void) | undefined;
 afterEach(() => { dispose?.(); dispose = undefined; document.body.replaceChildren(); });
+
+describe("optional workspace interactions", () => {
+  it("requests server sorting without reordering a partial page", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const [value, setValue] = createSignal<{ id: string; desc: boolean } | null>(null);
+    dispose = render(() => <DataTable rows={rows} columns={columns} caption="Keys" labels={labels}
+      sort={{ value: value(), onChange: setValue }} />, host);
+    const button = host.querySelector("thead button") as HTMLButtonElement;
+    button.click(); expect(value()).toEqual({ id: "name", desc: false });
+    expect(host.querySelector("thead th")?.getAttribute("aria-sort")).toBe("ascending");
+    expect([...host.querySelectorAll("tbody th")].map(n => n.textContent)).toEqual(["beta", "alpha"]);
+    button.click(); expect(value()).toEqual({ id: "name", desc: true });
+    button.click(); expect(value()).toBeNull();
+  });
+
+  it("selects rows by click and keyboard but leaves embedded buttons alone", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const onSelect = vi.fn();
+    dispose = render(() => <DataTable rows={rows} columns={columns} caption="Keys" labels={labels}
+      selection={{ rowId: r => r.name, selectedId: "alpha", onSelect }} actions={() => <button>Open</button>} />, host);
+    const trs = host.querySelectorAll<HTMLTableRowElement>("tbody tr");
+    expect(trs[1]!.getAttribute("aria-selected")).toBe("true");
+    trs[0]!.click(); expect(onSelect).toHaveBeenLastCalledWith(rows[0]);
+    trs[1]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onSelect).toHaveBeenLastCalledWith(rows[1]);
+    trs[0]!.querySelector("button")!.click(); expect(onSelect).toHaveBeenCalledTimes(2);
+  });
+
+  it("resizes with keyboard, clamps width, and resets all overrides on double click", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const onChange = vi.fn();
+    dispose = render(() => <DataTable rows={rows} columns={columns.map(c => ({ ...c, width: "100px" }))}
+      caption="Keys" labels={labels} resizing={{ label: "Resize {column}", minWidth: 80, maxWidth: 120, onChange }} />, host);
+    const handle = host.querySelector<HTMLElement>('[role="separator"]')!;
+    handle.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    expect(host.querySelector("col")?.getAttribute("style")).toContain("112px");
+    handle.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    expect(handle.getAttribute("aria-valuenow")).toBe("120");
+    handle.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    expect(host.querySelector("col")?.getAttribute("style")).toContain("100px");
+    expect(onChange).toHaveBeenLastCalledWith({}, "reset");
+  });
+
+  it("supports pointer dragging and cancels an unfinished drag on unmount", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const onChange = vi.fn();
+    dispose = render(() => <DataTable rows={rows} columns={columns.map(c => ({ ...c, width: "100px" }))}
+      caption="Keys" labels={labels} resizing={{ label: "Resize {column}", onChange }} />, host);
+    const pointer = (type: string, x: number) => Object.assign(new MouseEvent(type, { clientX: x, bubbles: true }), { pointerId: 1 });
+    host.querySelector('[role="separator"]')!.dispatchEvent(pointer("pointerdown", 10));
+    window.dispatchEvent(pointer("pointermove", 40)); window.dispatchEvent(pointer("pointerup", 40));
+    expect(host.querySelector("col")?.getAttribute("style")).toContain("130px");
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ name: 130 }), "resize");
+    host.querySelector('[role="separator"]')!.dispatchEvent(pointer("pointerdown", 40));
+    dispose!(); dispose = undefined; onChange.mockClear();
+    window.dispatchEvent(pointer("pointermove", 90)); window.dispatchEvent(pointer("pointerup", 90));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
 
 describe("DataTable", () => {
   it("renders a row per item and marks the row header", () => {
