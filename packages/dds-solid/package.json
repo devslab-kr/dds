@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-solid",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "description": "Accessible SolidJS primitives for the DevsLab Design System",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -44,9 +44,9 @@
   },
   "dependencies": {
     "@ark-ui/solid": "5.39.3",
-    "@devslab/dds-css": "workspace:0.17.1",
-    "@devslab/dds-icons": "workspace:0.17.1",
-    "@devslab/dds-tokens": "workspace:0.17.1",
+    "@devslab/dds-css": "workspace:0.18.0",
+    "@devslab/dds-icons": "workspace:0.18.0",
+    "@devslab/dds-tokens": "workspace:0.18.0",
     "@zag-js/aria-hidden": "1.45.0",
     "@zag-js/focus-trap": "1.45.0"
   },

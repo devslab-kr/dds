@@ -33,7 +33,7 @@ importers:
   packages/compatibility-canary:
     dependencies:
       '@devslab/dds-table':
-        specifier: workspace:0.17.1
+        specifier: workspace:0.18.0
         version: link:../dds-table
       '@tanstack/solid-query':
         specifier: 5.102.8
@@ -86,13 +86,13 @@ importers:
         specifier: 5.39.3
         version: 5.39.3(solid-js@1.9.15)
       '@devslab/dds-css':
-        specifier: workspace:0.17.1
+        specifier: workspace:0.18.0
         version: link:../dds-css
       '@devslab/dds-icons':
-        specifier: workspace:0.17.1
+        specifier: workspace:0.18.0
         version: link:../dds-icons
       '@devslab/dds-tokens':
-        specifier: workspace:0.17.1
+        specifier: workspace:0.18.0
         version: link:../dds-tokens
       '@zag-js/aria-hidden':
         specifier: 1.45.0
@@ -132,10 +132,10 @@ importers:
   packages/dds-table:
     dependencies:
       '@devslab/dds-css':
-        specifier: workspace:0.17.1
+        specifier: workspace:0.18.0
         version: link:../dds-css
       '@devslab/dds-tokens':
-        specifier: workspace:0.17.1
+        specifier: workspace:0.18.0
         version: link:../dds-tokens
       '@tanstack/solid-table':
         specifier: 9.2.4
@@ -178,7 +178,7 @@ importers:
   packages/site-kit:
     dependencies:
       '@devslab/dds-solid':
-        specifier: workspace:0.17.1
+        specifier: workspace:0.18.0
         version: link:../dds-solid
     devDependencies:
       '@tanstack/solid-router':
