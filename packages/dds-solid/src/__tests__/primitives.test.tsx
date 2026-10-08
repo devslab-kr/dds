@@ -13,6 +13,45 @@ let dispose: (() => void) | undefined;
 afterEach(() => { vi.useRealTimers(); dispose?.(); dispose = undefined; document.body.replaceChildren(); });
 
 describe("native control behavior", () => {
+  it("composes the tab root onto the consumer layout without an extra wrapper", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <Tabs defaultValue="a" unstyled asChild={attrs => <div {...attrs} class="consumer-layout" />}>
+      <main><TabList><Tab value="a">A</Tab></TabList><TabPanel value="a">Page</TabPanel></main>
+    </Tabs>, host);
+    expect(host.children).toHaveLength(1);
+    expect(host.firstElementChild?.className).toBe("consumer-layout");
+    expect(host.querySelector(".consumer-layout > main")).not.toBeNull();
+    expect(host.querySelector('[role="tab"]')?.getAttribute("aria-selected")).toBe("true");
+  });
+  it("supports manual tabs, consumer IDs and custom native triggers without changing selection on arrow focus", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const changed = vi.fn();
+    const clicked = vi.fn();
+    let custom!: HTMLButtonElement;
+    dispose = render(() => <Tabs defaultValue="a" activationMode="manual" onValueChange={changed}
+      tabId={value => `consumer-tab-${value}`} panelId={value => `consumer-panel-${value}`}>
+      <TabList unstyled><Tab value="a" unstyled>A</Tab><Tab value="b" unstyled ref={custom} onClick={clicked}
+        asChild={attrs => <button {...attrs} data-custom="true">B</button>} /></TabList>
+      <TabPanel value="a" style="display:flex">First</TabPanel><TabPanel value="b" style={{ display: "grid" }}>Second</TabPanel>
+    </Tabs>, host);
+    const first = host.querySelector<HTMLButtonElement>('#consumer-tab-a')!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    await vi.waitFor(() => expect(document.activeElement).toBe(custom));
+    expect(changed).not.toHaveBeenCalled();
+    expect(first.getAttribute("aria-selected")).toBe("true");
+    expect(host.querySelector<HTMLDivElement>('#consumer-panel-a')!.style.display).toBe("flex");
+    expect(host.querySelector<HTMLDivElement>('#consumer-panel-b')!.style.display).toBe("none");
+    expect(custom.id).toBe("consumer-tab-b");
+    expect(custom.classList.contains("dds-tab")).toBe(false);
+    expect(host.querySelector('[role="tablist"]')?.classList.contains("dds-tabs")).toBe(false);
+    custom.click();
+    await vi.waitFor(() => expect(changed).toHaveBeenCalledWith("b"));
+    expect(custom.getAttribute("aria-controls")).toBe("consumer-panel-b");
+    await vi.waitFor(() => expect(host.querySelector<HTMLDivElement>('#consumer-panel-a')!.style.display).toBe("none"));
+    expect(host.querySelector<HTMLDivElement>('#consumer-panel-b')!.style.display).toBe("grid");
+    expect(clicked).toHaveBeenCalledOnce();
+  });
   it("preserves checkable consumer ARIA, focus handlers and click bubbling", async () => {
     const host = document.body.appendChild(document.createElement("div"));
     const clicked = vi.fn();
@@ -187,6 +226,55 @@ describe("native control behavior", () => {
 });
 
 describe("keyboard lifecycle", () => {
+  it("keeps an authorized external retry region in the dialog focus and accessibility scope", async () => {
+    const rectangles = vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(() => [new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList);
+    const background = document.body.appendChild(document.createElement("div"));
+    background.textContent = "Background";
+    const opener = background.appendChild(document.createElement("button")); opener.textContent = "Open"; opener.focus();
+    const region = document.body.appendChild(document.createElement("div"));
+    const retry = region.appendChild(document.createElement("button")); retry.textContent = "Retry";
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <Dialog defaultOpen title="Retry task" additionalFocusContainers={() => [region]}><button>First</button><button>Last</button></Dialog>, host);
+    const buttons = [...host.querySelectorAll<HTMLButtonElement>("button")];
+    await vi.waitFor(() => expect(document.activeElement).toBe(buttons[0]));
+    await vi.waitFor(() => expect(background.getAttribute("aria-hidden")).toBe("true"));
+    expect(region.closest('[aria-hidden="true"]')).toBeNull();
+    buttons[1]!.focus(); buttons[1]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    expect(document.activeElement).toBe(retry);
+    retry.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    expect(document.activeElement).toBe(buttons[0]);
+    buttons[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
+    expect(document.activeElement).toBe(retry);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+    expect(background.getAttribute("aria-hidden")).toBeNull();
+    rectangles.mockRestore();
+  });
+
+  it("supports a portalled custom dialog frame, focus targets and cancellable Escape", async () => {
+    const rectangles = vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(() => [new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList);
+    const host = document.body.appendChild(document.createElement("div"));
+    const destination = document.body.appendChild(document.createElement("div"));
+    const final = document.body.appendChild(document.createElement("button")); final.textContent = "Fallback";
+    let initial!: HTMLInputElement;
+    const escape = vi.fn((event: KeyboardEvent) => event.preventDefault());
+    dispose = render(() => <Dialog defaultOpen title="Custom task" role="alertdialog" portal portalMount={destination}
+      initialFocus={() => initial} finalFocus={() => final} onEscapeKeyDown={escape}
+      unstyled class="custom-panel" overlayClass="custom-overlay" titleClass="custom-title"
+      frame={(parts) => <><header>{parts.title}</header><main>{parts.children}</main></>}>
+      <button>Earlier button</button><input ref={initial} aria-label="First field" />
+    </Dialog>, host);
+    await vi.waitFor(() => expect(document.activeElement).toBe(initial));
+    expect(host.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(destination.querySelector('.custom-panel[role="alertdialog"]')).not.toBeNull();
+    expect(destination.querySelector("header .custom-title")?.textContent).toBe("Custom task");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await vi.waitFor(() => expect(escape).toHaveBeenCalledTimes(1));
+    expect(destination.querySelector('[role="alertdialog"]')).not.toBeNull();
+    dispose?.(); dispose = undefined;
+    await vi.waitFor(() => expect(document.activeElement).toBe(final));
+    rectangles.mockRestore();
+  });
   it("inherits RTL tab direction without requiring an Ark provider", async () => {
     const host = document.body.appendChild(document.createElement("div"));
     host.dir = "rtl";

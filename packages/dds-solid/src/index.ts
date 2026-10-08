@@ -19,7 +19,7 @@ export {
   type ControlSize,
 } from "./controls";
 export { ConsoleShell, type ConsoleHeader, type ConsoleNavGroup, type ConsoleNavItem, type ConsoleShellLabels, type ConsoleShellProps } from "./console-shell";
-export { Dialog, type DialogProps } from "./dialog";
+export { Dialog, type DialogProps, type DialogFrameParts } from "./dialog";
 export { RadioGroup, type RadioGroupProps, type RadioOption } from "./radio-group";
 export { Icon, type IconProps } from "./icon";
 export { createStatusPill } from "./status-pill";

@@ -66,10 +66,14 @@ test("Dialog and Tabs delegate keyboard and focus lifecycle to Ark through DDS c
   const tabs = await read("packages/dds-solid/src/tabs.tsx");
   assert.match(dialog, /Escape/);
   assert.match(dialog, /@ark-ui\/solid\/dialog/);
-  assert.match(dialog, /modal trapFocus preventScroll/);
+  assert.match(dialog, /modal: !props.additionalFocusContainers/);
+  assert.match(dialog, /trapFocus: !props.additionalFocusContainers/);
+  assert.match(dialog, /preventScroll: true/);
+  assert.match(dialog, /@zag-js\/focus-trap/);
+  assert.match(dialog, /@zag-js\/aria-hidden/);
   assert.match(dialog, /details.open/);
   assert.match(tabs, /@ark-ui\/solid\/tabs/);
-  assert.match(tabs, /activationMode="automatic"/);
+  assert.match(tabs, /activationMode=\{props.activationMode \?\? "automatic"\}/);
   assert.match(tabs, /lazyMount=\{false\} unmountOnExit=\{false\}/);
   assert.match(tabs, /details.value/);
 });

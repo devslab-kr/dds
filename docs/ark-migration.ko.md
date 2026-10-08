@@ -28,6 +28,8 @@ router, 권한, 서버 요청과 도메인 상태는 소비 프로젝트가 담�
 
 ToastProvider는 보통 앱 최상위에 두며, 여러 provider의 큐와 DOM ID도 각각 분리한다. `regionLabel`과 `dismissLabel`은 소비 로케일에 맞게 주입한다.
 duration이 0 이하이면 알림을 유지하고, 포인터·포커스 상호작용 및 비활성 페이지에서는 타이머를 멈춘다.
+
+Tabs의 기본 선택 방식은 자동이며 `activationMode="manual"`이면 방향키는 포커스만 옮기고 Enter/Space로 선택한다. `tabId`/`panelId`로 접근성 ID를 지정한다. `unstyled`와 네이티브 속성을 받는 `asChild` 콜백으로 앱의 레이아웃과 버튼을 Ark import 없이 유지한다. 비활성 패널은 hidden/inert와 display 제외를 보장한다. 작업 모달과 허용된 재시도 영역은 [Dialog 프레임·외부 포커스 안내](dialog-focus.ko.md)를 참고한다.
 Tabs의 hidden 패널은 인스턴스를 유지하지만 실행 중인 effect나 서버 요청을 자동 중단하지 않는다.
 
 ## 검증

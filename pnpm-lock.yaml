@@ -94,6 +94,12 @@ importers:
       '@devslab/dds-tokens':
         specifier: workspace:0.17.1
         version: link:../dds-tokens
+      '@zag-js/aria-hidden':
+        specifier: 1.45.0
+        version: 1.45.0
+      '@zag-js/focus-trap':
+        specifier: 1.45.0
+        version: 1.45.0
     devDependencies:
       '@testing-library/jest-dom':
         specifier: 6.9.1

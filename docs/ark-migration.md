@@ -30,6 +30,8 @@ Normally use an application-level ToastProvider; multiple providers keep indepen
 Non-positive durations persist until dismissal; pointer/focus interaction and inactive pages pause expiry.
 Hidden Tabs panels preserve instances but do not automatically suspend effects or server requests.
 
+Tabs defaults to automatic activation; `activationMode="manual"` moves focus with arrows and activates on Enter/Space. `tabId`/`panelId` customize accessible IDs. `unstyled` and native-attribute `asChild` callbacks let Tabs/Tab retain an application's layout and buttons without Ark imports. Inactive panels own hidden/inert and display exclusion. See [Dialog frames and external focus regions](dialog-focus.md) for task dialogs and authorized retry regions.
+
 ## Verification
 
 Run `pnpm --filter @devslab/dds-solid test`, `check`, `build`, and `node --test tests/dds-solid-contracts.test.mjs`.

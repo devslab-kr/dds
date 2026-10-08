@@ -46,7 +46,9 @@
     "@ark-ui/solid": "5.39.3",
     "@devslab/dds-css": "workspace:0.17.1",
     "@devslab/dds-icons": "workspace:0.17.1",
-    "@devslab/dds-tokens": "workspace:0.17.1"
+    "@devslab/dds-tokens": "workspace:0.17.1",
+    "@zag-js/aria-hidden": "1.45.0",
+    "@zag-js/focus-trap": "1.45.0"
   },
   "peerDependencies": {
     "solid-js": "1.9.15"
