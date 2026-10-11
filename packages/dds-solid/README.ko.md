@@ -25,3 +25,13 @@ DDS가 공개 API와 시각 토큰을 소유한다. 기존 import와 콜백 값�
 하나를 두고, 알림 영역 이름이 필요하면 현지화한 `regionLabel`을 주입한다.
 포인터·포커스 상호작용 중과 브라우저 페이지가 비활성일 때는 알림 타이머가
 멈춘다. duration이 0 이하이면 명시적으로 닫을 때까지 유지한다.
+
+## DatePicker
+
+```tsx
+import { DatePicker } from "@devslab/dds-solid";
+const [date, setDate] = createSignal("");
+<DatePicker label="시작 날짜" value={date()} onChange={setDate} />
+```
+
+Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`; optional `min`, `max` and `disabled` constrain selection. Time remains a separate field.

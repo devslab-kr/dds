@@ -2,12 +2,13 @@ import { renderToString } from "solid-js/web";
 import { expect, it } from "vitest";
 
 import {
-  Button, Checkbox, ConsoleShell, Dialog, Field, Icon, IconButton, Radio, RadioGroup, Select, Switch,
+  DatePicker, Button, Checkbox, ConsoleShell, Dialog, Field, Icon, IconButton, Radio, RadioGroup, Select, Switch,
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip,
 } from "../index";
 
 const AllPrimitives = () => <div>
   <Button>Hydrate</Button>
+  <DatePicker label="날짜" value="2026-10-12" onChange={()=>{}}/>
   <IconButton aria-label="Complete"><Icon name="check" /></IconButton>
   <Field label="Country">{(control) => <Select {...control}><option>Korea</option></Select>}</Field>
   <Checkbox label="Check" defaultChecked />

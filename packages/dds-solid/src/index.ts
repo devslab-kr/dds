@@ -27,3 +27,5 @@ export type { StatusTone } from "./status-pill";
 export { Tab, TabList, TabPanel, Tabs, type TabPanelProps, type TabProps, type TabsProps } from "./tabs";
 export { ToastProvider, useToast, type ToastApi, type ToastInput, type ToastProviderProps, type ToastTone } from "./toast";
 export { Tooltip, type TooltipProps, type TooltipTriggerProps } from "./tooltip";
+
+export { DatePicker, type DatePickerProps } from "./date-picker";

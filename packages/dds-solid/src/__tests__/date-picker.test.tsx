@@ -1,0 +1,30 @@
+import {createSignal} from 'solid-js';
+import {render} from 'solid-js/web';
+import {afterEach,expect,it,vi} from 'vitest';
+import {DatePicker} from '../index';
+let dispose:(()=>void)|undefined;
+afterEach(()=>{dispose?.();document.body.replaceChildren();});
+it('selects and clears a controlled date, supports limits and Escape',async()=>{
+ const host=document.body.appendChild(document.createElement('div'));
+ const [date,setDate]=createSignal('2026-10-12');
+ dispose=render(()=><DatePicker label="날짜" value={date()} onChange={setDate} min="2026-10-10" max="2026-10-20"/>,host);
+ const trigger=host.querySelector<HTMLButtonElement>('[data-part="trigger"]')!;
+ trigger.click();
+ await vi.waitFor(()=>expect(document.querySelector('[data-value="2026-10-13"][data-part="table-cell-trigger"]')).not.toBeNull());
+ expect(document.querySelector('[data-value="2026-10-09"][data-part="table-cell-trigger"]')?.getAttribute('aria-disabled')).toBe('true');
+ document.querySelector<HTMLElement>('[data-value="2026-10-13"][data-part="table-cell-trigger"]')!.click();
+ await vi.waitFor(()=>expect(date()).toBe('2026-10-13'));
+ trigger.click();
+ await vi.waitFor(()=>expect(trigger.getAttribute('aria-expanded')).toBe('true'));
+ document.querySelector<HTMLButtonElement>('[data-part="clear-trigger"]')!.click();
+ await vi.waitFor(()=>expect(date()).toBe(''));
+ trigger.click();
+ await vi.waitFor(()=>expect(trigger.getAttribute('aria-expanded')).toBe('true'));
+ document.querySelector<HTMLElement>('[data-part="content"]')!.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+ await vi.waitFor(()=>expect(trigger.getAttribute('aria-expanded')).toBe('false'));
+});
+it('disables both date input and calendar trigger',()=>{
+ const host=document.body.appendChild(document.createElement('div'));
+ dispose=render(()=><DatePicker label="날짜" value="" onChange={()=>{}} disabled/>,host);
+ expect(host.querySelector('input')?.disabled).toBe(true);expect(host.querySelector('button')?.disabled).toBe(true);
+});

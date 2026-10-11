@@ -41,3 +41,15 @@ import { DatePicker } from "@devslab/dds-react";
 ```
 
 Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`. Optional `min`, `max` and `disabled` constrain selection. Import the package stylesheet. Time selection is a separate field. Ark owns calendar focus, keyboard navigation and popup dismissal.
+
+## createStatusPill
+
+```tsx
+const StatusPill = createStatusPill({
+  tones: { job: { ready: "success" } },
+  label: (domain, value, locale) => value === "ready" ? "준비됨" : undefined,
+});
+<StatusPill domain="job" value="ready" locale="ko" />
+```
+
+Unknown closed-domain status values throw to expose incomplete catalogs. Domains listed in `openDomains` instead show the unknown value as escaped text.

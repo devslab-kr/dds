@@ -24,3 +24,13 @@ same. See [the migration guide](../../docs/ark-migration.md) for integration det
 `regionLabel` if the notification region needs a name. Toast timers pause during
 pointer/focus interaction and when the browser page is idle. A non-positive duration
 keeps the toast until dismissed.
+
+## DatePicker
+
+```tsx
+import { DatePicker } from "@devslab/dds-solid";
+const [date, setDate] = createSignal("");
+<DatePicker label="시작 날짜" value={date()} onChange={setDate} />
+```
+
+Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`; optional `min`, `max` and `disabled` constrain selection. Time remains a separate field.
