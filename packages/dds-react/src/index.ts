@@ -12,3 +12,6 @@ export { Checkbox as ArkCheckbox } from "@ark-ui/react/checkbox";
 export { Switch as ArkSwitch } from "@ark-ui/react/switch";
 export { Field as ArkField } from "@ark-ui/react/field";
 export { Toast as ArkToast } from "@ark-ui/react/toast";
+
+export * from "./date-picker";
+export { DatePicker as ArkDatePicker } from "@ark-ui/react/date-picker";

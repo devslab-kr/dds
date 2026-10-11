@@ -26,3 +26,12 @@ Tooltip은 하나의 포커스 가능한 요소 또는 trigger props를 받는 r
 ConsoleShell은 brand/nav/header/labels/foot을 받으며 인스턴스별 고유 ID를 사용합니다. 브라우저 전역 없이 import와 SSR이 가능하고, React useId로 hydration 연결을 유지합니다. Solid accessor/ref/render 방식 대신 React JSX/ref와 Ark asChild 요소 구성을 사용합니다. AG Grid는 별도 패키지 `@devslab/dds-table-react`입니다.
 
 ESM, 타입 선언 및 명시적 CSS export를 제공합니다. React/React DOM/Ark를 번들에 복제하지 않습니다. 라이선스는 저장소와 동일한 포함 LICENSE를 확인하세요. 상세 API는 영문 README를 참고하세요.
+
+## DatePicker
+
+```tsx
+import { DatePicker } from "@devslab/dds-react";
+<DatePicker label="시작 날짜" value={date} onChange={setDate} />
+```
+
+Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`. Optional `min`, `max` and `disabled` constrain selection. Import the package stylesheet. Time selection is a separate field. Ark owns calendar focus, keyboard navigation and popup dismissal.

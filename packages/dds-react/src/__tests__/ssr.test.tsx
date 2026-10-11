@@ -18,6 +18,7 @@ import {
   TabPanel,
   ToastProvider,
   Dialog,
+  DatePicker,
 } from "../index";
 it("imports and renders without browser globals or translated fallback copy", () => {
   expect(typeof window).toBe("undefined");
@@ -25,6 +26,7 @@ it("imports and renders without browser globals or translated fallback copy", ()
     <ToastProvider>
       <Field label="이름">{(props) => <input {...props} />}</Field>
       <Button>저장</Button>
+      <DatePicker label="날짜" value="2026-10-12" onChange={()=>{}} />
       <Tabs defaultValue="a">
         <TabList aria-label="영역">
           <Tab value="a">첫째</Tab>
