@@ -116,10 +116,15 @@ describe("React DDS behavior", () => {
       </StrictMode>
     );
     await userEvent.click(screen.getByRole("button", { name: "열기" }));
-    await userEvent.click(
-      await screen.findByRole("button", { name: "안쪽 열기" })
-    );
-    await screen.findByRole("dialog", { name: "안쪽" });
+    const innerTrigger = await screen.findByRole("button", { name: "안쪽 열기" });
+    // Ark activates its focus trap and modal layer on animation frames. A
+    // rendered trigger alone does not establish that the outer layer is ready.
+    const outerDialog = await screen.findByRole("dialog", { name: "바깥" });
+    // jsdom has no layout, so Ark initially focuses the dialog fallback.
+    await waitFor(() => expect(outerDialog).toHaveFocus());
+    await userEvent.click(innerTrigger);
+    const innerDialog = await screen.findByRole("dialog", { name: "안쪽" });
+    await waitFor(() => expect(innerDialog).toHaveFocus());
     await userEvent.keyboard("{Escape}");
     await waitFor(() =>
       expect(
