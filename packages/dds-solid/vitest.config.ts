@@ -7,7 +7,7 @@ export default defineConfig({
     pool: process.platform === "win32" ? "threads" : "forks",
     maxWorkers: 2,
     environment: "jsdom",
-    include: ["src/__tests__/a11y.test.tsx", "src/__tests__/primitives.test.tsx"],
+    include: ["src/__tests__/a11y.test.tsx", "src/__tests__/primitives.test.tsx", "src/__tests__/date-picker.test.tsx"],
     globals: false,
     restoreMocks: true,
     setupFiles: ["src/__tests__/setup.ts"],

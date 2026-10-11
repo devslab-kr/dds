@@ -16,3 +16,21 @@
   transform: translate(var(--x), var(--y));
   opacity: var(--opacity);
 }
+
+/* Ark DatePicker interaction with DDS visual tokens. */
+.dds-date-picker-control {display:flex;align-items:stretch;gap:8px;}
+.dds-date-picker-control input {min-width:0;}
+.dds-date-picker-control .dds-btn {flex-shrink:0;min-width:44px;padding-inline:10px;}
+.dds-date-picker-positioner {z-index:100;}
+.dds-date-picker-content {width:320px;max-width:calc(100vw - 32px);padding:16px;background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-md);font-family:var(--dds-font-family-sans);font-size:var(--dds-typo-body-2-font-size);}
+.dds-date-picker-header {display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:600;margin-bottom:12px;}
+.dds-date-picker-table {width:100%;border-collapse:collapse;table-layout:fixed;}
+.dds-date-picker-table th {font-size:12px;font-weight:500;color:var(--dds-color-text-secondary);height:32px;}
+.dds-date-picker-table td {padding:0;text-align:center;}
+.dds-date-picker-table [data-part="table-cell-trigger"] {display:flex;align-items:center;justify-content:center;width:100%;height:40px;border:0;border-radius:var(--dds-radius-sm);font:inherit;color:inherit;background:transparent;cursor:pointer;}
+.dds-date-picker-table [data-part="table-cell-trigger"]:hover {background:var(--dds-color-bg-brand-subtle);}
+.dds-date-picker-table [data-outside-range] {color:var(--dds-color-text-secondary);}
+.dds-date-picker-table [data-part="table-cell-trigger"][data-selected] {background:var(--dds-color-bg-brand);color:var(--dds-color-text-on-brand);}
+.dds-date-picker-table [data-today]:not([data-selected]) {text-decoration:underline;text-underline-offset:4px;}
+.dds-date-picker-content :focus-visible {outline:2px solid var(--dds-color-text-brand);outline-offset:2px;}
+.dds-date-picker-footer {display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--dds-color-border-default);}
