@@ -32,3 +32,12 @@ Advanced compositional parts are exported as `ArkDialog`, `ArkTabs`, `ArkTooltip
 ConsoleShell accepts caller brand/navigation/header/labels/foot slots and unique per-instance landmark IDs. Its rail uses caller route state; no router or business store is included. Imports and server rendering require no browser globals; client-only effects start after mounting. React `useId` keeps label associations stable through hydration. React JSX, React refs and Ark `asChild` element composition differ from Solid render callbacks/accessors. The grid is a separate dependency: use `@devslab/dds-table-react` for AG Grid.
 
 ESM and declarations are shipped; React, React DOM and Ark remain external to the DDS bundle. This package is source-available under the included LICENSE, matching the DDS repository.
+
+## DatePicker
+
+```tsx
+import { DatePicker } from "@devslab/dds-react";
+<DatePicker label="시작 날짜" value={date} onChange={setDate} />
+```
+
+Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`. Optional `min`, `max` and `disabled` constrain selection. Import the package stylesheet. Time selection is a separate field. Ark owns calendar focus, keyboard navigation and popup dismissal.
