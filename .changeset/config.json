@@ -9,7 +9,9 @@
       "@devslab/dds-icons",
       "@devslab/dds-solid",
       "@devslab/site-kit",
-      "@devslab/dds-table"
+      "@devslab/dds-table",
+      "@devslab/dds-react",
+      "@devslab/dds-table-react"
     ]
   ],
   "linked": [],
@@ -17,6 +19,7 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@devslab/compatibility-canary"
+    "@devslab/compatibility-canary",
+    "@devslab/react-canary"
   ]
 }

@@ -20,24 +20,24 @@
 
 ### 1. Ark React primitives
 
-- [ ] Add `packages/dds-react` manifest/config and failing behavior/SSR tests.
-- [ ] Implement the component inventory and styling adapter; run RED/GREEN tests.
-- [ ] Validate controlled modes, refs, nested overlays/focus restoration, StrictMode cleanup, labels and accessibility.
-- [ ] Build ESM and declarations, document API and examples.
+- [x] Add `packages/dds-react` manifest/config and failing behavior/SSR tests.
+- [x] Implement the component inventory and styling adapter; run RED/GREEN tests.
+- [x] Validate controlled modes, refs, nested overlays/focus restoration, StrictMode cleanup, labels and accessibility.
+- [x] Build ESM and declarations, document API and examples.
 
 ### 2. AG Grid React wrapper
 
-- [ ] Add `packages/dds-table-react` manifest/config and failing SSR/theme/prop tests.
-- [ ] Implement typed DataTable/native AG escape hatch and named hydration-safe browser boundary.
-- [ ] Validate real Community behavior, updates, React cell renderers, refs/API and cleanup.
-- [ ] Build ESM/declarations and document Community/Enterprise limits.
+- [x] Add `packages/dds-table-react` manifest/config and failing SSR/theme/prop tests.
+- [x] Implement typed DataTable/native AG escape hatch and named hydration-safe browser boundary.
+- [x] Validate real Community behavior, updates, React cell renderers, refs/API and cleanup.
+- [x] Build ESM/declarations and document Community/Enterprise limits.
 
 ### 3. Integration and verification
 
-- [ ] Update single workspace lockfile, package inventory/fixed group and changeset.
-- [ ] Add a dedicated React browser fixture and tests for actual focus, overlays, grid keyboard/sort/filter/edit/selection, density and themes.
-- [ ] Add packed fresh-consumer SSR/hydration/import verification and wire all new gates into normal CI/release.
-- [ ] Run existing affected contracts and regression gates, review package contents and dependency boundaries.
+- [x] Update single workspace lockfile, package inventory/fixed group and changeset.
+- [x] Add a dedicated React browser fixture and tests for actual focus, overlays, grid keyboard/sort/filter/edit/selection, density and themes.
+- [x] Add packed fresh-consumer SSR/hydration/import verification and wire all new gates into normal CI/release.
+- [x] Run existing affected contracts and regression gates, review package contents and dependency boundaries.
 - [ ] Commit complete implementation and create an attached reviewable DDS PR with exact verification evidence.
 
 ## Review focus

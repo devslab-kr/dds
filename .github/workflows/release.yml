@@ -65,6 +65,13 @@ jobs:
       - run: pnpm run verify:table:test
       - run: pnpm run verify:table:a11y
       - run: pnpm run verify:table:release
+      - run: pnpm run verify:react:test
+      - run: pnpm run verify:react:a11y
+      - run: pnpm run verify:react:browser
+      - run: pnpm run verify:react:release
+      - run: pnpm run verify:table-react:test
+      - run: pnpm run verify:table-react:browser
+      - run: pnpm run verify:table-react:release
       - run: pnpm run verify:site-kit:ui
       - run: pnpm run verify:site-kit:browser
       - run: pnpm run verify:site-kit:release

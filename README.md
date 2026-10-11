@@ -19,6 +19,9 @@ React Native are consumers.
 | [`packages/dds-icons/`](packages/dds-icons/) | `@devslab/dds-icons` — the icon set: 40 core (24 grid, 1.6 stroke) + 7 devslab.kr `site-` icons, shipped as SVG files, a sprite and a path-data map |
 | [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — SolidJS accessible primitives with controlled/uncontrolled state, SSR/hydration, keyboard, focus, and lifecycle contracts |
 | [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — public infrastructure for product sites: strict 14-locale i18n, SEO/GEO builders, TanStack Start metadata adapter, opt-in analytics consent (D-034), and accessible SolidJS shared shells |
+| [`packages/dds-react/`](packages/dds-react/) | `@devslab/dds-react` — Ark UI based React primitives with DDS styles, refs, keyboard/focus and SSR contracts |
+| [`packages/dds-table/`](packages/dds-table/) | `@devslab/dds-table` — existing SolidJS TanStack table |
+| [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS themed AG Grid Community React wrapper; native grid options and API remain available |
 | [`preview/index.html`](preview/index.html) | Self-contained foundations & components preview — open in a browser (`components.html`, `icons.html` alongside) |
 | [`brand/index.html`](brand/index.html) | Brand identity guide: logo rules, Electric Cyan, motifs, voice & tone |
 
@@ -50,7 +53,10 @@ pnpm workspace. `pnpm install`, then:
   `verify:site-kit:release` — exact locale/catalog contracts, shared UI behavior,
   localized discovery documents, pack, fresh-consumer and publish dry-run gates
 
-The five public packages release in lockstep through Changesets, and the release
+- `pnpm verify:react:test`, `verify:react:a11y`, `verify:react:browser`, `verify:react:release` — React behavior, accessibility, real browser and fresh packed SSR/hydration consumers
+- `pnpm verify:table-react:test`, `verify:table-react:browser`, `verify:table-react:release` — actual AG Grid behavior, browser layout/keyboard/axe and fresh packed consumers
+
+The eight public packages release in lockstep through Changesets, and the release
 is automatic: every push to `main` runs `.github/workflows/release.yml`, which
 passes the full verification gate and then lets `changesets/action` either open
 the "chore: release dds" version PR (when changeset files are waiting) or publish

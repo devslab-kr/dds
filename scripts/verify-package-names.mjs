@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const packages = ["dds-tokens", "dds-css", "dds-icons", "dds-solid", "site-kit"];
+const packages = ["dds-tokens", "dds-css", "dds-icons", "dds-solid", "site-kit", "dds-table", "dds-react", "dds-table-react"];
 for (const packageName of packages) {
   const manifest = JSON.parse(
     await readFile(new URL(`../packages/${packageName}/package.json`, import.meta.url), "utf8"),
@@ -26,7 +26,7 @@ async function scan(directory) {
       const content = await readFile(path, "utf8").catch(() => "");
       assert.doesNotMatch(
         content,
-        /@devslab-kr\/(?:dds-tokens|dds-css|dds-icons|dds-solid|site-kit)/,
+        /@devslab-kr\/(?:dds-tokens|dds-css|dds-icons|dds-solid|site-kit|dds-table|dds-react|dds-table-react)/,
         `legacy package scope remains in ${path}`,
       );
     }

@@ -7,7 +7,7 @@
     "check": "pnpm -r run check && node scripts/check-docs-sync.mjs && node scripts/check-consumers.mjs",
     "check:consumers": "node scripts/check-consumers.mjs",
     "verify": "pnpm run build && pnpm run check",
-    "verify:source:stage1-2": "node --test packages/compatibility-canary/tests/contracts.test.mjs packages/compatibility-canary/tests/application-contracts.test.mjs tests/foundation-contracts.test.mjs",
+    "verify:source:stage1-2": "node --test packages/compatibility-canary/tests/contracts.test.mjs packages/compatibility-canary/tests/application-contracts.test.mjs tests/foundation-contracts.test.mjs tests/react-packages-contracts.test.mjs",
     "verify:source:stage3-4": "node --test tests/dds-solid-contracts.test.mjs tests/site-kit-core.test.mjs tests/site-kit-consent.test.mjs tests/site-kit-publisher.test.mjs tests/site-kit-contracts.test.mjs tests/site-kit-worker.test.mjs",
     "storybook": "pnpm run build && storybook dev -p 6006",
     "build-storybook": "pnpm run build && storybook build",
@@ -32,7 +32,14 @@
     "verify:site-kit:release": "pnpm run verify:foundation:core && pnpm --filter @devslab/dds-solid run build && pnpm --filter @devslab/site-kit run build && node scripts/verify-site-kit-release.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version && pnpm install --lockfile-only",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "verify:react:test": "node --test tests/react-packages-contracts.test.mjs && pnpm --filter @devslab/dds-react run test && pnpm --filter @devslab/dds-react run check && pnpm --filter @devslab/dds-react run build",
+    "verify:react:a11y": "pnpm --filter @devslab/dds-react run test:a11y",
+    "verify:react:browser": "pnpm --filter @devslab/dds-react run build && pnpm --filter @devslab/dds-table-react run build && pnpm --filter @devslab/react-canary run build && playwright test --config playwright.react.config.ts --grep \"ui \"",
+    "verify:react:release": "pnpm run verify:foundation:core && pnpm --filter @devslab/dds-react run build && node scripts/verify-react-release.mjs react && node scripts/verify-react-release.mjs react --react-version=18.3.1",
+    "verify:table-react:test": "pnpm --filter @devslab/dds-table-react run test && pnpm --filter @devslab/dds-table-react run check && pnpm --filter @devslab/dds-table-react run build",
+    "verify:table-react:browser": "pnpm --filter @devslab/dds-react run build && pnpm --filter @devslab/dds-table-react run build && pnpm --filter @devslab/react-canary run build && playwright test --config playwright.react.config.ts --grep \"grid \"",
+    "verify:table-react:release": "pnpm run verify:foundation:core && pnpm --filter @devslab/dds-table-react run build && node scripts/verify-react-release.mjs table-react && node scripts/verify-react-release.mjs table-react --react-version=18.3.1"
   },
   "engines": {
     "node": ">=20"

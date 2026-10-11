@@ -5,6 +5,22 @@
 
 ---
 
+## D-038 — React는 Ark UI, React 테이블은 AG Grid Community를 얇게 감싼다 (2026-10-11)
+
+`@devslab/dds-react`는 기존 DDS 공개 컴포넌트와 디자인을 React에 제공하며,
+복합 컴포넌트의 상태·키보드·포커스 동작은 Ark UI가 담당한다. React 18.3/19를
+peer dependency로 받고 토큰·CSS·아이콘을 기존 패키지와 공유한다.
+
+`@devslab/dds-table-react`는 AG Grid Community의 React 컴포넌트를 감싼다.
+DDS는 기본 테마·밀도·접근성 이름과 서버의 준비 영역을 제공하고, 엔진 옵션은
+`gridProps`, 실제 API는 `gridRef`로 전달한다. 그리드 본문은 마운트 후 생성된다.
+현재는 여러 엔진을 공통 API로 통합하는 팩토리를 만들지 않는다. 기존
+SolidJS `dds-table`과 FM 프로젝트는 이번 작업에서 변경하지 않는다.
+
+새 패키지는 기존 Changesets 버전 그룹에 포함한다. DOM 테스트뿐 아니라
+실제 브라우저의 포커스·정렬·편집·열 조절·테마·접근성과 신규 tarball 소비자의
+SSR/hydration 검증을 CI와 배포 게이트로 유지한다.
+
 ## D-037 — DDS API 안에서 Ark UI 동작을 사용하고 의존성을 크레딧으로 명시 (2026-10-08)
 
 **결정.** DDS의 공개 컴포넌트 API와 시각 토큰은 유지하고, 복합 컴포넌트의 접근성·키보드·포커스 동작은 내부에서 Ark UI로 연결한다. 소비자는 DDS를 계속 import하고 Ark의 details 객체 대신 기존 DDS 콜백 값을 받는다. 네이티브 버튼과 select의 계약은 유지한다. 별도 Ark 래퍼 패키지는 만들지 않는다.
