@@ -38,8 +38,10 @@
 - [x] Add a dedicated React browser fixture and tests for actual focus, overlays, grid keyboard/sort/filter/edit/selection, density and themes.
 - [x] Add packed fresh-consumer SSR/hydration/import verification and wire all new gates into normal CI/release.
 - [x] Run existing affected contracts and regression gates, review package contents and dependency boundaries.
-- [ ] Commit complete implementation and create an attached reviewable DDS PR with exact verification evidence.
+- [x] Commit complete implementation and create an attached reviewable DDS PR with exact verification evidence.
 
 ## Review focus
 
 Nested overlays/StrictMode cleanup; controlled prop/ref updates; browser-free imports and stable initial hydration; real grid geometry/keyboard behavior; themed/long-label/mobile appearance. These must be covered by behavior tests, not implementation snapshots alone.
+
+Verification: all planned implementation gates passed locally, including React 18.3.1 and 19.3.0 fresh consumers. Reviewable PR: https://github.com/devslab-kr/dds/pull/88. npm publication remains with the normal Changesets release.
