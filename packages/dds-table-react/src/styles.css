@@ -1,0 +1,25 @@
+.dds-data-grid {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  position: relative;
+  color: var(--dds-color-text-primary);
+  background: var(--dds-color-bg-default);
+  font-family: var(--dds-font-family-sans);
+  border-radius: var(--dds-radius-md);
+}
+.dds-data-grid > .ag-root-wrapper { block-size: 100%; }
+.dds-data-grid .ag-cell:focus-visible {
+  outline: 2px solid var(--dds-color-border-focus);
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dds-data-grid *, .dds-data-grid *::before, .dds-data-grid *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+@media (forced-colors: active) {
+  .dds-data-grid { forced-color-adjust: auto; }
+  .dds-data-grid .ag-cell:focus-visible { outline-color: Highlight; }
+}

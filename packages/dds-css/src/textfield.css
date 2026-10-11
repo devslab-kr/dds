@@ -51,7 +51,7 @@
   font-size: var(--dds-typo-caption-font-size);
   line-height: var(--dds-typo-caption-line-height);
   font-weight: var(--dds-typo-caption-font-weight);
-  color: var(--dds-color-text-muted);
+  color: var(--dds-color-text-secondary);
 }
 
 .dds-field--error .dds-input,

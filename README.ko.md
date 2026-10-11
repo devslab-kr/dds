@@ -18,6 +18,9 @@
 | [`packages/dds-icons/`](packages/dds-icons/) | `@devslab/dds-icons` — 아이콘 세트: 코어 40종(24 그리드·1.6 스트로크) + devslab.kr `site-` 7종. SVG 파일·스프라이트·path 데이터 맵 3형태 출하 |
 | [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — controlled/uncontrolled 상태, SSR·hydration, 키보드, 포커스, 수명주기 계약을 갖춘 SolidJS 접근성 primitive |
 | [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — 엄격한 14개 로케일 i18n, SEO/GEO 생성기, TanStack Start 메타데이터 어댑터, 옵트인 분석 동의(D-034), 접근 가능한 SolidJS 공통 셸을 담은 공개 제품 사이트 인프라 |
+| [`packages/dds-react/`](packages/dds-react/) | `@devslab/dds-react` — Ark UI 기반 React 컴포넌트, DDS 스타일·ref·키보드·포커스·SSR 계약 |
+| [`packages/dds-table/`](packages/dds-table/) | `@devslab/dds-table` — 기존 SolidJS TanStack 테이블 |
+| [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS 테마를 적용한 AG Grid Community React 래퍼. 네이티브 옵션·API를 그대로 사용 |
 | [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림 — `components.html`, `icons.html`도 함께) |
 | [`brand/index.html`](brand/index.html) | 브랜드 아이덴티티 가이드: 로고 규정, Electric Cyan, 모티프, 보이스 & 톤 |
 
@@ -48,7 +51,10 @@ pnpm 워크스페이스. `pnpm install` 후:
   `verify:site-kit:release` — 정확한 로케일·카탈로그 계약, 공통 UI 동작,
   다국어 검색 문서, 패키징·신규 소비자·publish dry-run 게이트
 
-다섯 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스하며, 릴리스는
+- `pnpm verify:react:test`, `verify:react:a11y`, `verify:react:browser`, `verify:react:release` — React 동작·접근성·실제 브라우저·패키징된 SSR/hydration 소비자 검증
+- `pnpm verify:table-react:test`, `verify:table-react:browser`, `verify:table-react:release` — 실제 AG Grid 동작·브라우저 레이아웃/키보드/axe·패키징된 소비자 검증
+
+여덟 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스하며, 릴리스는
 자동이다: `main`에 푸시될 때마다 `.github/workflows/release.yml`이 전체 검증
 게이트를 통과한 뒤 `changesets/action`이 — 대기 중인 changeset 파일이 있으면
 "chore: release dds" 버전 PR을 열고, 그 PR이 방금 머지됐으면 `main`에는 있지만
