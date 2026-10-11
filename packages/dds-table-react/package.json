@@ -1,19 +1,40 @@
 {
   "name": "@devslab/dds-table-react",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "DDS themed Community AG Grid for React",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": { "type": "git", "url": "https://github.com/devslab-kr/dds.git", "directory": "packages/dds-table-react" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/dds-table-react"
+  },
   "homepage": "https://devslab.kr/brand/",
-  "bugs": { "url": "https://github.com/devslab-kr/dds/issues" },
-  "publishConfig": { "registry": "https://registry.npmjs.org", "access": "public", "provenance": true },
-  "files": ["dist", "README.md", "README.ko.md", "LICENSE"],
-  "sideEffects": ["**/*.css"],
+  "bugs": {
+    "url": "https://github.com/devslab-kr/dds/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ko.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
@@ -22,12 +43,15 @@
     "test": "vitest run --config vitest.config.ts && vitest run --config vitest.ssr.config.ts"
   },
   "dependencies": {
-    "@devslab/dds-css": "workspace:0.19.0",
-    "@devslab/dds-tokens": "workspace:0.19.0",
+    "@devslab/dds-css": "workspace:0.20.0",
+    "@devslab/dds-tokens": "workspace:0.20.0",
     "ag-grid-community": "36.2.0",
     "ag-grid-react": "36.2.0"
   },
-  "peerDependencies": { "react": "^18.3.0 || ^19.0.0", "react-dom": "^18.3.0 || ^19.0.0" },
+  "peerDependencies": {
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0"
+  },
   "devDependencies": {
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -40,5 +64,11 @@
     "vite": "8.2.1",
     "vitest": "4.1.1"
   },
-  "keywords": ["react", "ag-grid", "table", "design-system", "devslab"]
+  "keywords": [
+    "react",
+    "ag-grid",
+    "table",
+    "design-system",
+    "devslab"
+  ]
 }
