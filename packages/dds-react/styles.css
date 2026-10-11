@@ -24,7 +24,7 @@
 .dds-date-picker-control input {min-width:0;}
 .dds-date-picker-control .dds-btn {flex-shrink:0;min-width:44px;padding-inline:10px;}
 .dds-date-picker-positioner {z-index:100;}
-.dds-date-picker-content {width:320px;max-width:calc(100vw - 32px);padding:16px;background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-md);font-family:var(--dds-font-family-sans);font-size:var(--dds-typo-body-2-font-size);}
+.dds-date-picker-content {width:320px;max-width:calc(100vw - 32px);max-height:min(calc(100dvh - 32px),var(--available-height,100dvh));overflow:auto;box-sizing:border-box;padding:16px;background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-md);font-family:var(--dds-font-family-sans);font-size:var(--dds-typo-body-2-font-size);}
 .dds-date-picker-header {display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:600;margin-bottom:12px;}
 .dds-date-picker-table {width:100%;border-collapse:collapse;table-layout:fixed;}
 .dds-date-picker-table th {font-size:12px;font-weight:500;color:var(--dds-color-text-secondary);height:32px;}
