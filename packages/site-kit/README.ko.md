@@ -511,3 +511,20 @@ import하는 소비자는 kit 전체로 클라이언트 JS ~150 KB가 아니라 
 `pnpm check`가 최소 소비자(`fixtures/bundle-probe`)를 빌드해 국기 본문이 메인
 청크로 되돌아오면 실패시킨다. 본문은 서버 렌더 HTML에는 여전히 실린다 —
 가져오는 파일로 옮기는 것은 별도 결정이다.
+
+### React·Solid 공통 화면과 SEO
+
+React는 `@devslab/site-kit/react`의 `SiteHeader`, `SiteFooter`,
+`ProductBrand`와 `react-chrome.css`를 사용합니다. Solid는 기존 Solid
+내보내기와 `styles.css`를 유지합니다. 두 스타일은 `chrome-tokens.css`의
+컨테이너 너비와 반응형 여백을 공유합니다.
+
+`metadataHead(buildMetadata(input), options)`는 프레임워크 독립적인
+Open Graph·Twitter·canonical·robots·브랜드 아이콘 태그를 생성합니다.
+Solid/TanStack의 `toTanStackHead`도 같은 생성기를 사용하며 기존 호환성을
+위해 아이콘은 명시적으로 켜야 합니다. 내부 앱은
+`{ canonical: false, robots: "noindex, nofollow" }`를 지정할 수 있습니다.
+아이콘 파일은 `node node_modules/@devslab/site-kit/scripts/sync-brand.mjs public`으로 동기화합니다.
+
+DDS는 공통 표현과 기본값을 관리합니다. 이후 Admin에서 관리할 문서 내용,
+게시 버전, 고객별 동의 기록은 DDS 상태가 아닌 별도 입력으로 연결합니다.

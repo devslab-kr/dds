@@ -112,6 +112,33 @@ export function buildRobots({ baseUrl, environment, policies }) {
  */
 export const BRAND_ICON_FILES = Object.freeze(["favicon.svg", "mark-48.png", "favicon.ico", "apple-touch-icon.png"]);
 
+/** Framework-neutral head descriptors consumed by both Next and TanStack. */
+export function metadataHead(metadata, { canonical = true, icons = true, robots, iconBasePath = "/brand", imageAlt, imageWidth, imageHeight, localeAlternates = [] } = {}) {
+  const meta = [
+    { title: metadata.title },
+    { name: "description", content: metadata.description },
+    { property: "og:type", content: metadata.openGraph.type },
+    { property: "og:site_name", content: metadata.openGraph.siteName },
+    { property: "og:title", content: metadata.openGraph.title },
+    { property: "og:description", content: metadata.openGraph.description },
+    { property: "og:url", content: metadata.openGraph.url },
+    { property: "og:image", content: metadata.openGraph.images[0].url },
+    { property: "og:locale", content: ({ ko: "ko_KR", en: "en_US" })[metadata.openGraph.locale] ?? metadata.openGraph.locale.replace("-", "_") },
+    { name: "twitter:card", content: metadata.twitter.card },
+    { name: "twitter:title", content: metadata.twitter.title },
+    { name: "twitter:description", content: metadata.twitter.description },
+    { name: "twitter:image", content: metadata.twitter.image },
+  ];
+  if (robots) meta.push({ name: "robots", content: robots });
+  if (imageAlt) meta.push({ property: "og:image:alt", content: imageAlt });
+  if (imageWidth) meta.push({ property: "og:image:width", content: String(imageWidth) });
+  if (imageHeight) meta.push({ property: "og:image:height", content: String(imageHeight) });
+  meta.push(...localeAlternates.map((content) => ({ property: "og:locale:alternate", content })));
+  const links = icons ? [...brandIconLinks({ basePath: iconBasePath })] : [];
+  if (canonical) links.push({ rel: "canonical", href: metadata.canonical });
+  return { meta, links };
+}
+
 const iconBase = (basePath) => {
   const value = String(basePath ?? "/brand");
   if (/^[a-z][a-z0-9+.-]*:|^\/\//i.test(value)) {

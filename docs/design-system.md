@@ -403,7 +403,7 @@ The mark and wordmark stay monochrome, without gradients or glow.
 **Family footer.** Use a thin semantic border above a quiet, wrapping row.
 The left side holds a 16–20px monochrome mark, the publisher's copyright,
 and a `by DevsLab` link to `https://devslab.kr/`. The right side holds the
-product's actual policy and service links; emphasize the privacy link.
+product's actual policy and service links, with equal default weight.
 The exact copy and links belong to the consuming product. On narrow
 screens, stack the two groups with left alignment and retain usable touch
 targets. Business identity, registration and address belong on applicable
@@ -423,12 +423,14 @@ contrast. Remove it in forced-colors and print modes. Workspaces and the
 document editor keep their existing task surfaces.
 
 **Reuse boundary.** `@devslab/site-kit/devslab` supplies the neutral
-`DEVSLAB_PUBLISHER` identity. Site-kit currently exposes its header and
-footer UI through the Solid adapter, not a React adapter. React products
-use that identity with thin React renderers and the same visual rules;
-this does not mean the existing OSS or corporate footer is already one
-shared component. Promoting adapters or publishing packages is a separate
-implementation change. Preview the three lockups in `brand/index.html`.
+`DEVSLAB_PUBLISHER` identity. React consumers use `@devslab/site-kit/react`;
+Solid consumers retain the Solid adapter. Both stylesheets share container
+geometry through `chrome-tokens.css`. The neutral `metadataHead` generator
+supplies SEO descriptors to React consumers and the Solid/TanStack adapter.
+Consumers supply real links and actions; Admin-managed document content,
+versions and customer consent records are a future integration. Package
+publishing and production deployment remain separate operations.
+Preview the three lockups in `brand/index.html`.
 
 ---
 

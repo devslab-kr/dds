@@ -1,13 +1,15 @@
 {
   "name": "@devslab/site-kit",
   "version": "0.21.0",
-  "description": "Strict i18n, SEO/GEO, and Solid public-site shells for DevsLab products",
+  "description": "Strict i18n, SEO/GEO, and React/Solid public-site chrome for DevsLab products",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
   "sideEffects": [
     "./styles.css",
     "./site-sections.css",
-    "./fonts.css"
+    "./fonts.css",
+    "./react-chrome.css",
+    "./chrome-tokens.css"
   ],
   "repository": {
     "type": "git",
@@ -30,7 +32,11 @@
     "site-sections.css",
     "fonts.css",
     "README.md",
-    "README.ko.md"
+    "README.ko.md",
+    "react-chrome.css",
+    "brand",
+    "scripts/sync-brand.mjs",
+    "chrome-tokens.css"
   ],
   "main": "./src/core/index.mjs",
   "types": "./src/core/index.d.mts",
@@ -62,14 +68,22 @@
     "./styles.css": "./styles.css",
     "./site-sections.css": "./site-sections.css",
     "./fonts.css": "./fonts.css",
-    "./fonts/*": "./fonts/*"
+    "./fonts/*": "./fonts/*",
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./react-chrome.css": "./react-chrome.css",
+    "./brand/*": "./brand/*",
+    "./sync-brand": "./scripts/sync-brand.mjs"
   },
   "scripts": {
-    "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly && tsc -p tsconfig.react.json",
     "check": "node scripts/build-flags.mjs --check && node scripts/build-fonts.mjs --check && tsc -p tsconfig.json --noEmit && tsc -p fixtures/bundle-probe/tsconfig.json && node scripts/check-client-bundle.mjs",
     "test": "vitest run --config vitest.config.ts && vitest run --config vitest.ssr.config.ts",
     "test:a11y": "vitest run --config vitest.config.ts src/solid/__tests__/a11y.test.tsx",
-    "test:worker": "wrangler deploy --dry-run --config fixtures/worker/wrangler.jsonc --outdir dist-worker"
+    "test:worker": "wrangler deploy --dry-run --config fixtures/worker/wrangler.jsonc --outdir dist-worker",
+    "test:react": "vitest run --config vitest.react.config.ts"
   },
   "dependencies": {
     "@devslab/dds-solid": "workspace:0.21.0"
@@ -77,7 +91,8 @@
   "peerDependencies": {
     "@tanstack/solid-router": "1.170.30",
     "@tanstack/solid-start": "1.168.47",
-    "solid-js": "1.9.15"
+    "solid-js": "1.9.15",
+    "react": "^18.3.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "@tanstack/solid-router": {
@@ -85,16 +100,23 @@
     },
     "@tanstack/solid-start": {
       "optional": true
+    },
+    "react": {
+      "optional": true
     }
   },
   "devDependencies": {
-    "@types/node": "26.3.0",
     "@tanstack/solid-router": "1.170.30",
     "@tanstack/solid-start": "1.168.47",
+    "@testing-library/jest-dom": "6.9.1",
+    "@types/node": "26.3.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "axe-core": "4.13.0",
     "jsdom": "30.0.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "solid-js": "1.9.15",
-    "@testing-library/jest-dom": "6.9.1",
     "typescript": "7.0.2",
     "vite": "8.2.1",
     "vite-plugin-solid": "2.11.14",

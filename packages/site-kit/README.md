@@ -490,3 +490,20 @@ does not exist.
 `LocaleMenu` renders a native `<select>` by default. `variant="flag"` renders a `<details>` disclosure whose trigger is the current locale's flag and whose rows are flag + native-name links — it works without JavaScript; Solid adds Escape-to-close and the `onLocaleChange(locale, href)` callback. `SiteHeader` forwards `localeVariant`. Flag data (`FLAG_COUNTRY`, `LOCALE_FLAGS`, `flagFor`, `flagCountryFor`) is exported from `@devslab/site-kit/flags`, a dedicated subpath — not the runtime-neutral `.` entry — because the vendored artwork is ~110 KB of SVG and most consumers never render a flag menu.
 
 The flag menu keeps that artwork out of the browser bundle too. Each menu renders one `<symbol>` sprite (one body per country) and every flag is an `<svg><use href="#…">` of it, so a locale change on the client only swaps an `href`. The sprite's markup is written by the server build; hydration adopts it, and the browser build reaches the bodies only through a dynamic `import()` — its own chunk, `dist/flag-bodies.js` — taken when a flag menu renders with no server HTML (a client-only app, a jsdom test). A consumer that imports `SiteHeader` therefore ships ~40 KB of client JS for the whole kit rather than ~150 KB; `pnpm check` builds a minimal consumer (`fixtures/bundle-probe`) and fails if a flag body ever returns to the main chunk. The bodies still sit in the server-rendered HTML — moving them to fetched files is a separate decision. The artwork is vendored from flag-icons (MIT, `flags/LICENSE-flag-icons.txt`). Flags are site-kit data, not `dds-icons` entries, because the icon set's contract requires single-colour `currentColor` strokes.
+
+### Shared React and Solid chrome
+
+React consumers import `SiteHeader`, `SiteFooter`, and `ProductBrand` from
+`@devslab/site-kit/react` and `@devslab/site-kit/react-chrome.css`. Solid
+consumers keep the existing Solid exports and `styles.css`. Both stylesheets
+use `chrome-tokens.css` for container width and responsive padding.
+
+`metadataHead(buildMetadata(input), options)` generates framework-neutral
+SEO descriptors, including Open Graph, Twitter, canonical, robots and brand
+icons. The Solid/TanStack `toTanStackHead` adapter delegates its metadata to
+this generator; icon links remain opt-in in that adapter for compatibility.
+For private apps, pass `{ canonical: false, robots: "noindex, nofollow" }`.
+Serve icons with `node node_modules/@devslab/site-kit/scripts/sync-brand.mjs public`.
+
+DDS owns rendering and defaults. Future Admin document content, publication
+versions and customer consent records are separate inputs, not DDS state.

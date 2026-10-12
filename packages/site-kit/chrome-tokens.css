@@ -1,0 +1,9 @@
+:root {
+  --dds-site-content-max: 72rem;
+  --dds-site-brand-mark-size: 1.75rem;
+  --dds-site-brand-gap: .625rem;
+  --dds-site-product-font-size: .8125rem;
+  --dds-site-brand-tracking: -.025em;
+}
+:root { --dds-site-content-padding: var(--dds-space-24); }
+@media (max-width: 640px) { :root { --dds-site-content-padding: var(--dds-space-16); } }

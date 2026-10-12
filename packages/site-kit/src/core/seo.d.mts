@@ -20,3 +20,5 @@ export declare const BRAND_ICON_FILES: readonly ["favicon.svg", "mark-48.png", "
 export interface BrandIconLink { rel: "icon" | "apple-touch-icon"; href: string; type?: string; sizes?: string }
 /** `<link>` descriptors for BRAND_ICON_FILES served at `basePath` (default "/brand"; a same-origin path, never a URL). */
 export declare function brandIconLinks(options?: { basePath?: string }): BrandIconLink[];
+export type HeadMeta = { title: string } | { name: string; content: string } | { property: string; content: string };
+export declare function metadataHead(metadata: SiteMetadata<string>, options?: { canonical?: boolean; icons?: boolean; robots?: string; iconBasePath?: string; imageAlt?: string; imageWidth?: string | number; imageHeight?: string | number; localeAlternates?: readonly string[] }): { meta: HeadMeta[]; links: Array<BrandIconLink | { rel: "canonical"; href: string }> };

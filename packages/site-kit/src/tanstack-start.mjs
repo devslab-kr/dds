@@ -1,4 +1,4 @@
-import { brandIconLinks } from "./core/seo.mjs";
+import { brandIconLinks, metadataHead } from "./core/seo.mjs";
 import { gtmHeadScript } from "./core/gtm.mjs";
 import { fontPreloadLinks } from "./core/fonts.mjs";
 import { consentCookieGrantsAnalytics, consentHeadScript } from "./core/consent.mjs";
@@ -57,21 +57,7 @@ export function consentHeadEntry(options) {
 export function toTanStackHead(metadata, options = {}) {
   const icons = options.icons === true ? brandIconLinks() : options.icons ? brandIconLinks(options.icons) : [];
   const head = {
-    meta: [
-      { title: metadata.title },
-      { name: "description", content: metadata.description },
-      { property: "og:type", content: metadata.openGraph.type },
-      { property: "og:locale", content: metadata.openGraph.locale },
-      { property: "og:url", content: metadata.openGraph.url },
-      { property: "og:site_name", content: metadata.openGraph.siteName },
-      { property: "og:title", content: metadata.openGraph.title },
-      { property: "og:description", content: metadata.openGraph.description },
-      { property: "og:image", content: metadata.openGraph.images[0].url },
-      { name: "twitter:card", content: metadata.twitter.card },
-      { name: "twitter:title", content: metadata.twitter.title },
-      { name: "twitter:description", content: metadata.twitter.description },
-      { name: "twitter:image", content: metadata.twitter.image },
-    ],
+    meta: metadataHead(metadata, { icons: false }).meta,
     links: [
       { rel: "canonical", href: metadata.canonical },
       ...metadata.alternates.map(({ hreflang, href }) => ({ rel: "alternate", hreflang, href })),
