@@ -379,6 +379,59 @@ instantly instead.
 
 ---
 
+### 3.8 DevsLab product identity and site chrome
+
+**Product lockup (2026-10-12).** DevsLab family services use the unchanged
+monochrome mark followed by `DevsLab / Contract`, `DevsLab / OSS`, or
+`DevsLab / DDS` on one line. The product name is a separate label, not part
+of the master logo. Keep its published case; do not use italic text,
+superscripts, subscripts, or a second baseline.
+
+| Header element | Reference |
+| --- | --- |
+| Mark | 28 × 28px, original 32-grid proportions, semantic primary text color |
+| Mark-to-wordmark gap | 10px |
+| `DevsLab` | Geist, 16px, weight 600, tracking −0.025em |
+| Slash and product label | Geist Mono, 13px, semantic secondary text color |
+| Link | The current product's home, with the full product name as its accessible label |
+
+These are brand reference dimensions; reusable implementations resolve
+their values through DDS or named brand variables. Preserve the complete
+name on small screens and make adjacent navigation yield space first.
+The mark and wordmark stay monochrome, without gradients or glow.
+
+**Family footer.** Use a thin semantic border above a quiet, wrapping row.
+The left side holds a 16–20px monochrome mark, the publisher's copyright,
+and a `by DevsLab` link to `https://devslab.kr/`. The right side holds the
+product's actual policy and service links; emphasize the privacy link.
+The exact copy and links belong to the consuming product. On narrow
+screens, stack the two groups with left alignment and retain usable touch
+targets. Business identity, registration and address belong on applicable
+service, sales or policy surfaces; they are not repeated on every company
+workspace screen by this design rule. Applicable disclosure requirements
+remain the product's responsibility. Render cookie settings only when a
+working consent controller exists, and QR codes only for a real destination.
+
+**Entry backdrop.** Public entry and authentication screens may use the
+same restrained upper-right atmosphere as devslab.kr. Its light reference is
+`radial-gradient(ellipse 46% 68% at 86% 22%, rgb(6 182 212 / 0.11), transparent 72%)`;
+the dark reference substitutes `rgb(34 211 238 / 0.10)`. Store this theme
+mapping in named surface variables rather than scattering palette values
+through components. Keep form and editor content surfaces plain (white in
+the light theme); the backdrop never alters the logo or reduces text
+contrast. Remove it in forced-colors and print modes. Workspaces and the
+document editor keep their existing task surfaces.
+
+**Reuse boundary.** `@devslab/site-kit/devslab` supplies the neutral
+`DEVSLAB_PUBLISHER` identity. Site-kit currently exposes its header and
+footer UI through the Solid adapter, not a React adapter. React products
+use that identity with thin React renderers and the same visual rules;
+this does not mean the existing OSS or corporate footer is already one
+shared component. Promoting adapters or publishing packages is a separate
+implementation change. Preview the three lockups in `brand/index.html`.
+
+---
+
 ## 4. Component rules
 
 ### 4.1 API contract — what web and native share
