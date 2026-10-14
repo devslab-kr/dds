@@ -24,6 +24,8 @@
   display: grid;
   place-items: center;
   margin: 0;
+  /* Host text-input padding must not displace the centered check mark. */
+  padding: 0;
   width: 18px;
   height: 18px;
   border: 1px solid var(--dds-color-border-strong);
