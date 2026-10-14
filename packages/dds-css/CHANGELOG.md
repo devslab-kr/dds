@@ -1,5 +1,11 @@
 # @devslab/dds-css
 
+## 0.21.1
+
+### Patch Changes
+
+- 73ae274: Reset checkbox and radio input padding so host text-input styles cannot enlarge the control or displace its centered mark.
+
 ## 0.21.0
 
 ## 0.20.0
