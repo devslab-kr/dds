@@ -1,5 +1,14 @@
 # @devslab/dds-solid
 
+## 0.21.1
+
+### Patch Changes
+
+- Updated dependencies [73ae274]
+  - @devslab/dds-css@0.21.1
+  - @devslab/dds-tokens@0.21.1
+  - @devslab/dds-icons@0.21.1
+
 ## 0.21.0
 
 ### Minor Changes
