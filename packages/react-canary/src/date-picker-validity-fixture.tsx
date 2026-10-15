@@ -9,6 +9,8 @@ type Validity={inputValue:string;value:string|null;valid:boolean;reason:string};
 function Fixture(){
   const query=new URLSearchParams(location.search);
   const initial=query.get('initial')??'2028-02-28';
+  const min=query.get('min');
+  const max=query.get('max');
   const [value,setValue]=useState(initial);
   const [validity,setValidity]=useState<Validity|null>(initial==='2028-02-28'?{inputValue:initial,value:initial,valid:true,reason:'valid'}:null);
   const [required,setRequired]=useState(query.get('required')==='1');
@@ -25,7 +27,7 @@ function Fixture(){
     setPayloads(items=>[...items,payload]);setStatus('Saved');
   }
   const props={label:'Fixture date',value,onChange:setValue,required,disabled,readOnly,
-    min:query.get('min')??undefined,max:query.get('max')??undefined,
+    ...(min===null?{}:{min}),...(max===null?{}:{max}),
     onValidityChange:setValidity};
   return <main style={{padding:24,maxWidth:520}}>
     <h1>DDS date validity fixture</h1>
