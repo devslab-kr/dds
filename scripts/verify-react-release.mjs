@@ -70,10 +70,15 @@ try {
   assert.match(source, mode === "react" ? /["']@ark-ui\/react(?:\/[^"']+)?["']/ : /["']ag-grid-react["']/, "Native library must remain external");
 
   const app = mode === "react" ? `
-import { Button, Checkbox, Field, Icon, Tabs, TabList, Tab, TabPanel } from "@devslab/dds-react";
+import { Button, Checkbox, DatePicker, Field, Icon, Tabs, TabList, Tab, TabPanel } from "@devslab/dds-react";
 export const events = [];
+export const dates = [];
+export let dateValidity;
+const reportDateValidity = state => { dateValidity = state; };
 export function App() {
+  const [date, setDate] = useState("2028-01-01");
   return h("section", null,
+    h(DatePicker, { label: "Packed date", locale: "ko-KR", value: date, onChange: value => { dates.push(value); setDate(value); }, onValidityChange: reportDateValidity }),
     h(Button, { id: "consumer-button", onClick: () => events.push("button") }, "Fresh consumer", h(Icon, { name: "check", label: "Complete" })),
     h(Field, { label: "Name", helpText: "Your name" }, props => h("input", { ...props, defaultValue: "Consumer" })),
     h(Checkbox, { name: "agree", label: "Agree", defaultChecked: true, onCheckedChange: value => events.push(value) }),
@@ -95,7 +100,7 @@ export function App() {
   });
 }
 `;
-  await writeFile(join(temp, "app.mjs"), 'import { createElement as h, createRef } from "react";\n' + app);
+  await writeFile(join(temp, "app.mjs"), 'import { createElement as h, createRef, useState } from "react";\n' + app);
   await writeFile(join(temp, "ssr.mjs"), `
 import assert from "node:assert/strict";
 import { createElement } from "react";
@@ -108,6 +113,7 @@ const { App } = await import("./app.mjs");
 const html = renderToString(createElement(App));
 assert.ok(html.includes(${JSON.stringify(mode === "react" ? "Fresh consumer" : "Preparing grid")}));
 ${mode === "table-react" ? 'assert.ok(html.includes(\'aria-busy="true"\')); assert.ok(!html.includes(\'role="grid"\'));' : 'assert.ok(html.includes(\'name="agree"\'));'}
+${mode === "react" ? 'assert.ok(html.includes(\'value="2028/01/01"\'), "Packed Korean DatePicker SSR display is incorrect");' : ''}
 assert.deepEqual(diagnostics, [], "Browser-free SSR emitted diagnostics");
 // React 19's web server entry retains MessageChannel handles under Node's
 // worker condition. Finish this isolated SSR process after its result flushes.
@@ -137,6 +143,13 @@ const { hydrateRoot } = await import("react-dom/client");
 const app = await import("./app.mjs");
 const host = document.querySelector("#root");
 const initial = [...host.querySelectorAll("*")];
+// Ark Portal renders inline on the server, then mounts the positioner in body.
+// Preserve every server node outside that known portal transition boundary.
+const initialPortal = host.querySelector('[data-scope="date-picker"][data-part="positioner"]');
+const initialPrimitives = initial.filter(element => !initialPortal?.contains(element));
+const initialDateRoot = host.querySelector('[data-scope="date-picker"][data-part="root"]');
+const initialDateControl = host.querySelector('[data-scope="date-picker"][data-part="control"]');
+const initialDateInput = host.querySelector('input[placeholder="YYYY/MM/DD"]');
 const root = hydrateRoot(host, h(app.App), { onRecoverableError: error => diagnostics.push(String(error)), onUncaughtError: error => diagnostics.push(String(error)) });
 const pause = () => new Promise(resolve => setTimeout(resolve, 20));
 async function until(predicate, message) { for (let i = 0; i < 250; i++) { if (predicate()) return; await pause(); } throw new Error(message); }
@@ -144,7 +157,16 @@ try {
 ${mode === "react" ? `
   await until(() => host.querySelector('[role="tab"][aria-selected="true"]'), "Tabs failed to hydrate");
   await pause(); await pause();
-  for (const element of initial) assert.ok(host.contains(element), "Hydration replaced server primitive DOM");
+  for (const element of initialPrimitives) assert.ok(host.contains(element), "Hydration replaced server primitive DOM");
+  assert.ok(initialPortal?.id, "Server DatePicker portal positioner is missing");
+  assert.ok(initialDateRoot && initialDateControl && initialDateInput, "Server DatePicker control DOM is missing");
+  assert.equal(host.querySelector('[data-scope="date-picker"][data-part="root"]'), initialDateRoot);
+  assert.equal(host.querySelector('[data-scope="date-picker"][data-part="control"]'), initialDateControl);
+  assert.equal(host.querySelector('input[placeholder="YYYY/MM/DD"]'), initialDateInput);
+  const bodyPortal = document.getElementById(initialPortal.id);
+  assert.ok(bodyPortal && bodyPortal !== initialPortal, "DatePicker portal did not promote its server subtree");
+  assert.equal(bodyPortal.parentElement, document.body, "DatePicker portal has the wrong client container");
+  assert.equal(host.querySelector('[data-scope="date-picker"][data-part="positioner"]'), null, "Inline server portal survived promotion");
   const input = host.querySelector('input[name="agree"]');
   assert.equal(input.checked, true); input.click();
   await until(() => app.events.includes(false), "Checkbox did not invoke its native callback");
@@ -154,6 +176,25 @@ ${mode === "react" ? `
   assert.equal(host.querySelector('[role="tab"][aria-selected="true"]').textContent, "Two");
   host.querySelector("#consumer-button").click();
   assert.ok(app.events.includes("button"));
+  await until(() => app.dateValidity?.value === "2028-01-01", "Packed DatePicker did not report initial canonical validity");
+  const dateInput = host.querySelector('input[placeholder="YYYY/MM/DD"]');
+  assert.ok(dateInput, "Packed Korean DatePicker input is missing");
+  assert.equal(dateInput.value, "2028/01/01");
+  const setInput = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set;
+  const typeDate = value => { setInput.call(dateInput, value); dateInput.dispatchEvent(new dom.window.Event("input", { bubbles: true })); };
+  typeDate("2028/02/29");
+  await until(() => app.dates.at(-1) === "2028-02-29" && app.dateValidity?.value === "2028-02-29", "Packed DatePicker did not emit canonical leap date");
+  assert.equal(dateInput.value, "2028/02/29");
+  assert.equal(app.dateValidity.valid, true);
+  assert.equal(dateInput.checkValidity(), true);
+  const committedDates = app.dates.length;
+  typeDate("2028/02/31");
+  await until(() => app.dateValidity?.inputValue === "2028/02/31" && app.dateValidity?.value === null, "Packed DatePicker did not retain invalid draft");
+  await pause(); await pause();
+  assert.equal(dateInput.value, "2028/02/31");
+  assert.equal(app.dateValidity.valid, false);
+  assert.equal(dateInput.checkValidity(), false);
+  assert.equal(app.dates.length, committedDates, "Invalid draft emitted a canonical change");
 ` : `
   const region = initial[0];
   assert.ok(initial.some(element => element.id === "grid-placeholder"));
@@ -171,15 +212,17 @@ ${mode === "react" ? `
   console.warn = originalWarn; console.error = originalError;
 }
 assert.equal(host.childElementCount, 0, "Unmount left consumer DOM behind");
+if (initialPortal) assert.equal(document.getElementById(initialPortal.id), null, "Unmount left DatePicker body portal behind");
 ${mode === "table-react" ? 'assert.equal(app.events[0].isDestroyed(), true, "AG Grid API survived unmount"); assert.equal(app.gridRef.current, null); assert.equal(app.regionRef.current, null);' : ''}
 assert.deepEqual(diagnostics, [], "Hydration or native library emitted diagnostics");
 dom.window.close();
 `);
   node([join(temp, "hydrate.mjs")]);
   await writeFile(join(temp, "consumer.tsx"), mode === "react" ? `
-import { Button, Checkbox, Field, Tabs, Tab, TabList, TabPanel, type ButtonProps } from "@devslab/dds-react";
+import { Button, Checkbox, Field, Tabs, Tab, TabList, TabPanel, DatePicker, type DatePickerProps, type DatePickerValidity, type ButtonProps } from "@devslab/dds-react";
 const props: ButtonProps = { tone: "primary", onClick: event => event.currentTarget.focus() };
-export const consumer = <><Button {...props}>Save</Button><Checkbox label="Agree" onCheckedChange={value => value satisfies boolean}/><Field label="Name">{control => <input {...control}/>}</Field><Tabs defaultValue="one"><TabList><Tab value="one">One</Tab></TabList><TabPanel value="one">First</TabPanel></Tabs></>;
+const dateProps: DatePickerProps = { label: "Packed date", value: "2028-01-01", locale: "ko-KR", required: true, readOnly: false, onChange: value => { value satisfies string; }, onValidityChange: (state: DatePickerValidity) => { state.value satisfies string | null; state.inputValue satisfies string; state.valid satisfies boolean; } };
+export const consumer = <><DatePicker {...dateProps}/><Button {...props}>Save</Button><Checkbox label="Agree" onCheckedChange={value => value satisfies boolean}/><Field label="Name">{control => <input {...control}/>}</Field><Tabs defaultValue="one"><TabList><Tab value="one">One</Tab></TabList><TabPanel value="one">First</TabPanel></Tabs></>;
 ` : `
 import { createRef } from "react";
 import { DataTable, ddsGridTheme, type DataTableRef, type DataTableProps } from "@devslab/dds-table-react";
