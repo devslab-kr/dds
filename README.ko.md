@@ -6,6 +6,47 @@
 웹과 모바일이 공유하는 프레임워크 중립적 토큰·컴포넌트·규칙 세트다.
 코어는 토큰 + CSS 이고 React · Vue · Ionic · React Native 는 소비자다.
 
+## 설치
+
+DDS 패키지는 **공개 npm 레지스트리**(`registry.npmjs.org`)에
+`@devslab/*` 이름으로 배포한다. 설치에 GitHub Packages 토큰은 필요하지 않다.
+
+프레임워크 중립적인 토큰과 CSS 컴포넌트 레이어를 설치하려면:
+
+```sh
+npm install @devslab/dds-tokens @devslab/dds-css --registry=https://registry.npmjs.org
+```
+
+CSS import를 지원하는 앱 진입점에서 토큰을 컴포넌트보다 먼저 불러온다:
+
+```js
+import "@devslab/dds-tokens/tokens.css";
+import "@devslab/dds-css/dds.css";
+```
+
+프레임워크나 제품에 필요한 패키지를 추가로 선택한다. 각 가이드에서 설정,
+peer dependency, 사용 가능한 exports를 확인할 수 있다.
+
+| npm 패키지 | 사용 가이드 |
+| --- | --- |
+| [`@devslab/dds-tokens`](https://www.npmjs.com/package/@devslab/dds-tokens) | [dds-tokens](packages/dds-tokens/README.ko.md) |
+| [`@devslab/dds-css`](https://www.npmjs.com/package/@devslab/dds-css) | [dds-css](packages/dds-css/README.ko.md) |
+| [`@devslab/dds-icons`](https://www.npmjs.com/package/@devslab/dds-icons) | [dds-icons](packages/dds-icons/README.ko.md) |
+| [`@devslab/dds-solid`](https://www.npmjs.com/package/@devslab/dds-solid) | [dds-solid](packages/dds-solid/README.ko.md) |
+| [`@devslab/site-kit`](https://www.npmjs.com/package/@devslab/site-kit) | [site-kit](packages/site-kit/README.ko.md) |
+| [`@devslab/dds-react`](https://www.npmjs.com/package/@devslab/dds-react) | [dds-react](packages/dds-react/README.ko.md) |
+| [`@devslab/dds-table`](https://www.npmjs.com/package/@devslab/dds-table) | [dds-table](packages/dds-table/README.ko.md) |
+| [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.ko.md) |
+
+[GitHub Releases](https://github.com/devslab-kr/dds/releases)는 버전별 변경 사항과
+릴리스 노트를 기록하는 곳이며, 패키지는 npm에서 설치한다. 패키지에는
+[DevsLab Source-Available License 1.0](LICENSE)을 적용한다.
+
+기존 GitHub Packages(`npm.pkg.github.com`)의 `@devslab-kr/*` 배포는
+[D-015](docs/decisions.md#d-015--dds-배포-패키지는-공개-npm--source-available-2026-08-31)에
+따라 종료했다. 위의 npm `@devslab/*` 패키지를 사용하고, 프로젝트의
+`.npmrc`에 남아 있는 불필요한 `@devslab-kr:registry` 매핑은 제거한다.
+
 ## 구성
 
 | 경로 | 내용 |
