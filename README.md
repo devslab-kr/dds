@@ -7,6 +7,48 @@ future apps): one framework-neutral set of tokens, components, and rules
 shared by web and mobile. The core is tokens + CSS; React, Vue, Ionic, and
 React Native are consumers.
 
+## Installation
+
+DDS packages are published on the **public npm registry** (`registry.npmjs.org`)
+under `@devslab/*`. No GitHub Packages token is needed to install them.
+
+For the framework-neutral tokens and CSS component layer:
+
+```sh
+npm install @devslab/dds-tokens @devslab/dds-css --registry=https://registry.npmjs.org
+```
+
+In an application entry point that supports CSS imports, load tokens before components:
+
+```js
+import "@devslab/dds-tokens/tokens.css";
+import "@devslab/dds-css/dds.css";
+```
+
+Choose additional packages for your framework or product needs; their guides cover
+setup, peer dependencies, and available exports.
+
+| npm package | Usage guide |
+| --- | --- |
+| [`@devslab/dds-tokens`](https://www.npmjs.com/package/@devslab/dds-tokens) | [dds-tokens](packages/dds-tokens/README.md) |
+| [`@devslab/dds-css`](https://www.npmjs.com/package/@devslab/dds-css) | [dds-css](packages/dds-css/README.md) |
+| [`@devslab/dds-icons`](https://www.npmjs.com/package/@devslab/dds-icons) | [dds-icons](packages/dds-icons/README.md) |
+| [`@devslab/dds-solid`](https://www.npmjs.com/package/@devslab/dds-solid) | [dds-solid](packages/dds-solid/README.md) |
+| [`@devslab/site-kit`](https://www.npmjs.com/package/@devslab/site-kit) | [site-kit](packages/site-kit/README.md) |
+| [`@devslab/dds-react`](https://www.npmjs.com/package/@devslab/dds-react) | [dds-react](packages/dds-react/README.md) |
+| [`@devslab/dds-table`](https://www.npmjs.com/package/@devslab/dds-table) | [dds-table](packages/dds-table/README.md) |
+| [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.md) |
+
+[GitHub Releases](https://github.com/devslab-kr/dds/releases) records version
+changes and release notes; install the packages from npm. The packages use the
+[DevsLab Source-Available License 1.0](LICENSE).
+
+The former `@devslab-kr/*` distribution on GitHub Packages
+(`npm.pkg.github.com`) has ended, as recorded in
+[D-015](docs/decisions.md#d-015--dds-배포-패키지는-공개-npm--source-available-2026-08-31).
+Use the `@devslab/*` npm packages above and remove any obsolete
+`@devslab-kr:registry` mapping from your project's `.npmrc`.
+
 ## What's here
 
 | Path | Contents |
