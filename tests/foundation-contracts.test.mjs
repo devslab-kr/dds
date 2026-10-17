@@ -125,8 +125,10 @@ test("every publishable, non-foundation package's verify:<surface> scripts are w
   const foundationTrio = new Set(["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons"]);
   const packageDirs = await readdir(new URL("../packages/", import.meta.url));
   const expectedSurfaces = new Set();
+  const packagesByName = new Map();
   for (const dir of packageDirs) {
     const manifest = await json(`packages/${dir}/package.json`);
+    packagesByName.set(manifest.name, { dir, manifest });
     if (manifest.private || foundationTrio.has(manifest.name)) continue;
     expectedSurfaces.add(dir.replace(/^dds-/, ""));
   }
@@ -147,15 +149,45 @@ test("every publishable, non-foundation package's verify:<surface> scripts are w
     "every non-foundation publishable package must define its own verify:<surface>:* scripts, and vice versa",
   );
 
+  const invokedScripts = (workflow) => [...workflow.matchAll(/^\s*-\s*run:\s*pnpm run ([\w:-]+)\s*$/gm)]
+    .map(([, script]) => script);
+  // These selected-file commands remain available locally. Each can be
+  // consolidated only while its package test executes the same Vitest suite.
+  const includedChecks = new Map();
+  for (const surface of ["solid", "table", "react"]) {
+    const pkg = packagesByName.get(`@devslab/dds-${surface}`);
+    const file = "src/__tests__/a11y.test.tsx";
+    await read(`packages/${pkg.dir}/${file}`);
+    const suite = surface === "react" ? "vitest run" : "vitest run --config vitest.config.ts";
+    assert.equal(root.scripts[`verify:${surface}:a11y`], `pnpm --filter ${pkg.manifest.name} run test:a11y`);
+    assert.equal(pkg.manifest.scripts["test:a11y"], `${suite} ${file}`);
+    assert.ok(pkg.manifest.scripts.test.split(" && ").includes(suite));
+    const config = await read(`packages/${pkg.dir}/vitest.config.ts`);
+    const patterns = (key) => [...(config.match(new RegExp(`\\b${key}:\\s*\\[([^\\]]*)\\]`))?.[1] ?? "")
+      .matchAll(/["']([^"']+)["']/g)].map(([, pattern]) => pattern);
+    assert.ok(patterns("include").some((pattern) => [file, "src/__tests__/*.test.tsx"].includes(pattern)));
+    assert.ok(patterns("exclude").every((pattern) => pattern === "src/__tests__/ssr.test.tsx"),
+      "consolidated a11y checks must not be excluded from the package suite");
+    assert.ok(root.scripts[`verify:${surface}:test`].split(" && ")
+      .includes(`pnpm --filter ${pkg.manifest.name} run test`));
+    includedChecks.set(`verify:${surface}:a11y`, `verify:${surface}:test`);
+  }
+  const covered = (script, workflow) => {
+    const invoked = invokedScripts(workflow);
+    return invoked.includes(script)
+      || invoked.includes(includedChecks.get(script))
+      // Identical commands (currently site-kit i18n/SEO) protect the same checks.
+      || invoked.some((name) => root.scripts[name] === root.scripts[script]);
+  };
+
   for (const [surface, suffixes] of surfaceScripts) {
     assert.ok(suffixes.has("release"), `verify:${surface}:release is required`);
     for (const suffix of suffixes) {
       const script = `verify:${surface}:${suffix}`;
       const [workflow, workflowName] = suffix === "release" ? [release, "release.yml"] : [ci, "ci.yml"];
-      assert.match(
-        workflow,
-        new RegExp(`pnpm run ${script.replaceAll(":", "\\:")}(?:\\s|$)`, "m"),
-        `${script} must run in ${workflowName}`,
+      assert.ok(
+        covered(script, workflow),
+        `${script} must run directly or through an equivalent check in ${workflowName}`,
       );
     }
   }
