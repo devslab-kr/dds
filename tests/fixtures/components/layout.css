@@ -1,0 +1,6 @@
+body { margin:0; font-family:system-ui,sans-serif; background:var(--dds-color-bg-default); color:var(--dds-color-text-primary); }
+main { max-width:720px; padding:24px; margin:auto; }
+section { margin-block:24px; padding-block:12px; border-bottom:1px solid var(--dds-color-border-default); }
+form, .examples { display:grid; gap:16px; }
+output { display:block; overflow-wrap:anywhere; }
+button { font:inherit; }

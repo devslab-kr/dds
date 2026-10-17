@@ -233,6 +233,36 @@ export const consumer = <DataTable {...props}/>;
 `);
   await writeFile(join(temp, "tsconfig.json"), JSON.stringify({ compilerOptions: { target: "ES2022", module: "ESNext", moduleResolution: "Bundler", jsx: "react-jsx", strict: true, skipLibCheck: true, noEmit: true }, files: ["consumer.tsx"] }));
   node([join(temp, "node_modules/typescript/bin/tsc"), "-p", join(temp, "tsconfig.json")]);
+  if (mode === "react") {
+    // Exercise StrictMode and new roots using the same installed package/React
+    // version as the preserved DatePicker/checkbox/tabs consumer above.
+    await writeFile(join(temp, "component-app.mjs"), await readFile(join(workspace, "scripts/fixtures/component-react-consumer.mjs"), "utf8"));
+    await writeFile(join(temp, "component-ssr.mjs"), `
+import assert from "node:assert/strict";
+import { createElement } from "react";
+import { renderToString } from "react-dom/server";
+assert.equal(typeof window, "undefined"); assert.equal(typeof document, "undefined");
+const diagnostics=[];
+console.warn=(...values)=>diagnostics.push(values.join(" "));
+console.error=(...values)=>diagnostics.push(values.join(" "));
+const { App }=await import("./component-app.mjs");
+const html=renderToString(createElement(App));
+assert.deepEqual(diagnostics,[],"New components emitted browser-free SSR diagnostics");
+process.stdout.write(JSON.stringify({html}),()=>process.exit(0));
+`);
+    await writeFile(join(temp, "component-ssr.json"), node([join(temp, "component-ssr.mjs")]));
+    const componentWorker = JSON.parse(node(["--conditions=worker", join(temp, "component-ssr.mjs")]));
+    assert.ok(componentWorker.html.includes("component-input"), "Worker SSR omitted new input controls");
+    await writeFile(join(temp, "component-hydrate.mjs"), await readFile(join(workspace, "scripts/fixtures/component-react-hydrate.mjs"), "utf8"));
+    node([join(temp, "component-hydrate.mjs")]);
+  }
+  if(mode === "react") {
+    await writeFile(join(temp,"component-subpaths.mjs"), `import assert from "node:assert/strict";
+import * as root from "@devslab/dds-react";
+for (const [path,names] of Object.entries({input:["Input","InputGroup"],combobox:["Combobox"],"select-picker":["SelectPicker"],"dropdown-menu":["DropdownMenu"],popover:["Popover"],calendar:["Calendar"],"date-picker":["DatePicker"]})) {const part=await import("@devslab/dds-react/"+path);for(const name of names)assert.equal(root[name],part[name],name+" root/subpath identity");}
+`);
+    node([join(temp,"component-subpaths.mjs")]);
+  }
   console.log(`${target} React ${reactVersion} pack, installed files/types, browser-free Node/worker SSR, real hydration and disposal passed`);
 } finally {
   // mkdtemp gives this process an owned, absolute child of the OS temp path.

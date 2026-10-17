@@ -34,7 +34,7 @@ test("React packages share DDS version/license but do not introduce grid or Reac
     grid.dependencies["ag-grid-community"],
   );
   assert.equal(grid.dependencies["ag-grid-react"], "36.2.0");
-  for (const dir of ["dds-solid", "dds-table"]) {
+  for (const dir of ["dds-solid", "dds-table-solid"]) {
     const solid = await json(`packages/${dir}/package.json`);
     assert.equal(solid.dependencies?.["ag-grid-react"], undefined);
     assert.equal(solid.dependencies?.["@ark-ui/react"], undefined);

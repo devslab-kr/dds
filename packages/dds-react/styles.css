@@ -23,7 +23,7 @@
 .dds-date-picker-control {display:flex;align-items:stretch;gap:8px;}
 .dds-date-picker-control input {min-width:0;}
 .dds-date-picker-control .dds-btn {flex-shrink:0;min-width:44px;padding-inline:10px;}
-.dds-date-picker-positioner {z-index:100;}
+.dds-date-picker-positioner {z-index:var(--dds-overlay-z-index,1001);}
 .dds-date-picker-content {width:320px;max-width:calc(100vw - 32px);max-height:min(calc(100dvh - 32px),var(--available-height,100dvh));overflow:auto;box-sizing:border-box;padding:16px;background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-md);font-family:var(--dds-font-family-sans);font-size:var(--dds-typo-body-2-font-size);}
 .dds-date-picker-header {display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:600;margin-bottom:12px;}
 .dds-date-picker-table {width:100%;border-collapse:collapse;table-layout:fixed;}
@@ -36,3 +36,12 @@
 .dds-date-picker-table [data-today]:not([data-selected]) {text-decoration:underline;text-underline-offset:4px;}
 .dds-date-picker-content :focus-visible {outline:2px solid var(--dds-color-text-brand);outline-offset:2px;}
 .dds-date-picker-footer {display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--dds-color-border-default);}
+
+/* Standalone Calendar shares the DatePicker view without popup positioning. */
+.dds-calendar {display:block;}
+.dds-date-picker--hidden > .dds-field__label {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
+.dds-date-picker--inside {position:relative;}
+.dds-date-picker--inside > .dds-field__label {position:absolute;inset-inline-start:12px;inset-block-start:18px;z-index:1;pointer-events:none;}
+.dds-date-picker--inside:focus-within > .dds-field__label,.dds-date-picker--inside[data-filled] > .dds-field__label {inset-block-start:2px;font-size:var(--dds-typo-caption-font-size);}
+.dds-date-picker--inside .dds-date-picker-control input {height:56px;padding-block:20px 4px;}
+.dds-date-picker--inside:not(:focus-within):not([data-filled]) input::placeholder {color:transparent;}

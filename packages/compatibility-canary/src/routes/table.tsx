@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/solid-router";
-import { DataTable } from "@devslab/dds-table";
+import { DataTable } from "@devslab/dds-table-solid";
 import { createSignal, onMount } from "solid-js";
 import "../../../dds-tokens/dist/tokens.css";
 import "../../../dds-css/dist/dds.css";

@@ -60,3 +60,8 @@ Unknown closed-domain status values throw to expose incomplete catalogs. Domains
 validity callback은 최초 mount, 의미 있는 입력·제약·외부 값 변경을 보고합니다. invalid/partial 입력은 `onChange`를 호출하지 않으므로 dirty/이탈 방지와 발행 확인 취소도 validity callback에 연결해야 합니다. callback 함수 identity만 바뀌면 같은 결과를 재보고하지 않아 inline setState 루프를 막습니다. 새 편집기는 문서 ID·명시적 reset revision을 key로 새로 mount하고 useCallback으로 안정적인 함수를 사용하세요. 같은 날짜여도 새 keyed 편집기는 초기 결과를 받습니다. 유효할 때 canonical value, invalid일 때 raw inputValue로 pristine 상태를 비교하면 표시 언어만 바뀔 때의 오탐과 소비자 포맷 코드를 피할 수 있습니다. 영문 예제의 keyed editor·baseline·previous 패턴을 참고하세요.
 
 아직 반영되지 않은 로컬 값과 일치하는 부모 값은 해당 발생 건의 응답으로 보고 최신 draft를 유지합니다. B/C/B 반복을 각각 보존하고 blur/Enter 중복 commit을 막습니다. 미반영 목록에 없는 다른 외부 값은 reset으로 처리합니다. 같은 문자열만으로는 미반영 값과 같은 의도적 reset을 응답과 구별할 수 없으므로 명시적 reset은 keyed editor remount를 사용하세요. 로컬 controlled state는 즉시 갱신하고 서버 저장을 분리하세요.
+## 입력·선택·메뉴·공유 달력
+
+Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다.
+
+상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.

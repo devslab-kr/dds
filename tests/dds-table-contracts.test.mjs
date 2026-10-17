@@ -5,9 +5,9 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const json = async (path) => JSON.parse(await read(path));
 
-test("dds-table pins TanStack exactly and ships the worker condition", async () => {
-  const manifest = await json("packages/dds-table/package.json");
-  assert.equal(manifest.name, "@devslab/dds-table");
+test("dds-table-solid pins TanStack exactly and ships the worker condition", async () => {
+  const manifest = await json("packages/dds-table-solid/package.json");
+  assert.equal(manifest.name, "@devslab/dds-table-solid");
   assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
   assert.equal(manifest.publishConfig.access, "public");
   assert.equal(manifest.dependencies["@tanstack/solid-table"], "9.2.4");
@@ -82,8 +82,8 @@ test("every table.css class that sets display re-declares [hidden]", async () =>
   }
 });
 
-test("dds-table exports the table surface and nothing else", async () => {
-  const entry = await read("packages/dds-table/src/index.ts");
+test("dds-table-solid exports the table surface and nothing else", async () => {
+  const entry = await read("packages/dds-table-solid/src/index.ts");
   for (const symbol of ["DataTable", "Column", "DataTableLabels"]) {
     assert.match(entry, new RegExp(symbol), `${symbol} must be exported`);
   }

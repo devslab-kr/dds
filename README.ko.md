@@ -35,7 +35,7 @@ peer dependency, 사용 가능한 exports를 확인할 수 있다.
 | [`@devslab/dds-solid`](https://www.npmjs.com/package/@devslab/dds-solid) | [dds-solid](packages/dds-solid/README.ko.md) |
 | [`@devslab/site-kit`](https://www.npmjs.com/package/@devslab/site-kit) | [site-kit](packages/site-kit/README.ko.md) |
 | [`@devslab/dds-react`](https://www.npmjs.com/package/@devslab/dds-react) | [dds-react](packages/dds-react/README.ko.md) |
-| [`@devslab/dds-table`](https://www.npmjs.com/package/@devslab/dds-table) | [dds-table](packages/dds-table/README.ko.md) |
+| [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.ko.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.ko.md) |
 
 [GitHub Releases](https://github.com/devslab-kr/dds/releases)는 버전별 변경 사항과
@@ -60,7 +60,7 @@ peer dependency, 사용 가능한 exports를 확인할 수 있다.
 | [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — controlled/uncontrolled 상태, SSR·hydration, 키보드, 포커스, 수명주기 계약을 갖춘 SolidJS 접근성 primitive |
 | [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — 엄격한 14개 로케일 i18n, SEO/GEO 생성기, TanStack Start 메타데이터 어댑터, 옵트인 분석 동의(D-034), 접근 가능한 SolidJS 공통 셸을 담은 공개 제품 사이트 인프라 |
 | [`packages/dds-react/`](packages/dds-react/) | `@devslab/dds-react` — Ark UI 기반 React 컴포넌트, DDS 스타일·ref·키보드·포커스·SSR 계약 |
-| [`packages/dds-table/`](packages/dds-table/) | `@devslab/dds-table` — 기존 SolidJS TanStack 테이블 |
+| [`packages/dds-table-solid/`](packages/dds-table-solid/) | `@devslab/dds-table-solid` — 기존 SolidJS TanStack 테이블 |
 | [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS 테마를 적용한 AG Grid Community React 래퍼. 네이티브 옵션·API를 그대로 사용 |
 | [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림 — `components.html`, `icons.html`도 함께) |
 | [`brand/index.html`](brand/index.html) | 브랜드 아이덴티티 가이드: 로고 규정, Electric Cyan, 모티프, 보이스 & 톤 |
@@ -95,7 +95,7 @@ pnpm 워크스페이스. `pnpm install` 후:
 - `pnpm verify:react:test`, `verify:react:a11y`, `verify:react:browser`, `verify:react:release` — React 동작·접근성·실제 브라우저·패키징된 SSR/hydration 소비자 검증
 - `pnpm verify:table-react:test`, `verify:table-react:browser`, `verify:table-react:release` — 실제 AG Grid 동작·브라우저 레이아웃/키보드/axe·패키징된 소비자 검증
 
-여덟 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스하며, 릴리스는
+호환 패키지를 포함한 아홉 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스하며, 릴리스는
 자동이다: `main`에 푸시될 때마다 `.github/workflows/release.yml`이 전체 검증
 게이트를 통과한 뒤 `changesets/action`이 — 대기 중인 changeset 파일이 있으면
 "chore: release dds" 버전 PR을 열고, 그 PR이 방금 머지됐으면 `main`에는 있지만
@@ -114,3 +114,7 @@ Source-Available License 1.0을 따른다. compatibility canary는 비공개·�
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 인벤토리 (Core 6종 ✅ 2026-08-13, +13종 ✅ 2026-08-15) →
 AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → 모바일 방향에 따라 `dds-native` (RN) 또는 Ionic
 테마 매핑.
+
+## 입력·선택·공유 달력 확장
+
+일반 Input/InputGroup, 가상화 Combobox/SelectPicker, DropdownMenu/Popover와 Calendar/DatePicker 공유 구조는 [사용 가이드](docs/components-input-choice-calendar.ko.md)를 참고하세요. 각 UI 패키지는 루트와 컴포넌트별 상세 경로를 함께 제공합니다. 기존 `@devslab/dds-table`은 `@devslab/dds-table-solid`의 호환 진입점으로 유지합니다.

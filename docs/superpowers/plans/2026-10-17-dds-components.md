@@ -1,6 +1,6 @@
 # DDS Components Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Ship matching Solid/React input, overlay, virtualized choice and calendar surfaces with explicit package entries and a compatible Solid table rename.
 
@@ -39,10 +39,10 @@ Independent workers may implement Tasks 1–3 concurrently after reading the spe
 
 **Interfaces:** `Input`, `InputGroup`, `InputProps`, `InputGroupProps`, `LabelPlacement = 'outside' | 'inside' | 'hidden'`. Input owns value/defaultValue/onValueChange, label/labelPlacement, clearable/clearLabel and field linkage; InputGroup owns start/end slots around one child. Shared CSS uses `dds-input-*` and `dds-input-group*` classes; no inline color values.
 
-- [ ] Add tests for email/password/type forwarding, external value updates, uncontrolled typing, one clear notification, required invalidity, readOnly, disabled, form reset, hidden and floating labels.
-- [ ] Run each file with its framework Vitest config; observe missing-implementation failure.
-- [ ] Implement using native inputs and existing Field conventions; pointer clear does not blur before commit and returns focus. Search icon/buttons are slots, not mandatory UI. IME Enter does not submit accidentally.
-- [ ] Run targeted tests and package type checks. Report CSS selectors needed to integrator.
+- [x] Add tests for email/password/type forwarding, external value updates, uncontrolled typing, one clear notification, required invalidity, readOnly, disabled, form reset, hidden and floating labels.
+- [x] Run each file with its framework Vitest config; observe missing-implementation failure.
+- [x] Implement using native inputs and existing Field conventions; pointer clear does not blur before commit and returns focus. Search icon/buttons are slots, not mandatory UI. IME Enter does not submit accidentally.
+- [x] Run targeted tests and package type checks. Report CSS selectors needed to integrator.
 
 ### Task 2: Choices and overlays in both frameworks
 
@@ -50,11 +50,11 @@ Independent workers may implement Tasks 1–3 concurrently after reading the spe
 
 **Interfaces:** Both frameworks export `Combobox`, `SelectPicker`, `DropdownMenu` and `Popover`. Compound overlay parts delegate to Ark. Choice options are `{ value: string; label: string; description?: string; disabled?: boolean }`; selection callbacks receive string IDs. Shared property names follow spec section 6. Explicit `filterMode='external'` bypasses local filtering; selectedOption supplies off-list labels; messages localize state labels. Integrator installs `@tanstack/solid-virtual` and `@tanstack/react-virtual`.
 
-- [ ] Add behavior tests for controlled/uncontrolled selection, local/external filtering, retained off-list labels, disabled/readOnly, empty/loading/error/retry, required/reset/name, IME and clear.
-- [ ] Run before implementing, record failure. Inspect installed Ark types for correct hooks/context, rather than copying obsolete samples.
-- [ ] Implement Ark choices and virtualizer integration. Cache highlighted row in rendered range as needed for valid active descendant, preserving logical collection navigation. Avoid all-option hidden selects. Implement native validation bridge with focus redirection.
-- [ ] Implement compound DropdownMenu with checkbox/radio/submenu and nonmodal Popover. Avoid nested native buttons. Preserve Ark focus/portal layering.
-- [ ] Run targeted tests and checks; document needed CSS selectors and browser-only validation gaps.
+- [x] Add behavior tests for controlled/uncontrolled selection, local/external filtering, retained off-list labels, disabled/readOnly, empty/loading/error/retry, required/reset/name, IME and clear.
+- [x] Run before implementing, record failure. Inspect installed Ark types for correct hooks/context, rather than copying obsolete samples.
+- [x] Implement Ark choices and virtualizer integration. Cache highlighted row in rendered range as needed for valid active descendant, preserving logical collection navigation. Avoid all-option hidden selects. Implement native validation bridge with focus redirection.
+- [x] Implement compound DropdownMenu with checkbox/radio/submenu and nonmodal Popover. Avoid nested native buttons. Preserve Ark focus/portal layering.
+- [x] Run targeted tests and checks; document needed CSS selectors and browser-only validation gaps.
 
 ### Task 3: Calendar sharing and DatePicker parity
 
@@ -62,9 +62,9 @@ Independent workers may implement Tasks 1–3 concurrently after reading the spe
 
 **Interfaces:** `Calendar` is controlled single-date inline Ark root with label/value/onChange/locale/timeZone/min/max/disabled/readOnly/startOfWeek/messages. `CalendarView` is private and consumes the enclosing Ark context; it never creates another root. `DatePicker` retains its existing value/onChange and validity contract; add labelPlacement and messages consistently. Date-only ISO storage never converts via UTC.
 
-- [ ] Pin independent calendar selection/month navigation/disabled/readOnly and DatePicker invalid-draft/required/locale/reset/delayed acknowledgement regressions before refactoring.
-- [ ] Observe failing new tests, then extract view and align Solid's input validation with existing React semantics. Preserve original React regression suites.
-- [ ] Run both framework date/calendar suites and package checks; report existing/new CSS selectors.
+- [x] Pin independent calendar selection/month navigation/disabled/readOnly and DatePicker invalid-draft/required/locale/reset/delayed acknowledgement regressions before refactoring.
+- [x] Observe failing new tests, then extract view and align Solid's input validation with existing React semantics. Preserve original React regression suites.
+- [x] Run both framework date/calendar suites and package checks; report existing/new CSS selectors.
 
 ### Task 4: Package boundaries, styling and Solid table rename
 
@@ -72,11 +72,11 @@ Independent workers may implement Tasks 1–3 concurrently after reading the spe
 
 **Interfaces:** Explicit `./input`, `./combobox`, `./select-picker`, `./dropdown-menu`, `./popover`, `./calendar`, `./date-picker` entries and preserved root/CSS exports. All point to the same built modules with declarations; Solid server entries maintain browser/node/worker/workerd conditions. New package dds-table-solid owns table implementation, legacy re-exports all public types and DataTable.
 
-- [ ] Add executable packed-import checks for detailed entry paths and old/new table identity; run them to observe missing-path/package failure.
-- [ ] Move table implementation with its tests/configs/docs; replace old package with small compatibility re-export. Update every repository first-party dependency, script/filter, release list and package-name inventory (historical changelog text remains historical).
-- [ ] Implement multi-entry builds without duplicated contexts and explicitly externalize virtualizer dependencies. Add token-only CSS with input floating labels, focus-within, RTL logical layout, popup dimensions and disabled/touch states.
-- [ ] Install/update lockfile, add a changeset for the fixed group including the new package. Keep all packages at current version until Changesets release handling.
-- [ ] Run foundation/core checks, both framework tests/checks/builds, table contracts/tests/builds and packed import checks. Fix contracts that explicitly described the old package name without removing behavior protection.
+- [x] Add executable packed-import checks for detailed entry paths and old/new table identity; run them to observe missing-path/package failure.
+- [x] Move table implementation with its tests/configs/docs; replace old package with small compatibility re-export. Update every repository first-party dependency, script/filter, release list and package-name inventory (historical changelog text remains historical).
+- [x] Implement multi-entry builds without duplicated contexts and explicitly externalize virtualizer dependencies. Add token-only CSS with input floating labels, focus-within, RTL logical layout, popup dimensions and disabled/touch states.
+- [x] Install/update lockfile, add a changeset for the fixed group including the new package. Keep all packages at current version until Changesets release handling.
+- [x] Run foundation/core checks, both framework tests/checks/builds, table contracts/tests/builds and packed import checks. Fix contracts that explicitly described the old package name without removing behavior protection.
 
 ### Task 5: Real browser, documentation and release verification
 
@@ -84,11 +84,11 @@ Independent workers may implement Tasks 1–3 concurrently after reading the spe
 
 **Interfaces:** Examples cover general input (email/password/search), inside/outside/hidden label, clear and form, external search, 10,000-item choices, nested modal overlays, inline and popup date selection; no FM dependencies.
 
-- [ ] Add browser tests for far-index keyboard navigation with real active descendant, bounded option count, filter/reset/reopen scroll, required invalid focus, overlay Escape nesting, IME, and SSR/hydration where feasible in existing release harnesses.
-- [ ] Run focused Playwright cases; fix actual browser failures, do not use jsdom geometry mocks as acceptance evidence.
-- [ ] Update bilingual usage docs, show exact imports/styles and native-vs-custom Select distinction, table compatibility transition and Input's general purpose.
-- [ ] Run `pnpm verify`, framework and table tests/build/check, touched contract suites, meaningful browser suite and packed release gates. Record commands/results and any unavailable external-tool checks without claiming they passed.
-- [ ] Perform final branch review, fix actionable regressions, commit DDS changes and report branch/SHA, verification and remaining boundaries. Do not publish/deploy.
+- [x] Add browser tests for far-index keyboard navigation with real active descendant, bounded option count, filter/reset/reopen scroll, required invalid focus, overlay Escape nesting, IME, and SSR/hydration where feasible in existing release harnesses.
+- [x] Run focused Playwright cases; fix actual browser failures, do not use jsdom geometry mocks as acceptance evidence.
+- [x] Update bilingual usage docs, show exact imports/styles and native-vs-custom Select distinction, table compatibility transition and Input's general purpose.
+- [x] Run `pnpm verify`, framework and table tests/build/check, touched contract suites, meaningful browser suite and packed release gates. Record commands/results and any unavailable external-tool checks without claiming they passed.
+- [x] Perform final branch review, fix actionable regressions, commit DDS changes and report branch/SHA, verification and remaining boundaries. Do not publish/deploy.
 
 ## Execution Ledger
 

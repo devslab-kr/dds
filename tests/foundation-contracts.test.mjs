@@ -41,7 +41,7 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.equal(root.devDependencies?.["@changesets/cli"], "2.29.7");
 
   const config = await json(".changeset/config.json");
-  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit", "@devslab/dds-table", "@devslab/dds-react", "@devslab/dds-table-react"]]);
+  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit", "@devslab/dds-table", "@devslab/dds-table-solid", "@devslab/dds-react", "@devslab/dds-table-react"]]);
   assert.equal(config.access, "public");
   assert.match(await read("LICENSE"), /DevsLab Source-Available License 1\.0/);
   const workflow = await read(".github/workflows/release.yml");
@@ -129,7 +129,8 @@ test("every publishable, non-foundation package's verify:<surface> scripts are w
   for (const dir of packageDirs) {
     const manifest = await json(`packages/${dir}/package.json`);
     packagesByName.set(manifest.name, { dir, manifest });
-    if (manifest.private || foundationTrio.has(manifest.name)) continue;
+    // The legacy table is exercised by table-solid release parity, not a duplicated suite.
+    if (manifest.private || foundationTrio.has(manifest.name) || manifest.name === "@devslab/dds-table") continue;
     expectedSurfaces.add(dir.replace(/^dds-/, ""));
   }
 
@@ -138,7 +139,7 @@ test("every publishable, non-foundation package's verify:<surface> scripts are w
     const match = script.match(/^verify:([a-z0-9-]+):(.+)$/);
     if (!match) continue;
     const [, surface, suffix] = match;
-    if (surface === "foundation" || surface === "canary" || surface === "source") continue;
+    if (surface === "foundation" || surface === "canary" || surface === "source" || surface === "table") continue;
     if (!surfaceScripts.has(surface)) surfaceScripts.set(surface, new Set());
     surfaceScripts.get(surface).add(suffix);
   }
@@ -154,7 +155,7 @@ test("every publishable, non-foundation package's verify:<surface> scripts are w
   // These selected-file commands remain available locally. Each can be
   // consolidated only while its package test executes the same Vitest suite.
   const includedChecks = new Map();
-  for (const surface of ["solid", "table", "react"]) {
+  for (const surface of ["solid", "table-solid", "react"]) {
     const pkg = packagesByName.get(`@devslab/dds-${surface}`);
     const file = "src/__tests__/a11y.test.tsx";
     await read(`packages/${pkg.dir}/${file}`);
@@ -176,6 +177,7 @@ test("every publishable, non-foundation package's verify:<surface> scripts are w
     const invoked = invokedScripts(workflow);
     return invoked.includes(script)
       || invoked.includes(includedChecks.get(script))
+      || (includedChecks.has(script) && invoked.some((name) => root.scripts[name] === root.scripts[includedChecks.get(script)]))
       // Identical commands (currently site-kit i18n/SEO) protect the same checks.
       || invoked.some((name) => root.scripts[name] === root.scripts[script]);
   };

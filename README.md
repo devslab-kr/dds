@@ -36,7 +36,7 @@ setup, peer dependencies, and available exports.
 | [`@devslab/dds-solid`](https://www.npmjs.com/package/@devslab/dds-solid) | [dds-solid](packages/dds-solid/README.md) |
 | [`@devslab/site-kit`](https://www.npmjs.com/package/@devslab/site-kit) | [site-kit](packages/site-kit/README.md) |
 | [`@devslab/dds-react`](https://www.npmjs.com/package/@devslab/dds-react) | [dds-react](packages/dds-react/README.md) |
-| [`@devslab/dds-table`](https://www.npmjs.com/package/@devslab/dds-table) | [dds-table](packages/dds-table/README.md) |
+| [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.md) |
 
 [GitHub Releases](https://github.com/devslab-kr/dds/releases) records version
@@ -62,7 +62,7 @@ Use the `@devslab/*` npm packages above and remove any obsolete
 | [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — SolidJS accessible primitives with controlled/uncontrolled state, SSR/hydration, keyboard, focus, and lifecycle contracts |
 | [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — public infrastructure for product sites: strict 14-locale i18n, SEO/GEO builders, TanStack Start metadata adapter, opt-in analytics consent (D-034), and accessible SolidJS shared shells |
 | [`packages/dds-react/`](packages/dds-react/) | `@devslab/dds-react` — Ark UI based React primitives with DDS styles, refs, keyboard/focus and SSR contracts |
-| [`packages/dds-table/`](packages/dds-table/) | `@devslab/dds-table` — existing SolidJS TanStack table |
+| [`packages/dds-table-solid/`](packages/dds-table-solid/) | `@devslab/dds-table-solid` — existing SolidJS TanStack table |
 | [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS themed AG Grid Community React wrapper; native grid options and API remain available |
 | [`preview/index.html`](preview/index.html) | Self-contained foundations & components preview — open in a browser (`components.html`, `icons.html` alongside) |
 | [`brand/index.html`](brand/index.html) | Brand identity guide: logo rules, Electric Cyan, motifs, voice & tone |
@@ -98,7 +98,7 @@ pnpm workspace. `pnpm install`, then:
 - `pnpm verify:react:test`, `verify:react:a11y`, `verify:react:browser`, `verify:react:release` — React behavior, accessibility, real browser and fresh packed SSR/hydration consumers
 - `pnpm verify:table-react:test`, `verify:table-react:browser`, `verify:table-react:release` — actual AG Grid behavior, browser layout/keyboard/axe and fresh packed consumers
 
-The eight public packages release in lockstep through Changesets, and the release
+The nine public packages including the compatibility wrapper release in lockstep through Changesets, and the release
 is automatic: every push to `main` runs `.github/workflows/release.yml`, which
 passes the full verification gate and then lets `changesets/action` either open
 the "chore: release dds" version PR (when changeset files are waiting) or publish
@@ -118,3 +118,7 @@ only when a consumer exists (spec §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 inventory (Core 6 ✅ 2026-08-13, +13 ✅ 2026-08-15) →
 AskLinq adoption → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → `dds-native` (RN) or an Ionic
 theme mapping, depending on how mobile goes.
+
+## Input, choice and shared calendar additions
+
+See the [usage guide](docs/components-input-choice-calendar.md) for general Input/InputGroup, virtualized Combobox/SelectPicker, DropdownMenu/Popover and shared Calendar/DatePicker views. Framework packages expose both root and detailed component entries. `@devslab/dds-table` remains a compatible entry for `@devslab/dds-table-solid`.

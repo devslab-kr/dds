@@ -127,7 +127,7 @@ clear 버튼의 pointerdown 때문에 입력창이 먼저 blur되어 이전 값�
 
 ### 6.1 데이터와 상태
 
-일차 옵션 형식은 `{ value: string; label: string; description?: string; disabled?: boolean }`이다. value는 유일하고 비어 있지 않은 안정적인 ID다. 빈 문자열은 선택 없음이다. 외부 옵션을 DDS 형식으로 변환하는 일은 소비자 어댑터가 담당한다. 중복 ID는 개발 환경에서 명확한 오류로 알린다.
+일차 옵션 형식은 `{ value: string; label: string; description?: string; disabled?: boolean }`이다. value는 유일하고 비어 있지 않은 안정적인 ID다. 빈 문자열은 선택 없음이다. 외부 옵션을 DDS 형식으로 변환하는 일은 소비자 어댑터가 담당한다. 중복·빈 ID는 모든 빌드에서 명확한 오류로 알린다. 잘못된 논리 컬렉션을 배포 후에도 조용히 허용하지 않는다.
 
 공통 API는 `items`, `value/defaultValue`, `onValueChange`, `disabled`, `readOnly`, `required`, `name`, `label`, `labelPlacement`, `messages`, `virtualization`이다. 선택 callback에는 ID만 전달한다. Ark의 details 객체나 virtualizer 인스턴스를 공개 API의 필수값으로 노출하지 않는다. 예외적으로 labelPlacement=inside는 선택 trigger 또는 실제 입력 컨트롤에 같은 floating 규칙을 적용한다.
 
@@ -141,7 +141,7 @@ Combobox는 후보를 확정할 때만 선택값을 변경한다. 단순 타이�
 
 Ark의 collection과 `scrollToIndexFn`을 각 프레임워크의 TanStack Virtual에 연결한다. 전체 논리 목록을 collection에 제공하고 DOM에는 화면에 보이는 행과 overscan만 유지한다. 행은 일차 구현에서 고정 높이로 제한하고 description 유무와 관계없이 같은 높이를 사용한다.
 
-`virtualization={false | { itemHeight?: number; overscan?: number }}`이며 기본은 false다. 활성화 시 기본 높이는 40px, overscan은 각 방향 5개다. inside 라벨은 trigger/input의 배치이고 옵션 높이에는 영향을 주지 않는다. 팝업의 가시 높이는 최대 320px이며 뷰포트 여유 공간에 맞춰 줄어든다.
+`virtualization={false | { itemHeight?: number; overscan?: number }}`이며 기본은 false다. 활성화 시 기본·최소 높이는 40px, overscan은 각 방향 5개다. 유한하지 않은 높이는 기본값으로 복구한다. inside 라벨은 trigger/input의 배치이고 옵션 높이에는 영향을 주지 않는다. 팝업의 가시 높이는 최대 320px이며 뷰포트 여유 공간에 맞춰 줄어든다.
 
 방향키·Home/End·typeahead·초기 선택 위치 이동은 논리 인덱스로 수행한다. 화면 밖 항목을 활성화하면 먼저 해당 행을 렌더링하고, 접근성 활성 ID는 실제 DOM에 존재하는 option을 가리켜야 한다. 단순 overscan 증가를 해결책으로 삼지 않는다. disabled 항목을 건너뛰고 전체 목록의 위치/개수를 올바르게 알린다.
 
