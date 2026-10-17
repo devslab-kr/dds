@@ -103,7 +103,7 @@ DateRangePicker, MultiSelect, TagsInput, 독립 ButtonGroup, 무한 로딩, 그�
 
 - Input은 네이티브 input 속성·ref를 전달한다. React/Solid 이벤트와 className/class의 프레임워크 관례는 유지한다.
 - 신규 값 API는 `value` 또는 `defaultValue`, `onValueChange(next: string)`이다. 두 제어 모드를 혼합하지 않는다. 네이티브 이벤트도 보존하되 같은 편집에 값 callback을 두 번 호출하지 않는다.
-- `type="text" | "search"`를 일차 지원한다. 파일·체크박스·날짜·숫자 스피너를 이 API로 감싸지 않는다.
+- 검색 전용이 아닌 일반 입력 기반이다. `type="text" | "search" | "email" | "tel" | "url" | "password" | "number"`를 지원하며 type별 네이티브 입력·유효성 의미를 보존한다. number는 HTML input의 동작이며 별도의 NumberInput 증감 UI를 뜻하지 않는다. 파일·체크박스·날짜 선택기를 이 API로 감싸지 않는다.
 - `label`, `labelPlacement="outside" | "inside" | "hidden"`을 제공한다. 기본은 outside다.
 - label을 생략하면 호출자가 `aria-label` 또는 유효한 `aria-labelledby`를 제공해야 한다. placeholder는 접근 가능한 이름을 대신하지 않는다.
 - `clearable`과 현지화된 `clearLabel`을 제공한다. clearable은 텍스트 내용을 지우는 동작이며 레코드 삭제와는 다르다.
