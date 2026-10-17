@@ -142,12 +142,20 @@ it("keeps an IME Enter from committing an active option", async () => {
   const input = screen.getByRole("combobox");
   await user.click(input);
   await user.keyboard("{ArrowDown}");
+  await screen.findByRole("listbox");
+  await user.keyboard("{Home}");
+  await waitFor(() => {
+    const id = input.getAttribute("aria-activedescendant");
+    expect(id).toBeTruthy();
+    expect(document.getElementById(id!)).toHaveTextContent("Apple");
+  });
   fireEvent.compositionStart(input);
   fireEvent.keyDown(input, { key: "Enter", code: "Enter", isComposing: true });
   expect(changed).not.toHaveBeenCalled();
+  expect(screen.getByRole("listbox")).toBeVisible();
   fireEvent.compositionEnd(input);
   await user.keyboard("{Enter}");
-  await waitFor(() => expect(changed).toHaveBeenCalledOnce());
+  await waitFor(() => expect(changed).toHaveBeenCalledExactlyOnceWith("a"));
 });
 it("keeps 10000-option rendering bounded and mounts the keyboard active descendant", async () => {
   const many = Array.from({ length: 10000 }, (_, index) => ({

@@ -53,3 +53,8 @@
 - All five implementation tasks completed, peer review findings resolved, final verification green. Implementation retained on `sexysinny/dds-components` in the managed DDS worktree.
 - Final Popover description linkage assertions passed in both four-case overlay suites after the full UI suites. No implementation changes were made after final package builds.
 - Existing repository versions remain unchanged; Changesets records the next release. Remote integration and publication remain outside this execution.
+
+## Merge and publication follow-up
+
+- User subsequently authorized merge and deployment. Feature PR #99 uses the protected main workflow; target Changesets fixed-group release is 0.22.0 across nine public packages.
+- Initial Linux CI failed React IME test because it sent Enter without establishing the intended highlighted-option precondition. The test now waits for the open listbox, uses Home, verifies the real Apple active descendant, checks that composing Enter keeps it open, and expects exactly one ID `a` selection afterward. This strengthens the assertion; component code is unchanged. Focused React choices: 11/11 passed. Required CI is rerun on the follow-up commit before merging.
