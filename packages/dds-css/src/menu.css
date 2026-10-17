@@ -1,0 +1,9 @@
+/* Dialog currently occupies layer 1000. Consumers can set the common overlay layer within a custom shell. */
+.dds-menu-positioner,.dds-popover-positioner,.dds-choice-positioner,.dds-date-picker-positioner {z-index:var(--dds-overlay-z-index,1001);color:var(--dds-color-text-primary);}
+.dds-menu {box-sizing:border-box;min-inline-size:180px;max-inline-size:calc(100vw - var(--dds-space-32));max-block-size:var(--available-height,80vh);overflow:auto;padding:var(--dds-space-4);border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-md);background:var(--dds-color-bg-elevated);color:var(--dds-color-text-primary);box-shadow:var(--dds-elevation-2);font-family:var(--dds-font-family-sans);font-size:var(--dds-typo-body-2-font-size);}
+.dds-menu [role^="menuitem"] {display:flex;align-items:center;gap:var(--dds-space-8);min-block-size:var(--dds-space-40);padding-inline:var(--dds-space-12);border-radius:var(--dds-radius-sm);cursor:pointer;outline:none;text-decoration:none;color:inherit;}
+.dds-menu [role^="menuitem"][data-highlighted] {background:var(--dds-color-bg-brand-subtle);}
+.dds-menu [data-disabled] {opacity:.45;cursor:not-allowed;}
+.dds-menu [data-part="item-group-label"] {padding:var(--dds-space-8) var(--dds-space-12);font-size:var(--dds-typo-caption-font-size);font-weight:600;color:var(--dds-color-text-secondary);}
+.dds-menu [role="separator"] {block-size:1px;background:var(--dds-color-border-default);margin-block:var(--dds-space-4);}
+@media(pointer:coarse){.dds-menu [role^="menuitem"]{min-block-size:44px;}}

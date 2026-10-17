@@ -5,6 +5,35 @@
 
 ---
 
+## D-039 — 프레임워크 이름과 공유 입력·선택·날짜 계약 (2026-10-18)
+
+**결정.** `@devslab/dds-solid`와 `@devslab/dds-react`를 유지하고 input, combobox,
+select-picker, dropdown-menu, popover, calendar, date-picker 상세 import 경로를
+같은 구현에 연결한다. Solid 테이블의 정식 이름은 `@devslab/dds-table-solid`이며
+기존 `@devslab/dds-table`은 같은 버전·구현·타입의 호환 재노출로 유지한다.
+
+Input/InputGroup은 검색을 포함한 일반 네이티브 입력과 주변 슬롯을 담당한다.
+Combobox/SelectPicker의 선택 ID·폼·외부 검색·고정 높이 가상화 계약을 양쪽에
+맞추고, 프레임워크별 내부 CalendarView를 독립 Calendar와 DatePicker가 공유한다.
+직접 입력의 invalid draft와 YYYY-MM-DD 저장 계약은 유지한다.
+
+**근거·검증.** 소비 제품의 직접 primitive 구현을 줄이고 DDS가 접근성·포커스·폼
+동작을 책임진다. 모달 안의 팝업은 해당 모달 DOM에 연결하며 Escape는 한 레이어만
+닫는다. 하위 메뉴 등록은 StrictMode 재마운트와 RTL을 포함해 검증한다. 양쪽
+단위·SSR, 30개 실제 브라우저 사례, React 18/19·Solid의 fresh tarball 설치와
+hydration 검사를 통과했다. FM-dental은 변경하거나 검증하지 않는다.
+
+**트레이드오프.** 일차 범위는 단일 선택과 최소 40px 고정 행이다. 가변 행·그룹
+가상화·범위/복수 날짜·일정 관리 달력은 후속 범위다. 팩토리나 별도 범용 오버레이
+엔진을 추가하지 않는다. 상세 설계와 사용법은
+`superpowers/specs/2026-10-17-dds-components-and-packages-design.ko.md`와
+`components-input-choice-calendar.ko.md`에 기록한다.
+
+**English.** Keep framework packages and component subpaths, explicitly name the Solid
+table package, and retain its legacy re-export. Share general input, single-choice and
+date contracts across Solid and React; share CalendarView within each framework.
+Native form semantics, modal accessibility and fresh-package hydration are verified.
+
 ## D-038 — React는 Ark UI, React 테이블은 AG Grid Community를 얇게 감싼다 (2026-10-11)
 
 `@devslab/dds-react`는 기존 DDS 공개 컴포넌트와 디자인을 React에 제공하며,

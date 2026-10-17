@@ -40,14 +40,14 @@ assert.deepEqual(thirdPartyDeclared, expected, "package.json must exactly match 
    against `expected` catches an addition AND a removal. The first-party
    loop below only ever iterates whatever `firstPartyDeclared` happens to
    contain, so it has no opinion on the SET of first-party dependencies —
-   deleting `@devslab/dds-table` from this manifest would pass every rule
+   deleting `@devslab/dds-table-solid` from this manifest would pass every rule
    below and this file would print "0 first-party workspace link(s)" on
    exit 0, silently ending the one thing the canary exists to prove for
    that package (its TanStack pin actually renders at runtime, per the
    /table route this canary's build/preview gates exercise). Named here so
    removing a first-party dependency is a required, deliberate edit to
    this list, not a side effect of deleting a line elsewhere. */
-const expectedFirstPartyDependencies = ["@devslab/dds-table"];
+const expectedFirstPartyDependencies = ["@devslab/dds-table-solid"];
 assert.deepEqual(
   Object.keys(firstPartyDeclared).sort(),
   [...expectedFirstPartyDependencies].sort(),

@@ -61,3 +61,4 @@ jobs:
       - run: pnpm run verify:site-kit:release
       # build all packages, then validate token JSON + docs/preview sync
       - run: pnpm run verify
+      - run: pnpm run verify:components

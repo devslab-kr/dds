@@ -1,7 +1,7 @@
 {
   "name": "@devslab/dds-table",
   "version": "0.21.2",
-  "description": "Declarative data table for the DevsLab Design System",
+  "description": "Compatibility re-export of @devslab/dds-table-solid; use the explicit Solid package for new code",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
@@ -33,14 +33,10 @@
   },
   "scripts": {
     "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "check": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --config vitest.config.ts && vitest run --config vitest.ssr.config.ts",
-    "test:a11y": "vitest run --config vitest.config.ts src/__tests__/a11y.test.tsx"
+    "check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@devslab/dds-css": "workspace:0.21.2",
-    "@devslab/dds-tokens": "workspace:0.21.2",
-    "@tanstack/solid-table": "9.2.4"
+    "@devslab/dds-table-solid": "workspace:0.21.2"
   },
   "peerDependencies": {
     "solid-js": "1.9.15"

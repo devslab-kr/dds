@@ -186,6 +186,32 @@ dom.window.close();
 `);
   runNode(["--conditions=browser", join(temp, "ark-hydrate.mjs")], temp);
   runNode(["--conditions=browser", join(temp, "ark-hydrate.mjs"), "section"], temp);
+  // Reuse this fresh tarball install for the new control inventory. Keep the
+  // separate process boundaries: server exports must never see browser globals.
+  const componentApp = await readFile(join(workspace, "scripts/fixtures/component-solid-consumer.mjs"), "utf8");
+  await writeFile(join(temp, "component-app.mjs"), componentApp);
+  await writeFile(join(temp, "component-client-app.mjs"), componentApp.replace('"@devslab/dds-solid"', JSON.stringify(browserEntry)).replace("'@devslab/dds-solid'", JSON.stringify(browserEntry)));
+  await writeFile(join(temp, "component-ssr.mjs"), `
+import assert from "node:assert/strict";
+import { generateHydrationScript, renderToString } from "solid-js/web";
+import { createComponent } from "solid-js";
+assert.equal(typeof window, "undefined"); assert.equal(typeof document, "undefined");
+const diagnostics=[];
+console.warn=(...values)=>diagnostics.push(values.join(" "));
+console.error=(...values)=>diagnostics.push(values.join(" "));
+const { App }=await import("./component-app.mjs");
+const html=renderToString(()=>createComponent(App,{}));
+assert.deepEqual(diagnostics,[],"New components emitted browser-free SSR diagnostics");
+process.stdout.write(JSON.stringify({bootstrap:generateHydrationScript(),html}));
+`);
+  await writeFile(join(temp, "component-ssr.json"), runNode([join(temp, "component-ssr.mjs")], temp));
+  await writeFile(join(temp, "component-hydrate.mjs"), await readFile(join(workspace, "scripts/fixtures/component-solid-hydrate.mjs"), "utf8"));
+  runNode(["--conditions=browser", join(temp, "component-hydrate.mjs")], temp);
+  await writeFile(join(temp, "component-subpaths.mjs"), `import assert from "node:assert/strict";
+import * as root from "@devslab/dds-solid";
+for (const [path,names] of Object.entries({input:["Input","InputGroup"],combobox:["Combobox"],"select-picker":["SelectPicker"],"dropdown-menu":["DropdownMenu"],popover:["Popover"],calendar:["Calendar"],"date-picker":["DatePicker"]})) {const part=await import("@devslab/dds-solid/"+path); for(const name of names) assert.equal(root[name],part[name],name+" must share root/subpath identity");}
+`);
+  runNode([join(temp,"component-subpaths.mjs")],temp);
   console.log("dds-solid pack, publish dry-run, and fresh consumer import, SSR, and hydration passed");
 } finally {
   await rm(temp, { recursive: true, force: true });

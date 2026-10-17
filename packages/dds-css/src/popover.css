@@ -1,0 +1,3 @@
+.dds-popover {box-sizing:border-box;inline-size:max-content;max-inline-size:calc(100vw - var(--dds-space-32));max-block-size:var(--available-height,80vh);overflow:auto;padding:var(--dds-space-16);border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-md);background:var(--dds-color-bg-elevated);color:var(--dds-color-text-primary);box-shadow:var(--dds-elevation-2);font-family:var(--dds-font-family-sans);font-size:var(--dds-typo-body-2-font-size);}
+.dds-popover [data-part="title"] {margin:0 0 var(--dds-space-8);font-size:var(--dds-typo-title-3-font-size);}
+.dds-popover [data-part="description"] {margin-block-end:var(--dds-space-12);color:var(--dds-color-text-secondary);}

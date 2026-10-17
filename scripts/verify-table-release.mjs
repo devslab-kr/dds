@@ -53,7 +53,7 @@ const runNode = (args, cwd) => {
 };
 
 try {
-  const packageNames = ["dds-tokens", "dds-css", "dds-table"];
+  const packageNames = ["dds-tokens", "dds-css", "dds-table-solid", "dds-table"];
   const tarballs = [];
   let tableTarball = "";
   for (const packageName of packageNames) {
@@ -62,9 +62,9 @@ try {
     runPnpm(["pack", "--pack-destination", temp], packageRoot);
     const tarball = join(temp, `${manifest.name.replace(/^@/, "").replace("/", "-")}-${manifest.version}.tgz`);
     tarballs.push(tarball);
-    if (packageName === "dds-table") tableTarball = tarball;
+    if (packageName === "dds-table-solid") tableTarball = tarball;
   }
-  const packageRoot = join(workspace, "packages", "dds-table");
+  const packageRoot = join(workspace, "packages", "dds-table-solid");
   const tableManifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
   const devslabDependencies = Object.keys(tableManifest.dependencies).filter((name) => name.startsWith("@devslab/"));
   for (const bundle of ["dist/index.js", "dist/server.js"]) {
@@ -87,11 +87,11 @@ try {
   publishDryRun(tableTarball, packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
   run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
-  const installedRoot = join(temp, "node_modules", "@devslab", "dds-table");
+  const installedRoot = join(temp, "node_modules", "@devslab", "dds-table-solid");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
-  assert.equal(manifest.name, "@devslab/dds-table");
+  assert.equal(manifest.name, "@devslab/dds-table-solid");
   // Mirrors verify-release.mjs's `files.some(({ path }) => path === "LICENSE")`
-  // for the foundation packages: dds-table's manifest points readers at
+  // for the foundation packages: dds-table-solid's manifest points readers at
   // "SEE LICENSE IN LICENSE", a source-available (non-OSI) licence, so the
   // packed tarball actually containing that file is the terms, not
   // boilerplate. Checked here via the fresh-consumer install already in
@@ -106,7 +106,9 @@ try {
   await writeFile(ssrScript, `
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
-import { DataTable } from "@devslab/dds-table";
+import { DataTable } from "@devslab/dds-table-solid";
+import { DataTable as LegacyDataTable } from "@devslab/dds-table";
+if (DataTable !== LegacyDataTable) throw new Error("legacy table must re-export the same implementation");
 const rows = [{ id: "1", name: "Fresh consumer" }, { id: "2", name: "Second row" }];
 const columns = [{ id: "name", label: "Name", cell: (row) => row.name }];
 const labels = { sortBy: "Sort by {column}", actions: "Actions", nextPage: "Next page" };
@@ -127,7 +129,7 @@ Object.defineProperty(globalThis, "_$HY", { value: dom.window._$HY, configurable
 const host = document.querySelector("#root");
 const { hydrate } = await import("solid-js/web");
 const { createComponent } = await import("solid-js");
-const { DataTable } = await import("@devslab/dds-table");
+const { DataTable } = await import("@devslab/dds-table-solid");
 const rows = [{ id: "1", name: "Fresh consumer" }, { id: "2", name: "Second row" }];
 const columns = [{ id: "name", label: "Name", cell: (row) => row.name }];
 const labels = { sortBy: "Sort by {column}", actions: "Actions", nextPage: "Next page" };
@@ -141,7 +143,7 @@ dispose(); console.warn = warn; console.error = error;
 if (diagnostics.length) throw new Error('fresh consumer hydration diagnostics: ' + diagnostics.join("\\n"));
 `, "utf8");
   runNode(["--conditions=browser", hydrationScript], temp);
-  console.log("dds-table pack, publish dry-run, and fresh consumer import, SSR, and hydration passed");
+  console.log("dds-table-solid pack, publish dry-run, and fresh consumer import, SSR, and hydration passed");
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

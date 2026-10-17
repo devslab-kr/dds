@@ -10,6 +10,7 @@
       "@devslab/dds-solid",
       "@devslab/site-kit",
       "@devslab/dds-table",
+      "@devslab/dds-table-solid",
       "@devslab/dds-react",
       "@devslab/dds-table-react"
     ]

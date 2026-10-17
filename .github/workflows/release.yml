@@ -73,6 +73,7 @@ jobs:
       - run: pnpm run verify:site-kit:ui
       - run: pnpm run verify:site-kit:browser
       - run: pnpm run verify:site-kit:release
+      - run: pnpm run verify:components
       - name: Create the release PR or publish to npm
         id: changesets
         uses: changesets/action@v1

@@ -106,13 +106,13 @@ it('readOnly prevents typing and opening the calendar',async()=>{
   const input=screen.getByLabelText(/^Date(?:\s*\*)?$/) as HTMLInputElement;
   expect(input.readOnly).toBe(true);
   await user.type(input,'2027');expect(input).toHaveValue('2028-02-28');
-  const trigger=screen.getByRole('button',{name:/Date.*달력/});
+  const trigger=screen.getByRole('button',{name:/Date.*Open calendar/});
   await user.click(trigger);expect(screen.queryByRole('application')).not.toBeInTheDocument();
 });
 
 it('a disabled transition closes the already-open portal',async()=>{
   const view=render(<Example/>);const user=userEvent.setup();
-  await user.click(screen.getByRole('button',{name:/Date.*달력/}));
+  await user.click(screen.getByRole('button',{name:/Date.*Open calendar/}));
   expect(screen.getByRole('application')).toBeInTheDocument();
   view.rerender(<Example disabled/>);
   await waitFor(()=>expect(screen.queryByRole('application')).not.toBeInTheDocument());
@@ -127,8 +127,8 @@ it('a complete valid typed date updates canonical state before a focused button 
 it('calendar Clear also clears an invalid persisted draft with no previous selection',async()=>{
   function Invalid(){const [value,setValue]=useState('2027-02-29');return <DatePicker locale="en-US" label="Date" value={value} onChange={setValue}/>;}
   render(<Invalid/>);const user=userEvent.setup();
-  await user.click(screen.getByRole('button',{name:/Date.*달력/}));
-  await user.click(screen.getByRole('button',{name:'선택 날짜 지우기'}));
+  await user.click(screen.getByRole('button',{name:/Date.*Open calendar/}));
+  await user.click(screen.getByRole('button',{name:'Clear selected date'}));
   await waitFor(()=>expect(screen.getByLabelText(/^Date(?:\s*\*)?$/)).toHaveValue(''));
 });
 // Review regression: observed assertion RED on the original patch. A single pendingEcho loses B when C

@@ -30,11 +30,67 @@
       "types": "./dist/index.d.ts",
       "worker": "./dist/server.js",
       "workerd": "./dist/server.js",
-      "node": "./dist/server.js",
       "browser": "./dist/index.js",
+      "node": "./dist/server.js",
       "default": "./dist/index.js"
     },
-    "./styles.css": "./styles.css"
+    "./styles.css": "./styles.css",
+    "./input": {
+      "types": "./dist/input.d.ts",
+      "worker": "./dist/input.server.js",
+      "workerd": "./dist/input.server.js",
+      "browser": "./dist/input.js",
+      "node": "./dist/input.server.js",
+      "default": "./dist/input.js"
+    },
+    "./combobox": {
+      "types": "./dist/combobox.d.ts",
+      "worker": "./dist/combobox.server.js",
+      "workerd": "./dist/combobox.server.js",
+      "browser": "./dist/combobox.js",
+      "node": "./dist/combobox.server.js",
+      "default": "./dist/combobox.js"
+    },
+    "./select-picker": {
+      "types": "./dist/select-picker.d.ts",
+      "worker": "./dist/select-picker.server.js",
+      "workerd": "./dist/select-picker.server.js",
+      "browser": "./dist/select-picker.js",
+      "node": "./dist/select-picker.server.js",
+      "default": "./dist/select-picker.js"
+    },
+    "./dropdown-menu": {
+      "types": "./dist/dropdown-menu.d.ts",
+      "worker": "./dist/dropdown-menu.server.js",
+      "workerd": "./dist/dropdown-menu.server.js",
+      "browser": "./dist/dropdown-menu.js",
+      "node": "./dist/dropdown-menu.server.js",
+      "default": "./dist/dropdown-menu.js"
+    },
+    "./popover": {
+      "types": "./dist/popover.d.ts",
+      "worker": "./dist/popover.server.js",
+      "workerd": "./dist/popover.server.js",
+      "browser": "./dist/popover.js",
+      "node": "./dist/popover.server.js",
+      "default": "./dist/popover.js"
+    },
+    "./calendar": {
+      "types": "./dist/calendar.d.ts",
+      "worker": "./dist/calendar.server.js",
+      "workerd": "./dist/calendar.server.js",
+      "browser": "./dist/calendar.js",
+      "node": "./dist/calendar.server.js",
+      "default": "./dist/calendar.js"
+    },
+    "./date-picker": {
+      "types": "./dist/date-picker.d.ts",
+      "worker": "./dist/date-picker.server.js",
+      "workerd": "./dist/date-picker.server.js",
+      "browser": "./dist/date-picker.js",
+      "node": "./dist/date-picker.server.js",
+      "default": "./dist/date-picker.js"
+    }
   },
   "scripts": {
     "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly",
@@ -47,6 +103,7 @@
     "@devslab/dds-css": "workspace:0.21.2",
     "@devslab/dds-icons": "workspace:0.21.2",
     "@devslab/dds-tokens": "workspace:0.21.2",
+    "@tanstack/solid-virtual": "3.13.48",
     "@zag-js/aria-hidden": "1.45.0",
     "@zag-js/focus-trap": "1.45.0"
   },
