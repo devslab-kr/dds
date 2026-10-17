@@ -5,9 +5,15 @@ on:
     branches: [main]
   pull_request:
 
+# Cancel superseded pull request runs; main verification runs finish normally.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   source-contracts:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -20,6 +26,7 @@ jobs:
   verify:
     needs: source-contracts
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -33,27 +40,24 @@ jobs:
       - run: pnpm run verify:canary:test
       - run: pnpm run verify:canary:build
       - run: pnpm run verify:canary:preview
+      # Includes the Storybook build and browser foundation checks.
       - run: pnpm run verify:foundation
       - run: pnpm run verify:release
+      # Package test scripts include their axe suites; avoid running them twice.
       - run: pnpm run verify:solid:test
-      - run: pnpm run verify:solid:a11y
       - run: pnpm run verify:solid:release
       - run: pnpm run verify:table:test
-      - run: pnpm run verify:table:a11y
       - run: pnpm run verify:table:release
       - run: pnpm run verify:react:test
-      - run: pnpm run verify:react:a11y
       - run: pnpm run verify:react:browser
       - run: pnpm run verify:react:release
       - run: pnpm run verify:table-react:test
       - run: pnpm run verify:table-react:browser
       - run: pnpm run verify:table-react:release
+      # i18n and SEO share these same core/publisher suites.
       - run: pnpm run verify:site-kit:i18n
       - run: pnpm run verify:site-kit:ui
-      - run: pnpm run verify:site-kit:seo
       - run: pnpm run verify:site-kit:browser
       - run: pnpm run verify:site-kit:release
       # build all packages, then validate token JSON + docs/preview sync
       - run: pnpm run verify
-      # stories must keep building against the current CSS/tokens
-      - run: pnpm exec storybook build

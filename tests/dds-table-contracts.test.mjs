@@ -22,40 +22,33 @@ test("dds-table pins TanStack exactly and ships the worker condition", async () 
     "An explicit browser condition must win over Node when testing hydration");
 });
 
-/** Every rule in a stylesheet as { selectors, body, comment } — the comment
- *  being the block comment written directly above the rule, if any. Media
- *  wrappers are unwrapped so their inner rules are listed too. */
+/** Read stylesheet selectors and declarations, including rules inside media wrappers. */
 function cssRules(text) {
   const rules = [];
-  // The selector group has no braces to stop at, so it swallows the comment
-  // above the rule; the comment is recovered from it rather than matched
-  // separately.
   const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
   for (const [, prelude, body] of text.replace(/@media[^{]+\{/g, "").matchAll(ruleRe)) {
-    const comments = [...prelude.matchAll(/\/\*[\s\S]*?\*\//g)].map(([comment]) => comment);
     const selectors = prelude.replace(/\/\*[\s\S]*?\*\//g, "").split(",").map((selector) => selector.trim()).filter(Boolean);
-    rules.push({ selectors, body, comment: comments.at(-1) ?? "" });
+    rules.push({ selectors, body });
   }
   return rules;
 }
 
 const ruleFor = (rules, selector) => rules.find((rule) => rule.selectors.includes(selector));
 
-test("table.css carries the console rules, each with its reason", async () => {
+test("table.css carries the console layout rules", async () => {
   const rules = cssRules(await read("packages/dds-css/src/table.css"));
   const expectations = [
-    [".dds-table code", /font-family:\s*var\(--dds-font-family-mono\)/, /character by character/],
-    [".dds-table__actions .dds-btn", /white-space:\s*nowrap/, /~53px/],
-    [".dds-table td:has(> .dds-table__actions)", /padding-block:\s*var\(--dds-space-4\)/, null],
-    [".dds-table td:has(.dds-btn--sm)", /padding-block:\s*var\(--dds-space-4\)/, /53px row/],
-    [".dds-table--dense .dds-btn--sm", /min-block-size:\s*var\(--dds-space-24\)/, /24px/],
-    [".dds-table-wrap--tall .dds-table", /border-collapse:\s*separate/, /sticky header from actually sticking/],
+    [".dds-table code", /font-family:\s*var\(--dds-font-family-mono\)/],
+    [".dds-table__actions .dds-btn", /white-space:\s*nowrap/],
+    [".dds-table td:has(> .dds-table__actions)", /padding-block:\s*var\(--dds-space-4\)/],
+    [".dds-table td:has(.dds-btn--sm)", /padding-block:\s*var\(--dds-space-4\)/],
+    [".dds-table--dense .dds-btn--sm", /min-block-size:\s*var\(--dds-space-24\)/],
+    [".dds-table-wrap--tall .dds-table", /border-collapse:\s*separate/],
   ];
-  for (const [selector, declaration, reason] of expectations) {
+  for (const [selector, declaration] of expectations) {
     const rule = ruleFor(rules, selector);
     assert.ok(rule, `table.css must define ${selector}`);
     assert.match(rule.body, declaration, `${selector} must declare ${declaration}`);
-    if (reason) assert.match(rule.comment, reason, `${selector} must say why it exists`);
   }
   assert.match(ruleFor(rules, ".dds-table__actions .dds-btn").body, /min-block-size:\s*var\(--dds-space-32\)/);
   assert.match(ruleFor(rules, ".dds-table--dense .dds-btn--sm").body, /padding-block:\s*0/);

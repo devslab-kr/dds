@@ -190,7 +190,8 @@ test("Worker and browser fixtures consume adapters and prove hydration plus Arab
   assert.match(browser, /toBeFocused/);
   assert.match(browser, /aria-expanded/);
   assert.equal(typeof root.scripts?.["verify:site-kit:browser"], "string");
-  for (const gate of ["verify:source:stage3-4", "verify:solid:test", "verify:solid:a11y", "verify:solid:release", "verify:site-kit:ui", "verify:site-kit:browser", "verify:site-kit:release"]) {
+  // foundation-contracts verifies that solid:test includes the axe suite.
+  for (const gate of ["verify:source:stage3-4", "verify:solid:test", "verify:solid:release", "verify:site-kit:ui", "verify:site-kit:browser", "verify:site-kit:release"]) {
     assert.match(workflow, new RegExp(gate.replaceAll(":", "\\:")), `${gate} must gate CI`);
   }
 });
