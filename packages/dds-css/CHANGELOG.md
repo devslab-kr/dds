@@ -1,5 +1,13 @@
 # @devslab/dds-css
 
+## 0.22.0
+
+### Minor Changes
+
+- 52d463b: Add matching general-purpose Input/InputGroup, virtualized Combobox and SelectPicker, DropdownMenu, Popover, and standalone Calendar to Solid and React. Share calendar views with DatePicker while preserving draft validation and ISO storage. Publish explicit component subpaths without adding table engines to UI imports.
+
+  Rename the Solid table implementation to @devslab/dds-table-solid. Keep @devslab/dds-table as a compatible same-version re-export, preserving existing consumers. No external consumer migration is required by this release.
+
 ## 0.21.2
 
 ## 0.21.1
