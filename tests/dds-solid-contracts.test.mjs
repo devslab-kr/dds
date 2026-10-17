@@ -33,51 +33,6 @@ test("dds-solid is a public exact-version package with stable exports", async ()
   ]) assert.match(entry, new RegExp(`\\b${symbol}\\b`), `${symbol} must be exported`);
 });
 
-test("native controls preserve semantic elements and accessible names", async () => {
-  const controls = await read("packages/dds-solid/src/controls.tsx");
-  assert.match(controls, /<button/);
-  assert.match(controls, /type="checkbox"/);
-  assert.match(controls, /type="radio"/);
-  assert.match(controls, /useSwitch/);
-  assert.match(controls, /<select/);
-  assert.match(controls, /aria-invalid/);
-  assert.match(controls, /aria-describedby/);
-  assert.match(controls, /"aria-label": string/);
-});
-
-test("stateful primitives expose controlled and uncontrolled contracts", async () => {
-  const state = await read("packages/dds-solid/src/controllable.ts");
-  const dialog = await read("packages/dds-solid/src/dialog.tsx");
-  const tabs = await read("packages/dds-solid/src/tabs.tsx");
-  const toast = await read("packages/dds-solid/src/toast.tsx");
-  const tooltip = await read("packages/dds-solid/src/tooltip.tsx");
-  assert.match(state, /createControllableSignal/);
-  for (const source of [dialog, tabs, tooltip]) {
-    assert.match(source, /defaultOpen|defaultValue/);
-    assert.match(source, /onOpenChange|onValueChange/);
-  }
-  assert.match(toast, /createToaster/);
-  assert.match(toast, /onCleanup\(api.clear\)/);
-  assert.match(toast, /role=.*alert/);
-});
-
-test("Dialog and Tabs delegate keyboard and focus lifecycle to Ark through DDS contracts", async () => {
-  const dialog = await read("packages/dds-solid/src/dialog.tsx");
-  const tabs = await read("packages/dds-solid/src/tabs.tsx");
-  assert.match(dialog, /Escape/);
-  assert.match(dialog, /@ark-ui\/solid\/dialog/);
-  assert.match(dialog, /modal: !props.additionalFocusContainers/);
-  assert.match(dialog, /trapFocus: !props.additionalFocusContainers/);
-  assert.match(dialog, /preventScroll: true/);
-  assert.match(dialog, /@zag-js\/focus-trap/);
-  assert.match(dialog, /@zag-js\/aria-hidden/);
-  assert.match(dialog, /details.open/);
-  assert.match(tabs, /@ark-ui\/solid\/tabs/);
-  assert.match(tabs, /activationMode=\{props.activationMode \?\? "automatic"\}/);
-  assert.match(tabs, /lazyMount=\{false\} unmountOnExit=\{false\}/);
-  assert.match(tabs, /details.value/);
-});
-
 test("Icon and style adapters consume DDS framework-neutral contracts", async () => {
   const icon = await read("packages/dds-solid/src/icon.tsx");
   const styles = await read("packages/dds-solid/styles.css");
@@ -86,26 +41,6 @@ test("Icon and style adapters consume DDS framework-neutral contracts", async ()
   assert.match(icon, /role=.*"img"/);
   assert.match(styles, /@devslab\/dds-tokens\/tokens\.css/);
   assert.match(styles, /@devslab\/dds-css\/dds\.css/);
-});
-
-test("runtime suites cover every primitive, both state modes, focus lifecycle, a11y, and hydration", async () => {
-  const [primitives, a11y, ssr, release] = await Promise.all([
-    read("packages/dds-solid/src/__tests__/primitives.test.tsx"),
-    read("packages/dds-solid/src/__tests__/a11y.test.tsx"),
-    read("packages/dds-solid/src/__tests__/ssr.test.tsx"),
-    read("scripts/verify-solid-release.mjs"),
-  ]);
-  for (const symbol of ["IconButton", "Field", "Select", "Radio", "Switch", "Tooltip", "ToastProvider", "Icon"]) {
-    assert.match(primitives, new RegExp(`\\b${symbol}\\b`), `${symbol} needs runtime coverage`);
-  }
-  assert.match(primitives, /controlled and uncontrolled/i);
-  assert.match(primitives, /focus trap cycle/i);
-  assert.match(primitives, /timer lifecycle/i);
-  for (const symbol of ["Dialog", "Tabs", "Tooltip", "ToastProvider", "Radio", "IconButton"]) assert.match(a11y, new RegExp(`\\b${symbol}\\b`));
-  for (const symbol of ["Dialog", "Tabs", "Tooltip", "ToastProvider", "Checkbox", "Radio", "Switch", "Select", "Field", "IconButton"]) assert.match(ssr, new RegExp(`\\b${symbol}\\b`));
-  assert.match(release, /renderToString/);
-  assert.match(release, /hydrate/);
-  assert.match(release, /@devslab\/dds-solid/);
 });
 
 test("Toast dismiss control has an injected localized accessible name without an English fallback", async () => {

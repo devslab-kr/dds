@@ -59,14 +59,12 @@ jobs:
       - run: pnpm run verify:canary:preview
       - run: pnpm run verify:foundation
       - run: pnpm run verify:release
+      # Package test scripts already include their axe suites.
       - run: pnpm run verify:solid:test
-      - run: pnpm run verify:solid:a11y
       - run: pnpm run verify:solid:release
       - run: pnpm run verify:table:test
-      - run: pnpm run verify:table:a11y
       - run: pnpm run verify:table:release
       - run: pnpm run verify:react:test
-      - run: pnpm run verify:react:a11y
       - run: pnpm run verify:react:browser
       - run: pnpm run verify:react:release
       - run: pnpm run verify:table-react:test
