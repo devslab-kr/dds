@@ -1,0 +1,6 @@
+/* TimePicker: the Combobox structure from choice.css (same 40px control, list
+ * and focus), with fixed-width digits and a clock button instead of the caret. */
+.dds-time-picker .dds-choice-input,.dds-time-picker .dds-choice-item {font-variant-numeric:tabular-nums;}
+.dds-time-picker .dds-choice-trigger {display:inline-flex;flex:none;align-items:center;justify-content:center;padding-inline:var(--dds-space-8);color:var(--dds-color-text-secondary);}
+.dds-time-picker .dds-choice-trigger:hover {color:var(--dds-color-text-primary);}
+.dds-time-picker .dds-choice-trigger:disabled {cursor:not-allowed;}

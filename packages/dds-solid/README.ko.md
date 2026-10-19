@@ -68,10 +68,22 @@ const [date, setDate] = createSignal("");
 <DatePicker label="시작 날짜" value={date()} onChange={setDate} />
 ```
 
-Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`; optional `min`, `max` and `disabled` constrain selection. Time remains a separate field.
+Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`; optional `min`, `max` and `disabled` constrain selection. Time of day uses TimePicker.
+
+## TimePicker
+
+```tsx
+import { TimePicker } from "@devslab/dds-solid";
+const [closing, setClosing] = createSignal("18:00");
+<TimePicker label="마감 시간" value={closing()} onValueChange={setClosing} clearable />
+```
+
+브라우저 기본 `type="time"` 드롭다운 대신 Combobox와 같은 컨트롤과 목록을 씁니다. 값은 24시간 `HH:MM` 또는 빈 문자열이며, 서버가 보낸 `HH:MM:SS`는 `HH:MM`으로 보여 줍니다. 목록은 `step`분 간격(기본 10분)이고 선택한 시간이 가운데에 오도록 열립니다. `10`을 입력하면 10:00–10:50만 남고, 끝까지 입력한 시간(간격에 맞지 않는 `10:45`도)은 Enter나 칸을 벗어날 때 확정됩니다.
 
 ## 입력·선택·메뉴·공유 달력
 
-Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다.
+Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다. SegmentedControl은 눈에 보이는 몇 가지 중 하나를 고르는 라디오 그룹이고, NumberInput은 − / + 버튼과 단위를 붙일 수 있는 숫자 입력으로 값은 숫자 또는 null입니다.
 
-상세 import: `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
+상세 import: `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/segmented-control`, `/number-input`, `/date-range-picker`, `/month-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
+Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다. DateRangePicker(시작일~종료일 기간)와 MonthPicker(YYYY-MM 월)도 같은 달력을 씁니다.
+

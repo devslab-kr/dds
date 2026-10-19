@@ -1,0 +1,139 @@
+/* NumberInput — a localized number field. The bordered control has the
+ * same 40px outer box, border, radius and whole-control focus ring as Input
+ * and SelectPicker. Digits sit at the end with tabular figures; an optional
+ * unit (원, 개, 분) and the − / + steppers sit inside the control after them,
+ * so neither can overlap the digits. */
+
+.dds-number-input {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  min-inline-size: 0;
+  font-family: var(--dds-font-family-sans);
+  font-size: var(--dds-typo-body-2-font-size);
+  color: var(--dds-color-text-primary);
+}
+.dds-number-input[hidden] {
+  display: none;
+}
+
+.dds-number-input__label {
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+}
+.dds-number-input[data-label-placement="hidden"] .dds-number-input__label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.dds-number-input__control {
+  display: flex;
+  align-items: stretch;
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: var(--dds-space-40);
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-md);
+  background: var(--dds-color-bg-default);
+  overflow: hidden;
+}
+.dds-number-input__control:focus-within {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+}
+.dds-number-input__control[data-invalid] {
+  border-color: var(--dds-color-status-danger);
+}
+
+.dds-number-input__field {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  inline-size: 100%;
+  padding-inline: var(--dds-space-12);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  outline: none;
+}
+.dds-number-input__field::placeholder {
+  color: var(--dds-color-text-muted);
+}
+.dds-number-input__control:has(.dds-number-input__suffix) .dds-number-input__field {
+  padding-inline-end: var(--dds-space-4);
+}
+
+.dds-number-input__suffix {
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding-inline-end: var(--dds-space-12);
+  color: var(--dds-color-text-secondary);
+  white-space: nowrap;
+}
+
+.dds-number-input__steppers {
+  display: flex;
+  flex: none;
+  border-inline-start: 1px solid var(--dds-color-border-default);
+}
+
+.dds-number-input__step {
+  display: grid;
+  place-items: center;
+  inline-size: var(--dds-space-32);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--dds-color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dds-number-input__step + .dds-number-input__step {
+  border-inline-start: 1px solid var(--dds-color-border-default);
+}
+.dds-number-input__step:not([disabled]):hover {
+  background: var(--dds-color-overlay-hover-tint);
+  color: var(--dds-color-text-primary);
+}
+.dds-number-input__step:not([disabled]):active {
+  background: var(--dds-color-overlay-pressed-tint);
+}
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-number-input__step[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dds-number-input[data-disabled] {
+  opacity: 0.45;
+}
+.dds-number-input[data-disabled] .dds-number-input__control {
+  background: var(--dds-color-bg-subtle);
+  cursor: not-allowed;
+}
+.dds-number-input[data-disabled] .dds-number-input__step[disabled] {
+  opacity: 1;
+}
+.dds-number-input[data-readonly] .dds-number-input__control {
+  background: var(--dds-color-bg-subtle);
+}
+
+@media (pointer: coarse) {
+  .dds-number-input__control {
+    block-size: 44px;
+  }
+  .dds-number-input__step {
+    inline-size: 44px;
+  }
+}

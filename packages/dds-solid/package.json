@@ -90,6 +90,46 @@
       "browser": "./dist/date-picker.js",
       "node": "./dist/date-picker.server.js",
       "default": "./dist/date-picker.js"
+    },
+    "./time-picker": {
+      "types": "./dist/time-picker.d.ts",
+      "worker": "./dist/time-picker.server.js",
+      "workerd": "./dist/time-picker.server.js",
+      "browser": "./dist/time-picker.js",
+      "node": "./dist/time-picker.server.js",
+      "default": "./dist/time-picker.js"
+    },
+    "./segmented-control": {
+      "types": "./dist/segmented-control.d.ts",
+      "worker": "./dist/segmented-control.server.js",
+      "workerd": "./dist/segmented-control.server.js",
+      "browser": "./dist/segmented-control.js",
+      "node": "./dist/segmented-control.server.js",
+      "default": "./dist/segmented-control.js"
+    },
+    "./number-input": {
+      "types": "./dist/number-input.d.ts",
+      "worker": "./dist/number-input.server.js",
+      "workerd": "./dist/number-input.server.js",
+      "browser": "./dist/number-input.js",
+      "node": "./dist/number-input.server.js",
+      "default": "./dist/number-input.js"
+    },
+    "./date-range-picker": {
+      "types": "./dist/date-range-picker.d.ts",
+      "worker": "./dist/date-range-picker.server.js",
+      "workerd": "./dist/date-range-picker.server.js",
+      "browser": "./dist/date-range-picker.js",
+      "node": "./dist/date-range-picker.server.js",
+      "default": "./dist/date-range-picker.js"
+    },
+    "./month-picker": {
+      "types": "./dist/month-picker.d.ts",
+      "worker": "./dist/month-picker.server.js",
+      "workerd": "./dist/month-picker.server.js",
+      "browser": "./dist/month-picker.js",
+      "node": "./dist/month-picker.server.js",
+      "default": "./dist/month-picker.js"
     }
   },
   "scripts": {

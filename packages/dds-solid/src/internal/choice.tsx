@@ -11,6 +11,7 @@ import {
   onMount,
   Show,
   untrack,
+  type JSX,
 } from "solid-js";
 import {
   createVirtualizer,
@@ -21,10 +22,35 @@ import {
   choiceMessages,
   choiceWarningsEnabled,
   validateOptions,
+  type ChoiceOption,
   type ComboboxProps,
 } from "../choice-types";
 
-export function Choice(props: ComboboxProps & { searchable: boolean }) {
+/**
+ * Options for DDS components built on Choice (TimePicker). They are not part
+ * of the public Combobox/SelectPicker props; every default keeps the existing
+ * Combobox and SelectPicker behavior.
+ */
+export interface ChoiceInternals {
+  searchable: boolean;
+  /** Replaces the default case-insensitive label substring filter. */
+  matchItem?: (item: ChoiceOption, query: string) => boolean;
+  /** On blur, the value the typed text stands for, "" to clear, or null to restore the label. */
+  commitDraft?: (text: string) => string | null;
+  /** Content of the searchable trigger button (default "⌄"). */
+  triggerContent?: () => JSX.Element;
+  rootClass?: string;
+  invalid?: boolean;
+  /** Highlight the first match while typing so Enter picks it. */
+  autoHighlight?: boolean;
+  /** Scroll the selected option to the middle of the list when it opens. */
+  centerSelected?: boolean;
+  inputMode?: JSX.HTMLAttributes<HTMLInputElement>["inputMode"];
+  /** Called before a native form reset restores the value. */
+  onFormReset?: () => void;
+}
+
+export function Choice(props: ComboboxProps & ChoiceInternals) {
   const id = createUniqueId();
   const [internal, setInternal] = createSignal(props.defaultValue ?? "");
   const value = () => props.value ?? internal();
@@ -52,6 +78,7 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
       );
   });
   let composing = false;
+  let consumedOnBlur: string | null = null;
   let pendingRestore: { from: string; to: string } | null = null;
   const resolveLabel = (id: string) =>
     props.items.find((item) => item.value === id)?.label ??
@@ -110,9 +137,12 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
         ) as HTMLFormElement | null)
       : validation?.form;
     if (!form) return;
+    // A task, not a microtask: after a reset-button click, microtasks run
+    // before the browser resets the controls and would be overwritten.
     const reset = (event: Event) =>
-      queueMicrotask(() => {
+      setTimeout(() => {
         if (event.defaultPrevented) return;
+        props.onFormReset?.();
         const resetValue = props.value ?? props.defaultValue ?? "";
         const resetLabel = resolveLabel(resetValue);
         previousSelection = { value: resetValue, label: resetLabel };
@@ -130,9 +160,11 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
     props.filterMode !== "external" &&
     inputValue() !== label()
       ? props.items.filter((item) =>
-          item.label
-            .toLocaleLowerCase()
-            .includes(inputValue().toLocaleLowerCase()),
+          props.matchItem
+            ? props.matchItem(item, inputValue())
+            : item.label
+                .toLocaleLowerCase()
+                .includes(inputValue().toLocaleLowerCase()),
         )
       : props.items,
   );
@@ -185,8 +217,24 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
           0,
           items().findIndex((item) => item.value === value()),
         ),
-        { align: "auto" },
+        { align: props.centerSelected ? "center" : "auto" },
       );
+  });
+  createEffect(() => {
+    const content = scroll();
+    if (!props.centerSelected || !open() || virtual() || !content) return;
+    // Ark only scrolls the highlighted option to the nearest edge.
+    const frame = requestAnimationFrame(() => {
+      const selected = content.querySelector<HTMLElement>(
+        '[data-part="item"][data-state="checked"]',
+      );
+      if (!selected) return;
+      const list = content.getBoundingClientRect(),
+        row = selected.getBoundingClientRect();
+      content.scrollTop +=
+        row.top - list.top - (content.clientHeight - row.height) / 2;
+    });
+    onCleanup(() => cancelAnimationFrame(frame));
   });
   const Parts = props.searchable ? C : S;
   const rows = createMemo(() => {
@@ -226,6 +274,9 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
     get readOnly() {
       return props.readOnly;
     },
+    get invalid() {
+      return props.invalid;
+    },
     onOpenChange: (details: { open: boolean }) => {
       if (!blocked()) setOpen(details.open);
     },
@@ -263,11 +314,24 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
         get inputValue() {
           return inputValue();
         },
-        onInputValueChange: (details: { inputValue: string }) => {
+        onInputValueChange: (details: {
+          inputValue: string;
+          reason?: string | undefined;
+        }) => {
+          // Ark reports a keystroke after the blur that already committed it.
+          const stale =
+            consumedOnBlur === details.inputValue &&
+            details.reason === "input-change" &&
+            visible?.ownerDocument.activeElement !== visible;
+          consumedOnBlur = null;
+          if (stale) return;
           if (!blocked() && details.inputValue !== inputValue())
             setInput(details.inputValue);
         },
         selectionBehavior: "preserve" as const,
+        ...(props.autoHighlight
+          ? { inputBehavior: "autohighlight" as const }
+          : {}),
       }
     : {};
   return (
@@ -275,7 +339,7 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
       {...rootProps}
       {...inputProps}
       id={props.id ?? id}
-      class="dds-choice"
+      class={props.rootClass ? `dds-choice ${props.rootClass}` : "dds-choice"}
       data-label-placement={props.labelPlacement ?? "outside"}
       data-has-value={value() || inputValue() ? "" : undefined}
     >
@@ -296,6 +360,7 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
             aria-describedby={props["aria-describedby"]}
             aria-required={props.required}
             placeholder={props.placeholder}
+            inputMode={props.inputMode}
             onCompositionStart={() => {
               composing = true;
             }}
@@ -308,7 +373,17 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
                 event.stopPropagation();
               }
             }}
-            onBlur={() => {
+            onBlur={(event) => {
+              if (props.commitDraft) {
+                // The DOM holds the latest keystroke; Ark's input state may still be queued.
+                consumedOnBlur = event.currentTarget.value;
+                const next = blocked()
+                  ? null
+                  : props.commitDraft(consumedOnBlur);
+                if (next !== null && next !== value()) setValue(next);
+                restoreInput(label());
+                return;
+              }
               if (value()) restoreInput(label());
             }}
           />
@@ -324,7 +399,11 @@ export function Choice(props: ComboboxProps & { searchable: boolean }) {
           aria-required={props.required}
         >
           {props.searchable ? (
-            "⌄"
+            props.triggerContent ? (
+              props.triggerContent()
+            ) : (
+              "⌄"
+            )
           ) : (
             <span class="dds-choice-value">
               {label() || props.placeholder || messages().open}

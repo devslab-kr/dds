@@ -262,16 +262,18 @@ for (const [framework, port] of [
       await input.fill("2026-10-20");
       await input.press("Tab");
       await expect(page.getByLabel("Picked value")).toHaveText("2026-10-20");
-      await page
-        .getByRole("button", { name: "Picked date Open calendar", exact: true })
-        .click();
-      await expect(
-        page.locator(".dds-date-picker-positioner .dds-date-picker-content"),
-      ).toBeVisible();
+      const pickedTrigger = page.getByRole("button", {
+        name: "Picked date Open calendar",
+        exact: true,
+      });
+      await pickedTrigger.click();
+      // The page holds several date popups; follow this trigger's own content.
+      const pickedContent = page.locator(
+        `.dds-date-picker-positioner [id="${await pickedTrigger.getAttribute("aria-controls")}"].dds-date-picker-content`,
+      );
+      await expect(pickedContent).toBeVisible();
       await page.keyboard.press("Escape");
-      await expect(
-        page.locator(".dds-date-picker-positioner .dds-date-picker-content"),
-      ).toBeHidden();
+      await expect(pickedContent).toBeHidden();
     });
     test("composing Enter does not submit input form and inputs pass axe", async ({
       page,
@@ -540,3 +542,480 @@ for (const [framework, port] of [
     await expect(opener).toBeFocused();
   });
 }
+
+// Solid-only until React parity: DateRangePicker and MonthPicker (DDS 0.24).
+test.describe("Solid DateRangePicker and MonthPicker", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://127.0.0.1:5282");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Solid");
+  });
+  const period = (page: import("@playwright/test").Page) =>
+    page.getByRole("group", { name: "Billing period", exact: true });
+  const openRange = (page: import("@playwright/test").Page) =>
+    page.locator('.dds-date-range-content[data-state="open"]');
+  const openMonths = (page: import("@playwright/test").Page) =>
+    page.locator('.dds-month-picker-content[data-state="open"]');
+
+  test("DateRangePicker selects by keyboard and pointer, previews on hover and rejects a reversed typed period", async ({
+    page,
+  }) => {
+    const group = period(page),
+      start = group.getByRole("textbox", { name: "Start date", exact: true }),
+      end = group.getByRole("textbox", { name: "End date", exact: true }),
+      trigger = group.getByRole("button", {
+        name: "Billing period Open calendar",
+        exact: true,
+      });
+    await trigger.click();
+    await expect(openRange(page)).toBeVisible();
+    // Opening focuses the period start; the keyboard picks a new start and end.
+    await expect(
+      openRange(page).getByRole("button", {
+        name: "Choose Monday, October 5, 2026",
+        exact: true,
+      }),
+    ).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-05~2026-10-09",
+    );
+    // Choosing a start moves focus to the next day (Ark range behavior): Oct 7, then one week down.
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-06~2026-10-14",
+    );
+    await expect(end).toBeFocused();
+    await trigger.click();
+    await openRange(page)
+      .locator('[data-part="table-cell-trigger"][data-value="2026-10-12"]')
+      .click();
+    await openRange(page)
+      .locator('[data-part="table-cell-trigger"][data-value="2026-10-21"]')
+      .hover();
+    await expect(
+      openRange(page).locator("[data-in-hover-range]").first(),
+    ).toBeVisible();
+    await openRange(page)
+      .locator('[data-part="table-cell-trigger"][data-value="2026-10-21"]')
+      .click();
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-12~2026-10-21",
+    );
+    await expect(openRange(page)).toBeHidden();
+    await end.fill("2026-10-01");
+    await expect(end).toHaveAttribute("aria-invalid", "true");
+    await expect(group.getByRole("alert")).toHaveText(
+      "The end date must be on or after the start date.",
+    );
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-12~2026-10-21",
+    );
+    await start.fill("2026-09-30");
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-09-30~2026-10-01",
+    );
+  });
+
+  test("DateRangePicker presets, MonthPicker keyboard months and both form values submit and reset", async ({
+    page,
+  }) => {
+    const group = period(page);
+    await group
+      .getByRole("button", { name: "Billing period Open calendar", exact: true })
+      .click();
+    await expect(
+      openRange(page).getByRole("button", { name: "Out of range", exact: true }),
+    ).toBeDisabled();
+    await openRange(page)
+      .getByRole("button", { name: "October 2026", exact: true })
+      .click();
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-01~2026-10-31",
+    );
+    const monthTrigger = page.getByRole("button", {
+      name: "Billing month Open calendar",
+      exact: true,
+    });
+    await monthTrigger.click();
+    await expect(openMonths(page)).toBeVisible();
+    await expect(openMonths(page).locator(".dds-date-picker-year")).toHaveText(
+      "2026",
+    );
+    await expect(
+      openMonths(page).locator('[data-part="table-cell-trigger"][data-value="2"]'),
+    ).toHaveAttribute("aria-disabled", "true");
+    await expect(
+      openMonths(page).locator('[data-part="table-cell-trigger"][data-value="10"]'),
+    ).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("textbox", { name: "Billing month", exact: true }),
+    ).toHaveValue("2026-11");
+    await page.getByRole("button", { name: "Submit period form" }).click();
+    await expect(page.getByLabel("Submitted period")).toHaveText(
+      "2026-10-01~2026-10-31|2026-11",
+    );
+    await page.getByRole("button", { name: "Reset period form" }).click();
+    await expect(
+      page.getByRole("textbox", { name: "Billing month", exact: true }),
+    ).toHaveValue("2026-10");
+    await page.getByRole("button", { name: "Submit period form" }).click();
+    await expect(page.getByLabel("Submitted period")).toHaveText(
+      "2026-10-01~2026-10-31|2026-10",
+    );
+  });
+
+  for (const width of [1280, 390])
+    test(`range and month fields share DatePicker geometry, stay on screen and pass axe at ${width}px`, async ({
+      page,
+    }) => {
+      test.setTimeout(60000);
+      await page.setViewportSize({ width, height: 900 });
+      const section = page.locator('section[aria-label="Periods"]');
+      await section.scrollIntoViewIfNeeded();
+      const boxes = await section.evaluate((root) =>
+        [...root.querySelectorAll(".dds-date-picker-control")].map((control) => {
+          const field = control.firstElementChild!.getBoundingClientRect(),
+            button = control.querySelector("button")!.getBoundingClientRect();
+          return {
+            left: field.left,
+            right: field.right,
+            height: field.height,
+            buttonRight: button.right,
+            buttonHeight: button.height,
+          };
+        }),
+      );
+      // DatePicker, two DateRangePickers, two MonthPickers.
+      expect(boxes).toHaveLength(5);
+      for (const box of boxes) {
+        expect(box.height).toBe(40);
+        expect(box.buttonHeight).toBe(boxes[0]!.buttonHeight);
+        expect(Math.abs(box.left - boxes[0]!.left)).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(box.right - boxes[0]!.right)).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(box.buttonRight - boxes[0]!.buttonRight)).toBeLessThanOrEqual(0.5);
+      }
+      expect(
+        (
+          await new AxeBuilder({ page })
+            .include('section[aria-label="Periods"]')
+            .analyze()
+        ).violations,
+      ).toEqual([]);
+      for (const [name, content] of [
+        ["Billing period Open calendar", openRange(page)],
+        ["청구 월 달력 열기", openMonths(page)],
+      ] as const) {
+        await page.getByRole("button", { name, exact: true }).click();
+        await expect(content).toBeVisible();
+        const rect = await content.boundingBox();
+        expect(rect!.x).toBeGreaterThanOrEqual(0);
+        expect(rect!.x + rect!.width).toBeLessThanOrEqual(width);
+        expect(
+          (await new AxeBuilder({ page }).include('.dds-date-picker-content[data-state="open"]').analyze())
+            .violations,
+        ).toEqual([]);
+        await page.keyboard.press("Escape");
+        await expect(content).toBeHidden();
+        await expect(page.getByRole("button", { name, exact: true })).toBeFocused();
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+      ).toBeLessThanOrEqual(0);
+    });
+
+  test("DateRangePicker inside a modal stays reachable and Escape closes one layer", async ({
+    page,
+  }) => {
+    const opener = page.getByRole("button", { name: "Open dialog", exact: true });
+    await opener.click();
+    const modal = page.getByRole("dialog", { name: "Parent dialog", exact: true });
+    const trigger = modal.getByRole("button", {
+      name: "Nested period Open calendar",
+      exact: true,
+    });
+    await trigger.click();
+    const day = page.getByRole("button", {
+      name: "Choose Tuesday, October 13, 2026",
+      exact: true,
+    });
+    await expect(day).toBeVisible();
+    expect(
+      await day.evaluate((element) => element.closest('[aria-hidden="true"],[inert]')),
+    ).toBeNull();
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeVisible();
+    await expect(trigger).toBeFocused();
+    await expect(day).toBeHidden();
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeHidden();
+    await expect(opener).toBeFocused();
+  });
+});
+
+// Solid-first components (D-041): React has no TimePicker yet.
+test.describe("Solid TimePicker", () => {
+  const picker = (page: import("@playwright/test").Page, name: string) =>
+    page.locator(".dds-time-picker", {
+      has: page.getByRole("combobox", { name, exact: true }),
+    });
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://127.0.0.1:5282");
+  });
+  test("opens around the selection, filters, accepts typed times and steps with the keyboard", async ({
+    page,
+  }) => {
+    const root = picker(page, "Closing time"),
+      input = root.getByRole("combobox"),
+      output = page.getByLabel("Time value", { exact: true }),
+      list = page.locator('.dds-choice-content[data-state="open"]');
+    await expect(input).toHaveValue("09:00");
+    await root.locator('[data-part="trigger"]').click();
+    await expect(list).toBeVisible();
+    const selected = list.locator('[role="option"][data-state="checked"]');
+    await expect(selected).toHaveText("09:00");
+    await expect(selected).toBeInViewport();
+    const listBox = (await list.boundingBox())!,
+      selectedBox = (await selected.boundingBox())!;
+    // Centered, not merely scrolled to an edge.
+    expect(
+      Math.abs(
+        selectedBox.y + selectedBox.height / 2 - (listBox.y + listBox.height / 2),
+      ),
+    ).toBeLessThan(listBox.height / 4);
+    expect(
+      (
+        await new AxeBuilder({ page })
+          .include('section[aria-label="Times"]')
+          .include('.dds-choice-content[data-state="open"]')
+          .analyze()
+      ).violations,
+    ).toEqual([]);
+    await page.keyboard.press("Escape");
+    await expect(list).toBeHidden();
+    await input.fill("10");
+    await expect(list.getByRole("option")).toHaveText([
+      "10:00",
+      "10:10",
+      "10:20",
+      "10:30",
+      "10:40",
+      "10:50",
+    ]);
+    await page.keyboard.press("Enter");
+    await expect(output).toHaveText("10:00");
+    await expect(input).toHaveValue("10:00");
+    await input.fill("1045");
+    await page.keyboard.press("Tab");
+    await expect(output).toHaveText("10:45");
+    await expect(input).toHaveValue("10:45");
+    await root.locator('[data-part="trigger"]').click();
+    await expect(list.locator('[role="option"][data-state="checked"]')).toHaveText(
+      "10:45",
+    );
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(output).toHaveText("10:50");
+    await root.getByRole("button", { name: "Clear time", exact: true }).click();
+    await expect(output).toHaveText("");
+    await expect(input).toBeFocused();
+  });
+  for (const width of [1280, 390])
+    test(`matches the neighboring SelectPicker box and keeps its list on screen at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const time = (await picker(page, "Closing time")
+          .locator(".dds-choice-control")
+          .boundingBox())!,
+        select = (await page
+          .locator(".dds-choice", {
+            has: page.getByRole("combobox", { name: "Aligned select", exact: true }),
+          })
+          .locator(".dds-choice-control")
+          .boundingBox())!;
+      expect(time.height).toBe(40);
+      expect(time.height).toBe(select.height);
+      expect(time.x).toBe(select.x);
+      expect(time.width).toBe(select.width);
+      const offStep = picker(page, "Off step time");
+      await expect(offStep.getByRole("combobox")).toHaveValue("10:45");
+      await offStep.locator('[data-part="trigger"]').click();
+      const list = page.locator('.dds-choice-content[data-state="open"]');
+      await expect(list.locator('[role="option"][data-state="checked"]')).toHaveText(
+        "10:45",
+      );
+      const box = (await list.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(width);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+      ).toBeLessThanOrEqual(0);
+    });
+  test("a reset button restores the default time in the field and the form data", async ({ page }) => {
+    const form = page.getByRole("form", { name: "Time form" }),
+      input = form.getByRole("combobox", { name: "Reset time", exact: true });
+    await input.fill("1200");
+    await page.keyboard.press("Tab");
+    await expect(input).toHaveValue("12:00");
+    await form.getByRole("button", { name: "Reset time form" }).click();
+    await expect(input).toHaveValue("08:30");
+    expect(
+      await form.evaluate((element) => new FormData(element as HTMLFormElement).get("resetTime")),
+    ).toBe("08:30");
+  });
+  test("inside a modal Escape closes the time list before the dialog", async ({
+    page,
+  }) => {
+    const opener = page.getByRole("button", { name: "Open dialog", exact: true });
+    await opener.click();
+    const modal = page.getByRole("dialog", { name: "Parent dialog", exact: true });
+    await expect(modal).toBeVisible();
+    const root = picker(page, "Dialog time");
+    await root.locator('[data-part="trigger"]').click();
+    const option = page.getByRole("option", { name: "08:30", exact: true });
+    await expect(option).toBeVisible();
+    expect(
+      await option.evaluate((element) => element.closest('[aria-hidden="true"],[inert]')),
+    ).toBeNull();
+    await page.keyboard.press("Escape");
+    await expect(option).toBeHidden();
+    await expect(modal).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeHidden();
+    await expect(opener).toBeFocused();
+  });
+});
+
+// Solid-only until React parity lands (DDS 0.24 adds these to dds-solid first).
+test.describe("Solid SegmentedControl and NumberInput", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://127.0.0.1:5282");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Solid");
+  });
+  test("a reset button restores uncontrolled numbers and selections", async ({ page }) => {
+    const form = page.getByRole("form", { name: "Number form" }),
+      quantity = form.getByRole("spinbutton", { name: "Quantity", exact: true }),
+      unit = form.getByRole("combobox", { name: "Unit", exact: true });
+    await quantity.fill("5");
+    await page.keyboard.press("Tab");
+    await expect(quantity).toHaveValue("5");
+    await unit.click();
+    await page.getByRole("option", { name: "Option 00002", exact: true }).click();
+    await expect(unit).toHaveText("Option 00002");
+    await form.getByRole("button", { name: "Reset number form" }).click();
+    await expect(quantity).toHaveValue("1");
+    await expect(unit).toHaveText("Option 00001");
+  });
+  test("segmented control moves and selects with arrow keys and submits the item ID", async ({ page }) => {
+    const group = page.getByRole("radiogroup", { name: "View", exact: true });
+    const day = group.getByRole("radio", { name: "Day", exact: true });
+    await day.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(group.getByRole("radio", { name: "Week", exact: true })).toBeChecked();
+    await expect(group.getByRole("radio", { name: "Week", exact: true })).toBeFocused();
+    await expect(page.getByLabel("View value")).toHaveText("week");
+    await expect(group.locator('.dds-segmented__item[data-state="checked"]')).toHaveText("Week");
+    await expect(group.locator(".dds-segmented__item[data-focus-visible]")).toHaveText("Week");
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.getByLabel("View value")).toHaveText("day");
+    await group.getByText("Month", { exact: true }).click();
+    await expect(page.getByLabel("View value")).toHaveText("month");
+    const filter = page.getByRole("radiogroup", { name: "Status filter", exact: true });
+    await expect(filter.getByRole("radio", { name: "완료", exact: true })).toBeDisabled();
+    const long = filter.locator(".dds-segmented__item", { hasText: "보류 중인 요청 전체 보기" });
+    await expect(long).toHaveAttribute("title", "보류 중인 요청 전체 보기");
+    await page.getByRole("button", { name: "Submit number form" }).click();
+    await expect(page.getByLabel("Number submission")).toHaveText("month|15000");
+  });
+  test("number input formats, steps, clamps on blur, ignores the wheel and submits the plain number", async ({ page }) => {
+    const amount = page.getByRole("spinbutton", { name: "Amount", exact: true });
+    await expect(amount).toHaveValue("15,000");
+    await expect(amount).toHaveAttribute("aria-valuetext", "15,000 원");
+    await amount.focus();
+    await page.keyboard.press("ArrowUp");
+    await expect(page.getByLabel("Amount value")).toHaveText("15001");
+    await page.keyboard.press("PageDown");
+    await expect(page.getByLabel("Amount value")).toHaveText("14991");
+    await page.keyboard.press("End");
+    await expect(page.getByLabel("Amount value")).toHaveText("1000000");
+    await expect(amount).toHaveValue("1,000,000");
+    await amount.hover();
+    await page.mouse.wheel(0, 300);
+    await expect(page.getByLabel("Amount value")).toHaveText("1000000");
+    await amount.fill("");
+    await expect(page.getByLabel("Amount value")).toHaveText("empty");
+    await amount.pressSequentially("12345678");
+    await expect(amount).toHaveAttribute("aria-invalid", "true");
+    await amount.blur();
+    await expect(amount).toHaveValue("1,000,000");
+    await expect(page.getByLabel("Amount value")).toHaveText("1000000");
+    await amount.fill("");
+    await amount.pressSequentially("ab-1.5");
+    await expect(amount).toHaveValue("15");
+    await page.getByRole("button", { name: "Submit number form" }).click();
+    await expect(page.getByLabel("Number submission")).toHaveText("day|15");
+    const quantity = page.getByRole("spinbutton", { name: "Quantity", exact: true });
+    await expect(page.getByRole("button", { name: "Decrease" }).first()).toBeDisabled();
+    await page.getByRole("button", { name: "Increase" }).first().click();
+    await expect(quantity).toHaveValue("2");
+    await expect(page.getByRole("button", { name: "Decrease" }).first()).toBeEnabled();
+  });
+  for (const width of [1280, 390])
+    test(`segmented and number controls match Input height and edges without clipping at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const grid = page.locator(".control-grid");
+      const input = await grid.locator(".dds-input__control").boundingBox();
+      const number = await grid.locator(".dds-number-input__control").boundingBox();
+      const track = await grid.locator(".dds-segmented__track").boundingBox();
+      expect(input!.height).toBe(40);
+      expect(number!.height).toBe(40);
+      expect(track!.height).toBe(40);
+      if (width === 390) {
+        expect(number!.x).toBe(input!.x);
+        expect(number!.width).toBe(input!.width);
+      } else expect(number!.y).toBe(input!.y);
+      for (const control of await page.locator(".dds-number-input__control").all()) {
+        const box = (await control.boundingBox())!;
+        const steps = await control.locator(".dds-number-input__step").all();
+        for (const step of steps) {
+          const stepBox = (await step.boundingBox())!;
+          expect(stepBox.width).toBeGreaterThanOrEqual(32);
+          expect(stepBox.x + stepBox.width).toBeLessThanOrEqual(box.x + box.width);
+        }
+        const field = control.locator(".dds-number-input__field");
+        const fieldBox = (await field.boundingBox())!;
+        const suffix = control.locator(".dds-number-input__suffix");
+        if (await suffix.count()) {
+          const suffixBox = (await suffix.boundingBox())!;
+          expect(suffixBox.x).toBeGreaterThanOrEqual(fieldBox.x + fieldBox.width - 0.5);
+          expect(suffixBox.x + suffixBox.width).toBeLessThanOrEqual((await steps[0]!.boundingBox())!.x + 0.5);
+        }
+        expect(await field.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+      }
+      const segments = page.getByRole("radiogroup", { name: "View", exact: true }).locator(".dds-segmented__item");
+      const heights = new Set<number>();
+      for (const segment of await segments.all()) {
+        heights.add((await segment.boundingBox())!.height);
+        expect(await segment.locator(".dds-segmented__text").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+      }
+      expect(heights.size).toBe(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    });
+  test("choosing a segment does not shift its neighbours", async ({ page }) => {
+    const group = page.getByRole("radiogroup", { name: "View", exact: true });
+    const before = await group.locator(".dds-segmented__item").evaluateAll((items) => items.map((item) => item.getBoundingClientRect().x));
+    await group.getByText("Week", { exact: true }).click();
+    const after = await group.locator(".dds-segmented__item").evaluateAll((items) => items.map((item) => item.getBoundingClientRect().x));
+    expect(after).toEqual(before);
+  });
+  test("focused segmented and number controls pass browser axe", async ({ page }) => {
+    await page.getByRole("radio", { name: "Day", exact: true }).first().focus();
+    expect((await new AxeBuilder({ page }).include('section[aria-label="Segments and numbers"]').analyze()).violations).toEqual([]);
+    await page.getByRole("spinbutton", { name: "Amount", exact: true }).focus();
+    expect((await new AxeBuilder({ page }).include('section[aria-label="Segments and numbers"]').analyze()).violations).toEqual([]);
+  });
+});

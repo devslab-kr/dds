@@ -30,6 +30,9 @@ export { ToastProvider, useToast, type ToastApi, type ToastInput, type ToastProv
 export { Tooltip, type TooltipProps, type TooltipTriggerProps } from "./tooltip";
 
 export { DatePicker, type DatePickerProps } from "./date-picker";
+export { TimePicker, type TimePickerProps, type TimeMessages } from "./time-picker";
+export * from "./date-range-picker";
+export * from "./month-picker";
 
 export * from "./input";
 export * from "./combobox";
@@ -37,3 +40,16 @@ export * from "./select-picker";
 export * from "./dropdown-menu";
 export * from "./popover";
 export * from "./calendar";
+export {
+  SegmentedControl,
+  validateSegmentedItems,
+  type SegmentedControlItem,
+  type SegmentedControlProps,
+} from "./segmented-control";
+export {
+  NumberInput,
+  normalizeNumberText,
+  numberInputMessages,
+  type NumberInputMessages,
+  type NumberInputProps,
+} from "./number-input";
