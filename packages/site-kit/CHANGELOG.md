@@ -1,5 +1,11 @@
 # @devslab/site-kit
 
+## 0.22.1
+
+### Patch Changes
+
+- @devslab/dds-solid@0.22.1
+
 ## 0.22.0
 
 ### Patch Changes
