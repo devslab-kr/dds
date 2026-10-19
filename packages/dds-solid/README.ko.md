@@ -26,6 +26,40 @@ DDS가 공개 API와 시각 토큰을 소유한다. 기존 import와 콜백 값�
 포인터·포커스 상호작용 중과 브라우저 페이지가 비활성일 때는 알림 타이머가
 멈춘다. duration이 0 이하이면 명시적으로 닫을 때까지 유지한다.
 
+## createPendingAction
+
+버튼이 여러 개인 화면은 어느 버튼이 작업을 시작했는지 알아야 한다. 모든 버튼에
+같은 플래그 하나를 넘기면 한 번만 눌러도 전부 돈다.
+
+```tsx
+import { Button, createPendingAction } from "@devslab/dds-solid";
+const action = createPendingAction<"approve" | "reject">();
+<Button tone="danger" loading={action.is("reject")} disabled={action.busy()}
+  onClick={() => action.run("reject", () => decide("reject"))}>반려</Button>
+<Button loading={action.is("approve")} disabled={action.busy()}
+  onClick={() => action.run("approve", () => decide("approve"))}>승인</Button>
+```
+
+`is(key)`는 실행 중인 동작에만 참이라 그 컨트롤만 진행 상태를 보이고, `busy()`로
+나머지를 잠근다. `run`은 작업이 끝나면 성공·실패와 관계없이 상태를 지우고 오류는
+호출자에게 그대로 넘긴다. 다른 동작이 실행 중이면 아무것도 하지 않으므로 두 번
+눌러도 요청이 두 번 나가지 않는다. 목록 다시 불러오기처럼 마지막 요청이 이겨야 하는
+곳에는 `{ replace: true }`를 준다.
+
+작업은 `AbortSignal`을 받는다. 그 실행이 더는 유효하지 않을 때, 곧 `reset()`, 그
+실행을 대체한 새 실행, 컴포넌트 정리 때 abort된다. await 뒤에 화면을 바꾸기 전에
+`signal.aborted`를 확인하거나 signal을 `fetch`에 넘기면 되므로 요청 번호나 "아직
+살아 있음" 플래그를 따로 둘 필요가 없다. 늦게 끝난 이전 작업은 새 동작의 상태를
+지우지 못한다.
+
+```tsx
+const list = createPendingAction<"search" | "page">();
+const reload = (key: "search" | "page") => list.run(key, async (signal) => {
+  const rows = await loadRows(filter());
+  if (!signal.aborted) setRows(rows);
+}, { replace: true });
+```
+
 ## DatePicker
 
 ```tsx

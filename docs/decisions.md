@@ -5,6 +5,42 @@
 
 ---
 
+## D-040 — 실행 중 동작은 키로 추적한다: `createPendingAction` / `usePendingAction` (2026-10-19)
+
+**결정.** 화면에서 지금 어떤 동작이 실행 중인지를 기억하는 헬퍼를 Solid(`createPendingAction`)와
+React(`usePendingAction`)에 같은 계약으로 둔다. 버튼마다 키를 주고 `is(key)`는 그 버튼의
+진행 표시에, `busy`는 나머지 컨트롤 잠금에 쓴다. `run(key, task)`는 작업이 끝나면 성공·실패와
+관계없이 상태를 지우고 오류는 호출자에게 넘긴다. 다른 동작이 실행 중이면 시작하지 않고,
+`{ replace: true }`면 실행 중인 것을 abort하고 새 것이 이긴다(목록 다시 불러오기). 작업은
+`AbortSignal`을 받으며 이 signal은 `reset()`, 대체한 새 실행, 컴포넌트 정리 때 abort된다.
+늦게 끝난 실행은 새 동작의 상태를 지우지 못한다. Button은 바꾸지 않는다. `loading`은 그대로
+버튼 하나의 표시이고, 어느 버튼인지는 이 헬퍼가 정한다.
+
+**근거.** FM-dental에서 가입 승인 모달이 반려·승인 둘 다에 같은 바쁨 값을 넘겨, 한 번 누르면 두
+버튼이 함께 돌았다. 같은 버그가 13개 화면에 있었고(fm-dental #156·#157·#159), 각 화면이
+`busy` 불리언과 실행 중 키를 따로 손으로 들고 있었다. 둘은 어긋날 수 있다. 다섯 화면은 늦게 온
+응답이 새 화면을 덮지 않도록 요청 번호나 "아직 살아 있음" 플래그까지 따로 구현했다. Button의
+`loading`만으로는 "어느 버튼인지"를 표현할 수 없어 이 실수를 막지 못한다. 키 하나에서 `is`와
+`busy`를 모두 파생하면 "모두 돌기"를 쓸 방법이 사라진다. 요청 번호 대신 웹 표준 `AbortSignal`을
+주면 화면은 await 뒤 `signal.aborted`만 보면 되고, signal을 `fetch`에 그대로 넘길 수도 있다.
+React는 상태가 다음 렌더에 반영되므로 같은 이벤트 루프의 두 번째 클릭은 ref로 막는다.
+
+**검증.** 양쪽 단위 테스트 7개씩: 실행 키만 표시, 실행 중 두 번째 시작 무시, replace가 이전
+signal을 abort하고 새 실행이 이김, 실패 시 정리와 오류 전달, reset이 signal을 abort하고 늦은
+완료가 새 동작을 지우지 못함, 정리/언마운트 때 abort, 실제 Button 두 개 중 누른 쪽만
+`aria-busy`(React는 StrictMode와 같은 턴의 두 번째 클릭 포함). 보호 장치 여덟 곳을 하나씩
+지우면 각각 해당 테스트가 실패하는 것을 확인했다.
+
+**트레이드오프.** 하나의 헬퍼는 한 번에 하나의 동작만 추적한다. 서로 독립적으로 동시에 도는
+작업(예: 여러 행의 동시 업로드)은 헬퍼를 따로 둔다.
+
+**English.** Track the running action by key in both frameworks with one contract: `is(key)` drives
+that control's progress, `busy` locks the rest, `run` clears on settle and ignores a second start
+unless `replace` is set. The task gets an `AbortSignal` that aborts on `reset()`, on a replacing
+run and on disposal, replacing hand-written request counters and mounted flags. Button is unchanged.
+
+---
+
 ## D-039 — 프레임워크 이름과 공유 입력·선택·날짜 계약 (2026-10-18)
 
 **결정.** `@devslab/dds-solid`와 `@devslab/dds-react`를 유지하고 input, combobox,

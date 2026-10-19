@@ -25,6 +25,38 @@ same. See [the migration guide](../../docs/ark-migration.md) for integration det
 pointer/focus interaction and when the browser page is idle. A non-positive duration
 keeps the toast until dismissed.
 
+## createPendingAction
+
+A screen with several buttons needs to know which one started the work. Pass one shared flag
+to every button and they all spin on a single click.
+
+```tsx
+import { Button, createPendingAction } from "@devslab/dds-solid";
+const action = createPendingAction<"approve" | "reject">();
+<Button tone="danger" loading={action.is("reject")} disabled={action.busy()}
+  onClick={() => action.run("reject", () => decide("reject"))}>Reject</Button>
+<Button loading={action.is("approve")} disabled={action.busy()}
+  onClick={() => action.run("approve", () => decide("approve"))}>Approve</Button>
+```
+
+`is(key)` is true only for the running action, so only that control shows progress; `busy()`
+locks the rest. `run` clears the state when the task settles, passes its error on, and does
+nothing while another action runs, so a second click cannot start a second request. Pass
+`{ replace: true }` where the latest request should win instead, such as a list reload.
+
+The task receives an `AbortSignal` that aborts when its run stops counting: `reset()`, a run that
+replaced it, or the component going away. Check `signal.aborted` after each await before touching
+the screen, or pass the signal to `fetch`; no separate request counter or "still mounted" flag is
+needed. A late completion never clears a newer action.
+
+```tsx
+const list = createPendingAction<"search" | "page">();
+const reload = (key: "search" | "page") => list.run(key, async (signal) => {
+  const rows = await loadRows(filter());
+  if (!signal.aborted) setRows(rows);
+}, { replace: true });
+```
+
 ## DatePicker
 
 ```tsx

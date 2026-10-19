@@ -48,6 +48,20 @@ const StatusPill = createStatusPill({
 
 Unknown closed-domain status values throw to expose incomplete catalogs. Domains listed in `openDomains` instead show the unknown value as escaped text.
 
+## usePendingAction
+
+버튼이 여러 개인 화면은 어느 버튼이 작업을 시작했는지 알아야 한다. 모든 버튼에 같은 플래그 하나를 넘기면 한 번만 눌러도 전부 돈다.
+
+```tsx
+const action = usePendingAction<"approve" | "reject">();
+<Button tone="danger" loading={action.is("reject")} disabled={action.busy}
+  onClick={() => action.run("reject", () => decide("reject"))}>반려</Button>
+<Button loading={action.is("approve")} disabled={action.busy}
+  onClick={() => action.run("approve", () => decide("approve"))}>승인</Button>
+```
+
+Solid `createPendingAction`과 같은 계약이고 accessor 대신 값을 쓴다. `is(key)`는 실행 중인 동작에만 참이고 `busy`로 나머지를 잠근다. `run`은 작업이 끝나면 성공·실패와 관계없이 상태를 지우고 오류는 호출자에게 넘긴다. 다른 동작이 실행 중이면 아무것도 하지 않는다. React가 첫 클릭을 아직 렌더하지 않은 같은 이벤트 루프 안의 두 번째 클릭도 막는다. 목록 다시 불러오기처럼 마지막 요청이 이겨야 하는 곳에는 `{ replace: true }`를 준다. 작업은 `AbortSignal`을 받고, 이 signal은 `reset()`, 그 실행을 대체한 새 실행, 언마운트 때 abort된다. await 뒤 상태를 바꾸기 전에 `signal.aborted`를 확인하거나 `fetch`에 넘긴다. 늦게 끝난 이전 작업은 새 동작의 상태를 지우지 못한다.
+
 ### DatePicker 직접 입력과 저장
 
 `value`/`onChange`는 기존과 같이 날짜 전용 `YYYY-MM-DD` 문자열과 명시적 지우기 `''`만 전달합니다. 입력한 날짜가 완전하고 실재하면 즉시 반영하며 잘못되거나 미완성인 입력을 이전 날짜로 치환하지 않습니다. `required`는 실제 입력의 필수 상태로 전달하고, `readOnly`는 편집과 달력 열기를 막습니다. 잠금 전환 시 열린 달력을 닫습니다. 잘못된 저장 기본값은 원문과 오류를 표시합니다.

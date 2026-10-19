@@ -54,6 +54,20 @@ const StatusPill = createStatusPill({
 
 Unknown closed-domain status values throw to expose incomplete catalogs. Domains listed in `openDomains` instead show the unknown value as escaped text.
 
+## usePendingAction
+
+A screen with several buttons needs to know which one started the work. Pass one shared flag to every button and they all spin on a single click.
+
+```tsx
+const action = usePendingAction<"approve" | "reject">();
+<Button tone="danger" loading={action.is("reject")} disabled={action.busy}
+  onClick={() => action.run("reject", () => decide("reject"))}>Reject</Button>
+<Button loading={action.is("approve")} disabled={action.busy}
+  onClick={() => action.run("approve", () => decide("approve"))}>Approve</Button>
+```
+
+The same contract as Solid's `createPendingAction`, with values in place of accessors. `is(key)` is true only for the running action; `busy` locks the rest. `run` clears the state when the task settles, passes its error on, and does nothing while another action runs, even for a second click in the same event loop turn, before React has rendered the first. Pass `{ replace: true }` where the latest request should win, such as a list reload. The task receives an `AbortSignal` that aborts on `reset()`, on a run that replaced it, and on unmount: check `signal.aborted` after each await before setting state, or pass it to `fetch`. A late completion never clears a newer action.
+
 ### DatePicker manual input and saving
 
 `value`/`onChange` remain canonical date-only `YYYY-MM-DD` strings (or intentional clear `''`). Complete real dates commit while typing; invalid/incomplete text stays visible and never becomes a replacement date. `required` forwards native/accessible required state; `readOnly` prevents edits/calendar opening. Locked transitions close the portal. Invalid persisted values render an error without being parsed or cleared.
