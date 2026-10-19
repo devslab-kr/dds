@@ -22,6 +22,7 @@ export { ConsoleShell, type ConsoleHeader, type ConsoleNavGroup, type ConsoleNav
 export { Dialog, type DialogProps, type DialogFrameParts } from "./dialog";
 export { RadioGroup, type RadioGroupProps, type RadioOption } from "./radio-group";
 export { Icon, type IconProps } from "./icon";
+export { createPendingAction, type PendingAction, type PendingActionRunOptions } from "./pending-action";
 export { createStatusPill } from "./status-pill";
 export type { StatusTone } from "./status-pill";
 export { Tab, TabList, TabPanel, Tabs, type TabPanelProps, type TabProps, type TabsProps } from "./tabs";

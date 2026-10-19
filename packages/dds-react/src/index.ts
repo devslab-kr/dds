@@ -17,6 +17,7 @@ export * from "./date-picker";
 export { DatePicker as ArkDatePicker } from "@ark-ui/react/date-picker";
 
 export * from "./status-pill";
+export * from "./pending-action";
 
 export * from "./input";
 export * from "./combobox";
