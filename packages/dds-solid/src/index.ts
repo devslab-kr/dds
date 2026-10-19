@@ -30,6 +30,8 @@ export { ToastProvider, useToast, type ToastApi, type ToastInput, type ToastProv
 export { Tooltip, type TooltipProps, type TooltipTriggerProps } from "./tooltip";
 
 export { DatePicker, type DatePickerProps } from "./date-picker";
+export * from "./date-range-picker";
+export * from "./month-picker";
 
 export * from "./input";
 export * from "./combobox";

@@ -13,6 +13,8 @@ export default defineConfig({
         popover: "src/popover.tsx",
         calendar: "src/calendar.tsx",
         "date-picker": "src/date-picker.tsx",
+        "date-range-picker": "src/date-range-picker.tsx",
+        "month-picker": "src/month-picker.tsx",
       },
       formats: ["es"],
       fileName: (_format, name) => name + ".js",

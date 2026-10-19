@@ -6,6 +6,8 @@ import { SelectPicker } from "../select-picker";
 import { Calendar } from "../calendar";
 import { DropdownMenu } from "../dropdown-menu";
 import { Popover } from "../popover";
+import { DateRangePicker } from "../date-range-picker";
+import { MonthPicker } from "../month-picker";
 
 import {
   DatePicker,
@@ -184,4 +186,26 @@ it("server-renders ConsoleShell without the client-only hydration claim", () => 
   expect(html).toContain("Projects");
   expect(html).toContain('data-nav="dashboard.projects"');
   expect(html).not.toContain("data-hydrated");
+});
+
+it("server-renders DateRangePicker and MonthPicker with display text and API form values", () => {
+  const html = renderToString(() => (
+    <>
+      <DateRangePicker
+        label="조회 기간"
+        startName="from"
+        endName="to"
+        defaultValue={{ start: "2026-10-01", end: "2026-10-20" }}
+        presets={[{ label: "이번 달", value: { start: "2026-10-01", end: "2026-10-31" } }]}
+      />
+      <MonthPicker label="청구 월" name="month" value="2026-10" />
+    </>
+  ));
+  expect(html).toContain('value="2026/10/01"');
+  expect(html).toContain('value="2026/10/20"');
+  expect(html).toContain('name="from"');
+  expect(html).toContain('value="2026-10-01"');
+  expect(html).toContain('value="2026/10"');
+  expect(html).toContain('value="2026-10"');
+  expect(html).toContain("시작일");
 });

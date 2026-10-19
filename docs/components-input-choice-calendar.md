@@ -64,7 +64,25 @@ Popover exposes Root, Trigger, Content, Title, Description, CloseTrigger and Anc
 
 Calendar renders an always-visible single-date calendar. DatePicker adds editable text and a popup. Within each framework both use one private CalendarView under their own single Ark root. Dates remain YYYY-MM-DD or empty strings, never UTC-converted timestamps. Korean display uses YYYY/MM/DD. min/max are inclusive; timeZone controls today's date, not stored date conversion. startOfWeek defaults to Sunday (0) and accepts 0–6.
 
-DatePicker preserves invalid/incomplete drafts and reports onValidityChange. Callback-based saves must check validity.valid and use canonical value. Delayed parent acknowledgements do not blindly reset drafts. Use keyed editor remounts for explicit resets indistinguishable from pending identical values. Both frameworks support readOnly/disabled, localized messages, showToday, clearable and labelPlacement. Standalone Calendar is controlled. Range selection and scheduling calendars are separate future features.
+DatePicker preserves invalid/incomplete drafts and reports onValidityChange. Callback-based saves must check validity.valid and use canonical value. Delayed parent acknowledgements do not blindly reset drafts. Use keyed editor remounts for explicit resets indistinguishable from pending identical values. Both frameworks support readOnly/disabled, localized messages, showToday, clearable and labelPlacement. Standalone Calendar is controlled. Range selection lives in the Solid DateRangePicker below; scheduling calendars are a separate future feature.
+
+## Date ranges and months (Solid)
+
+Solid-only for now (React parity is a follow-up). Import from `@devslab/dds-solid/date-range-picker` and `@devslab/dds-solid/month-picker`, or from the root.
+
+```tsx
+<DateRangePicker label="Period" value={range} onValueChange={setRange}
+  startName="from" endName="to" min="2026-01-01" max="2026-12-31"
+  presets={[{ label: 'This month', value: { start: '2026-10-01', end: '2026-10-31' } }]} />
+<MonthPicker label="Billing month" value={month} onValueChange={setMonth}
+  name="month" min="2026-01" max="2026-12" />
+```
+
+DateRangePicker replaces two separate date fields for a period. Its value is `{ start, end }`, each YYYY-MM-DD or `""`. One bordered control holds a start and an end input with a `~` separator and the calendar button; each input has its own accessible name (messages.startLabel/endLabel) and the field label names the group. Typing follows DatePicker's rules on each side. A typed end before the start is shown as invalid and is never swapped or reported. onValueChange runs only on user changes, never with start after end; an emptied side is reported as `""`, and required only marks both sides as needed. In the calendar the first click chooses the start and the second the end (Ark orders them); hovering previews the period, and closing after only one click keeps the committed period. presets are consumer data shown as footer buttons; presets outside min/max are disabled, and DDS ships no built-in list. There is no single-date Today action in range mode. Forms receive the API dates under `startName` and `endName` (display text is never submitted). labelPlacement is outside or hidden; inside is not offered because two inputs share one label.
+
+MonthPicker replaces product month inputs (for example a billing month). Its value is YYYY-MM or `""`. Typing accepts YYYY-MM, YYYY/MM, YYYY.MM and YYYYMM; Korean display is YYYY/MM. The popup pages by year and shows a 3 × 4 month grid; months outside the inclusive YYYY-MM min/max are disabled, the current month (by timeZone) is underlined and the selected month is filled. showThisMonth and clearable choose the footer actions. `name` submits YYYY-MM. labelPlacement supports outside, inside and hidden like DatePicker.
+
+Both take value/defaultValue/onValueChange, locale (ko/en defaults), messages, required, disabled, readOnly, invalid, form, id and aria-label/labelledby/describedby. Form reset restores defaultValue (or the controlled value). Escape closes the popup and returns focus to the calendar button; inside a Dialog the popup mounts in that dialog.
 
 ## Solid table name
 

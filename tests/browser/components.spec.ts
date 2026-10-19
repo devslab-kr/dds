@@ -262,16 +262,18 @@ for (const [framework, port] of [
       await input.fill("2026-10-20");
       await input.press("Tab");
       await expect(page.getByLabel("Picked value")).toHaveText("2026-10-20");
-      await page
-        .getByRole("button", { name: "Picked date Open calendar", exact: true })
-        .click();
-      await expect(
-        page.locator(".dds-date-picker-positioner .dds-date-picker-content"),
-      ).toBeVisible();
+      const pickedTrigger = page.getByRole("button", {
+        name: "Picked date Open calendar",
+        exact: true,
+      });
+      await pickedTrigger.click();
+      // The page holds several date popups; follow this trigger's own content.
+      const pickedContent = page.locator(
+        `.dds-date-picker-positioner [id="${await pickedTrigger.getAttribute("aria-controls")}"].dds-date-picker-content`,
+      );
+      await expect(pickedContent).toBeVisible();
       await page.keyboard.press("Escape");
-      await expect(
-        page.locator(".dds-date-picker-positioner .dds-date-picker-content"),
-      ).toBeHidden();
+      await expect(pickedContent).toBeHidden();
     });
     test("composing Enter does not submit input form and inputs pass axe", async ({
       page,
@@ -540,3 +542,216 @@ for (const [framework, port] of [
     await expect(opener).toBeFocused();
   });
 }
+
+// Solid-only until React parity: DateRangePicker and MonthPicker (DDS 0.24).
+test.describe("Solid DateRangePicker and MonthPicker", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://127.0.0.1:5282");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Solid");
+  });
+  const period = (page: import("@playwright/test").Page) =>
+    page.getByRole("group", { name: "Billing period", exact: true });
+  const openRange = (page: import("@playwright/test").Page) =>
+    page.locator('.dds-date-range-content[data-state="open"]');
+  const openMonths = (page: import("@playwright/test").Page) =>
+    page.locator('.dds-month-picker-content[data-state="open"]');
+
+  test("DateRangePicker selects by keyboard and pointer, previews on hover and rejects a reversed typed period", async ({
+    page,
+  }) => {
+    const group = period(page),
+      start = group.getByRole("textbox", { name: "Start date", exact: true }),
+      end = group.getByRole("textbox", { name: "End date", exact: true }),
+      trigger = group.getByRole("button", {
+        name: "Billing period Open calendar",
+        exact: true,
+      });
+    await trigger.click();
+    await expect(openRange(page)).toBeVisible();
+    // Opening focuses the period start; the keyboard picks a new start and end.
+    await expect(
+      openRange(page).getByRole("button", {
+        name: "Choose Monday, October 5, 2026",
+        exact: true,
+      }),
+    ).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-05~2026-10-09",
+    );
+    // Choosing a start moves focus to the next day (Ark range behavior): Oct 7, then one week down.
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-06~2026-10-14",
+    );
+    await expect(end).toBeFocused();
+    await trigger.click();
+    await openRange(page)
+      .locator('[data-part="table-cell-trigger"][data-value="2026-10-12"]')
+      .click();
+    await openRange(page)
+      .locator('[data-part="table-cell-trigger"][data-value="2026-10-21"]')
+      .hover();
+    await expect(
+      openRange(page).locator("[data-in-hover-range]").first(),
+    ).toBeVisible();
+    await openRange(page)
+      .locator('[data-part="table-cell-trigger"][data-value="2026-10-21"]')
+      .click();
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-12~2026-10-21",
+    );
+    await expect(openRange(page)).toBeHidden();
+    await end.fill("2026-10-01");
+    await expect(end).toHaveAttribute("aria-invalid", "true");
+    await expect(group.getByRole("alert")).toHaveText(
+      "The end date must be on or after the start date.",
+    );
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-12~2026-10-21",
+    );
+    await start.fill("2026-09-30");
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-09-30~2026-10-01",
+    );
+  });
+
+  test("DateRangePicker presets, MonthPicker keyboard months and both form values submit and reset", async ({
+    page,
+  }) => {
+    const group = period(page);
+    await group
+      .getByRole("button", { name: "Billing period Open calendar", exact: true })
+      .click();
+    await expect(
+      openRange(page).getByRole("button", { name: "Out of range", exact: true }),
+    ).toBeDisabled();
+    await openRange(page)
+      .getByRole("button", { name: "October 2026", exact: true })
+      .click();
+    await expect(page.getByLabel("Period value")).toHaveText(
+      "2026-10-01~2026-10-31",
+    );
+    const monthTrigger = page.getByRole("button", {
+      name: "Billing month Open calendar",
+      exact: true,
+    });
+    await monthTrigger.click();
+    await expect(openMonths(page)).toBeVisible();
+    await expect(openMonths(page).locator(".dds-date-picker-year")).toHaveText(
+      "2026",
+    );
+    await expect(
+      openMonths(page).locator('[data-part="table-cell-trigger"][data-value="2"]'),
+    ).toHaveAttribute("aria-disabled", "true");
+    await expect(
+      openMonths(page).locator('[data-part="table-cell-trigger"][data-value="10"]'),
+    ).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("textbox", { name: "Billing month", exact: true }),
+    ).toHaveValue("2026-11");
+    await page.getByRole("button", { name: "Submit period form" }).click();
+    await expect(page.getByLabel("Submitted period")).toHaveText(
+      "2026-10-01~2026-10-31|2026-11",
+    );
+    await page.getByRole("button", { name: "Reset period form" }).click();
+    await expect(
+      page.getByRole("textbox", { name: "Billing month", exact: true }),
+    ).toHaveValue("2026-10");
+    await page.getByRole("button", { name: "Submit period form" }).click();
+    await expect(page.getByLabel("Submitted period")).toHaveText(
+      "2026-10-01~2026-10-31|2026-10",
+    );
+  });
+
+  for (const width of [1280, 390])
+    test(`range and month fields share DatePicker geometry, stay on screen and pass axe at ${width}px`, async ({
+      page,
+    }) => {
+      test.setTimeout(60000);
+      await page.setViewportSize({ width, height: 900 });
+      const section = page.locator('section[aria-label="Periods"]');
+      await section.scrollIntoViewIfNeeded();
+      const boxes = await section.evaluate((root) =>
+        [...root.querySelectorAll(".dds-date-picker-control")].map((control) => {
+          const field = control.firstElementChild!.getBoundingClientRect(),
+            button = control.querySelector("button")!.getBoundingClientRect();
+          return {
+            left: field.left,
+            right: field.right,
+            height: field.height,
+            buttonRight: button.right,
+            buttonHeight: button.height,
+          };
+        }),
+      );
+      // DatePicker, two DateRangePickers, two MonthPickers.
+      expect(boxes).toHaveLength(5);
+      for (const box of boxes) {
+        expect(box.height).toBe(40);
+        expect(box.buttonHeight).toBe(boxes[0]!.buttonHeight);
+        expect(Math.abs(box.left - boxes[0]!.left)).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(box.right - boxes[0]!.right)).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(box.buttonRight - boxes[0]!.buttonRight)).toBeLessThanOrEqual(0.5);
+      }
+      expect(
+        (
+          await new AxeBuilder({ page })
+            .include('section[aria-label="Periods"]')
+            .analyze()
+        ).violations,
+      ).toEqual([]);
+      for (const [name, content] of [
+        ["Billing period Open calendar", openRange(page)],
+        ["청구 월 달력 열기", openMonths(page)],
+      ] as const) {
+        await page.getByRole("button", { name, exact: true }).click();
+        await expect(content).toBeVisible();
+        const rect = await content.boundingBox();
+        expect(rect!.x).toBeGreaterThanOrEqual(0);
+        expect(rect!.x + rect!.width).toBeLessThanOrEqual(width);
+        expect(
+          (await new AxeBuilder({ page }).include('.dds-date-picker-content[data-state="open"]').analyze())
+            .violations,
+        ).toEqual([]);
+        await page.keyboard.press("Escape");
+        await expect(content).toBeHidden();
+        await expect(page.getByRole("button", { name, exact: true })).toBeFocused();
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+      ).toBeLessThanOrEqual(0);
+    });
+
+  test("DateRangePicker inside a modal stays reachable and Escape closes one layer", async ({
+    page,
+  }) => {
+    const opener = page.getByRole("button", { name: "Open dialog", exact: true });
+    await opener.click();
+    const modal = page.getByRole("dialog", { name: "Parent dialog", exact: true });
+    const trigger = modal.getByRole("button", {
+      name: "Nested period Open calendar",
+      exact: true,
+    });
+    await trigger.click();
+    const day = page.getByRole("button", {
+      name: "Choose Tuesday, October 13, 2026",
+      exact: true,
+    });
+    await expect(day).toBeVisible();
+    expect(
+      await day.evaluate((element) => element.closest('[aria-hidden="true"],[inert]')),
+    ).toBeNull();
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeVisible();
+    await expect(trigger).toBeFocused();
+    await expect(day).toBeHidden();
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeHidden();
+    await expect(opener).toBeFocused();
+  });
+});

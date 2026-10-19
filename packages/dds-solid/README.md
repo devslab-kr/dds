@@ -69,6 +69,6 @@ Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controll
 
 ## Inputs, choices, overlays and shared calendars
 
-Input/InputGroup are general-purpose native inputs, not search-only, with label placement and clear actions. Combobox/SelectPicker support fixed-row virtualization; DropdownMenu/Popover provide accessible overlays; Calendar/DatePicker share a calendar view.
+Input/InputGroup are general-purpose native inputs, not search-only, with label placement and clear actions. Combobox/SelectPicker support fixed-row virtualization; DropdownMenu/Popover provide accessible overlays; Calendar/DatePicker share a calendar view, which DateRangePicker (start ~ end period) and MonthPicker (YYYY-MM) also use.
 
-Use explicit subpaths `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).
+Use explicit subpaths `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/date-range-picker`, `/month-picker`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).
