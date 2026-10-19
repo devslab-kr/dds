@@ -24,6 +24,8 @@ export const FILES = [
   "select.css",
   "choice.css",
   "time-picker.css",
+  "number-input.css",
+  "segmented-control.css",
   "checkbox-radio.css",
   "switch.css",
   "badge.css",

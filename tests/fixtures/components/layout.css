@@ -4,3 +4,4 @@ section { margin-block:24px; padding-block:12px; border-bottom:1px solid var(--d
 form, .examples { display:grid; gap:16px; }
 output { display:block; overflow-wrap:anywhere; }
 button { font:inherit; }
+.control-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; align-items:end; }

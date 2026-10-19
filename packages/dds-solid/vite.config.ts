@@ -14,6 +14,8 @@ export default defineConfig({
         calendar: "src/calendar.tsx",
         "date-picker": "src/date-picker.tsx",
         "time-picker": "src/time-picker.tsx",
+        "segmented-control": "src/segmented-control.tsx",
+        "number-input": "src/number-input.tsx",
       },
       formats: ["es"],
       fileName: (_format, name) => name + ".js",

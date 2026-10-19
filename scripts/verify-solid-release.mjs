@@ -209,7 +209,7 @@ process.stdout.write(JSON.stringify({bootstrap:generateHydrationScript(),html}))
   runNode(["--conditions=browser", join(temp, "component-hydrate.mjs")], temp);
   await writeFile(join(temp, "component-subpaths.mjs"), `import assert from "node:assert/strict";
 import * as root from "@devslab/dds-solid";
-for (const [path,names] of Object.entries({input:["Input","InputGroup"],combobox:["Combobox"],"select-picker":["SelectPicker"],"dropdown-menu":["DropdownMenu"],popover:["Popover"],calendar:["Calendar"],"date-picker":["DatePicker"],"time-picker":["TimePicker"]})) {const part=await import("@devslab/dds-solid/"+path); for(const name of names) assert.equal(root[name],part[name],name+" must share root/subpath identity");}
+for (const [path,names] of Object.entries({input:["Input","InputGroup"],combobox:["Combobox"],"select-picker":["SelectPicker"],"dropdown-menu":["DropdownMenu"],popover:["Popover"],calendar:["Calendar"],"date-picker":["DatePicker"],"time-picker":["TimePicker"],"segmented-control":["SegmentedControl"],"number-input":["NumberInput"]})) {const part=await import("@devslab/dds-solid/"+path); for(const name of names) assert.equal(root[name],part[name],name+" must share root/subpath identity");}
 `);
   runNode([join(temp,"component-subpaths.mjs")],temp);
   console.log("dds-solid pack, publish dry-run, and fresh consumer import, SSR, and hydration passed");

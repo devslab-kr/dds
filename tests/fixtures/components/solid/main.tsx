@@ -10,6 +10,8 @@ import {DatePicker} from '../../../../packages/dds-solid/src/date-picker';
 import {TimePicker} from '../../../../packages/dds-solid/src/time-picker';
 import {Dialog} from '../../../../packages/dds-solid/src/dialog';
 import {ToastProvider,useToast} from '../../../../packages/dds-solid/src/toast';
+import {SegmentedControl} from '../../../../packages/dds-solid/src/segmented-control';
+import {NumberInput} from '../../../../packages/dds-solid/src/number-input';
 import '../../../../packages/dds-solid/styles.css';
 import '../layout.css';
 import {items,externalItems,retainedOption} from '../data';
@@ -17,6 +19,21 @@ import {items,externalItems,retainedOption} from '../data';
 function Notices(){
  const toast=useToast();
  return <section aria-label="Toasts"><h2>Toasts</h2><button onClick={()=>toast.show({message:'연결된 서비스에서 결과를 확인하지 못했습니다. 잠시 후 다시 시도하고, 계속되면 관리자에게 문의해 주세요.',tone:'danger',duration:0})}>Show long notice</button><button onClick={()=>toast.show({message:'저장했습니다.',tone:'success',duration:0})}>Show short notice</button></section>;
+}
+// Solid-only for now: SegmentedControl and NumberInput (React parity is a recorded follow-up).
+function SegmentsAndNumbers(){
+ const [view,setView]=createSignal('day'),[amount,setAmount]=createSignal<number|null>(15000),[submitted,setSubmitted]=createSignal('');
+ const views=[{value:'day',label:'Day'},{value:'week',label:'Week'},{value:'month',label:'Month'}];
+ const filters=[{value:'all',label:'전체'},{value:'open',label:'접수'},{value:'held',label:'보류 중인 요청 전체 보기'},{value:'done',label:'완료',disabled:true}];
+ return <section aria-label='Segments and numbers'><h2>Segments and numbers</h2>
+ <form aria-label='Number form' onSubmit={event=>{event.preventDefault();const data=new FormData(event.currentTarget);setSubmitted(String(data.get('view'))+'|'+String(data.get('amount')));}}>
+ <SegmentedControl label='View' name='view' items={views} value={view()} onValueChange={setView}/><output aria-label='View value'>{view()}</output>
+ <SegmentedControl aria-label='Status filter' items={filters} defaultValue='open' size='sm' fullWidth/>
+ <NumberInput label='Amount' name='amount' suffix='원' min={0} max={1000000} value={amount()} onValueChange={setAmount}/><output aria-label='Amount value'>{amount()===null?'empty':String(amount())}</output>
+ <NumberInput label='Quantity' locale='en-US' min={1} max={10} defaultValue={1}/>
+ <div class='control-grid'><Input label='Memo' placeholder='Memo'/><SelectPicker label='Unit' items={items.slice(0,3)} defaultValue='item-1'/><NumberInput label='Minutes' suffix='분' defaultValue={30} min={0}/><SegmentedControl label='Mode' items={views.slice(0,2)} defaultValue='day'/></div>
+ <button type='submit'>Submit number form</button><button type='reset'>Reset number form</button><output aria-label='Number submission'>{submitted()}</output>
+ </form></section>;
 }
 function App(){
  const [combo,setCombo]=createSignal(''),[select,setSelect]=createSignal('');
@@ -57,6 +74,7 @@ function App(){
  <Dialog title="Parent dialog" open={dialog()} onOpenChange={setDialog}><Popover.Root><Popover.Trigger>Nested popover</Popover.Trigger><Popover.Content><Popover.Title>Details</Popover.Title><Popover.Description>Nested details</Popover.Description><Popover.CloseTrigger>Close details</Popover.CloseTrigger></Popover.Content></Popover.Root><Combobox label="Dialog combo" items={items.slice(0,3)} value={nestedChoice()} onValueChange={setNestedChoice}/><output aria-label="Dialog choice value">{nestedChoice()}</output><DatePicker label="Nested date" locale="en-US" value={picked()} onChange={setPicked}/><TimePicker label="Dialog time" locale="en-US" value={nestedTime()} onValueChange={setNestedTime}/><button onClick={()=>setDialog(false)}>Close dialog</button></Dialog></section>
  <section aria-label="Times"><h2>Times</h2><div class="examples"><TimePicker label="Closing time" locale="en-US" value={time()} onValueChange={setTime} clearable/><output aria-label="Time value">{time()}</output><SelectPicker label="Aligned select" items={items.slice(0,3)}/><TimePicker label="Off step time" locale="en-US" defaultValue="10:45:00"/></div></section>
  <section aria-label="Calendars"><h2>Calendars</h2><Calendar label="Inline calendar" locale="en-US" value={date()} onChange={setDate}/><output aria-label="Calendar value">{date()}</output><DatePicker label="Picked date" locale="en-US" value={picked()} onChange={setPicked}/><output aria-label="Picked value">{picked()}</output></section>
+ <SegmentsAndNumbers/>
  </main>;
 }
 render(()=><ToastProvider regionLabel="Notifications" dismissLabel="Close notice"><App/><Notices/></ToastProvider>,document.getElementById('root')!);

@@ -18,6 +18,8 @@ export default defineConfig({
         "calendar.server": "src/calendar.tsx",
         "date-picker.server": "src/date-picker.tsx",
         "time-picker.server": "src/time-picker.tsx",
+        "segmented-control.server": "src/segmented-control.tsx",
+        "number-input.server": "src/number-input.tsx",
       },
       external: [
         /^solid-js(?:\/|$)/,
