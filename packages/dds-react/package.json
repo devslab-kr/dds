@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-react",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "Accessible React primitives for the DevsLab Design System",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -80,9 +80,9 @@
   },
   "dependencies": {
     "@ark-ui/react": "5.39.3",
-    "@devslab/dds-css": "workspace:0.23.0",
-    "@devslab/dds-icons": "workspace:0.23.0",
-    "@devslab/dds-tokens": "workspace:0.23.0",
+    "@devslab/dds-css": "workspace:0.24.0",
+    "@devslab/dds-icons": "workspace:0.24.0",
+    "@devslab/dds-tokens": "workspace:0.24.0",
     "@tanstack/react-virtual": "3.14.21"
   },
   "peerDependencies": {
