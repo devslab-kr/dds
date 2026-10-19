@@ -5,6 +5,50 @@
 
 ---
 
+## D-041 — 시간·기간·월·세그먼트·숫자 입력을 Solid에 먼저 둔다 (2026-10-20)
+
+**결정.** `@devslab/dds-solid`에 `TimePicker`, `DateRangePicker`, `MonthPicker`, `SegmentedControl`,
+`NumberInput`을 루트와 상세 경로(`/time-picker`, `/date-range-picker`, `/month-picker`,
+`/segmented-control`, `/number-input`)로 추가한다. D-039는 Solid·React에 같은 계약을 함께 두지만 이번에는
+Solid에만 먼저 낸다. React 동등 구현은 후속 작업이며, 그때까지 `tests/component-entries.test.mjs`의
+`solidOnlyPaths`와 `components.spec.ts`의 Solid 전용 블록이 이 예외를 드러낸다.
+
+- TimePicker는 Combobox 엔진(`internal/choice.tsx`)에 선택적 훅(일치 규칙·blur 확정·트리거 내용·선택 항목
+  가운데 정렬·폼 reset 전 호출)을 더해 만든다. 기본값은 모두 꺼져 있어 Combobox·SelectPicker 동작은 그대로다.
+  값은 24시간 `HH:MM`이고 `HH:MM:SS`는 `HH:MM`으로 보여 줄 뿐 사용자가 바꾸기 전엔 다시 쓰지 않는다.
+  간격(기본 10분)에 맞지 않는 기존 값과 끝까지 입력한 시간은 목록의 제자리에 선택지로 넣는다.
+- DateRangePicker는 `{ start, end }`(각각 `YYYY-MM-DD` 또는 `""`), MonthPicker는 `YYYY-MM`이다. 기간의 폼
+  제출은 `startName`/`endName` 두 값이다. 두 컴포넌트는 내부 CalendarView를 공유한다(월 보기·프리셋 추가).
+- SegmentedControl은 Ark SegmentGroup(라디오 의미), NumberInput은 Ark NumberInput이며 값은 `number | null`
+  (빈 칸은 0이 아니라 null), 폼에는 서식 없는 숫자를 제출한다.
+- 새 컴포넌트의 아이콘은 인라인 SVG다. 상세 경로가 공유 `Icon`을 가져오면 Rollup이 아이콘 전체를 공유 청크로
+  옮겨 `verify:solid:release`의 dds-icons 외부화 검사가 실패한다(DatePicker의 달력 아이콘과 같은 이유).
+
+**같이 고친 것.** `.dds-choice-control`이 42px였다(테두리 안쪽에 40px 최소 높이). Input·DatePicker는 40px라
+같은 행에 놓으면 2px 어긋났다. 이제 컨트롤이 40px를 갖고 내부 부분이 늘어난다(Solid·React 공통 dds-css). 비어 있는 상태 줄도 흐름에서 빼서(live region은 유지) 필드 전체가 Input보다 4px 길어지지 않게 했다. 아래 정렬 그리드에서 SelectPicker만 4px 위로 올라가던 원인이다.
+Solid의 DatePicker 입력칸에 DDS 입력 모양을 입혔다(전에는 브라우저 기본 입력이었다).
+Solid Combobox·SelectPicker(그리고 TimePicker)와 NumberInput의 폼 reset 복원을 microtask에서 task(`setTimeout`)로
+옮겼다. reset 버튼을 누르면 리스너가 끝난 직후 microtask가 먼저 돌고 그 뒤에 브라우저가 컨트롤을 비우므로, 복원한
+값이 지워졌다(`form.reset()`을 스크립트로 부르는 jsdom 테스트는 순서가 달라 이를 못 봤다). 같은 패턴이 남은 Solid
+Input과 React Choice·Input은 후속 작업이다.
+
+**근거.** FM-dental(Solid)이 관리자 화면의 시간 칸 7곳을 브라우저 기본 time 드롭다운으로 쓰고 있었고, 기간
+조회 화면 6곳 이상이 날짜 칸 두 개, 청구 월은 자체 MonthInput, 토글 버튼 묶음 13곳이 `aria-pressed`를 손으로,
+숫자 4곳이 기본 number 칸이었다. 소비자가 Solid뿐이라 React를 함께 만들면 검증되지 않는 표면만 늘어난다.
+
+**검증.** 컴포넌트별 jsdom 테스트, axe(열린 목록·달력 포함), SSR, 새 tarball 소비자의 SSR·hydration(서버 DOM
+유지와 상호작용 1회씩), 실제 브라우저 사례(Solid 전용: 키보드·필터·직접 입력·대화상자 안 Escape 한 겹·1280/390px
+에서 이웃 컨트롤과 높이·모서리 일치·목록이 화면 안에 있음).
+
+**트레이드오프.** React 소비자는 당분간 새 컴포넌트를 쓸 수 없다. TimePicker는 12시간제 표시와 min/max가 없다.
+
+**English.** Add TimePicker, DateRangePicker, MonthPicker, SegmentedControl and NumberInput to dds-solid first
+(a D-039 exception; React parity is a follow-up, marked by Solid-only test lists). TimePicker reuses the Combobox
+engine through opt-in hooks. New subpaths inline their icons so the shared icon set stays in the root bundle.
+Choice controls are now 40px like Input and DatePicker, and Solid DatePicker's input gets the DDS input style.
+
+---
+
 ## D-040 — 실행 중 동작은 키로 추적한다: `createPendingAction` / `usePendingAction` (2026-10-19)
 
 **결정.** 화면에서 지금 어떤 동작이 실행 중인지를 기억하는 헬퍼를 Solid(`createPendingAction`)와

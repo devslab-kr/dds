@@ -226,7 +226,9 @@ export function NumberInput(props: NumberInputProps) {
     if (!form) return;
     const reset = (event: Event) => {
       resetting = true;
-      queueMicrotask(() => {
+      // A task, not a microtask: after a reset-button click, microtasks run
+      // before the browser resets the controls and would be overwritten.
+      setTimeout(() => {
         resetting = false;
         if (event.defaultPrevented) return;
         if (!controlled()) setInternal(props.defaultValue ?? null);

@@ -20,6 +20,8 @@ export default defineConfig({
         "time-picker.server": "src/time-picker.tsx",
         "segmented-control.server": "src/segmented-control.tsx",
         "number-input.server": "src/number-input.tsx",
+        "date-range-picker.server": "src/date-range-picker.tsx",
+        "month-picker.server": "src/month-picker.tsx",
       },
       external: [
         /^solid-js(?:\/|$)/,

@@ -137,8 +137,10 @@ export function Choice(props: ComboboxProps & ChoiceInternals) {
         ) as HTMLFormElement | null)
       : validation?.form;
     if (!form) return;
+    // A task, not a microtask: after a reset-button click, microtasks run
+    // before the browser resets the controls and would be overwritten.
     const reset = (event: Event) =>
-      queueMicrotask(() => {
+      setTimeout(() => {
         if (event.defaultPrevented) return;
         props.onFormReset?.();
         const resetValue = props.value ?? props.defaultValue ?? "";

@@ -94,7 +94,25 @@ Calendar는 항상 보이는 독립 달력이고 DatePicker는 입력창과 팝�
 
 DatePicker는 미완성·잘못된 직접 입력을 draft로 유지하고 onValidityChange로 알린다. 저장 버튼은 validity.valid와 canonical value를 확인한다. 부모가 값을 늦게 반영해도 최신 draft를 무조건 덮지 않는다. 동일 문자열로 명시적 reset을 구분해야 하는 편집기는 문서 ID/reset revision을 key로 새로 마운트한다. disabled/readOnly에서는 직접 입력·달력·오늘·지우기로 값을 변경할 수 없다.
 
-messages로 달력 문구를 바꾸고 showToday/clearable로 footer 액션을 선택한다. 독립 Calendar는 단일 날짜 controlled 모드다. 일정 관리용 월간 캘린더, 기간 선택과 복수 날짜 선택은 이번 API의 범위가 아니다.
+messages로 달력 문구를 바꾸고 showToday/clearable로 footer 액션을 선택한다. 독립 Calendar는 단일 날짜 controlled 모드다. 기간 선택은 아래 Solid DateRangePicker가 맡는다. 일정 관리용 월간 캘린더와 복수 날짜 선택은 범위가 아니다.
+
+## 기간과 월 선택 (Solid)
+
+지금은 Solid에서만 제공한다(React는 후속). `@devslab/dds-solid/date-range-picker`, `@devslab/dds-solid/month-picker` 또는 루트에서 가져온다.
+
+```tsx
+<DateRangePicker label="조회 기간" value={range} onValueChange={setRange}
+  startName="from" endName="to" min="2026-01-01" max="2026-12-31"
+  presets={[{ label: '이번 달', value: { start: '2026-10-01', end: '2026-10-31' } }]} />
+<MonthPicker label="청구 월" value={month} onValueChange={setMonth}
+  name="month" min="2026-01" max="2026-12" />
+```
+
+DateRangePicker는 기간을 날짜 칸 두 개로 받던 화면을 대신한다. 값은 `{ start, end }`이고 각각 YYYY-MM-DD 또는 빈 문자열이다. 테두리 하나 안에 시작일·종료일 입력과 `~`가 있고 옆에 달력 버튼이 있다. 두 입력은 각자 이름(messages.startLabel/endLabel, 기본 "시작일"/"종료일")을 갖고, 필드 라벨이 둘을 묶는다. 직접 입력 규칙은 DatePicker와 같다. 종료일을 시작일보다 앞으로 입력하면 오류로 보여 주고, 날짜를 바꿔 넣거나 값을 알리지 않는다. onValueChange는 사용자가 바꿨을 때만 부르며 시작일이 종료일보다 늦은 값은 보내지 않는다. 한쪽을 지우면 그쪽을 빈 문자열로 알린다. required는 두 날짜가 모두 필요하다는 표시다. 달력에서는 첫 클릭이 시작일, 두 번째 클릭이 종료일이며 순서는 Ark가 맞춘다. 마우스를 올리면 기간을 미리 보여 주고, 한 번만 누르고 닫으면 기존 기간이 그대로 남는다. presets는 소비 제품이 넘기는 데이터로 달력 아래 버튼이 되며, min/max 밖이면 비활성이다. DDS는 기본 목록을 두지 않는다. 기간 모드에는 단일 날짜용 "오늘" 버튼이 없다. 폼에는 표시 문자열이 아니라 `startName`, `endName` 이름으로 YYYY-MM-DD가 제출된다. labelPlacement는 outside와 hidden만 받는다. 입력이 둘이라 inside 라벨은 두지 않는다.
+
+MonthPicker는 제품마다 따로 만든 월 입력(예: 청구 월)을 대신한다. 값은 YYYY-MM 또는 빈 문자열이다. 직접 입력은 YYYY-MM, YYYY/MM, YYYY.MM, YYYYMM을 받고 한국어 표시는 YYYY/MM이다. 팝업은 해 단위로 넘기며 3열 × 4행 월 목록을 보여 준다. min/max(YYYY-MM, 양 끝 포함) 밖의 월은 비활성, 이번 달(timeZone 기준)은 밑줄, 선택한 월은 채움으로 표시한다. showThisMonth와 clearable로 아래 버튼을 고른다. `name`으로 YYYY-MM을 제출한다. labelPlacement는 DatePicker처럼 outside/inside/hidden을 받는다.
+
+둘 다 value/defaultValue/onValueChange, locale(ko/en 기본 문구), messages, required, disabled, readOnly, invalid, form, id, aria-label/labelledby/describedby를 지원한다. 폼 reset은 defaultValue(controlled면 현재 값)로 되돌린다. Escape는 팝업을 닫고 달력 버튼으로 초점을 돌려준다. Dialog 안에서는 팝업이 그 Dialog 안에 연결된다.
 
 ## TimePicker (시간 선택)
 
@@ -113,6 +131,7 @@ import { TimePicker } from '@devslab/dds-solid/time-picker';
 목록은 00:00부터 `step`분 간격이다(기본 10분). 시계 버튼을 누르면 선택한 시간이 목록 가운데에 오도록 열린다. 숫자를 입력하면 시간의 앞자리로 걸러진다. `10`은 10:00–10:50, `9`는 09:00–09:50, `930`은 09:30, `9:3`은 09:30–09:39다. 끝까지 입력한 시간(`10:45`, `1045`, `10:45:00`)은 간격에 맞지 않아도 목록에 선택지로 나온다. Enter는 강조된 선택지를 고르고, 칸을 벗어나면 끝까지 입력한 시간으로 확정한다. 덜 입력했거나 잘못 입력한 글자는 현재 값으로 되돌리고, 칸을 비우고 벗어나면 값을 지운다. 간격에 맞지 않는 기존 값(10분 목록의 10:45)도 목록의 제자리에 나오고 선택된 상태를 유지한다.
 
 화살표로 이동하고 Enter로 고르며 Escape로 닫는다(Dialog 안에서는 한 겹씩 닫힌다). Tab으로 다음 칸으로 간다. `name`은 `HH:MM`을 제출하고 `required`는 브라우저 기본 검사를 쓰며, 폼 초기화는 `defaultValue`로 되돌린다. disabled와 readOnly에서는 열거나 고칠 수 없다. 기본 문구는 `locale`(기본 ko-KR)에 따라 한국어 또는 영어로 나오고 `messages`(open, clear, empty)로 바꿀 수 있다. 1분 간격처럼 목록이 길면 가상화한다.
+
 ## SegmentedControl (Solid)
 
 SegmentedControl은 보기 전환이나 목록 필터처럼 눈에 보이는 몇 가지 중 하나를 고르는 컨트롤이다. 라디오 그룹으로 동작한다. Tab으로 한 번만 들어가고 화살표 키로 이동하면서 선택하며(글 방향을 따른다), 각 칸이 브라우저 기본 라디오라서 name/form으로 선택한 항목 ID가 제출되고 폼 초기화 시 처음 값으로 돌아간다. 직접 만든 `aria-pressed` 버튼 묶음 대신 쓴다.

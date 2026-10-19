@@ -15,7 +15,8 @@
 .dds-choice-item[data-disabled] {opacity:.45;cursor:not-allowed;}
 .dds-choice-description {font-size:var(--dds-typo-caption-font-size);color:var(--dds-color-text-secondary);overflow:hidden;text-overflow:ellipsis;}
 .dds-choice-status {padding:var(--dds-space-12);color:var(--dds-color-text-secondary);}
-.dds-choice-status:empty {padding:0;}
+/* Out of flow while empty so the field is as tall as Input (no stray gap); still in the tree as a live region. */
+.dds-choice-status:empty {position:absolute;padding:0;}
 .dds-choice-validation {position:absolute;inline-size:1px;block-size:1px;padding:0;border:0;clip-path:inset(50%);overflow:hidden;}
 .dds-choice[data-label-placement="hidden"] .dds-choice-label {position:absolute;inline-size:1px;block-size:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap;}
 .dds-choice[data-label-placement="inside"] .dds-choice-label {position:absolute;z-index:1;inset-inline-start:var(--dds-space-12);inset-block-start:var(--dds-space-20);pointer-events:none;color:var(--dds-color-text-secondary);}
