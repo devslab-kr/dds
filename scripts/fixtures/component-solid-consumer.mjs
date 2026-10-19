@@ -1,5 +1,5 @@
 import {createComponent as h,createSignal} from 'solid-js';
-import {Input,InputGroup,Combobox,SelectPicker,Calendar} from '@devslab/dds-solid';
+import {Input,InputGroup,Combobox,SelectPicker,Calendar,TimePicker} from '@devslab/dds-solid';
 export const events=[];
 const items=[{value:'a',label:'Apple'},{value:'b',label:'Banana'}];
 export function App(){
@@ -9,5 +9,6 @@ export function App(){
   h(Combobox,{id:'component-combo',label:'Packed combo',items,defaultValue:'a',onValueChange:value=>events.push(['combo',value])}),
   h(SelectPicker,{id:'component-select',label:'Packed select',items,defaultValue:'b',onValueChange:value=>events.push(['select',value])}),
   h(Calendar,{label:'Packed inline calendar',locale:'en-US',get value(){return date();},onChange:value=>{events.push(['calendar',value]);setDate(value);}}),
+  h(TimePicker,{id:'component-time',label:'Packed time',name:'closing',defaultValue:'18:30:00',onValueChange:value=>events.push(['time',value])}),
  ];
 }

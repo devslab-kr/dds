@@ -2,7 +2,8 @@
 .dds-choice-label {font-size:var(--dds-typo-label-font-size);line-height:var(--dds-typo-label-line-height);font-weight:var(--dds-typo-label-font-weight);}
 .dds-choice-control {position:relative;display:flex;align-items:center;inline-size:100%;min-block-size:var(--dds-space-40);border:1px solid var(--dds-color-border-strong);border-radius:var(--dds-radius-md);background:var(--dds-color-bg-default);}
 .dds-choice-control:focus-within {outline:var(--dds-space-2) solid var(--dds-color-border-focus);}
-.dds-choice-input,.dds-choice-trigger {box-sizing:border-box;min-inline-size:0;min-block-size:var(--dds-space-40);border:0;background:transparent;color:inherit;font:inherit;padding-inline:var(--dds-space-12);}
+/* The control owns the 40px height (border included, like Input and DatePicker); parts stretch inside it. */
+.dds-choice-input,.dds-choice-trigger {box-sizing:border-box;align-self:stretch;min-inline-size:0;min-block-size:0;border:0;background:transparent;color:inherit;font:inherit;padding-inline:var(--dds-space-12);}
 .dds-choice-input {flex:1;inline-size:100%;outline:none;}
 .dds-choice-trigger {cursor:pointer;text-align:start;}
 .dds-choice-control > .dds-choice-trigger:first-child {inline-size:100%;}

@@ -540,3 +540,125 @@ for (const [framework, port] of [
     await expect(opener).toBeFocused();
   });
 }
+
+// Solid-first components (D-041): React has no TimePicker yet.
+test.describe("Solid TimePicker", () => {
+  const picker = (page: import("@playwright/test").Page, name: string) =>
+    page.locator(".dds-time-picker", {
+      has: page.getByRole("combobox", { name, exact: true }),
+    });
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://127.0.0.1:5282");
+  });
+  test("opens around the selection, filters, accepts typed times and steps with the keyboard", async ({
+    page,
+  }) => {
+    const root = picker(page, "Closing time"),
+      input = root.getByRole("combobox"),
+      output = page.getByLabel("Time value", { exact: true }),
+      list = page.locator('.dds-choice-content[data-state="open"]');
+    await expect(input).toHaveValue("09:00");
+    await root.locator('[data-part="trigger"]').click();
+    await expect(list).toBeVisible();
+    const selected = list.locator('[role="option"][data-state="checked"]');
+    await expect(selected).toHaveText("09:00");
+    await expect(selected).toBeInViewport();
+    const listBox = (await list.boundingBox())!,
+      selectedBox = (await selected.boundingBox())!;
+    // Centered, not merely scrolled to an edge.
+    expect(
+      Math.abs(
+        selectedBox.y + selectedBox.height / 2 - (listBox.y + listBox.height / 2),
+      ),
+    ).toBeLessThan(listBox.height / 4);
+    expect(
+      (
+        await new AxeBuilder({ page })
+          .include('section[aria-label="Times"]')
+          .include('.dds-choice-content[data-state="open"]')
+          .analyze()
+      ).violations,
+    ).toEqual([]);
+    await page.keyboard.press("Escape");
+    await expect(list).toBeHidden();
+    await input.fill("10");
+    await expect(list.getByRole("option")).toHaveText([
+      "10:00",
+      "10:10",
+      "10:20",
+      "10:30",
+      "10:40",
+      "10:50",
+    ]);
+    await page.keyboard.press("Enter");
+    await expect(output).toHaveText("10:00");
+    await expect(input).toHaveValue("10:00");
+    await input.fill("1045");
+    await page.keyboard.press("Tab");
+    await expect(output).toHaveText("10:45");
+    await expect(input).toHaveValue("10:45");
+    await root.locator('[data-part="trigger"]').click();
+    await expect(list.locator('[role="option"][data-state="checked"]')).toHaveText(
+      "10:45",
+    );
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(output).toHaveText("10:50");
+    await root.getByRole("button", { name: "Clear time", exact: true }).click();
+    await expect(output).toHaveText("");
+    await expect(input).toBeFocused();
+  });
+  for (const width of [1280, 390])
+    test(`matches the neighboring SelectPicker box and keeps its list on screen at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const time = (await picker(page, "Closing time")
+          .locator(".dds-choice-control")
+          .boundingBox())!,
+        select = (await page
+          .locator(".dds-choice", {
+            has: page.getByRole("combobox", { name: "Aligned select", exact: true }),
+          })
+          .locator(".dds-choice-control")
+          .boundingBox())!;
+      expect(time.height).toBe(40);
+      expect(time.height).toBe(select.height);
+      expect(time.x).toBe(select.x);
+      expect(time.width).toBe(select.width);
+      const offStep = picker(page, "Off step time");
+      await expect(offStep.getByRole("combobox")).toHaveValue("10:45");
+      await offStep.locator('[data-part="trigger"]').click();
+      const list = page.locator('.dds-choice-content[data-state="open"]');
+      await expect(list.locator('[role="option"][data-state="checked"]')).toHaveText(
+        "10:45",
+      );
+      const box = (await list.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(width);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+      ).toBeLessThanOrEqual(0);
+    });
+  test("inside a modal Escape closes the time list before the dialog", async ({
+    page,
+  }) => {
+    const opener = page.getByRole("button", { name: "Open dialog", exact: true });
+    await opener.click();
+    const modal = page.getByRole("dialog", { name: "Parent dialog", exact: true });
+    await expect(modal).toBeVisible();
+    const root = picker(page, "Dialog time");
+    await root.locator('[data-part="trigger"]').click();
+    const option = page.getByRole("option", { name: "08:30", exact: true });
+    await expect(option).toBeVisible();
+    expect(
+      await option.evaluate((element) => element.closest('[aria-hidden="true"],[inert]')),
+    ).toBeNull();
+    await page.keyboard.press("Escape");
+    await expect(option).toBeHidden();
+    await expect(modal).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeHidden();
+    await expect(opener).toBeFocused();
+  });
+});

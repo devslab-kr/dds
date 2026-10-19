@@ -96,6 +96,24 @@ DatePicker는 미완성·잘못된 직접 입력을 draft로 유지하고 onVali
 
 messages로 달력 문구를 바꾸고 showToday/clearable로 footer 액션을 선택한다. 독립 Calendar는 단일 날짜 controlled 모드다. 일정 관리용 월간 캘린더, 기간 선택과 복수 날짜 선택은 이번 API의 범위가 아니다.
 
+## TimePicker (시간 선택)
+
+```tsx
+import { TimePicker } from '@devslab/dds-solid/time-picker';
+
+<TimePicker label="마감 시간" value={closing()} onValueChange={setClosing}
+  name="closing" clearable />
+<TimePicker label="수거 시간" defaultValue="09:30" step={30} />
+```
+
+브라우저 기본 `type="time"` 드롭다운을 대신한다. 컨트롤 높이(40px)·목록·키보드는 Combobox와 같다. 지금은 Solid에만 있고 React는 후속 작업이다(D-041).
+
+값은 24시간 `HH:MM` 문자열이고 `""`는 비어 있음이다. 서버가 초까지 보낸 값(`HH:MM:SS`)은 `HH:MM`으로 보여 주되, 사용자가 바꾸기 전에는 값을 다시 쓰지 않는다. onValueChange는 항상 `HH:MM` 또는 `""`를 받는다. 시간이 아닌 값은 받은 그대로 보여 주고 aria-invalid로 표시한다. 바깥에서 오류를 표시할 때는 `invalid`를 쓴다.
+
+목록은 00:00부터 `step`분 간격이다(기본 10분). 시계 버튼을 누르면 선택한 시간이 목록 가운데에 오도록 열린다. 숫자를 입력하면 시간의 앞자리로 걸러진다. `10`은 10:00–10:50, `9`는 09:00–09:50, `930`은 09:30, `9:3`은 09:30–09:39다. 끝까지 입력한 시간(`10:45`, `1045`, `10:45:00`)은 간격에 맞지 않아도 목록에 선택지로 나온다. Enter는 강조된 선택지를 고르고, 칸을 벗어나면 끝까지 입력한 시간으로 확정한다. 덜 입력했거나 잘못 입력한 글자는 현재 값으로 되돌리고, 칸을 비우고 벗어나면 값을 지운다. 간격에 맞지 않는 기존 값(10분 목록의 10:45)도 목록의 제자리에 나오고 선택된 상태를 유지한다.
+
+화살표로 이동하고 Enter로 고르며 Escape로 닫는다(Dialog 안에서는 한 겹씩 닫힌다). Tab으로 다음 칸으로 간다. `name`은 `HH:MM`을 제출하고 `required`는 브라우저 기본 검사를 쓰며, 폼 초기화는 `defaultValue`로 되돌린다. disabled와 readOnly에서는 열거나 고칠 수 없다. 기본 문구는 `locale`(기본 ko-KR)에 따라 한국어 또는 영어로 나오고 `messages`(open, clear, empty)로 바꿀 수 있다. 1분 간격처럼 목록이 길면 가상화한다.
+
 ## Solid 테이블 이름 이전
 
 새 코드는 `@devslab/dds-table-solid`를 사용한다. `@devslab/dds-table-react`는 유지한다. 기존 `@devslab/dds-table`은 동일 구현과 타입을 재노출하므로 기존 import가 계속 동작한다. Solid 테이블의 스타일은 종전처럼 tokens.css와 dds-css/components/table.css에서 가져온다. npm deprecation·외부 제품 이전은 이번 구현에서 실행하지 않는다.

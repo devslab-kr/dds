@@ -6,6 +6,7 @@ import { SelectPicker } from "../select-picker";
 import { Calendar } from "../calendar";
 import { DropdownMenu } from "../dropdown-menu";
 import { Popover } from "../popover";
+import { TimePicker } from "../time-picker";
 
 import {
   DatePicker,
@@ -184,4 +185,22 @@ it("server-renders ConsoleShell without the client-only hydration claim", () => 
   expect(html).toContain("Projects");
   expect(html).toContain('data-nav="dashboard.projects"');
   expect(html).not.toContain("data-hydrated");
+});
+
+it("server-renders TimePicker with the HH:MM value, label and clock trigger", () => {
+  const html = renderToString(() => (
+    <form>
+      <TimePicker label="마감 시간" name="closing" defaultValue="18:30:00" clearable />
+      <TimePicker label="Broken" value="25:99" locale="en-US" />
+    </form>
+  ));
+  expect(html).toContain("마감 시간");
+  expect(html).toMatch(/value="18:30"/);
+  expect(html).not.toContain("18:30:00");
+  expect(html).toMatch(/class="dds-choice dds-time-picker\s*"/);
+  expect(html).toContain('aria-label="시간 목록 열기"');
+  expect(html).toContain('aria-label="Open time list"');
+  expect(html).toMatch(/<svg[^>]*aria-hidden="true"/);
+  expect(html).toContain('name="closing"');
+  expect(html).toContain('value="25:99"');
 });

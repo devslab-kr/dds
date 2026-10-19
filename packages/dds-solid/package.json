@@ -90,6 +90,14 @@
       "browser": "./dist/date-picker.js",
       "node": "./dist/date-picker.server.js",
       "default": "./dist/date-picker.js"
+    },
+    "./time-picker": {
+      "types": "./dist/time-picker.d.ts",
+      "worker": "./dist/time-picker.server.js",
+      "workerd": "./dist/time-picker.server.js",
+      "browser": "./dist/time-picker.js",
+      "node": "./dist/time-picker.server.js",
+      "default": "./dist/time-picker.js"
     }
   },
   "scripts": {

@@ -65,10 +65,20 @@ const [date, setDate] = createSignal("");
 <DatePicker label="시작 날짜" value={date()} onChange={setDate} />
 ```
 
-Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`; optional `min`, `max` and `disabled` constrain selection. Time remains a separate field.
+Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controlled `value` uses `YYYY-MM-DD` or an empty string. `locale` defaults to `ko-KR`, `timeZone` to `Asia/Seoul`; optional `min`, `max` and `disabled` constrain selection. Time of day uses TimePicker.
+
+## TimePicker
+
+```tsx
+import { TimePicker } from "@devslab/dds-solid";
+const [closing, setClosing] = createSignal("18:00");
+<TimePicker label="마감 시간" value={closing()} onValueChange={setClosing} clearable />
+```
+
+Replaces the native `type="time"` dropdown with the Combobox control and list. Values are 24-hour `HH:MM` or an empty string; `HH:MM:SS` from a server is shown as `HH:MM`. The list steps every `step` minutes (default 10) and opens centered on the selection; typing `10` filters to 10:00–10:50, and a complete typed time (even off the step, e.g. `10:45`) is accepted with Enter or on leaving the field.
 
 ## Inputs, choices, overlays and shared calendars
 
 Input/InputGroup are general-purpose native inputs, not search-only, with label placement and clear actions. Combobox/SelectPicker support fixed-row virtualization; DropdownMenu/Popover provide accessible overlays; Calendar/DatePicker share a calendar view.
 
-Use explicit subpaths `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).
+Use explicit subpaths `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).

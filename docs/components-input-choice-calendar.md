@@ -66,6 +66,24 @@ Calendar renders an always-visible single-date calendar. DatePicker adds editabl
 
 DatePicker preserves invalid/incomplete drafts and reports onValidityChange. Callback-based saves must check validity.valid and use canonical value. Delayed parent acknowledgements do not blindly reset drafts. Use keyed editor remounts for explicit resets indistinguishable from pending identical values. Both frameworks support readOnly/disabled, localized messages, showToday, clearable and labelPlacement. Standalone Calendar is controlled. Range selection and scheduling calendars are separate future features.
 
+## Time of day
+
+```tsx
+import { TimePicker } from '@devslab/dds-solid/time-picker';
+
+<TimePicker label="Closing time" value={closing()} onValueChange={setClosing}
+  name="closing" clearable />
+<TimePicker label="Pickup slot" defaultValue="09:30" step={30} locale="en-US" />
+```
+
+TimePicker replaces the browser's native `type="time"` dropdown with the same 40px control, list and keyboard as Combobox. It is Solid only for now; React parity is a follow-up (D-041).
+
+Values are 24-hour `HH:MM` strings and `""` is empty. A server value with seconds (`HH:MM:SS`) is shown as `HH:MM` and is not rewritten until the person changes it; onValueChange always receives `HH:MM` or `""`. A value that is not a time is shown as it came and marked aria-invalid; `invalid` marks it from outside.
+
+The list runs from 00:00 in `step` minutes (default 10). The clock button opens it with the selected time in the middle. Typing filters by the start of the time: `10` lists 10:00–10:50, `9` lists 09:00–09:50, `930` means 09:30, `9:3` means 09:30–09:39. A complete typed time (`10:45`, `1045`, `10:45:00`) is offered as an option even when it is off the step: Enter picks the highlighted option and leaving the field commits a complete time. Partial or wrong text is put back to the current value; an emptied field clears it. A saved value off the step (10:45 on a 10-minute list) appears in its place in the list and stays selected.
+
+Arrow keys move, Enter picks, Escape closes (inside a Dialog it closes one layer at a time), Tab leaves. `name` submits `HH:MM`, `required` uses native validity and form reset restores `defaultValue`. disabled and readOnly block opening and editing. Built-in Korean or English text follows `locale` (default ko-KR) and `messages` overrides it (open, clear, empty). Steps of one minute virtualize the list.
+
 ## Solid table name
 
 Use `@devslab/dds-table-solid` for new Solid code. `@devslab/dds-table-react` is unchanged. The previous `@devslab/dds-table` package remains a same-version compatibility re-export of the Solid implementation and types. Solid table CSS still comes from tokens.css and dds-css/components/table.css. No external consumer migration or registry deprecation is performed by this change.

@@ -23,6 +23,7 @@ export const FILES = [
   "textarea.css",
   "select.css",
   "choice.css",
+  "time-picker.css",
   "checkbox-radio.css",
   "switch.css",
   "badge.css",

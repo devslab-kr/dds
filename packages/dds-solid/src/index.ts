@@ -30,6 +30,7 @@ export { ToastProvider, useToast, type ToastApi, type ToastInput, type ToastProv
 export { Tooltip, type TooltipProps, type TooltipTriggerProps } from "./tooltip";
 
 export { DatePicker, type DatePickerProps } from "./date-picker";
+export { TimePicker, type TimePickerProps, type TimeMessages } from "./time-picker";
 
 export * from "./input";
 export * from "./combobox";

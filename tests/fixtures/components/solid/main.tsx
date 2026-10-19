@@ -7,6 +7,7 @@ import {DropdownMenu} from '../../../../packages/dds-solid/src/dropdown-menu';
 import {Popover} from '../../../../packages/dds-solid/src/popover';
 import {Calendar} from '../../../../packages/dds-solid/src/calendar';
 import {DatePicker} from '../../../../packages/dds-solid/src/date-picker';
+import {TimePicker} from '../../../../packages/dds-solid/src/time-picker';
 import {Dialog} from '../../../../packages/dds-solid/src/dialog';
 import {ToastProvider,useToast} from '../../../../packages/dds-solid/src/toast';
 import '../../../../packages/dds-solid/styles.css';
@@ -24,6 +25,7 @@ function App(){
  const [dialog,setDialog]=createSignal(false),[action,setAction]=createSignal('none'),[submitted,setSubmitted]=createSignal('');
  const [checked,setChecked]=createSignal(false),[density,setDensity]=createSignal('comfortable'),[direction,setDirection]=createSignal<'ltr'|'rtl'>('ltr');
  const [nestedChoice,setNestedChoice]=createSignal('');
+ const [time,setTime]=createSignal('09:00'),[nestedTime,setNestedTime]=createSignal('');
  return <main><h1>DDS components · Solid</h1>
  <section aria-label="General inputs"><h2>General inputs</h2>
  <form aria-label="Input form" onSubmit={event=>{event.preventDefault();setSubmitted(String(new FormData(event.currentTarget).get('email')));}}>
@@ -52,7 +54,8 @@ function App(){
  <output aria-label="Notifications value">{checked()?'on':'off'}</output><output aria-label="Density value">{density()}</output><p id="menu-link-target" tabIndex={-1}>Linked destination</p>
  <Popover.Root><Popover.Trigger>Open standalone popover</Popover.Trigger><Popover.Content><Popover.Title>Popover options</Popover.Title><Popover.Description>Review the available options</Popover.Description><Popover.CloseTrigger aria-label="Close popover options">Close popover options</Popover.CloseTrigger></Popover.Content></Popover.Root>
  <output aria-label="Action value">{action()}</output><button onClick={()=>setDialog(true)}>Open dialog</button>
- <Dialog title="Parent dialog" open={dialog()} onOpenChange={setDialog}><Popover.Root><Popover.Trigger>Nested popover</Popover.Trigger><Popover.Content><Popover.Title>Details</Popover.Title><Popover.Description>Nested details</Popover.Description><Popover.CloseTrigger>Close details</Popover.CloseTrigger></Popover.Content></Popover.Root><Combobox label="Dialog combo" items={items.slice(0,3)} value={nestedChoice()} onValueChange={setNestedChoice}/><output aria-label="Dialog choice value">{nestedChoice()}</output><DatePicker label="Nested date" locale="en-US" value={picked()} onChange={setPicked}/><button onClick={()=>setDialog(false)}>Close dialog</button></Dialog></section>
+ <Dialog title="Parent dialog" open={dialog()} onOpenChange={setDialog}><Popover.Root><Popover.Trigger>Nested popover</Popover.Trigger><Popover.Content><Popover.Title>Details</Popover.Title><Popover.Description>Nested details</Popover.Description><Popover.CloseTrigger>Close details</Popover.CloseTrigger></Popover.Content></Popover.Root><Combobox label="Dialog combo" items={items.slice(0,3)} value={nestedChoice()} onValueChange={setNestedChoice}/><output aria-label="Dialog choice value">{nestedChoice()}</output><DatePicker label="Nested date" locale="en-US" value={picked()} onChange={setPicked}/><TimePicker label="Dialog time" locale="en-US" value={nestedTime()} onValueChange={setNestedTime}/><button onClick={()=>setDialog(false)}>Close dialog</button></Dialog></section>
+ <section aria-label="Times"><h2>Times</h2><div class="examples"><TimePicker label="Closing time" locale="en-US" value={time()} onValueChange={setTime} clearable/><output aria-label="Time value">{time()}</output><SelectPicker label="Aligned select" items={items.slice(0,3)}/><TimePicker label="Off step time" locale="en-US" defaultValue="10:45:00"/></div></section>
  <section aria-label="Calendars"><h2>Calendars</h2><Calendar label="Inline calendar" locale="en-US" value={date()} onChange={setDate}/><output aria-label="Calendar value">{date()}</output><DatePicker label="Picked date" locale="en-US" value={picked()} onChange={setPicked}/><output aria-label="Picked value">{picked()}</output></section>
  </main>;
 }
