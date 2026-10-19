@@ -5,9 +5,11 @@ import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const read=async path=>JSON.parse(await readFile(new URL(`../${path}`,import.meta.url),'utf8'));
 const paths=['input','combobox','select-picker','dropdown-menu','popover','calendar','date-picker'];
+// Solid-first components; React parity is a recorded follow-up (D-039 exception).
+const solidOnlyPaths=['segmented-control','number-input'];
 for(const framework of ['solid','react']) test(`${framework} component subpaths ship declarations and runtime modules`,async()=>{
  const manifest=await read(`packages/dds-${framework}/package.json`);
- for(const subpath of paths){
+ for(const subpath of framework==='solid'?[...paths,...solidOnlyPaths]:paths){
   const entry=manifest.exports[`./${subpath}`];
   assert.ok(entry,`${subpath} is a documented public entry`);
   const outputs=new Set(Object.values(entry));

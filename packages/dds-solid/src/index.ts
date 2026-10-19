@@ -37,3 +37,16 @@ export * from "./select-picker";
 export * from "./dropdown-menu";
 export * from "./popover";
 export * from "./calendar";
+export {
+  SegmentedControl,
+  validateSegmentedItems,
+  type SegmentedControlItem,
+  type SegmentedControlProps,
+} from "./segmented-control";
+export {
+  NumberInput,
+  normalizeNumberText,
+  numberInputMessages,
+  type NumberInputMessages,
+  type NumberInputProps,
+} from "./number-input";

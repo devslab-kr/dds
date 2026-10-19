@@ -17,6 +17,8 @@ export default defineConfig({
         "popover.server": "src/popover.tsx",
         "calendar.server": "src/calendar.tsx",
         "date-picker.server": "src/date-picker.tsx",
+        "segmented-control.server": "src/segmented-control.tsx",
+        "number-input.server": "src/number-input.tsx",
       },
       external: [
         /^solid-js(?:\/|$)/,

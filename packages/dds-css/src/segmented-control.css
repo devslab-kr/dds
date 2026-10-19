@@ -1,0 +1,164 @@
+/* SegmentedControl — one choice among a few visible options (view switch, filter).
+ * Markup is the radio-group pattern: .dds-segmented[role="radiogroup"] >
+ * .dds-segmented__track > label.dds-segmented__item[data-state] with a
+ * visually hidden native radio inside each item. Selection is data-state
+ * from the radio state, never a class alone.
+ *
+ * Heights: md is 40px and sm is 32px including the track border, the same
+ * outer box as the other single-line DDS controls. Segment labels never wrap;
+ * content-width segments never clip, and full-width segments ellipsize with
+ * the label repeated in a title. */
+
+.dds-segmented {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  font-family: var(--dds-font-family-sans);
+  color: var(--dds-color-text-primary);
+}
+.dds-segmented[hidden] {
+  display: none;
+}
+
+.dds-segmented__label {
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+}
+
+.dds-segmented__track {
+  display: inline-flex;
+  align-items: stretch;
+  align-self: flex-start;
+  gap: var(--dds-space-2);
+  max-inline-size: 100%;
+  block-size: var(--dds-space-40);
+  padding: var(--dds-space-2);
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-md);
+  background: var(--dds-color-bg-subtle);
+  /* Too many segments for the width scroll inside the track instead of
+   * pushing the page sideways. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dds-segmented__track::-webkit-scrollbar {
+  display: none;
+}
+.dds-segmented[data-size="sm"] .dds-segmented__track {
+  block-size: var(--dds-space-32);
+}
+.dds-segmented[data-full-width] .dds-segmented__track {
+  display: flex;
+  align-self: stretch;
+}
+
+.dds-segmented__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-inline-size: 0;
+  padding-inline: var(--dds-space-12);
+  border: 1px solid transparent;
+  border-radius: var(--dds-radius-sm);
+  font-size: var(--dds-typo-label-font-size);
+  line-height: var(--dds-typo-label-line-height);
+  font-weight: var(--dds-typo-label-font-weight);
+  color: var(--dds-color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard),
+    border-color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard),
+    box-shadow var(--dds-motion-duration-fast) var(--dds-motion-easing-standard),
+    color var(--dds-motion-duration-fast) var(--dds-motion-easing-standard);
+}
+.dds-segmented[data-size="sm"] .dds-segmented__item {
+  padding-inline: var(--dds-space-8);
+}
+.dds-segmented[data-full-width] .dds-segmented__item {
+  flex: 1 1 0;
+}
+
+/* The bold selected label reserves its width in every state, so choosing a
+ * segment never shifts its neighbours. */
+.dds-segmented__text {
+  display: inline-grid;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.dds-segmented__text::after {
+  content: attr(data-text);
+  block-size: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 600;
+}
+.dds-segmented[data-full-width] .dds-segmented__text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dds-segmented[data-full-width] .dds-segmented__text::after {
+  content: none;
+}
+
+.dds-segmented__item:not([data-disabled]):not([data-state="checked"]):hover {
+  color: var(--dds-color-text-primary);
+  background: var(--dds-color-overlay-hover-tint);
+}
+
+.dds-segmented__item[data-state="checked"] {
+  border-color: var(--dds-color-border-strong);
+  background: var(--dds-color-bg-default);
+  box-shadow: var(--dds-elevation-1);
+  color: var(--dds-color-text-primary);
+  font-weight: 600;
+}
+
+.dds-segmented__item[data-focus-visible] {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: calc(var(--dds-space-2) * -1);
+}
+
+.dds-segmented[data-invalid] .dds-segmented__track {
+  border-color: var(--dds-color-status-danger);
+}
+
+/* opacity is allowed for disabled only (spec §4.2) */
+.dds-segmented__item[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dds-segmented[data-disabled] .dds-segmented__item[data-disabled] {
+  opacity: 1;
+}
+.dds-segmented[data-disabled] .dds-segmented__track {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dds-segmented__item[data-readonly] {
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dds-segmented__item {
+    transition: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .dds-segmented__track,
+  .dds-segmented[data-size="sm"] .dds-segmented__track {
+    block-size: calc(44px + var(--dds-space-4) + 2px);
+  }
+  .dds-segmented__item {
+    min-inline-size: 44px;
+  }
+}

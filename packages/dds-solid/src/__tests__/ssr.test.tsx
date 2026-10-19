@@ -6,6 +6,8 @@ import { SelectPicker } from "../select-picker";
 import { Calendar } from "../calendar";
 import { DropdownMenu } from "../dropdown-menu";
 import { Popover } from "../popover";
+import { SegmentedControl } from "../segmented-control";
+import { NumberInput } from "../number-input";
 
 import {
   DatePicker,
@@ -184,4 +186,29 @@ it("server-renders ConsoleShell without the client-only hydration claim", () => 
   expect(html).toContain("Projects");
   expect(html).toContain('data-nav="dashboard.projects"');
   expect(html).not.toContain("data-hydrated");
+});
+
+it("server-renders SegmentedControl and NumberInput with their values and no browser globals", () => {
+  const html = renderToString(() => (
+    <>
+      <SegmentedControl
+        label="보기"
+        name="view"
+        items={[
+          { value: "day", label: "일" },
+          { value: "week", label: "주" },
+        ]}
+        defaultValue="week"
+      />
+      <NumberInput label="금액" name="amount" defaultValue={1234567} suffix="원" min={0} />
+    </>
+  ));
+  expect(html).toContain('role="radiogroup"');
+  expect(html).toContain('data-state="checked"');
+  expect(html).toContain('value="week"');
+  expect(html).toContain('role="spinbutton"');
+  expect(html).toContain('value="1,234,567"');
+  expect(html).toContain('value="1234567"');
+  expect(html).toContain("값 늘리기");
+  expect(html).toContain("원");
 });

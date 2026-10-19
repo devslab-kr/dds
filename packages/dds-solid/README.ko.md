@@ -72,6 +72,6 @@ Ark UI owns focus, selection and keyboard navigation; DDS owns styling. Controll
 
 ## 입력·선택·메뉴·공유 달력
 
-Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다.
+Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다. SegmentedControl은 눈에 보이는 몇 가지 중 하나를 고르는 라디오 그룹이고, NumberInput은 − / + 버튼과 단위를 붙일 수 있는 숫자 입력으로 값은 숫자 또는 null입니다.
 
-상세 import: `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
+상세 import: `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/segmented-control`, `/number-input`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.

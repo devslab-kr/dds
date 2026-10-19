@@ -540,3 +540,119 @@ for (const [framework, port] of [
     await expect(opener).toBeFocused();
   });
 }
+
+// Solid-only until React parity lands (DDS 0.24 adds these to dds-solid first).
+test.describe("Solid SegmentedControl and NumberInput", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://127.0.0.1:5282");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Solid");
+  });
+  test("segmented control moves and selects with arrow keys and submits the item ID", async ({ page }) => {
+    const group = page.getByRole("radiogroup", { name: "View", exact: true });
+    const day = group.getByRole("radio", { name: "Day", exact: true });
+    await day.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(group.getByRole("radio", { name: "Week", exact: true })).toBeChecked();
+    await expect(group.getByRole("radio", { name: "Week", exact: true })).toBeFocused();
+    await expect(page.getByLabel("View value")).toHaveText("week");
+    await expect(group.locator('.dds-segmented__item[data-state="checked"]')).toHaveText("Week");
+    await expect(group.locator(".dds-segmented__item[data-focus-visible]")).toHaveText("Week");
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.getByLabel("View value")).toHaveText("day");
+    await group.getByText("Month", { exact: true }).click();
+    await expect(page.getByLabel("View value")).toHaveText("month");
+    const filter = page.getByRole("radiogroup", { name: "Status filter", exact: true });
+    await expect(filter.getByRole("radio", { name: "완료", exact: true })).toBeDisabled();
+    const long = filter.locator(".dds-segmented__item", { hasText: "보류 중인 요청 전체 보기" });
+    await expect(long).toHaveAttribute("title", "보류 중인 요청 전체 보기");
+    await page.getByRole("button", { name: "Submit number form" }).click();
+    await expect(page.getByLabel("Number submission")).toHaveText("month|15000");
+  });
+  test("number input formats, steps, clamps on blur, ignores the wheel and submits the plain number", async ({ page }) => {
+    const amount = page.getByRole("spinbutton", { name: "Amount", exact: true });
+    await expect(amount).toHaveValue("15,000");
+    await expect(amount).toHaveAttribute("aria-valuetext", "15,000 원");
+    await amount.focus();
+    await page.keyboard.press("ArrowUp");
+    await expect(page.getByLabel("Amount value")).toHaveText("15001");
+    await page.keyboard.press("PageDown");
+    await expect(page.getByLabel("Amount value")).toHaveText("14991");
+    await page.keyboard.press("End");
+    await expect(page.getByLabel("Amount value")).toHaveText("1000000");
+    await expect(amount).toHaveValue("1,000,000");
+    await amount.hover();
+    await page.mouse.wheel(0, 300);
+    await expect(page.getByLabel("Amount value")).toHaveText("1000000");
+    await amount.fill("");
+    await expect(page.getByLabel("Amount value")).toHaveText("empty");
+    await amount.pressSequentially("12345678");
+    await expect(amount).toHaveAttribute("aria-invalid", "true");
+    await amount.blur();
+    await expect(amount).toHaveValue("1,000,000");
+    await expect(page.getByLabel("Amount value")).toHaveText("1000000");
+    await amount.fill("");
+    await amount.pressSequentially("ab-1.5");
+    await expect(amount).toHaveValue("15");
+    await page.getByRole("button", { name: "Submit number form" }).click();
+    await expect(page.getByLabel("Number submission")).toHaveText("day|15");
+    const quantity = page.getByRole("spinbutton", { name: "Quantity", exact: true });
+    await expect(page.getByRole("button", { name: "Decrease" }).first()).toBeDisabled();
+    await page.getByRole("button", { name: "Increase" }).first().click();
+    await expect(quantity).toHaveValue("2");
+    await expect(page.getByRole("button", { name: "Decrease" }).first()).toBeEnabled();
+  });
+  for (const width of [1280, 390])
+    test(`segmented and number controls match Input height and edges without clipping at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const grid = page.locator(".control-grid");
+      const input = await grid.locator(".dds-input__control").boundingBox();
+      const number = await grid.locator(".dds-number-input__control").boundingBox();
+      const track = await grid.locator(".dds-segmented__track").boundingBox();
+      expect(input!.height).toBe(40);
+      expect(number!.height).toBe(40);
+      expect(track!.height).toBe(40);
+      if (width === 390) {
+        expect(number!.x).toBe(input!.x);
+        expect(number!.width).toBe(input!.width);
+      } else expect(number!.y).toBe(input!.y);
+      for (const control of await page.locator(".dds-number-input__control").all()) {
+        const box = (await control.boundingBox())!;
+        const steps = await control.locator(".dds-number-input__step").all();
+        for (const step of steps) {
+          const stepBox = (await step.boundingBox())!;
+          expect(stepBox.width).toBeGreaterThanOrEqual(32);
+          expect(stepBox.x + stepBox.width).toBeLessThanOrEqual(box.x + box.width);
+        }
+        const field = control.locator(".dds-number-input__field");
+        const fieldBox = (await field.boundingBox())!;
+        const suffix = control.locator(".dds-number-input__suffix");
+        if (await suffix.count()) {
+          const suffixBox = (await suffix.boundingBox())!;
+          expect(suffixBox.x).toBeGreaterThanOrEqual(fieldBox.x + fieldBox.width - 0.5);
+          expect(suffixBox.x + suffixBox.width).toBeLessThanOrEqual((await steps[0]!.boundingBox())!.x + 0.5);
+        }
+        expect(await field.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+      }
+      const segments = page.getByRole("radiogroup", { name: "View", exact: true }).locator(".dds-segmented__item");
+      const heights = new Set<number>();
+      for (const segment of await segments.all()) {
+        heights.add((await segment.boundingBox())!.height);
+        expect(await segment.locator(".dds-segmented__text").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+      }
+      expect(heights.size).toBe(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    });
+  test("choosing a segment does not shift its neighbours", async ({ page }) => {
+    const group = page.getByRole("radiogroup", { name: "View", exact: true });
+    const before = await group.locator(".dds-segmented__item").evaluateAll((items) => items.map((item) => item.getBoundingClientRect().x));
+    await group.getByText("Week", { exact: true }).click();
+    const after = await group.locator(".dds-segmented__item").evaluateAll((items) => items.map((item) => item.getBoundingClientRect().x));
+    expect(after).toEqual(before);
+  });
+  test("focused segmented and number controls pass browser axe", async ({ page }) => {
+    await page.getByRole("radio", { name: "Day", exact: true }).first().focus();
+    expect((await new AxeBuilder({ page }).include('section[aria-label="Segments and numbers"]').analyze()).violations).toEqual([]);
+    await page.getByRole("spinbutton", { name: "Amount", exact: true }).focus();
+    expect((await new AxeBuilder({ page }).include('section[aria-label="Segments and numbers"]').analyze()).violations).toEqual([]);
+  });
+});

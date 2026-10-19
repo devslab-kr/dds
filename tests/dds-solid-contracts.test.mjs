@@ -30,6 +30,7 @@ test("dds-solid is a public exact-version package with stable exports", async ()
     "Button", "IconButton", "Field", "Select", "Checkbox", "Radio", "Switch",
     "Dialog", "Tabs", "TabList", "Tab", "TabPanel", "ToastProvider", "useToast",
     "Tooltip", "Icon", "createStatusPill", "createPendingAction", "ConsoleShell",
+    "SegmentedControl", "NumberInput",
   ]) assert.match(entry, new RegExp(`\\b${symbol}\\b`), `${symbol} must be exported`);
 });
 
