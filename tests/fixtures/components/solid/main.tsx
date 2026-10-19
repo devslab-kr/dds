@@ -8,9 +8,15 @@ import {Popover} from '../../../../packages/dds-solid/src/popover';
 import {Calendar} from '../../../../packages/dds-solid/src/calendar';
 import {DatePicker} from '../../../../packages/dds-solid/src/date-picker';
 import {Dialog} from '../../../../packages/dds-solid/src/dialog';
+import {ToastProvider,useToast} from '../../../../packages/dds-solid/src/toast';
 import '../../../../packages/dds-solid/styles.css';
 import '../layout.css';
 import {items,externalItems,retainedOption} from '../data';
+// A real-length Korean notice: the toast must take the width of its text, not of its empty region.
+function Notices(){
+ const toast=useToast();
+ return <section aria-label="Toasts"><h2>Toasts</h2><button onClick={()=>toast.show({message:'연결된 서비스에서 결과를 확인하지 못했습니다. 잠시 후 다시 시도하고, 계속되면 관리자에게 문의해 주세요.',tone:'danger',duration:0})}>Show long notice</button><button onClick={()=>toast.show({message:'저장했습니다.',tone:'success',duration:0})}>Show short notice</button></section>;
+}
 function App(){
  const [combo,setCombo]=createSignal(''),[select,setSelect]=createSignal('');
  const [external,setExternal]=createSignal('saved'),[results,setResults]=createSignal([retainedOption]);
@@ -50,4 +56,4 @@ function App(){
  <section aria-label="Calendars"><h2>Calendars</h2><Calendar label="Inline calendar" locale="en-US" value={date()} onChange={setDate}/><output aria-label="Calendar value">{date()}</output><DatePicker label="Picked date" locale="en-US" value={picked()} onChange={setPicked}/><output aria-label="Picked value">{picked()}</output></section>
  </main>;
 }
-render(()=><App/>,document.getElementById('root')!);
+render(()=><ToastProvider regionLabel="Notifications" dismissLabel="Close notice"><App/><Notices/></ToastProvider>,document.getElementById('root')!);

@@ -20,6 +20,30 @@ for (const [framework, port] of [
         framework,
       );
     });
+    for (const width of [1280, 390])
+      test(`toasts take the width of their text and stay on screen at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 800 });
+        await page.getByRole("button", { name: "Show short notice" }).click();
+        await page.getByRole("button", { name: "Show long notice" }).click();
+        const toasts = page.locator(".dds-toast");
+        await expect(toasts).toHaveCount(2);
+        await expect(page.getByRole("alert")).toContainText("관리자에게 문의해 주세요.");
+        const long = await page.getByRole("alert").boundingBox();
+        const short = await toasts.filter({ hasText: "저장했습니다." }).boundingBox();
+        // The region has no width of its own, so a toast that shrink-wraps to it collapses to a few characters.
+        expect(long!.width).toBeGreaterThan(Math.min(320, width - 64));
+        expect(long!.width).toBeLessThanOrEqual(360);
+        expect(short!.width).toBeGreaterThan(120);
+        expect(short!.width).toBeLessThan(long!.width);
+        for (const box of [long!, short!]) {
+          expect(box.x).toBeGreaterThanOrEqual(0);
+          expect(box.x + box.width).toBeLessThanOrEqual(width);
+        }
+        // The text stays inside its box (Korean word breaking itself is each product's root rule, D-030).
+        const text = await page.getByRole("alert").locator('[data-part="description"]').boundingBox();
+        expect(text!.x + text!.width).toBeLessThanOrEqual(long!.x + long!.width);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+      });
     test("general inputs preserve native form validity, reset and pointer-clear focus", async ({
       page,
     }) => {

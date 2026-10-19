@@ -31,8 +31,21 @@
   border-radius: var(--dds-radius-md);
   box-shadow: var(--dds-elevation-2);
   padding: var(--dds-space-12) var(--dds-space-16);
+  /* Ark (Zag) places every toast absolutely inside the region, and the region
+   * has no in-flow content, so it is zero-wide. Without its own width a toast
+   * shrink-wraps to that and wraps every few characters. Take the text's width
+   * up to the cap, pinned to the region's end edge (logical, so RTL holds). */
+  width: max-content;
+  inset-inline-end: 0;
   max-width: min(360px, calc(100vw - var(--dds-space-32)));
   animation: dds-toast-in var(--dds-motion-duration-base) var(--dds-motion-easing-enter);
+}
+
+/* A long unbroken string (a URL, an ID) wraps inside the box instead of
+ * pushing past it. Word breaking for a language stays the product's root rule. */
+.dds-toast [data-part="description"] {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .dds-toast--success::before,
