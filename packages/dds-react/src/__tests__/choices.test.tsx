@@ -172,6 +172,8 @@ it("keeps 10000-option rendering bounded and mounts the keyboard active descenda
   );
   const trigger = screen.getByRole("combobox");
   await user.click(trigger);
+  // The list takes focus on the next frame; an End still on the trigger is dropped.
+  await waitFor(() => expect(screen.getByRole("listbox")).toHaveFocus());
   await user.keyboard("{End}");
   await waitFor(() => {
     const id = screen

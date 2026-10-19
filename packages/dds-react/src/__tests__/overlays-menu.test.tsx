@@ -1,14 +1,48 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { fireEvent } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { expect, it, onTestFinished, vi } from "vitest";
 import { DropdownMenu } from "../dropdown-menu";
 import { Popover } from "../popover";
 import { StrictMode } from "react";
 import userEvent from "@testing-library/user-event";
 
-it.each(["ltr", "rtl"] as const)(
-  "opens and selects a %s submenu after StrictMode mounts",
-  async (dir) => {
+// Zag moves focus into a menu on the next animation frame, after the menu is
+// already visible (a submenu opened from the keyboard is even highlighted by
+// then). Slow frames turn "keys sent before focus arrived" from an occasional
+// CI failure into one that happens every run.
+function slowAnimationFrames(ms: number) {
+  const timers = new Set<number>();
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    const id = window.setTimeout(() => {
+      timers.delete(id);
+      callback(performance.now());
+    }, ms);
+    timers.add(id);
+    return id;
+  });
+  vi.stubGlobal("cancelAnimationFrame", (id: number) => {
+    timers.delete(id);
+    window.clearTimeout(id);
+  });
+  onTestFinished(() => {
+    for (const id of timers) window.clearTimeout(id);
+    vi.unstubAllGlobals();
+  });
+}
+
+// Keys go to the focused element, so a menu is ready for keys once focus is in it.
+const expectFocusWithin = (element: HTMLElement) =>
+  expect(element).toContainElement(document.activeElement as HTMLElement);
+
+it.each([
+  ["ltr", "normal"],
+  ["rtl", "normal"],
+  ["ltr", "slow"],
+  ["rtl", "slow"],
+] as const)(
+  "opens and selects a %s submenu after StrictMode mounts with %s frames",
+  async (dir, frames) => {
+    if (frames === "slow") slowAnimationFrames(200);
     const selected = vi.fn(),
       user = userEvent.setup();
     render(
@@ -33,6 +67,7 @@ it.each(["ltr", "rtl"] as const)(
     );
     await user.click(screen.getByRole("button", { name: "Parent actions" }));
     const parent = await screen.findByRole("menu", { name: "Parent actions" });
+    await waitFor(() => expectFocusWithin(parent));
     await user.keyboard("{Home}{ArrowDown}");
     await waitFor(() => {
       const active = document.getElementById(
@@ -41,9 +76,17 @@ it.each(["ltr", "rtl"] as const)(
       expect(active).toHaveTextContent("More actions");
     });
     await user.keyboard(dir === "rtl" ? "{ArrowLeft}" : "{ArrowRight}");
-    expect(
-      await screen.findByRole("menu", { name: "More actions" }),
-    ).toHaveAttribute("dir", dir);
+    const submenu = await screen.findByRole("menu", { name: "More actions" });
+    expect(submenu).toHaveAttribute("dir", dir);
+    // Until focus moves in, Enter lands on the parent's "More actions" item and
+    // only reopens the submenu, so nothing is selected.
+    await waitFor(() => {
+      expectFocusWithin(submenu);
+      const active = document.getElementById(
+        submenu.getAttribute("aria-activedescendant")!,
+      );
+      expect(active).toHaveTextContent("Archive action");
+    });
     await user.keyboard("{Enter}");
     await waitFor(() =>
       expect(selected).toHaveBeenCalledExactlyOnceWith("archive"),
