@@ -259,7 +259,7 @@ process.stdout.write(JSON.stringify({html}),()=>process.exit(0));
   if(mode === "react") {
     await writeFile(join(temp,"component-subpaths.mjs"), `import assert from "node:assert/strict";
 import * as root from "@devslab/dds-react";
-for (const [path,names] of Object.entries({input:["Input","InputGroup"],combobox:["Combobox"],"select-picker":["SelectPicker"],"dropdown-menu":["DropdownMenu"],popover:["Popover"],calendar:["Calendar"],"date-picker":["DatePicker"],"time-picker":["TimePicker"],"date-range-picker":["DateRangePicker"],"month-picker":["MonthPicker"]})) {const part=await import("@devslab/dds-react/"+path);for(const name of names)assert.equal(root[name],part[name],name+" root/subpath identity");}
+for (const [path,names] of Object.entries({input:["Input","InputGroup"],combobox:["Combobox"],"select-picker":["SelectPicker"],"dropdown-menu":["DropdownMenu"],popover:["Popover"],calendar:["Calendar"],"date-picker":["DatePicker"],"time-picker":["TimePicker"],"date-range-picker":["DateRangePicker"],"month-picker":["MonthPicker"],"segmented-control":["SegmentedControl"],"number-input":["NumberInput"]})) {const part=await import("@devslab/dds-react/"+path);for(const name of names)assert.equal(root[name],part[name],name+" root/subpath identity");}
 `);
     node([join(temp,"component-subpaths.mjs")]);
   }

@@ -85,6 +85,16 @@
       "types": "./dist/month-picker.d.ts",
       "import": "./dist/month-picker.js",
       "default": "./dist/month-picker.js"
+    },
+    "./segmented-control": {
+      "types": "./dist/segmented-control.d.ts",
+      "import": "./dist/segmented-control.js",
+      "default": "./dist/segmented-control.js"
+    },
+    "./number-input": {
+      "types": "./dist/number-input.d.ts",
+      "import": "./dist/number-input.js",
+      "default": "./dist/number-input.js"
     }
   },
   "scripts": {

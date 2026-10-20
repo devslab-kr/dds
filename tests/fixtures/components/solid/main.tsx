@@ -22,7 +22,6 @@ function Notices(){
  const toast=useToast();
  return <section aria-label="Toasts"><h2>Toasts</h2><button onClick={()=>toast.show({message:'연결된 서비스에서 결과를 확인하지 못했습니다. 잠시 후 다시 시도하고, 계속되면 관리자에게 문의해 주세요.',tone:'danger',duration:0})}>Show long notice</button><button onClick={()=>toast.show({message:'저장했습니다.',tone:'success',duration:0})}>Show short notice</button></section>;
 }
-// Solid-only for now: SegmentedControl and NumberInput (React parity is a recorded follow-up).
 function SegmentsAndNumbers(){
  const [view,setView]=createSignal('day'),[amount,setAmount]=createSignal<number|null>(15000),[submitted,setSubmitted]=createSignal('');
  const views=[{value:'day',label:'Day'},{value:'week',label:'Week'},{value:'month',label:'Month'}];

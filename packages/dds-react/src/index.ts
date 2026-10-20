@@ -28,3 +28,5 @@ export * from "./dropdown-menu";
 export * from "./popover";
 export * from "./calendar";
 export { TimePicker, type TimePickerProps, type TimeMessages } from "./time-picker";
+export * from "./segmented-control";
+export * from "./number-input";

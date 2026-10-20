@@ -9,6 +9,8 @@ import { Popover } from "../popover";
 import { TimePicker } from "../time-picker";
 import { DateRangePicker } from "../date-range-picker";
 import { MonthPicker } from "../month-picker";
+import { SegmentedControl } from "../segmented-control";
+import { NumberInput } from "../number-input";
 import {
   Button,
   IconButton,
@@ -186,4 +188,30 @@ it("server-renders TimePicker with the HH:MM value, label and clock trigger", ()
   expect(html).toContain('aria-label="Open time list"');
   expect(html).toContain('name="closing"');
   expect(html).toContain('value="25:99"');
+});
+
+it("server-renders SegmentedControl and NumberInput with their values and no browser globals", () => {
+  expect(typeof window).toBe("undefined");
+  const html = renderToString(
+    <>
+      <SegmentedControl
+        label="보기"
+        name="view"
+        items={[
+          { value: "day", label: "일" },
+          { value: "week", label: "주" },
+        ]}
+        defaultValue="week"
+      />
+      <NumberInput label="금액" name="amount" defaultValue={1234567} suffix="원" min={0} />
+    </>,
+  );
+  expect(html).toContain('role="radiogroup"');
+  expect(html).toContain('data-state="checked"');
+  expect(html).toContain('value="week"');
+  expect(html).toContain('role="spinbutton"');
+  expect(html).toContain('value="1,234,567"');
+  expect(html).toContain('value="1234567"');
+  expect(html).toContain("값 늘리기");
+  expect(html).toContain("원");
 });

@@ -906,10 +906,13 @@ test.describe(`${framework} TimePicker`, () => {
 });
 
 // Solid-only until React parity lands (DDS 0.24 adds these to dds-solid first).
-test.describe("Solid SegmentedControl and NumberInput", () => {
+for (const [framework, port] of [
+  ["React", 5281],
+  ["Solid", 5282],
+] as const) test.describe(`${framework} SegmentedControl and NumberInput`, () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("http://127.0.0.1:5282");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Solid");
+    await page.goto(`http://127.0.0.1:${port}`);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(framework);
   });
   test("a reset button restores uncontrolled numbers and selections", async ({ page }) => {
     const form = page.getByRole("form", { name: "Number form" }),
