@@ -756,14 +756,17 @@ test.describe("Solid DateRangePicker and MonthPicker", () => {
   });
 });
 
-// Solid-first components (D-041): React has no TimePicker yet.
-test.describe("Solid TimePicker", () => {
+for (const [framework, port] of [
+  ["React", 5281],
+  ["Solid", 5282],
+] as const)
+test.describe(`${framework} TimePicker`, () => {
   const picker = (page: import("@playwright/test").Page, name: string) =>
     page.locator(".dds-time-picker", {
       has: page.getByRole("combobox", { name, exact: true }),
     });
   test.beforeEach(async ({ page }) => {
-    await page.goto("http://127.0.0.1:5282");
+    await page.goto(`http://127.0.0.1:${port}`);
   });
   test("opens around the selection, filters, accepts typed times and steps with the keyboard", async ({
     page,
@@ -796,7 +799,8 @@ test.describe("Solid TimePicker", () => {
     ).toEqual([]);
     await page.keyboard.press("Escape");
     await expect(list).toBeHidden();
-    await input.fill("10");
+    await input.clear();
+    await input.pressSequentially("10", { delay: 20 });
     await expect(list.getByRole("option")).toHaveText([
       "10:00",
       "10:10",
@@ -808,7 +812,8 @@ test.describe("Solid TimePicker", () => {
     await page.keyboard.press("Enter");
     await expect(output).toHaveText("10:00");
     await expect(input).toHaveValue("10:00");
-    await input.fill("1045");
+    await input.clear();
+    await input.pressSequentially("1045", { delay: 20 });
     await page.keyboard.press("Tab");
     await expect(output).toHaveText("10:45");
     await expect(input).toHaveValue("10:45");
@@ -858,11 +863,16 @@ test.describe("Solid TimePicker", () => {
   test("a reset button restores the default time in the field and the form data", async ({ page }) => {
     const form = page.getByRole("form", { name: "Time form" }),
       input = form.getByRole("combobox", { name: "Reset time", exact: true });
-    await input.fill("1200");
+    await input.clear();
+    await input.pressSequentially("1200", { delay: 20 });
+    const note = form.getByRole("textbox", { name: "Reset note", exact: true });
+    await note.fill("owned by parent");
     await page.keyboard.press("Tab");
     await expect(input).toHaveValue("12:00");
     await form.getByRole("button", { name: "Reset time form" }).click();
     await expect(input).toHaveValue("08:30");
+    // A controlled Input keeps its parent value through a reset-button click.
+    await expect(note).toHaveValue("owned by parent");
     expect(
       await form.evaluate((element) => new FormData(element as HTMLFormElement).get("resetTime")),
     ).toBe("08:30");

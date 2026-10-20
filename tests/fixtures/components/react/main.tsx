@@ -7,6 +7,7 @@ import {DropdownMenu} from '../../../../packages/dds-react/src/dropdown-menu';
 import {Popover} from '../../../../packages/dds-react/src/popover';
 import {Calendar} from '../../../../packages/dds-react/src/calendar';
 import {DatePicker} from '../../../../packages/dds-react/src/date-picker';
+import {TimePicker} from '../../../../packages/dds-react/src/time-picker';
 import {Dialog} from '../../../../packages/dds-react/src/overlays';
 import {ToastProvider,useToast} from '../../../../packages/dds-react/src/toast';
 import '../../../../packages/dds-react/styles.css';
@@ -24,6 +25,7 @@ function App(){
  const [dialog,setDialog]=useState(false),[action,setAction]=useState('none'),[submitted,setSubmitted]=useState('');
  const [checked,setChecked]=useState(false),[density,setDensity]=useState('comfortable'),[direction,setDirection]=useState<'ltr'|'rtl'>('ltr');
  const [nestedChoice,setNestedChoice]=useState('');
+ const [time,setTime]=useState('09:00'),[nestedTime,setNestedTime]=useState(''),[note,setNote]=useState('memo');
  return <main><h1>DDS components · React</h1>
  <section aria-label="General inputs"><h2>General inputs</h2>
  <form aria-label="Input form" onSubmit={event=>{event.preventDefault();setSubmitted(String(new FormData(event.currentTarget).get('email')));}}>
@@ -52,7 +54,8 @@ function App(){
  <output aria-label="Notifications value">{checked?'on':'off'}</output><output aria-label="Density value">{density}</output><p id="menu-link-target" tabIndex={-1}>Linked destination</p>
  <Popover.Root><Popover.Trigger>Open standalone popover</Popover.Trigger><Popover.Content><Popover.Title>Popover options</Popover.Title><Popover.Description>Review the available options</Popover.Description><Popover.CloseTrigger aria-label="Close popover options">Close popover options</Popover.CloseTrigger></Popover.Content></Popover.Root>
  <output aria-label="Action value">{action}</output><button onClick={()=>setDialog(true)}>Open dialog</button>
- <Dialog title="Parent dialog" open={dialog} onOpenChange={setDialog}><Popover.Root><Popover.Trigger>Nested popover</Popover.Trigger><Popover.Content><Popover.Title>Details</Popover.Title><Popover.Description>Nested details</Popover.Description><Popover.CloseTrigger>Close details</Popover.CloseTrigger></Popover.Content></Popover.Root><Combobox label="Dialog combo" items={items.slice(0,3)} value={nestedChoice} onValueChange={setNestedChoice}/><output aria-label="Dialog choice value">{nestedChoice}</output><DatePicker label="Nested date" locale="en-US" value={picked} onChange={setPicked}/><button onClick={()=>setDialog(false)}>Close dialog</button></Dialog></section>
+ <Dialog title="Parent dialog" open={dialog} onOpenChange={setDialog}><Popover.Root><Popover.Trigger>Nested popover</Popover.Trigger><Popover.Content><Popover.Title>Details</Popover.Title><Popover.Description>Nested details</Popover.Description><Popover.CloseTrigger>Close details</Popover.CloseTrigger></Popover.Content></Popover.Root><Combobox label="Dialog combo" items={items.slice(0,3)} value={nestedChoice} onValueChange={setNestedChoice}/><output aria-label="Dialog choice value">{nestedChoice}</output><DatePicker label="Nested date" locale="en-US" value={picked} onChange={setPicked}/><TimePicker label="Dialog time" locale="en-US" value={nestedTime} onValueChange={setNestedTime}/><button onClick={()=>setDialog(false)}>Close dialog</button></Dialog></section>
+ <section aria-label="Times"><h2>Times</h2><div className="examples"><TimePicker label="Closing time" locale="en-US" value={time} onValueChange={setTime} clearable/><output aria-label="Time value">{time}</output><SelectPicker label="Aligned select" items={items.slice(0,3)}/><TimePicker label="Off step time" locale="en-US" defaultValue="10:45:00"/><form aria-label="Time form"><TimePicker label="Reset time" locale="en-US" name="resetTime" defaultValue="08:30"/><Input label="Reset note" name="note" value={note} onValueChange={setNote}/><button type="reset">Reset time form</button></form></div></section>
  <section aria-label="Calendars"><h2>Calendars</h2><Calendar label="Inline calendar" locale="en-US" value={date} onChange={setDate}/><output aria-label="Calendar value">{date}</output><DatePicker label="Picked date" locale="en-US" value={picked} onChange={setPicked}/><output aria-label="Picked value">{picked}</output></section>
  </main>;
 }

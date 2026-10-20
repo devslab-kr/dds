@@ -70,6 +70,11 @@
       "types": "./dist/date-picker.d.ts",
       "import": "./dist/date-picker.js",
       "default": "./dist/date-picker.js"
+    },
+    "./time-picker": {
+      "types": "./dist/time-picker.d.ts",
+      "import": "./dist/time-picker.js",
+      "default": "./dist/time-picker.js"
     }
   },
   "scripts": {

@@ -11,11 +11,12 @@ HTMLElement.prototype.scrollTo=function(){};
 const diagnostics=[],warn=console.warn,error=console.error;
 console.warn=(...values)=>diagnostics.push(values.join(' '));console.error=(...values)=>diagnostics.push(values.join(' '));
 const host=document.querySelector('#root');
-const serverNodes=[...host.querySelectorAll('#component-group,#component-input,.dds-choice,.dds-choice-input,.dds-choice-trigger,.dds-choice-label,.dds-calendar,.dds-calendar [data-part="content"],.dds-calendar [data-part="table"],.dds-calendar [data-part="table-cell-trigger"]')];
+const serverNodes=[...host.querySelectorAll('#component-group,#component-input,.dds-choice,.dds-choice-input,.dds-choice-trigger,.dds-choice-label,.dds-calendar,.dds-calendar [data-part="content"],.dds-calendar [data-part="table"],.dds-calendar [data-part="table-cell-trigger"],.dds-time-picker,.dds-time-picker input,.dds-time-picker svg')];
 assert.equal(host.querySelector('#component-input')?.value,'Hydrated text','Inside input missing from SSR');
 assert.equal(host.querySelector('.dds-choice-input')?.value,'Apple','Combo default selection missing from SSR');
 assert.ok(host.querySelector('[data-scope="select"][data-part="trigger"]')?.textContent.includes('Banana'),'Select default selection missing from SSR');
 assert.ok(host.querySelector('.dds-calendar [data-value="2026-10-17"][data-selected]'),'Calendar selection missing from SSR');
+assert.equal(host.querySelector('.dds-time-picker input')?.value,'18:30','TimePicker HH:MM value missing from SSR');
 const {createElement:h}=await import('react');const {hydrateRoot}=await import('react-dom/client');const {App,events}=await import('./component-app.mjs');
 const pause=()=>new Promise(resolve=>setTimeout(resolve,20));
 async function until(predicate,message){for(let i=0;i<250;i++){if(predicate())return;await pause();}throw new Error(message+(diagnostics.length?'\n'+diagnostics.join('\n'):''));}
@@ -42,5 +43,10 @@ try{
  await until(()=>events.some(([kind,value])=>kind==='select'&&value==='a'),'Hydrated select selection failed');
  host.querySelector('.dds-calendar [data-part="table-cell-trigger"][data-value="2026-10-18"]').click();
  await until(()=>events.some(([kind,value])=>kind==='calendar'&&value==='2026-10-18'),'Hydrated Calendar selection failed');
+ const timeTrigger=host.querySelector('.dds-time-picker [data-part="trigger"]');
+ timeTrigger.click();
+ await until(()=>timeTrigger.getAttribute('aria-expanded')==='true','Hydrated TimePicker did not open');
+ document.querySelector('[data-scope="combobox"][data-part="item"][data-value="10:30"]').click();
+ await until(()=>events.some(([kind,value])=>kind==='time'&&value==='10:30'),'Hydrated TimePicker selection failed');
 }finally{root?.unmount();console.warn=warn;console.error=error;dom.window.close();}
 assert.deepEqual(diagnostics,[],'New component SSR hydration emitted diagnostics');

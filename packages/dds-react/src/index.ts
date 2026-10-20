@@ -25,3 +25,4 @@ export * from "./select-picker";
 export * from "./dropdown-menu";
 export * from "./popover";
 export * from "./calendar";
+export { TimePicker, type TimePickerProps, type TimeMessages } from "./time-picker";

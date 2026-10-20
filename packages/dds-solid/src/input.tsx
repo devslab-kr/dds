@@ -73,8 +73,10 @@ export function Input(props: InputProps) {
     // Native form ownership can change after mount, including external forms.
     void rest.form;
     const form = input.form;
+    // A task, not a microtask: after a reset-button click, microtasks run
+    // before the browser resets the controls and would be overwritten.
     const reset = (event: Event) =>
-      queueMicrotask(() => {
+      setTimeout(() => {
         if (event.defaultPrevented) return;
         if (local.value === undefined) setInternal(initial);
         input.value = current();
