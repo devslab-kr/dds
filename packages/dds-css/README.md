@@ -23,7 +23,7 @@ the native counterpart of Dialog — Phase 3).
 - Per-component imports: `@devslab/dds-css/components/button.css` etc.
 - A loading button (`aria-busy="true"` + a `.dds-spinner` child) keeps its
   size and name: the label is hidden, not removed, and the spinner is drawn
-  over it (D-042).
+  over it (D-043).
 - Markup contracts, states, accessibility checklists and do/don't per
   component: [`docs/components.md`](../../docs/components.md).
   Live reference: `preview/components.html` (run `pnpm build` first).

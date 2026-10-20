@@ -62,10 +62,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     const input = inputRef.current;
     if (!input) return;
     input.defaultValue = initial.current;
-    // Reset happens after the event dispatch. Respect preventDefault, and keep
-    // the parent's controlled value when the browser resets native form data.
+    // The browser resets the controls after the reset event; after a reset-button
+    // click a microtask would run before that, so restore on a task. Respect
+    // preventDefault, and keep the parent's controlled value.
     const reset = (event: Event) =>
-      queueMicrotask(() => {
+      setTimeout(() => {
         if (event.defaultPrevented) return;
         if (latest.current.controlled) input.value = latest.current.current;
         else {

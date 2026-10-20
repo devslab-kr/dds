@@ -1,5 +1,16 @@
 # @devslab/dds-solid
 
+## 0.25.0
+
+### Patch Changes
+
+- e36292c: Add `TimePicker`, `DateRangePicker`, `MonthPicker`, `SegmentedControl` and `NumberInput` to `@devslab/dds-react`, each from the root and its own subpath (`/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`), with the same props and value contracts as the Solid versions (D-042).
+
+  Fix: clicking a form's reset button now restores React Combobox/SelectPicker and Input (React and Solid) values; the restore used to run before the browser cleared the controls.
+  - @devslab/dds-tokens@0.25.0
+  - @devslab/dds-css@0.25.0
+  - @devslab/dds-icons@0.25.0
+
 ## 0.24.0
 
 ### Minor Changes

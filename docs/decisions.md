@@ -5,7 +5,7 @@
 
 ---
 
-## D-042 — 진행 중인 버튼은 크기가 그대로다: 라벨은 숨기고 스피너는 가운데 겹친다 (2026-10-20)
+## D-043 — 진행 중인 버튼은 크기가 그대로다: 라벨은 숨기고 스피너는 가운데 겹친다 (2026-10-20)
 
 **맥락.** Button은 loading(`aria-busy="true"`)이면 `.dds-spinner`를 라벨 옆 흐름에 넣었다. 버튼이
 스피너+간격(약 24px)만큼 넓어져 진행 표시가 뜰 때마다 옆 요소가 밀리고, 줄바꿈된 라벨은 한 줄이
@@ -84,6 +84,30 @@ are unchanged. Loading is no longer dimmed (Button and IconButton), even with `[
 the spinner fell to about 2:1 against the button. Forced colors paint the loading button and the
 spinner in system colors without a transition, and reduced motion now slows the spinner instead of
 stopping it.
+
+---
+
+## D-042 — D-041의 다섯 컴포넌트를 React에도 둔다, reset 복원은 task로 (2026-10-20)
+
+**결정.** `@devslab/dds-react`에 `TimePicker`, `DateRangePicker`, `MonthPicker`, `SegmentedControl`,
+`NumberInput`을 Solid와 같은 props·값 계약·DOM 클래스·CSS로 추가하고 같은 상세 경로를 연다. D-041의 Solid
+전용 예외는 끝났다. `tests/component-entries.test.mjs`의 `solidOnlyPaths`를 지웠고, 브라우저 사례는 React·Solid
+모두에서 돈다.
+
+- React TimePicker는 React Choice에 Solid와 같은 선택적 훅을 더해 만든다. 입력 글자는 Choice가 갖고 TimePicker는
+  `onDraftChange`로 따라 읽는다(키마다 React 상태를 돌리면 빠른 입력이 섞인다).
+- React 쪽에서 Solid와 다르게 해야 했던 것: DateRangePicker·MonthPicker는 Ark가 팝업을 닫은 뒤 한 렌더 늦게
+  달력 버튼으로 초점을 옮기므로 입력칸 초점을 두 프레임 뒤에 한 번 더 준다. NumberInput 입력칸은 비제어로 두고
+  바뀔 때만 글자를 쓴다(제어 입력은 한글·일본어 조합을 덮어쓴다). 글자 거르기는 네이티브 `beforeinput`을 쓴다.
+- **폼 reset 복원은 task(`setTimeout`).** React Choice와 Input, Solid Input도 Solid Choice·NumberInput(D-041)처럼
+  옮겼다. reset 버튼을 누르면 microtask가 브라우저가 컨트롤을 비우기 전에 돌아 복원값이 지워졌다. 브라우저
+  사례가 reset 버튼으로 TimePicker·NumberInput·SelectPicker와 제어 Input을 확인한다.
+
+**검증.** 두 프레임워크의 단위·SSR·axe, React 18/19와 Solid 새 tarball 소비자의 SSR·hydration, 실제 브라우저에서
+React·Solid 같은 사례(키를 하나씩 누르는 입력 포함), React·Solid 화면 픽셀 비교(1280/390px, 라이트/다크, 차이 0).
+
+**English.** React gets the five D-041 components with the Solid contracts, ending the Solid-only exception. React
+Choice/Input and Solid Input now restore after a native form reset on a task, as Solid Choice/NumberInput already did.
 
 ---
 

@@ -40,7 +40,7 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 - 상태: hover/pressed는 토큰으로(`bg.brand-hover`, 알파 틴트); disabled는
   `[disabled]`(opacity 0.45 — 유일하게 허용되는 opacity 상태); loading은
   `aria-busy="true"` + `.dds-spinner` 자식(포인터 차단). **loading은 버튼
-  크기를 바꾸지 않습니다**(D-042): 라벨과 아이콘은 자리와 접근성 트리에
+  크기를 바꾸지 않습니다**(D-043): 라벨과 아이콘은 자리와 접근성 트리에
   그대로 남아 접근 가능한 이름이 바뀌지 않고, 그려지지만 않습니다. 스피너는
   버튼 글자색으로 그 위 가운데에 겹칩니다. 옆 요소가 밀리지 않고, 줄바꿈된
   라벨도 다시 접히지 않습니다. `[disabled]`가 함께 있어도(프레임워크
@@ -75,7 +75,7 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 - 아이콘은 `currentColor`를 상속합니다. `<svg>`에는 `aria-hidden="true"`.
 - loading(`aria-busy="true"`; 프레임워크의 `loading` prop은 아이콘을
   `.dds-spinner`로 바꿈): 같은 크기·같은 `aria-label`, 포인터 차단,
-  Button과 같이 흐리게 하지 않음(D-042).
+  Button과 같이 흐리게 하지 않음(D-043).
 - **접근성**: `aria-label` 필수 — 아이콘에는 접근 가능한 이름이 없습니다.
   `--sm`(32×32)은 웹 최소선 24×24는 넘지만 터치 타깃 44×44에는 못 미칩니다.
   터치 화면에서는 기본 크기를 쓰세요.

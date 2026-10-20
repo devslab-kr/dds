@@ -1,3 +1,4 @@
+import "@testing-library/jest-dom/vitest";
 import { useState } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -5,6 +6,7 @@ import { expect, it, vi } from "vitest";
 import { fireEvent } from "@testing-library/react";
 import { Combobox } from "../combobox";
 import { SelectPicker } from "../select-picker";
+import { TimePicker } from "../time-picker";
 // jsdom has no scrolling geometry; actual virtual scrolling is tested in browsers.
 HTMLElement.prototype.scrollTo = vi.fn();
 const items = [
@@ -277,4 +279,23 @@ it("restores a controlled query on blur, external selection and reset without du
     expect(screen.getByRole("combobox")).toHaveValue("Banana"),
   );
   expect(notify).toHaveBeenCalledExactlyOnceWith("Banana");
+});
+it.each([
+  ["Combobox", <Combobox id="pickup-cutoff" items={items} />, 'input[role="combobox"]'],
+  ["TimePicker", <TimePicker id="pickup-cutoff" />, 'input[role="combobox"]'],
+  ["SelectPicker", <SelectPicker id="pickup-cutoff" items={items} />, 'button[role="combobox"]'],
+] as const)("%s puts its id on the visible control so an outside label names it", (_, field, selector) => {
+  // A form field that renders its own <label htmlFor={id}> and hands the control that id.
+  const { container } = render(
+    <>
+      <label htmlFor="pickup-cutoff">마감 시간</label>
+      {field}
+    </>,
+  );
+  const control = container.querySelector<HTMLElement>(selector)!;
+  expect(document.querySelectorAll('[id="pickup-cutoff"]')).toHaveLength(1);
+  expect(document.getElementById("pickup-cutoff")).toBe(control);
+  // The element a label click focuses and activates.
+  expect(container.querySelector("label")!.control).toBe(control);
+  expect(control).toHaveAccessibleName("마감 시간");
 });

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// Loading Button contract (docs/decisions.md D-042): a loading button keeps
+// Loading Button contract (docs/decisions.md D-043): a loading button keeps
 // the box its label gives it, keeps its accessible name, paints only the
 // spinner (centred, 3:1 or better) and blocks the pointer. The fixture
 // (tests/fixtures/components/{react,solid}/button.tsx) renders every Button

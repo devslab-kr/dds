@@ -408,7 +408,7 @@ Faking states with opacity (`opacity: 0.5`) is allowed for disabled only.
 Loading never changes a control's size. Its content keeps its place and its
 accessible name but is not painted, and the progress indicator is drawn over
 it. A loading control is not dimmed: the indicator is the only thing painted,
-so it needs 3:1 against its surface (§6, D-042).
+so it needs 3:1 against its surface (§6, D-043).
 
 ### 4.3 Component tiers and initial inventory
 

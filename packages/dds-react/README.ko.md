@@ -17,7 +17,7 @@ import { Button, Field, Select, Dialog } from '@devslab/dds-react';
 
 Button, IconButton, Field, Checkbox, Radio, Select, Switch, RadioGroup, Dialog, Tabs/TabList/Tab/TabPanel, Tooltip, Icon, ToastProvider/useToast, ConsoleShell 및 props 타입을 제공합니다. 모든 제품 문구와 접근성 이름은 호출자가 전달합니다.
 
-React DOM 속성(`className`, `htmlFor`, `onChange`)과 객체/콜백 ref를 사용합니다. Button은 기본 `type="button"`이고, loading 중에는 눌리지 않으며 이름과 크기를 그대로 유지합니다. 라벨은 지우지 않고 숨기며 스피너를 그 위에 그리므로(D-042) 진행 중에도 라벨은 바꾸지 마세요. Checkbox/Radio/Switch는 `checked`, `defaultChecked`, `onCheckedChange(boolean)`을 지원하고, Select는 네이티브 value/onChange를 사용합니다. RadioGroup은 label/options와 value/defaultValue/onValueChange(string)을 받습니다. Tabs는 Ark 옵션과 onValueChange(string)을 지원합니다.
+React DOM 속성(`className`, `htmlFor`, `onChange`)과 객체/콜백 ref를 사용합니다. Button은 기본 `type="button"`이고, loading 중에는 눌리지 않으며 이름과 크기를 그대로 유지합니다. 라벨은 지우지 않고 숨기며 스피너를 그 위에 그리므로(D-043) 진행 중에도 라벨은 바꾸지 마세요. Checkbox/Radio/Switch는 `checked`, `defaultChecked`, `onCheckedChange(boolean)`을 지원하고, Select는 네이티브 value/onChange를 사용합니다. RadioGroup은 label/options와 value/defaultValue/onValueChange(string)을 받습니다. Tabs는 Ark 옵션과 onValueChange(string)을 지원합니다.
 
 Dialog는 기본적으로 portal을 사용하며 Ark가 중첩 모달, 포커스 복원, Escape, 스크롤 잠금을 관리합니다. `portal={false}`로 SSR 열린 콘텐츠를 인라인 렌더링할 수 있습니다. `contentProps`, `actions`, `frame`, `initialFocus`, `finalFocus`, `unstyled`와 Ark root 옵션을 제공합니다. Solid의 커스텀 additionalFocusContainers는 모방하지 않습니다. 고급 구성은 ArkDialog/ArkTabs/ArkTooltip/ArkRadioGroup/ArkCheckbox/ArkSwitch/ArkField/ArkToast 네임스페이스를 사용하세요.
 
@@ -76,6 +76,7 @@ validity callback은 최초 mount, 의미 있는 입력·제약·외부 값 변�
 아직 반영되지 않은 로컬 값과 일치하는 부모 값은 해당 발생 건의 응답으로 보고 최신 draft를 유지합니다. B/C/B 반복을 각각 보존하고 blur/Enter 중복 commit을 막습니다. 미반영 목록에 없는 다른 외부 값은 reset으로 처리합니다. 같은 문자열만으로는 미반영 값과 같은 의도적 reset을 응답과 구별할 수 없으므로 명시적 reset은 keyed editor remount를 사용하세요. 로컬 controlled state는 즉시 갱신하고 서버 저장을 분리하세요.
 ## 입력·선택·메뉴·공유 달력
 
-Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다.
+Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker/DateRangePicker/MonthPicker는 공유 달력을 제공합니다.
 
-상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
+상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/date-range-picker`, `/month-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
+상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.

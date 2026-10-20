@@ -123,7 +123,7 @@ describe("native control behavior", () => {
     expect(button.disabled).toBe(true);
     expect(button.getAttribute("aria-busy")).toBe("true");
     // The label stays in the button while loading (it is only not painted,
-    // D-042), so the name does not change and the spinner adds nothing to it.
+    // D-043), so the name does not change and the spinner adds nothing to it.
     expect(button).toHaveAccessibleName("Save");
     button.click();
     expect(click).not.toHaveBeenCalled();

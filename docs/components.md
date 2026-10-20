@@ -41,7 +41,7 @@ native implementation waits for a native consumer (Phase 3).
 - States: hover/pressed via tokens (`bg.brand-hover`, alpha tints);
   disabled = `[disabled]` (opacity 0.45 — the one allowed opacity state);
   loading = `aria-busy="true"` + a `.dds-spinner` child (blocks pointer
-  events). **Loading keeps the button's size** (D-042): the label and icons
+  events). **Loading keeps the button's size** (D-043): the label and icons
   stay in place and in the accessibility tree, so the accessible name does
   not change, but they are not painted; the spinner is centred over them in
   the button's text color. Neighbours do not move and a wrapped label does
@@ -78,7 +78,7 @@ native implementation waits for a native consumer (Phase 3).
 - The icon inherits `currentColor`; give the `<svg>` `aria-hidden="true"`.
 - Loading (`aria-busy="true"`; the framework `loading` prop swaps the icon
   for a `.dds-spinner`): same box, same `aria-label`, pointer blocked and,
-  like Button, not dimmed (D-042).
+  like Button, not dimmed (D-043).
 - **A11y**: `aria-label` is mandatory — an icon has no accessible name. `--sm`
   (32×32) clears the 24×24 web floor but not the 44×44 touch target: on
   touch surfaces use the default size.

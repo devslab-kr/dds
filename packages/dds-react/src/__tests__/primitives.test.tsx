@@ -26,7 +26,7 @@ describe("React DDS behavior", () => {
       </Button>
     );
     // The label stays in the button while loading (it is only not painted,
-    // D-042), so the name does not change and the spinner adds nothing to it.
+    // D-043), so the name does not change and the spinner adds nothing to it.
     expect(ref.current).toBe(screen.getByRole("button", { name: "저장" }));
     expect(ref.current).toHaveAccessibleName("저장");
     expect(ref.current).toBeDisabled();

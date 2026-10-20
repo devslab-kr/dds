@@ -15,7 +15,7 @@ import { DatePicker } from '@devslab/dds-react/date-picker';
 
 ## General inputs
 
-Input is not search-only. It supports native text/search/email/tel/url/password/number semantics, refs, events, name/form, required, readOnly and disabled. type="number" is the native HTML control; for formatted numbers, units and − / + buttons use NumberInput (Solid, below). InputGroup lays out a single Input with optional start/end icons, units or action buttons. It does not own the input value.
+Input is not search-only. It supports native text/search/email/tel/url/password/number semantics, refs, events, name/form, required, readOnly and disabled. type="number" is the native HTML control; for formatted numbers, units and − / + buttons use NumberInput (below). InputGroup lays out a single Input with optional start/end icons, units or action buttons. It does not own the input value.
 
 ```tsx
 <Input type="email" name="email" label="Email" required />
@@ -48,6 +48,8 @@ For remote search use filterMode="external" and pass server-filtered items. Cont
 
 Typing alone does not commit an option. Blurring an uncommitted query with an existing selection restores that selection's label. Clear resets both query and selected ID. Native form data contains the selected ID rather than the label. Required invalidity focuses the visible control. readOnly prevents selection changes.
 
+`id` goes on the visible control: the text box of Combobox and TimePicker, the button of SelectPicker. A form field that renders its own `<label for={id}>` therefore names the control, and clicking the label focuses it. The other part IDs Ark derives from it (such as `combobox:<id>:content`) are internal; do not target them.
+
 ## Menus and popovers
 
 DropdownMenu exposes Root, Trigger, Content, Item, Group, Label, Separator, CheckboxItem, RadioGroup, RadioItem, ItemText, ItemIndicator, Submenu and SubmenuTrigger. Item.onSelect runs an action; Root.onSelect receives an ID and Root.onOpenChange receives a boolean. Compose submenus from Submenu + SubmenuTrigger + Content. Use the framework's Ark asChild convention for native links or existing DDS buttons; do not nest buttons.
@@ -64,11 +66,11 @@ Popover exposes Root, Trigger, Content, Title, Description, CloseTrigger and Anc
 
 Calendar renders an always-visible single-date calendar. DatePicker adds editable text and a popup. Within each framework both use one private CalendarView under their own single Ark root. Dates remain YYYY-MM-DD or empty strings, never UTC-converted timestamps. Korean display uses YYYY/MM/DD. min/max are inclusive; timeZone controls today's date, not stored date conversion. startOfWeek defaults to Sunday (0) and accepts 0–6.
 
-DatePicker preserves invalid/incomplete drafts and reports onValidityChange. Callback-based saves must check validity.valid and use canonical value. Delayed parent acknowledgements do not blindly reset drafts. Use keyed editor remounts for explicit resets indistinguishable from pending identical values. Both frameworks support readOnly/disabled, localized messages, showToday, clearable and labelPlacement. Standalone Calendar is controlled. Range selection lives in the Solid DateRangePicker below; scheduling calendars are a separate future feature.
+DatePicker preserves invalid/incomplete drafts and reports onValidityChange. Callback-based saves must check validity.valid and use canonical value. Delayed parent acknowledgements do not blindly reset drafts. Use keyed editor remounts for explicit resets indistinguishable from pending identical values. Both frameworks support readOnly/disabled, localized messages, showToday, clearable and labelPlacement. Standalone Calendar is controlled. Range selection lives in DateRangePicker below; scheduling calendars are a separate future feature.
 
-## Date ranges and months (Solid)
+## Date ranges and months
 
-Solid-only for now (React parity is a follow-up). Import from `@devslab/dds-solid/date-range-picker` and `@devslab/dds-solid/month-picker`, or from the root.
+Both frameworks ship them with the same props, values, classes and behavior. Import from `@devslab/dds-solid/date-range-picker` and `@devslab/dds-solid/month-picker` (or `@devslab/dds-react/date-range-picker` and `@devslab/dds-react/month-picker`), or from the root.
 
 ```tsx
 <DateRangePicker label="Period" value={range} onValueChange={setRange}
@@ -94,7 +96,7 @@ import { TimePicker } from '@devslab/dds-solid/time-picker';
 <TimePicker label="Pickup slot" defaultValue="09:30" step={30} locale="en-US" />
 ```
 
-TimePicker replaces the browser's native `type="time"` dropdown with the same 40px control, list and keyboard as Combobox. It is Solid only for now; React parity is a follow-up (D-041).
+TimePicker replaces the browser's native `type="time"` dropdown with the same 40px control, list and keyboard as Combobox. Solid and React share the same props and value contract (React: `import { TimePicker } from '@devslab/dds-react/time-picker'`).
 
 Values are 24-hour `HH:MM` strings and `""` is empty. A server value with seconds (`HH:MM:SS`) is shown as `HH:MM` and is not rewritten until the person changes it; onValueChange always receives `HH:MM` or `""`. A value that is not a time is shown as it came and marked aria-invalid; `invalid` marks it from outside.
 
@@ -102,26 +104,26 @@ The list runs from 00:00 in `step` minutes (default 10). The clock button opens 
 
 Arrow keys move, Enter picks, Escape closes (inside a Dialog it closes one layer at a time), Tab leaves. `name` submits `HH:MM`, `required` uses native validity and form reset restores `defaultValue`. disabled and readOnly block opening and editing. Built-in Korean or English text follows `locale` (default ko-KR) and `messages` overrides it (open, clear, empty). Steps of one minute virtualize the list.
 
-## Segmented control (Solid)
+## Segmented control
 
 SegmentedControl picks one of a few visible options, such as a view switch or a list filter. It is a radio group: one tab stop, arrow keys move and select (following the writing direction), and each segment is a native radio, so name/form submit the selected item ID and native form reset returns to the first rendered choice. Use it instead of hand-made `aria-pressed` button rows.
 
 ```tsx
-import { SegmentedControl } from '@devslab/dds-solid/segmented-control';
+import { SegmentedControl } from '@devslab/dds-solid/segmented-control'; // or '@devslab/dds-react/segmented-control'
 <SegmentedControl label="View" name="view" value={view()} onValueChange={setView}
   items={[{ value: 'day', label: 'Day' }, { value: 'week', label: 'Week' }, { value: 'month', label: 'Month' }]} />
 <SegmentedControl aria-label="Status filter" size="sm" fullWidth defaultValue="open"
   items={[{ value: 'all', label: 'All' }, { value: 'open', label: 'Open' }, { value: 'done', label: 'Done', disabled: true }]} />
 ```
 
-items need unique nonempty value IDs; an empty list or a duplicate throws. value/defaultValue/onValueChange follow the shared pattern, and onValueChange runs only after a user choice. Give it a visible label, or aria-label/aria-labelledby. size is md (40px, the height of other single-line controls) or sm (32px). Segments size to their labels by default and never clip; when there are too many for the width, the track scrolls inside itself. fullWidth shares the width equally and shortens long labels with an ellipsis, keeping the full label in a tooltip. disabled, readOnly, invalid and required are supported, and individual items can be disabled. The selected label is bold without moving its neighbours. React parity is a follow-up; this release ships it in dds-solid only.
+items need unique nonempty value IDs; an empty list or a duplicate throws. value/defaultValue/onValueChange follow the shared pattern, and onValueChange runs only after a user choice. Give it a visible label, or aria-label/aria-labelledby. size is md (40px, the height of other single-line controls) or sm (32px). Segments size to their labels by default and never clip; when there are too many for the width, the track scrolls inside itself. fullWidth shares the width equally and shortens long labels with an ellipsis, keeping the full label in a tooltip. disabled, readOnly, invalid and required are supported, and individual items can be disabled. The selected label is bold without moving its neighbours. Solid and React share the same props, value contract and DOM; the React version takes className where Solid takes class.
 
-## Number input (Solid)
+## Number input
 
 NumberInput is a localized number field with optional − / + buttons and a unit. Its value is a number, or null when the field is empty (never 0). The text in the field is formatted with Intl (thousands separators by default) and never leaves the component: name/form submit the plain number (`1234567`), not `1,234,567`.
 
 ```tsx
-import { NumberInput } from '@devslab/dds-solid/number-input';
+import { NumberInput } from '@devslab/dds-solid/number-input'; // or '@devslab/dds-react/number-input'
 <NumberInput label="Amount" name="amount" suffix="원" min={0} max={10000000}
   value={amount()} onValueChange={setAmount} />
 <NumberInput label="Rate" formatOptions={{ maximumFractionDigits: 2 }} step={0.5} stepper={false} />
@@ -131,7 +133,7 @@ locale defaults to `ko-KR` and decides formatting and the button names (값 줄�
 
 Keyboard: ArrowUp/ArrowDown move by step, PageUp/PageDown by ten steps, and Home/End jump to min/max only when that bound is set (otherwise they move the caret). The mouse wheel never changes the value. While the number is outside min/max the field is marked invalid; leaving the field clamps it. An empty field stays empty and is not invalid unless required. Letters and other text are refused rather than guessed at; a minus sign is refused when min is zero or more, and a decimal point when fractions are not allowed. Full-width digits from Japanese or Chinese input methods are converted, and composing text is read only after the composition ends.
 
-The suffix sits inside the control after the digits, is announced with the value, and never overlaps the digits. The − / + buttons are disabled at the bounds and are at least 32px wide (44px on touch screens). label can be outside (default) or hidden; without label, supply aria-label or aria-labelledby. required, disabled, readOnly, invalid and placeholder are supported. React parity is a follow-up; this release ships it in dds-solid only.
+The suffix sits inside the control after the digits, is announced with the value, and never overlaps the digits. The − / + buttons are disabled at the bounds and are at least 32px wide (44px on touch screens). label can be outside (default) or hidden; without label, supply aria-label or aria-labelledby. required, disabled, readOnly, invalid and placeholder are supported. Solid and React share the same props, value contract and DOM; the React version takes className where Solid takes class.
 
 ## Solid table name
 

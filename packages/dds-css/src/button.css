@@ -2,7 +2,7 @@
  * Variants: primary / secondary / ghost / danger. Sizes: sm / md(default) / lg.
  * Control heights come from the spacing scale (32/40/48); type from the typo
  * scale (label for sm/md, body-1 size for lg). Loading = aria-busy="true" with
- * a .dds-spinner child; the button keeps its size while loading (D-042). */
+ * a .dds-spinner child; the button keeps its size while loading (D-043). */
 
 .dds-btn {
   appearance: none;
@@ -46,7 +46,7 @@
   cursor: not-allowed;
 }
 
-/* Loading (D-042). The button keeps the exact box its label gives it, so the
+/* Loading (D-043). The button keeps the exact box its label gives it, so the
  * controls beside it do not move and a wrapped label does not wrap again
  * when progress starts. The label stays in the layout and in the
  * accessibility tree (its accessible name does not change) but is not

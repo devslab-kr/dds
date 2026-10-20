@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-table-react",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "description": "DDS themed Community AG Grid for React",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -43,8 +43,8 @@
     "test": "vitest run --config vitest.config.ts && vitest run --config vitest.ssr.config.ts"
   },
   "dependencies": {
-    "@devslab/dds-css": "workspace:0.24.0",
-    "@devslab/dds-tokens": "workspace:0.24.0",
+    "@devslab/dds-css": "workspace:0.25.0",
+    "@devslab/dds-tokens": "workspace:0.25.0",
     "ag-grid-community": "36.2.0",
     "ag-grid-react": "36.2.0"
   },

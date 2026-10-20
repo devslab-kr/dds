@@ -339,6 +339,15 @@ export function Choice(props: ComboboxProps & ChoiceInternals) {
       {...rootProps}
       {...inputProps}
       id={props.id ?? id}
+      // A consumer id lands on the control a <label for> targets (text box, or
+      // SelectPicker's button), not on Zag's prefixed part IDs.
+      ids={
+        props.id
+          ? props.searchable
+            ? { input: props.id }
+            : { trigger: props.id }
+          : undefined
+      }
       class={props.rootClass ? `dds-choice ${props.rootClass}` : "dds-choice"}
       data-label-placement={props.labelPlacement ?? "outside"}
       data-has-value={value() || inputValue() ? "" : undefined}
@@ -427,19 +436,10 @@ export function Choice(props: ComboboxProps & ChoiceInternals) {
           </button>
         </Show>
       </Parts.Control>
+      {/* Hidden by choice.css. No style attribute: a style-src-attr CSP blocks it. */}
       <input
         ref={validation}
         class="dds-choice-validation"
-        style={{
-          position: "absolute",
-          width: "1px",
-          height: "1px",
-          padding: "0",
-          border: "0",
-          "clip-path": "inset(50%)",
-          overflow: "hidden",
-          "white-space": "nowrap",
-        }}
         tabIndex={-1}
         aria-hidden="true"
         name={props.name}
@@ -471,13 +471,10 @@ export function Choice(props: ComboboxProps & ChoiceInternals) {
         {(mount) => (
           <Portal mount={mount()}>
             <Parts.Positioner class="dds-choice-positioner">
+              {/* choice.css gives the list its 320px cap and scrolling. */}
               <Parts.Content
                 ref={setScroll}
                 class="dds-choice-content"
-                style={{
-                  "max-height": "min(320px, var(--available-height, 320px))",
-                  overflow: "auto",
-                }}
               >
                 <div
                   style={
