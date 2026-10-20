@@ -54,28 +54,44 @@ IconButton danger는 2.29(라이트)·2.25(다크). 흐리지 않으면 5.13~19.
 
 **검증.** `tests/browser/button.spec.ts`(+ `tests/fixtures/components/{react,solid}/button.tsx`)가
 React·Solid 각각 Button 4변형×3크기×3내용(라벨·아이콘+라벨·줄바꿈 라벨)과 IconButton 3변형×3크기를
-평상시와 진행 중으로 잰다. LTR·RTL에서 상자와 옆 요소 위치가 같고(0.01px 미만), 스피너 중심이 버튼
-중심과 같고(0.5px 미만), 접근 가능한 이름이 그대로이고, 포인터 클릭이 동작하지 않는다. 실제
-스크린샷 픽셀로 라벨 영역에 아무것도 그려지지 않고(채널 차 8 이하), 스피너 대비가 3:1 이상이고,
-고리의 틈이 열려 있다 — 라이트·다크·강제 색상 각각. 강제 색상에서 진행 중 버튼은 색 전환이 없다.
+평상시와 진행 중으로 잰다. 프레임워크 Button이 만들지 않는 직접 마크업은 프레임워크 없는 고정 화면
+(`tests/fixtures/components/solid/button-markup.ts`)이 4변형×3크기×5모양으로 잰다: `disabled` 없는
+`aria-busy`, 스피너가 글자 뒤, 문서의 `aria-busy`+`disabled`, `<a class="dds-btn" href>`, 라벨 속
+이모지. LTR·RTL에서 상자와 옆 요소 위치가 같고(0.01px 미만), 스피너 중심이 버튼 중심과 같고(0.5px
+미만), 접근 가능한 이름이 그대로이고, 모든 진행 중 버튼을 포인터로 눌러도 동작하지 않는다(직접
+마크업은 `disabled`가 없어 CSS의 `pointer-events`만이 막는다). 실제 스크린샷 픽셀로 라벨 영역에
+아무것도 그려지지 않고(채널 차 8 이하), 스피너 대비가 3:1 이상이고, 고리의 틈이 열려 있다 — 라이트·
+다크·강제 색상 각각. 강제 색상에서도 상자와 옆 요소 위치가 같고, 진행 중 버튼은 색 전환이 없다.
 모션 감소에서 스피너는 무한 반복·감속이다. 터치(거친 포인터)에서 44px 높이와 같은 상자를 유지한다.
-고치기 전 CSS로 새 브라우저 테스트 12개가 모두 실패했다. 단위 테스트(React·Solid)는 진행 중 접근
-가능한 이름·disabled·`aria-busy`·클릭 차단을 고정한다. 이번 변경은 마크업을 바꾸지 않아 고치기 전
-코드에서도 통과하지만, Button이 라벨을 스피너로 바꾸게 하면 실패함을 확인했다.
+고치기 전 CSS로 React·Solid 테스트 12개와 직접 마크업 테스트 6개가 모두 실패했다. 진행 중 규칙에서
+`pointer-events: none`만 지우면 직접 마크업의 포인터 테스트 2개(LTR·RTL)가 실패하고(48회 눌림),
+강제 색상 진행 중 규칙에 `font-variant-emoji: normal`을 넣으면 강제 색상 테스트가 이모지 12사례에서
+실패한다. 단위 테스트(React·Solid)는 진행 중 접근 가능한 이름·disabled·`aria-busy`·클릭 차단을
+고정한다. 이번 변경은 마크업을 바꾸지 않아 고치기 전 코드에서도 통과하지만, Button이 라벨을
+스피너로 바꾸게 하면 실패함을 확인했다.
 
 **트레이드오프.**
 - 진행 중에는 어떤 버튼인지 글자가 보이지 않는다(스피너만). 같은 줄의 다른 버튼은 라벨이 보이고
   위치는 그대로라 구분된다.
 - 진행 중 라벨을 바꾸는 소비자("저장" → "저장 중…")는 숨은 글자의 폭이 바뀌어 여전히 크기가
-  바뀐다. 문서는 라벨을 그대로 두라고 안내한다. DDS 안에서는 site-kit `RequestAccessForm`이 아직
-  `messages.submitting`으로 라벨을 바꾼다(후속).
+  바뀐다. 문서는 라벨을 그대로 두라고 안내한다. DDS 안의 site-kit `RequestAccessForm`도 같이 고쳤다:
+  보내는 동안 버튼은 `messages.submit`을 유지하고 `messages.submitting`은 폼의 상태 영역
+  (`aria-live`)에 보이고 읽힌다. Storybook·`preview/components.html`의 진행 중 예시 라벨도 평상시
+  라벨("저장")로 맞췄다.
 - `.dds-btn`에 `position: relative`가 붙어 버튼 안 절대 위치 요소의 기준이 버튼이 된다.
 - 바로 자식인 글자 속 컬러 이모지는 Chromium에서 채움 투명으로 함께 숨는 것을 확인했고, 다른 엔진은
   확인하지 않았다. 요소로 감싼 이모지는 `opacity: 0`으로 어디서나 숨는다.
+- 강제 색상의 이모지 표기(2026-10-20 실측, "저장 ✅" primary): Chromium 151·Chrome 155·Edge 155는
+  강제 색상이면 `forced-color-adjust`와 상관없이 계산값 `font-variant-emoji: text`로 흑백 표기를
+  써서, 진행 중 버튼(`forced-color-adjust: none`)도 평상시와 폭이 같다(72.56px). Firefox 153은 강제
+  색상에서도 컬러 표기를 유지해 역시 같다(77.85px). 진행 중 규칙에 `font-variant-emoji: text`를
+  넣자는 안은 반려했다 — Chromium에서는 바뀌는 것이 없고, Firefox에서는 진행 중에만 흑백이 되어
+  폭이 약 5px 바뀐다(77.85→72.82px). 강제 색상 테스트가 이모지 사례의 상자를 잰다.
 - 강제 색상에서 진행 중 버튼은 OS 대신 DDS가 시스템 색으로 칠한다.
 
-**재검토 시점.** 진행 중에도 라벨을 보여 달라는 제품 요구가 생길 때, 또는 Safari·Firefox에서 채움
-투명으로 숨지 않는 글자(컬러 이모지 등)가 실제 화면에서 나올 때.
+**재검토 시점.** 진행 중에도 라벨을 보여 달라는 제품 요구가 생길 때, Safari·Firefox에서 채움
+투명으로 숨지 않는 글자(컬러 이모지 등)가 실제 화면에서 나올 때, 또는 강제 색상에서
+`forced-color-adjust: none`이 이모지 표기를 바꾸는 엔진이 나올 때(강제 색상 테스트가 실패한다).
 
 **English.** A loading Button keeps the box its label gives it: the label stays in the layout and
 the accessibility tree (same accessible name) but is not painted (transparent text fill, element
@@ -83,7 +99,8 @@ children at opacity 0), and the spinner is centred over it. Markup and the React
 are unchanged. Loading is no longer dimmed (Button and IconButton), even with `[disabled]`: at 0.45
 the spinner fell to about 2:1 against the button. Forced colors paint the loading button and the
 spinner in system colors without a transition, and reduced motion now slows the spinner instead of
-stopping it.
+stopping it. site-kit `RequestAccessForm` keeps its submit label while sending and shows
+`messages.submitting` in its status region instead.
 
 ---
 

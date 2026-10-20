@@ -8,7 +8,7 @@ export const Spinner = {
       <span class="dds-spinner" role="status" aria-label="불러오는 중"></span>
       <span class="dds-spinner dds-spinner--lg" role="status" aria-label="불러오는 중"></span>
       <span style="color:var(--dds-color-text-brand)"><span class="dds-spinner" role="status" aria-label="불러오는 중"></span></span>
-      <button class="dds-btn dds-btn--primary" aria-busy="true"><span class="dds-spinner" aria-hidden="true"></span>저장 중</button>
+      <button class="dds-btn dds-btn--primary" aria-busy="true"><span class="dds-spinner" aria-hidden="true"></span>저장</button>
     </div>`,
 };
 

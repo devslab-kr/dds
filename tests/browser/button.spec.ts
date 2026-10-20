@@ -2,10 +2,13 @@ import { expect, test, type Page } from "@playwright/test";
 
 // Loading Button contract (docs/decisions.md D-043): a loading button keeps
 // the box its label gives it, keeps its accessible name, paints only the
-// spinner (centred, 3:1 or better) and blocks the pointer. The fixture
-// (tests/fixtures/components/{react,solid}/button.tsx) renders every Button
-// tone × size × content and every IconButton tone × size; one toggle flips
-// them all to loading.
+// spinner (centred, 3:1 or better) and blocks the pointer. The fixtures
+// (tests/fixtures/components/{react,solid}/button.tsx) render every Button
+// tone × size × content and every IconButton tone × size; the markup fixture
+// (tests/fixtures/components/solid/button-markup.ts) renders hand-written
+// .dds-btn markup the framework Buttons never produce (aria-busy without
+// [disabled], the spinner after the text, <a class="dds-btn">, an emoji in
+// the label). One toggle flips a page to loading.
 
 interface Rect {
   x: number;
@@ -29,7 +32,7 @@ async function geometry(page: Page): Promise<Geometry[]> {
         const { x, y, width, height } = element.getBoundingClientRect();
         return { x, y, width, height };
       };
-      const button = item.querySelector("button")!;
+      const button = item.querySelector(".dds-btn, .dds-iconbtn")!;
       const spinner = button.querySelector(".dds-spinner");
       return {
         key: item.getAttribute("data-case")!,
@@ -60,9 +63,20 @@ async function settle(page: Page) {
   });
 }
 
+// Same box and same neighbour position, idle and loading.
+function expectSameBoxes(idle: Geometry[], loading: Geometry[]) {
+  expect(loading.map((item) => item.key)).toEqual(idle.map((item) => item.key));
+  for (const [index, before] of idle.entries()) {
+    const after = loading[index]!;
+    for (const side of ["x", "y", "width", "height"] as const)
+      expect.soft(Math.abs(after.box[side] - before.box[side]), `${before.key}: ${side}`).toBeLessThan(0.01);
+    expect.soft(Math.abs(after.neighbour - before.neighbour), `${before.key}: neighbour moved`).toBeLessThan(0.01);
+  }
+}
+
 async function startLoading(page: Page) {
   await page.getByRole("button", { name: "Toggle loading" }).click();
-  await expect(page.locator("[data-case] button[aria-busy='true']")).toHaveCount(
+  await expect(page.locator("[data-case] [aria-busy='true']")).toHaveCount(
     await page.locator("[data-case]").count(),
   );
   await settle(page);
@@ -86,7 +100,7 @@ interface Paint {
 async function paint(page: Page): Promise<Paint[]> {
   const results: Paint[] = [];
   for (const item of await page.locator("[data-case]").all()) {
-    const button = item.locator("button");
+    const button = item.locator(".dds-btn, .dds-iconbtn");
     const png = await button.screenshot();
     results.push(
       await button.evaluate(async (element, base64) => {
@@ -161,13 +175,14 @@ function expectOnlySpinnerPainted(results: Paint[]) {
   }
 }
 
-for (const [framework, port] of [
-  ["React", 5281],
-  ["Solid", 5282],
+for (const [framework, port, file] of [
+  ["React", 5281, "button.html"],
+  ["Solid", 5282, "button.html"],
+  ["Markup", 5282, "button-markup.html"],
 ] as const) {
   test.describe(`${framework} loading buttons`, () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto(`http://127.0.0.1:${port}/button.html`);
+      await page.goto(`http://127.0.0.1:${port}/${file}`);
       await expect(page.getByRole("heading", { level: 1 })).toContainText(framework);
     });
 
@@ -179,23 +194,26 @@ for (const [framework, port] of [
         const idle = await geometry(page);
         await startLoading(page);
         const loading = await geometry(page);
-        expect(loading.map((item) => item.key)).toEqual(idle.map((item) => item.key));
+        expectSameBoxes(idle, loading);
         for (const [index, before] of idle.entries()) {
           const after = loading[index]!;
-          for (const side of ["x", "y", "width", "height"] as const)
-            expect.soft(Math.abs(after.box[side] - before.box[side]), `${before.key}: ${side}`).toBeLessThan(0.01);
-          expect.soft(Math.abs(after.neighbour - before.neighbour), `${before.key}: neighbour moved`).toBeLessThan(0.01);
           const spinner = after.spinner!;
           const centre = (rect: Rect) => [rect.x + rect.width / 2, rect.y + rect.height / 2];
           const [spinnerX, spinnerY] = centre(spinner);
           const [boxX, boxY] = centre(after.box);
           expect.soft(Math.abs(spinnerX! - boxX!), `${before.key}: spinner x centre`).toBeLessThan(0.5);
           expect.soft(Math.abs(spinnerY! - boxY!), `${before.key}: spinner y centre`).toBeLessThan(0.5);
-          await expect.soft(page.locator(`[data-case="${before.key}"] button`)).toHaveAccessibleName(before.name);
+          await expect.soft(page.locator(`[data-case="${before.key}"] :is(.dds-btn, .dds-iconbtn)`)).toHaveAccessibleName(before.name);
         }
-        // The pointer cannot activate a loading button.
-        for (const item of loading.slice(0, 3))
-          await page.mouse.click(item.box.x + item.box.width / 2, item.box.y + item.box.height / 2);
+        // The pointer cannot activate a loading button. The framework Buttons
+        // are also [disabled]; most of the markup page's are not, so there
+        // only the CSS stops the click.
+        for (const item of loading) {
+          const target = page.locator(`[data-case="${item.key}"] :is(.dds-btn, .dds-iconbtn)`);
+          await target.scrollIntoViewIfNeeded();
+          const box = (await target.boundingBox())!;
+          await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        }
         await expect(page.getByLabel("Clicks")).toHaveText("0");
       });
 
@@ -210,13 +228,18 @@ for (const [framework, port] of [
       }
     });
 
-    test("keep the label hidden and the spinner's gap open in forced colors", async ({ page }) => {
+    test("keep each box, the label hidden and the spinner's gap open in forced colors", async ({ page }) => {
       await page.emulateMedia({ forcedColors: "active" });
+      const idle = await geometry(page);
       await startLoading(page);
+      // Opting out of forced colors must not change how the label is laid
+      // out: Chromium draws emoji in text presentation under forced colors
+      // and in colour once opted out, and the two glyphs differ in width.
+      expectSameBoxes(idle, await geometry(page));
       expectOnlySpinnerPainted(await paint(page));
       // Opted out of forced colors, a fading background would show the brand
       // color it no longer forces for the length of the fade.
-      const fading = await page.locator("[data-case] button.dds-btn").evaluateAll((buttons) =>
+      const fading = await page.locator("[data-case] .dds-btn").evaluateAll((buttons) =>
         buttons.filter((button) => {
           const style = getComputedStyle(button);
           return style.transitionProperty !== "none" && style.transitionDuration.split(",").some((value) => Number.parseFloat(value) > 0);
@@ -254,13 +277,8 @@ for (const [framework, port] of [
         expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
         const idle = await geometry(page);
         await startLoading(page);
-        const loading = await geometry(page);
-        for (const [index, before] of idle.entries()) {
-          const after = loading[index]!;
-          expect.soft(before.box.height, `${before.key}: touch height`).toBeGreaterThanOrEqual(44);
-          expect.soft(Math.abs(after.box.width - before.box.width), `${before.key}: width`).toBeLessThan(0.01);
-          expect.soft(Math.abs(after.box.height - before.box.height), `${before.key}: height`).toBeLessThan(0.01);
-        }
+        for (const before of idle) expect.soft(before.box.height, `${before.key}: touch height`).toBeGreaterThanOrEqual(44);
+        expectSameBoxes(idle, await geometry(page));
       });
     });
   });
