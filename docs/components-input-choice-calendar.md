@@ -64,11 +64,11 @@ Popover exposes Root, Trigger, Content, Title, Description, CloseTrigger and Anc
 
 Calendar renders an always-visible single-date calendar. DatePicker adds editable text and a popup. Within each framework both use one private CalendarView under their own single Ark root. Dates remain YYYY-MM-DD or empty strings, never UTC-converted timestamps. Korean display uses YYYY/MM/DD. min/max are inclusive; timeZone controls today's date, not stored date conversion. startOfWeek defaults to Sunday (0) and accepts 0–6.
 
-DatePicker preserves invalid/incomplete drafts and reports onValidityChange. Callback-based saves must check validity.valid and use canonical value. Delayed parent acknowledgements do not blindly reset drafts. Use keyed editor remounts for explicit resets indistinguishable from pending identical values. Both frameworks support readOnly/disabled, localized messages, showToday, clearable and labelPlacement. Standalone Calendar is controlled. Range selection lives in the Solid DateRangePicker below; scheduling calendars are a separate future feature.
+DatePicker preserves invalid/incomplete drafts and reports onValidityChange. Callback-based saves must check validity.valid and use canonical value. Delayed parent acknowledgements do not blindly reset drafts. Use keyed editor remounts for explicit resets indistinguishable from pending identical values. Both frameworks support readOnly/disabled, localized messages, showToday, clearable and labelPlacement. Standalone Calendar is controlled. Range selection lives in DateRangePicker below; scheduling calendars are a separate future feature.
 
-## Date ranges and months (Solid)
+## Date ranges and months
 
-Solid-only for now (React parity is a follow-up). Import from `@devslab/dds-solid/date-range-picker` and `@devslab/dds-solid/month-picker`, or from the root.
+Both frameworks ship them with the same props, values, classes and behavior. Import from `@devslab/dds-solid/date-range-picker` and `@devslab/dds-solid/month-picker` (or `@devslab/dds-react/date-range-picker` and `@devslab/dds-react/month-picker`), or from the root.
 
 ```tsx
 <DateRangePicker label="Period" value={range} onValueChange={setRange}

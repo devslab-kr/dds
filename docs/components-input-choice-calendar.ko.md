@@ -94,11 +94,11 @@ Calendar는 항상 보이는 독립 달력이고 DatePicker는 입력창과 팝�
 
 DatePicker는 미완성·잘못된 직접 입력을 draft로 유지하고 onValidityChange로 알린다. 저장 버튼은 validity.valid와 canonical value를 확인한다. 부모가 값을 늦게 반영해도 최신 draft를 무조건 덮지 않는다. 동일 문자열로 명시적 reset을 구분해야 하는 편집기는 문서 ID/reset revision을 key로 새로 마운트한다. disabled/readOnly에서는 직접 입력·달력·오늘·지우기로 값을 변경할 수 없다.
 
-messages로 달력 문구를 바꾸고 showToday/clearable로 footer 액션을 선택한다. 독립 Calendar는 단일 날짜 controlled 모드다. 기간 선택은 아래 Solid DateRangePicker가 맡는다. 일정 관리용 월간 캘린더와 복수 날짜 선택은 범위가 아니다.
+messages로 달력 문구를 바꾸고 showToday/clearable로 footer 액션을 선택한다. 독립 Calendar는 단일 날짜 controlled 모드다. 기간 선택은 아래 DateRangePicker가 맡는다. 일정 관리용 월간 캘린더와 복수 날짜 선택은 범위가 아니다.
 
-## 기간과 월 선택 (Solid)
+## 기간과 월 선택
 
-지금은 Solid에서만 제공한다(React는 후속). `@devslab/dds-solid/date-range-picker`, `@devslab/dds-solid/month-picker` 또는 루트에서 가져온다.
+Solid와 React 모두 같은 props·값·클래스·동작으로 제공한다. `@devslab/dds-solid/date-range-picker`, `@devslab/dds-solid/month-picker`(React는 `@devslab/dds-react/date-range-picker`, `@devslab/dds-react/month-picker`) 또는 루트에서 가져온다.
 
 ```tsx
 <DateRangePicker label="조회 기간" value={range} onValueChange={setRange}

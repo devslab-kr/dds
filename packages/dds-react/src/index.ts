@@ -14,6 +14,8 @@ export { Field as ArkField } from "@ark-ui/react/field";
 export { Toast as ArkToast } from "@ark-ui/react/toast";
 
 export * from "./date-picker";
+export * from "./date-range-picker";
+export * from "./month-picker";
 export { DatePicker as ArkDatePicker } from "@ark-ui/react/date-picker";
 
 export * from "./status-pill";
