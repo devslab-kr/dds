@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/browser",
-  testMatch: "components.spec.ts",
+  testMatch: ["components.spec.ts", "button.spec.ts"],
   fullyParallel: false,
   workers: 1,
   retries: 0,

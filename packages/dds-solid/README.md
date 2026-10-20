@@ -25,6 +25,12 @@ same. See [the migration guide](../../docs/ark-migration.md) for integration det
 pointer/focus interaction and when the browser page is idle. A non-positive duration
 keeps the toast until dismissed.
 
+## Button loading
+
+`loading` keeps the button's size and accessible name: the label is hidden, not removed, and the
+spinner is drawn over it, so the controls beside it do not move and a wrapped label does not wrap
+again (D-043). Keep the label the same while loading; the hidden text still sets the width.
+
 ## createPendingAction
 
 A screen with several buttons needs to know which one started the work. Pass one shared flag

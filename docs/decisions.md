@@ -5,6 +5,105 @@
 
 ---
 
+## D-043 — 진행 중인 버튼은 크기가 그대로다: 라벨은 숨기고 스피너는 가운데 겹친다 (2026-10-20)
+
+**맥락.** Button은 loading(`aria-busy="true"`)이면 `.dds-spinner`를 라벨 옆 흐름에 넣었다. 버튼이
+스피너+간격(약 24px)만큼 넓어져 진행 표시가 뜰 때마다 옆 요소가 밀리고, 줄바꿈된 라벨은 한 줄이
+더 생겨 상자가 커졌다(소비 제품 실측: Admin·Contract·Accounts·pay-ui·notify-ui에서 표 열 2~10px
+이동, 좁은 화면 알림 상자 58→93px). 제품들은 평상시에도 스피너 자리를 비워 두는 보정
+(`dl-pay-spinner-room` 등)으로 피하려 했지만, 같은 화면의 다른 버튼과 크기가 달라지는 새 불일치를
+만들었다. 소유자 결정(2026-10-20): DDS 버튼에서 고친다.
+
+**결정.**
+- 진행 중에도 버튼 상자는 라벨이 정한 그대로다. 라벨은 흐름과 접근성 트리에 남겨 접근 가능한
+  이름이 바뀌지 않게 하고 그리지만 않는다. 글자는 채움(`-webkit-text-fill-color`)을 투명하게,
+  요소 자식(아이콘 등)은 `opacity: 0`. 스피너는 흐름에서 빼 버튼 가운데에 겹친다
+  (`position: absolute; inset: 0; margin: auto`, `.dds-btn`에 `position: relative`). 스피너 색은
+  여전히 `currentColor`라 버튼 글자색(소비자가 덮어쓴 색 포함)을 따른다.
+- 마크업은 바뀌지 않는다. 텍스트와 `.dds-spinner`를 바로 자식으로 둔 기존 마크업, `<a class="dds-btn">`,
+  React·Solid `Button`(코드 변경 없음)이 그대로 새 동작을 얻는다.
+- loading은 흐리게 하지 않는다. `opacity: 0.45`는 다시 disabled 전용이고, `[disabled]`가 함께 있어도
+  (프레임워크 Button은 둘 다 붙인다) 진행 중 버튼은 `opacity: 1`이다. 포인터 차단·`cursor: not-allowed`·
+  disabled 의미는 그대로다. IconButton의 loading도 같은 규칙이다. IconButton은 원래 아이콘을 스피너로
+  바꾸지만 상자 크기가 고정이라 크기는 이미 변하지 않았다.
+- 강제 색상 모드는 투명한 글자와 스피너의 투명한 윗부분까지 시스템 색으로 칠해, 숨긴 라벨이 다시 보이고
+  스피너는 멈춘 듯한 고리가 됐다(수정 전 실측). 진행 중 버튼은 `forced-color-adjust: none`으로 빠져
+  시스템 색으로 직접 칠한다(면 `ButtonFace`, 테두리 `GrayText`, 스피너 `ButtonText`). 빠진 버튼의 배경
+  전환은 강제되지 않던 브랜드 색을 잠깐 보여 주므로 전환을 끈다. 단독 스피너도 강제 색상에서는
+  `CanvasText`로 직접 칠해 틈을 유지한다.
+- 모션 감소: `base.css`의 전역 규칙(`:root [class^="dds-"]`, 애니메이션 0.01ms·1회)이 스피너도 멈추고
+  있었다. 스피너 문서와 백로그가 말한 "멈추지 않고 느려진다"와 반대였다. `spinner.css`가 같은 명시도
+  (`:root .dds-spinner`)로 뒤에서 1600ms·무한 반복을 되찾는다.
+
+**흐림을 뺀 근거(대비 측정).** 라벨을 숨기면 그려지는 것은 스피너뿐이다. 0.45 흐림에서 스피너 대
+버튼 바탕(WCAG 1.4.11 그래픽 객체 3:1): 라이트 primary 2.09·ghost 1.96·danger 2.29·secondary 3.18,
+다크 primary 2.42·ghost 2.93·danger 2.25·secondary 4.35(`bg.default` 위, `bg.subtle` 위도 같은 수준).
+IconButton danger는 2.29(라이트)·2.25(다크). 흐리지 않으면 5.13~19.9이다. 1.4.11은 비활성 컴포넌트를
+면제하지만, 여기서 스피너는 "진행 중"을 알리는 유일한 표시라 면제로 다루지 않았다. 진행 중 버튼은
+흐린 disabled 버튼(라벨이 보임)과도 스피너로 구분된다.
+
+**반려한 대안.**
+- 글자색을 사용자 정의 속성(예: `--dds-btn-color`)으로 옮기고 진행 중에는 `color: transparent`, 스피너는
+  그 속성 색 — 새 공개 API가 생기고, 소비자가 `color`를 덮어쓴 버튼에서 진행 중 스피너만 변형 기본색으로
+  돌아간다. 글자 채움만 투명하게 하면 `currentColor`가 그대로라 그럴 일이 없다.
+- 라벨을 `<span>`으로 감싸 숨기기 — 아이콘과 글자 사이 flex `gap`과 `.dds-btn > svg` 같은 소비자 셀렉터가
+  달라지고, 직접 마크업을 쓰는 소비자는 여전히 고쳐지지 않는다.
+- 평상시에도 스피너 자리를 비워 두기(제품들의 보정) — 같은 화면의 다른 버튼과 폭이 달라진다.
+- `visibility: hidden`·`display: none`으로 라벨 숨기기 — 접근성 트리에서 빠져 이름이 사라진다.
+- 흐림 유지 — 위 대비 수치.
+
+**검증.** `tests/browser/button.spec.ts`(+ `tests/fixtures/components/{react,solid}/button.tsx`)가
+React·Solid 각각 Button 4변형×3크기×3내용(라벨·아이콘+라벨·줄바꿈 라벨)과 IconButton 3변형×3크기를
+평상시와 진행 중으로 잰다. 프레임워크 Button이 만들지 않는 직접 마크업은 프레임워크 없는 고정 화면
+(`tests/fixtures/components/solid/button-markup.ts`)이 4변형×3크기×5모양으로 잰다: `disabled` 없는
+`aria-busy`, 스피너가 글자 뒤, 문서의 `aria-busy`+`disabled`, `<a class="dds-btn" href>`, 라벨 속
+이모지. LTR·RTL에서 상자와 옆 요소 위치가 같고(0.01px 미만), 스피너 중심이 버튼 중심과 같고(0.5px
+미만), 접근 가능한 이름이 그대로이고, 모든 진행 중 버튼을 포인터로 눌러도 동작하지 않는다(직접
+마크업은 `disabled`가 없어 CSS의 `pointer-events`만이 막는다). 실제 스크린샷 픽셀로 라벨 영역에
+아무것도 그려지지 않고(채널 차 8 이하), 스피너 대비가 3:1 이상이고, 고리의 틈이 열려 있다 — 라이트·
+다크·강제 색상 각각. 강제 색상에서도 상자와 옆 요소 위치가 같고, 진행 중 버튼은 색 전환이 없다.
+모션 감소에서 스피너는 무한 반복·감속이다. 터치(거친 포인터)에서 44px 높이와 같은 상자를 유지한다.
+고치기 전 CSS로 React·Solid 테스트 12개와 직접 마크업 테스트 6개가 모두 실패했다. 진행 중 규칙에서
+`pointer-events: none`만 지우면 직접 마크업의 포인터 테스트 2개(LTR·RTL)가 실패하고(48회 눌림),
+강제 색상 진행 중 규칙에 `font-variant-emoji: normal`을 넣으면 강제 색상 테스트가 이모지 12사례에서
+실패한다. 단위 테스트(React·Solid)는 진행 중 접근 가능한 이름·disabled·`aria-busy`·클릭 차단을
+고정한다. 이번 변경은 마크업을 바꾸지 않아 고치기 전 코드에서도 통과하지만, Button이 라벨을
+스피너로 바꾸게 하면 실패함을 확인했다.
+
+**트레이드오프.**
+- 진행 중에는 어떤 버튼인지 글자가 보이지 않는다(스피너만). 같은 줄의 다른 버튼은 라벨이 보이고
+  위치는 그대로라 구분된다.
+- 진행 중 라벨을 바꾸는 소비자("저장" → "저장 중…")는 숨은 글자의 폭이 바뀌어 여전히 크기가
+  바뀐다. 문서는 라벨을 그대로 두라고 안내한다. DDS 안의 site-kit `RequestAccessForm`도 같이 고쳤다:
+  보내는 동안 버튼은 `messages.submit`을 유지하고 `messages.submitting`은 폼의 상태 영역
+  (`aria-live`)에 보이고 읽힌다. Storybook·`preview/components.html`의 진행 중 예시 라벨도 평상시
+  라벨("저장")로 맞췄다.
+- `.dds-btn`에 `position: relative`가 붙어 버튼 안 절대 위치 요소의 기준이 버튼이 된다.
+- 바로 자식인 글자 속 컬러 이모지는 Chromium에서 채움 투명으로 함께 숨는 것을 확인했고, 다른 엔진은
+  확인하지 않았다. 요소로 감싼 이모지는 `opacity: 0`으로 어디서나 숨는다.
+- 강제 색상의 이모지 표기(2026-10-20 실측, "저장 ✅" primary): Chromium 151·Chrome 155·Edge 155는
+  강제 색상이면 `forced-color-adjust`와 상관없이 계산값 `font-variant-emoji: text`로 흑백 표기를
+  써서, 진행 중 버튼(`forced-color-adjust: none`)도 평상시와 폭이 같다(72.56px). Firefox 153은 강제
+  색상에서도 컬러 표기를 유지해 역시 같다(77.85px). 진행 중 규칙에 `font-variant-emoji: text`를
+  넣자는 안은 반려했다 — Chromium에서는 바뀌는 것이 없고, Firefox에서는 진행 중에만 흑백이 되어
+  폭이 약 5px 바뀐다(77.85→72.82px). 강제 색상 테스트가 이모지 사례의 상자를 잰다.
+- 강제 색상에서 진행 중 버튼은 OS 대신 DDS가 시스템 색으로 칠한다.
+
+**재검토 시점.** 진행 중에도 라벨을 보여 달라는 제품 요구가 생길 때, Safari·Firefox에서 채움
+투명으로 숨지 않는 글자(컬러 이모지 등)가 실제 화면에서 나올 때, 또는 강제 색상에서
+`forced-color-adjust: none`이 이모지 표기를 바꾸는 엔진이 나올 때(강제 색상 테스트가 실패한다).
+
+**English.** A loading Button keeps the box its label gives it: the label stays in the layout and
+the accessibility tree (same accessible name) but is not painted (transparent text fill, element
+children at opacity 0), and the spinner is centred over it. Markup and the React/Solid components
+are unchanged. Loading is no longer dimmed (Button and IconButton), even with `[disabled]`: at 0.45
+the spinner fell to about 2:1 against the button. Forced colors paint the loading button and the
+spinner in system colors without a transition, and reduced motion now slows the spinner instead of
+stopping it. site-kit `RequestAccessForm` keeps its submit label while sending and shows
+`messages.submitting` in its status region instead.
+
+---
+
 ## D-042 — D-041의 다섯 컴포넌트를 React에도 둔다, reset 복원은 task로 (2026-10-20)
 
 **결정.** `@devslab/dds-react`에 `TimePicker`, `DateRangePicker`, `MonthPicker`, `SegmentedControl`,

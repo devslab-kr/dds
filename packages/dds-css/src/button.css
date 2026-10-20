@@ -2,7 +2,7 @@
  * Variants: primary / secondary / ghost / danger. Sizes: sm / md(default) / lg.
  * Control heights come from the spacing scale (32/40/48); type from the typo
  * scale (label for sm/md, body-1 size for lg). Loading = aria-busy="true" with
- * a .dds-spinner child. */
+ * a .dds-spinner child; the button keeps its size while loading (D-043). */
 
 .dds-btn {
   appearance: none;
@@ -29,6 +29,10 @@
   -webkit-tap-highlight-color: transparent;
   white-space: normal;
   overflow-wrap: anywhere;
+  /* Containing block for the loading spinner, which is centred over the
+   * label rather than placed beside it. Set here, not only while loading,
+   * so a consumer's own position (a fixed action button) still wins. */
+  position: relative;
 }
 
 .dds-btn:focus-visible {
@@ -37,13 +41,36 @@
 }
 
 /* opacity is allowed for disabled only (spec §4.2) */
-.dds-btn[disabled],
-.dds-btn[aria-busy="true"] {
+.dds-btn[disabled] {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Loading (D-043). The button keeps the exact box its label gives it, so the
+ * controls beside it do not move and a wrapped label does not wrap again
+ * when progress starts. The label stays in the layout and in the
+ * accessibility tree (its accessible name does not change) but is not
+ * painted: the text fill is transparent and element children (icons) are
+ * fully transparent. The spinner is taken out of the flow and centred over
+ * the label; it keeps the button's text color (currentColor).
+ *
+ * Not dimmed: the spinner is the only thing painted, and at the disabled
+ * 0.45 opacity it drops to about 2:1 against the button (WCAG 1.4.11 asks
+ * 3:1). The framework Buttons also set [disabled], so this rule comes after
+ * the one above to put the opacity back. */
 .dds-btn[aria-busy="true"] {
+  opacity: 1;
+  cursor: not-allowed;
   pointer-events: none;
+  -webkit-text-fill-color: transparent;
+}
+.dds-btn[aria-busy="true"] > :not(.dds-spinner) {
+  opacity: 0;
+}
+.dds-btn[aria-busy="true"] > .dds-spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
 }
 
 /* variants ---------------------------------------------------------------- */
@@ -113,5 +140,24 @@
   .dds-btn,
   .dds-btn--sm {
     min-block-size: 44px;
+  }
+}
+
+/* Forced colors repaint every text color, transparent included, so the
+ * hidden label would come back on top of the spinner. A loading button opts
+ * out and paints itself with system colors: the face of a button, the
+ * disabled border, and the spinner in button text. No transition: opted out,
+ * the background would fade from the brand color it no longer forces. */
+@media (forced-colors: active) {
+  .dds-btn[aria-busy="true"] {
+    forced-color-adjust: none;
+    background-color: ButtonFace;
+    border-color: GrayText;
+    color: ButtonText;
+    transition: none;
+  }
+  .dds-btn[aria-busy="true"] > .dds-spinner {
+    forced-color-adjust: none;
+    color: ButtonText;
   }
 }

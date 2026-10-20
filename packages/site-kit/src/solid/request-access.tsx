@@ -7,6 +7,9 @@ export interface RequestAccessMessages {
   organizationLabel: string;
   useCaseLabel: string;
   submit: string;
+  /** Announced in the status region while the form is sending. The button
+   * keeps the `submit` label: a loading Button hides its label but keeps
+   * its width and name (DDS D-043). */
   submitting: string;
   success: string;
   error: string;
@@ -37,8 +40,8 @@ export function RequestAccessForm(props: RequestAccessFormProps) {
       <Field label={props.messages.emailLabel} required>{(control) => <input {...control} class="dds-input" type="email" name="email" autocomplete="email" required />}</Field>
       <Field label={props.messages.organizationLabel}>{(control) => <input {...control} class="dds-input" name="organization" autocomplete="organization" />}</Field>
       <Field label={props.messages.useCaseLabel}>{(control) => <textarea {...control} class="dds-textarea" name="useCase" rows="5" />}</Field>
-      <Button type="submit" loading={state() === "submitting"}>{state() === "submitting" ? props.messages.submitting : props.messages.submit}</Button>
-      <div aria-live="polite" aria-atomic="true">{state() === "success" ? props.messages.success : state() === "error" ? props.messages.error : ""}</div>
+      <Button type="submit" loading={state() === "submitting"}>{props.messages.submit}</Button>
+      <div aria-live="polite" aria-atomic="true">{state() === "submitting" ? props.messages.submitting : state() === "success" ? props.messages.success : state() === "error" ? props.messages.error : ""}</div>
     </form>
   );
 }

@@ -38,6 +38,15 @@
   cursor: not-allowed;
 }
 
+/* Loading: the framework IconButtons swap the icon for a .dds-spinner, which
+ * the fixed box already centres. Same rule as .dds-btn (D-043): not dimmed,
+ * because a 0.45 spinner falls below 3:1 (danger is about 2.3:1). */
+.dds-iconbtn[aria-busy="true"] {
+  opacity: 1;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* variants ---------------------------------------------------------------- */
 
 .dds-iconbtn--secondary {

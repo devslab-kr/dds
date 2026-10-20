@@ -72,21 +72,33 @@ it("defaults main to the shell width and opts into a full-bleed main for section
   expect(bleedHost.querySelector("#main-content")?.classList.contains("site-main--bleed")).toBe(true);
 });
 
-it("submits request-access data once and announces success", async () => {
-  const submit = vi.fn(async () => undefined);
+it("submits request-access data once, keeps the button's name while sending and announces progress", async () => {
+  let finish!: () => void;
+  const submit = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
   const host = document.body.appendChild(document.createElement("div"));
   dispose = render(() => <RequestAccessForm messages={{
     nameLabel: "Name", emailLabel: "Email", organizationLabel: "Organization", useCaseLabel: "Use case",
     submit: "Request access", submitting: "Submitting", success: "Received", error: "Try again",
   }} onSubmit={submit} />, host);
   const form = host.querySelector("form")!;
+  const button = host.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const status = host.querySelector('[aria-live="polite"]')!;
   (host.querySelector('[name="name"]') as HTMLInputElement).value = "Ada";
   (host.querySelector('[name="email"]') as HTMLInputElement).value = "ada@example.com";
   form.dispatchEvent(new SubmitEvent("submit", { bubbles: true, cancelable: true }));
+  form.dispatchEvent(new SubmitEvent("submit", { bubbles: true, cancelable: true }));
+  // While sending, the loading Button hides its label but keeps its width and
+  // name (D-043), so the label must not change; the status region says it.
+  expect(button.getAttribute("aria-busy")).toBe("true");
+  expect(button.textContent).toBe("Request access");
+  expect(status.textContent).toBe("Submitting");
+  finish();
   await Promise.resolve();
   await Promise.resolve();
   expect(submit).toHaveBeenCalledTimes(1);
-  expect(host.querySelector('[aria-live="polite"]')?.textContent).toBe("Received");
+  expect(button.getAttribute("aria-busy")).toBeNull();
+  expect(button.textContent).toBe("Request access");
+  expect(status.textContent).toBe("Received");
 });
 
 it("uses a crawlable home link on the not-found page", () => {

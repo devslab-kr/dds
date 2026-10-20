@@ -53,6 +53,6 @@ export const States = {
     row(`
       <button class="dds-btn dds-btn--primary">default (hover me)</button>
       <button class="dds-btn dds-btn--primary" disabled>disabled</button>
-      <button class="dds-btn dds-btn--primary" aria-busy="true"><span class="dds-spinner" aria-hidden="true"></span>loading</button>
+      <button class="dds-btn dds-btn--primary" aria-busy="true"><span class="dds-spinner" aria-hidden="true"></span>저장</button>
       <button class="dds-btn dds-btn--danger" disabled>danger disabled</button>`),
 };

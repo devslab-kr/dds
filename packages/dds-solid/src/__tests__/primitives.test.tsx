@@ -1,6 +1,7 @@
 import { render } from "solid-js/web";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import "@testing-library/jest-dom/vitest";
 
 import {
   Button, Checkbox, Dialog, Field, Icon, IconButton, Radio, RadioGroup, Select, Switch,
@@ -114,12 +115,18 @@ describe("native control behavior", () => {
     await vi.waitFor(() => expect(checkboxes.every((input) => input.checked)).toBe(true));
     await vi.waitFor(() => expect(new FormData(form).get("choice")).toBe("a"));
   });
-  it("renders loading Button with native disabled semantics", () => {
+  it("renders loading Button with native disabled semantics and its name", () => {
     const host = document.body.appendChild(document.createElement("div"));
-    dispose = render(() => <Button loading>Save</Button>, host);
+    const click = vi.fn();
+    dispose = render(() => <Button loading onClick={click}><svg aria-hidden="true" />Save</Button>, host);
     const button = host.querySelector("button")!;
     expect(button.disabled).toBe(true);
     expect(button.getAttribute("aria-busy")).toBe("true");
+    // The label stays in the button while loading (it is only not painted,
+    // D-043), so the name does not change and the spinner adds nothing to it.
+    expect(button).toHaveAccessibleName("Save");
+    button.click();
+    expect(click).not.toHaveBeenCalled();
   });
 
   it("supports controlled checkbox state", async () => {

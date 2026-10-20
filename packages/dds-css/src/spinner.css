@@ -27,8 +27,22 @@
   }
 }
 
+/* base.css stops every dds- animation after one 0.01ms run under reduced
+ * motion. The :root prefix ties its specificity and this file loads after
+ * base.css, so the spinner keeps turning, at half speed, instead of freezing. */
 @media (prefers-reduced-motion: reduce) {
-  .dds-spinner {
+  :root .dds-spinner {
     animation-duration: 1600ms;
+    animation-iteration-count: infinite;
+  }
+}
+
+/* Forced colors repaint the transparent top border too, which closes the gap
+ * and leaves a ring that looks still. Opt out and paint it in the system text
+ * color (a loading button sets ButtonText instead, button.css). */
+@media (forced-colors: active) {
+  .dds-spinner {
+    forced-color-adjust: none;
+    color: CanvasText;
   }
 }
