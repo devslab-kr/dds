@@ -6,6 +6,7 @@ import { expect, it, vi } from "vitest";
 import { fireEvent } from "@testing-library/react";
 import { Combobox } from "../combobox";
 import { SelectPicker } from "../select-picker";
+import { TimePicker } from "../time-picker";
 // jsdom has no scrolling geometry; actual virtual scrolling is tested in browsers.
 HTMLElement.prototype.scrollTo = vi.fn();
 const items = [
@@ -281,6 +282,7 @@ it("restores a controlled query on blur, external selection and reset without du
 });
 it.each([
   ["Combobox", <Combobox id="pickup-cutoff" items={items} />, 'input[role="combobox"]'],
+  ["TimePicker", <TimePicker id="pickup-cutoff" />, 'input[role="combobox"]'],
   ["SelectPicker", <SelectPicker id="pickup-cutoff" items={items} />, 'button[role="combobox"]'],
 ] as const)("%s puts its id on the visible control so an outside label names it", (_, field, selector) => {
   // A form field that renders its own <label htmlFor={id}> and hands the control that id.

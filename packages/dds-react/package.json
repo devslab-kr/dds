@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-react",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "description": "Accessible React primitives for the DevsLab Design System",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -70,6 +70,31 @@
       "types": "./dist/date-picker.d.ts",
       "import": "./dist/date-picker.js",
       "default": "./dist/date-picker.js"
+    },
+    "./time-picker": {
+      "types": "./dist/time-picker.d.ts",
+      "import": "./dist/time-picker.js",
+      "default": "./dist/time-picker.js"
+    },
+    "./date-range-picker": {
+      "types": "./dist/date-range-picker.d.ts",
+      "import": "./dist/date-range-picker.js",
+      "default": "./dist/date-range-picker.js"
+    },
+    "./month-picker": {
+      "types": "./dist/month-picker.d.ts",
+      "import": "./dist/month-picker.js",
+      "default": "./dist/month-picker.js"
+    },
+    "./segmented-control": {
+      "types": "./dist/segmented-control.d.ts",
+      "import": "./dist/segmented-control.js",
+      "default": "./dist/segmented-control.js"
+    },
+    "./number-input": {
+      "types": "./dist/number-input.d.ts",
+      "import": "./dist/number-input.js",
+      "default": "./dist/number-input.js"
     }
   },
   "scripts": {
@@ -80,9 +105,9 @@
   },
   "dependencies": {
     "@ark-ui/react": "5.39.3",
-    "@devslab/dds-css": "workspace:0.24.0",
-    "@devslab/dds-icons": "workspace:0.24.0",
-    "@devslab/dds-tokens": "workspace:0.24.0",
+    "@devslab/dds-css": "workspace:0.25.0",
+    "@devslab/dds-icons": "workspace:0.25.0",
+    "@devslab/dds-tokens": "workspace:0.25.0",
     "@tanstack/react-virtual": "3.14.21"
   },
   "peerDependencies": {

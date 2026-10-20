@@ -125,8 +125,11 @@ describe("Input", () => {
     change.mockClear();
     input.form!.reset();
     await vi.waitFor(() => expect(input.value).toBe("initial"));
-    expect(host.querySelector("button")?.getAttribute("aria-label")).toBe(
-      "내용 지우기",
+    // The browser restores the text at once; the restore of state runs on the next task.
+    await vi.waitFor(() =>
+      expect(host.querySelector("button")?.getAttribute("aria-label")).toBe(
+        "내용 지우기",
+      ),
     );
     expect(change).not.toHaveBeenCalled();
   });
