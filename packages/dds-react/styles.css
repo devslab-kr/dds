@@ -35,7 +35,37 @@
 .dds-date-picker-table [data-part="table-cell-trigger"][data-selected] {background:var(--dds-color-bg-brand);color:var(--dds-color-text-on-brand);}
 .dds-date-picker-table [data-today]:not([data-selected]) {text-decoration:underline;text-underline-offset:4px;}
 .dds-date-picker-content :focus-visible {outline:2px solid var(--dds-color-text-brand);outline-offset:2px;}
-.dds-date-picker-footer {display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--dds-color-border-default);}
+.dds-date-picker-footer {display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--dds-color-border-default);}
+
+/* Text box shared by DatePicker, MonthPicker and the DateRangePicker pair: same 40px DDS input look. */
+.dds-date-picker-control > input,.dds-date-range-box {box-sizing:border-box;flex:1;min-inline-size:0;block-size:var(--dds-space-40);border:1px solid var(--dds-color-border-strong);border-radius:var(--dds-radius-md);background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);font-family:inherit;font-size:var(--dds-typo-body-2-font-size);font-variant-numeric:tabular-nums;}
+.dds-date-picker-control > input {padding-inline:var(--dds-space-12);}
+.dds-date-picker-control > input:focus-visible,.dds-date-range-box:focus-within {outline:var(--dds-space-2) solid var(--dds-color-border-focus);outline-offset:0;}
+.dds-date-picker-control > input[aria-invalid="true"],.dds-date-range-box[data-invalid] {border-color:var(--dds-color-status-danger);}
+.dds-date-picker-control > input:disabled,.dds-date-range-box[data-disabled] {opacity:.45;cursor:not-allowed;background:var(--dds-color-bg-subtle);}
+.dds-date-picker-control > input::placeholder,.dds-date-range-input::placeholder {color:var(--dds-color-text-muted);}
+.dds-date-range-box {display:flex;align-items:center;gap:var(--dds-space-8);padding-inline:var(--dds-space-12);}
+.dds-date-range-box[hidden] {display:none;}
+.dds-date-range-input {flex:1;inline-size:100%;min-inline-size:0;block-size:100%;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-variant-numeric:tabular-nums;outline:none;}
+.dds-date-range-input:disabled {cursor:not-allowed;}
+.dds-date-range-separator {flex:none;color:var(--dds-color-text-secondary);}
+.dds-field__error {font-size:var(--dds-typo-caption-font-size);line-height:var(--dds-typo-caption-line-height);color:var(--dds-color-status-danger);}
+@media (pointer:coarse) {.dds-date-picker-control > input,.dds-date-range-box {min-block-size:44px;}}
+
+/* Range selection: ends filled, days between tinted, hover previews the end being chosen. */
+.dds-date-picker-table [data-part="table-cell-trigger"][data-in-range] {background:var(--dds-color-bg-brand-subtle);color:var(--dds-color-text-primary);border-radius:0;}
+.dds-date-picker-table [data-part="table-cell-trigger"]:is([data-range-start],[data-range-end]) {background:var(--dds-color-bg-brand);color:var(--dds-color-text-on-brand);border-radius:var(--dds-radius-sm);}
+.dds-date-picker-table [data-part="table-cell-trigger"][data-hover-range-end]:not([data-range-start]) {box-shadow:inset 0 0 0 2px var(--dds-color-bg-brand);border-radius:var(--dds-radius-sm);}
+.dds-date-picker-presets {display:flex;flex-wrap:wrap;gap:var(--dds-space-8);flex:1 1 100%;}
+.dds-date-picker-presets[hidden] {display:none;}
+.dds-date-picker-footer > [data-part="clear-trigger"] {margin-inline-start:auto;}
+/* Days and months outside min/max read as unavailable, not as ordinary choices. */
+.dds-date-picker-table [data-part="table-cell-trigger"][data-disabled] {opacity:.45;cursor:not-allowed;background:transparent;}
+
+/* Month grid (MonthPicker): 3 columns × 4 rows, year paged in the header. */
+.dds-date-picker-year {font-variant-numeric:tabular-nums;}
+.dds-date-picker-table--months td {padding:var(--dds-space-4);}
+.dds-date-picker-table--months [data-part="table-cell-trigger"] {height:var(--dds-space-40);}
 
 /* Standalone Calendar shares the DatePicker view without popup positioning. */
 .dds-calendar {display:block;}

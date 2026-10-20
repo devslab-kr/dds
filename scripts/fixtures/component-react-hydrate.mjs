@@ -11,12 +11,16 @@ HTMLElement.prototype.scrollTo=function(){};
 const diagnostics=[],warn=console.warn,error=console.error;
 console.warn=(...values)=>diagnostics.push(values.join(' '));console.error=(...values)=>diagnostics.push(values.join(' '));
 const host=document.querySelector('#root');
-const serverNodes=[...host.querySelectorAll('#component-group,#component-input,.dds-choice,.dds-choice-input,.dds-choice-trigger,.dds-choice-label,.dds-calendar,.dds-calendar [data-part="content"],.dds-calendar [data-part="table"],.dds-calendar [data-part="table-cell-trigger"],.dds-time-picker,.dds-time-picker input,.dds-time-picker svg')];
+const serverNodes=[...host.querySelectorAll('#component-group,#component-input,.dds-choice,.dds-choice-input,.dds-choice-trigger,.dds-choice-label,.dds-calendar,.dds-calendar [data-part="content"],.dds-calendar [data-part="table"],.dds-calendar [data-part="table-cell-trigger"],.dds-time-picker,.dds-time-picker input,.dds-time-picker svg,.dds-date-range-picker,#component-range,#component-range-end,.dds-date-range-box,.dds-month-picker,#component-month')];
 assert.equal(host.querySelector('#component-input')?.value,'Hydrated text','Inside input missing from SSR');
 assert.equal(host.querySelector('.dds-choice-input')?.value,'Apple','Combo default selection missing from SSR');
 assert.ok(host.querySelector('[data-scope="select"][data-part="trigger"]')?.textContent.includes('Banana'),'Select default selection missing from SSR');
 assert.ok(host.querySelector('.dds-calendar [data-value="2026-10-17"][data-selected]'),'Calendar selection missing from SSR');
 assert.equal(host.querySelector('.dds-time-picker input')?.value,'18:30','TimePicker HH:MM value missing from SSR');
+assert.equal(host.querySelector('#component-range')?.value,'2026-10-01','Range start missing from SSR');
+assert.equal(host.querySelector('#component-range-end')?.value,'2026-10-20','Range end missing from SSR');
+assert.equal(host.querySelector('input[name="to"]')?.value,'2026-10-20','Range form value missing from SSR');
+assert.equal(host.querySelector('#component-month')?.value,'2026-10','Month missing from SSR');
 const {createElement:h}=await import('react');const {hydrateRoot}=await import('react-dom/client');const {App,events}=await import('./component-app.mjs');
 const pause=()=>new Promise(resolve=>setTimeout(resolve,20));
 async function until(predicate,message){for(let i=0;i<250;i++){if(predicate())return;await pause();}throw new Error(message+(diagnostics.length?'\n'+diagnostics.join('\n'):''));}
@@ -48,5 +52,11 @@ try{
  await until(()=>timeTrigger.getAttribute('aria-expanded')==='true','Hydrated TimePicker did not open');
  document.querySelector('[data-scope="combobox"][data-part="item"][data-value="10:30"]').click();
  await until(()=>events.some(([kind,value])=>kind==='time'&&value==='10:30'),'Hydrated TimePicker selection failed');
+ const rangeEnd=host.querySelector('#component-range-end');setInput.call(rangeEnd,'2026-10-25');rangeEnd.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+ await until(()=>events.some(([kind,value])=>kind==='range'&&value==='2026-10-01~2026-10-25'),'Hydrated DateRangePicker edit failed');
+ await until(()=>host.querySelector('input[name="to"]').value==='2026-10-25','Hydrated range form value did not follow the edit');
+ const month=host.querySelector('#component-month');setInput.call(month,'2026/11');month.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+ await until(()=>events.some(([kind,value])=>kind==='month'&&value==='2026-11'),'Hydrated MonthPicker edit failed');
+ await until(()=>host.querySelector('input[name="month"]').value==='2026-11','Hydrated month form value did not follow the edit');
 }finally{root?.unmount();console.warn=warn;console.error=error;dom.window.close();}
 assert.deepEqual(diagnostics,[],'New component SSR hydration emitted diagnostics');

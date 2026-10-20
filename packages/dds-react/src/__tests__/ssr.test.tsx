@@ -7,6 +7,8 @@ import { Calendar } from "../calendar";
 import { DropdownMenu } from "../dropdown-menu";
 import { Popover } from "../popover";
 import { TimePicker } from "../time-picker";
+import { DateRangePicker } from "../date-range-picker";
+import { MonthPicker } from "../month-picker";
 import {
   Button,
   IconButton,
@@ -142,6 +144,31 @@ it("server-renders the complete inventory and gives multiple shells distinct IDs
   expect(html).not.toContain("data-hydrated");
   const ids = [...html.matchAll(/id="([^"]+)"/g)].map((match) => match[1]);
   expect(new Set(ids).size).toBe(ids.length);
+});
+
+it("server-renders DateRangePicker and MonthPicker with display text and API form values", () => {
+  const html = renderToString(
+    <>
+      <DateRangePicker
+        label="조회 기간"
+        startName="from"
+        endName="to"
+        defaultValue={{ start: "2026-10-01", end: "2026-10-20" }}
+        presets={[
+          { label: "이번 달", value: { start: "2026-10-01", end: "2026-10-31" } },
+        ]}
+      />
+      <MonthPicker label="청구 월" name="month" value="2026-10" />
+    </>,
+  );
+  expect(html).toContain('value="2026/10/01"');
+  expect(html).toContain('value="2026/10/20"');
+  expect(html).toContain('name="from"');
+  expect(html).toContain('value="2026-10-01"');
+  expect(html).toContain('value="2026/10"');
+  expect(html).toContain('value="2026-10"');
+  expect(html).toContain("시작일");
+  expect(html).toContain("조회 기간 달력 열기");
 });
 
 it("server-renders TimePicker with the HH:MM value, label and clock trigger", () => {
