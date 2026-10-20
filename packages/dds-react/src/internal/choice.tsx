@@ -37,17 +37,6 @@ export interface ChoiceInternals {
   onDraftChange?: (text: string) => void;
 }
 
-/** The native validation input stores one ID, never a second option collection. */
-const validationStyle = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  padding: 0,
-  border: 0,
-  clipPath: "inset(50%)",
-  overflow: "hidden",
-  whiteSpace: "nowrap",
-} as const;
 export function Choice(props: ComboboxProps & ChoiceInternals) {
   validateOptions(props.items);
   const [internal, setInternal] = useState(props.defaultValue ?? "");
@@ -416,10 +405,11 @@ export function Choice(props: ComboboxProps & ChoiceInternals) {
           </button>
         ) : null}
       </Parts.Control>
+      {/* The native validation input stores one ID, never a second option collection.
+          Hidden by choice.css; no style attribute, which a style-src-attr CSP blocks. */}
       <input
         ref={validationRef}
         className="dds-choice-validation"
-        style={validationStyle}
         tabIndex={-1}
         aria-hidden="true"
         name={props.name}
@@ -448,13 +438,10 @@ export function Choice(props: ComboboxProps & ChoiceInternals) {
       {portalMount && (
         <Portal container={{ current: portalMount }}>
           <Parts.Positioner className="dds-choice-positioner">
+            {/* choice.css gives the list its 320px cap and scrolling. */}
             <Parts.Content
               ref={scrollRef}
               className="dds-choice-content"
-              style={{
-                maxHeight: "min(320px, var(--available-height, 320px))",
-                overflow: "auto",
-              }}
             >
               <div
                 style={

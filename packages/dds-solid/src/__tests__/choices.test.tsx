@@ -343,3 +343,16 @@ it.each<[string, (id: string) => JSX.Element, string]>([
   expect(host.querySelector("label")!.control).toBe(control);
   expect(control).toHaveAccessibleName("마감 시간");
 });
+it.each<[string, () => JSX.Element]>([
+  ["Combobox", () => <Combobox label="Fruit" items={items} />],
+  ["TimePicker", () => <TimePicker label="마감 시간" />],
+  ["SelectPicker", () => <SelectPicker label="Fruit" items={items} />],
+])("%s clones no style attribute onto its validation input or list (strict CSP)", async (_, field) => {
+  // Solid writes a static style object into the cloned template HTML, which a
+  // style-src-attr CSP blocks; choice.css carries these rules as classes.
+  const host = document.body.appendChild(document.createElement("div"));
+  dispose = render(field, host);
+  await vi.waitFor(() => expect(document.querySelector(".dds-choice-content")).not.toBeNull());
+  expect(host.querySelector(".dds-choice-validation")!.getAttribute("style")).toBeNull();
+  expect(document.querySelector(".dds-choice-content")!.getAttribute("style")).toBeNull();
+});
