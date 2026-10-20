@@ -255,3 +255,17 @@ it("server-renders DateRangePicker and MonthPicker with display text and API for
   expect(html).toContain('value="2026-10"');
   expect(html).toContain("시작일");
 });
+
+it("server-renders choice controls without style attributes (strict style-src-attr CSP)", () => {
+  // A CSP without 'unsafe-inline' for style-src-attr blocks every style attribute
+  // the HTML parser meets; the stylesheet classes carry these rules instead.
+  const items = [{ value: "a", label: "Apple" }];
+  for (const html of [
+    renderToString(() => <Combobox label="Fruit" items={items} name="fruit" />),
+    renderToString(() => <SelectPicker label="Fruit" items={items} name="fruit" />),
+    renderToString(() => <TimePicker label="마감 시간" name="closing" defaultValue="18:30" />),
+  ]) {
+    expect(html).toContain("dds-choice-validation");
+    expect(html).not.toMatch(/\sstyle=/);
+  }
+});

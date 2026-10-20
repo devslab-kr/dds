@@ -1,8 +1,10 @@
-import { createSignal } from "solid-js";
+import "@testing-library/jest-dom/vitest";
+import { createSignal, type JSX } from "solid-js";
 import { render } from "solid-js/web";
 import { afterEach, expect, it, vi } from "vitest";
 import { Combobox } from "../combobox";
 import { SelectPicker } from "../select-picker";
+import { TimePicker } from "../time-picker";
 HTMLElement.prototype.scrollTo = vi.fn();
 let dispose: (() => void) | undefined;
 afterEach(() => {
@@ -317,4 +319,40 @@ it("moves its reset bridge when the associated form changes", async () => {
   expect(
     new FormData(host.querySelector<HTMLFormElement>("#form-b")!).get("fruit"),
   ).toBe("b");
+});
+it.each<[string, (id: string) => JSX.Element, string]>([
+  ["Combobox", (id) => <Combobox id={id} items={items} />, 'input[role="combobox"]'],
+  ["TimePicker", (id) => <TimePicker id={id} />, 'input[role="combobox"]'],
+  ["SelectPicker", (id) => <SelectPicker id={id} items={items} />, 'button[role="combobox"]'],
+])("%s puts its id on the visible control so an outside label names it", (_, field, selector) => {
+  // A form field that renders its own <label for={id}> (FM's Field) and hands the control that id.
+  const host = document.body.appendChild(document.createElement("div"));
+  dispose = render(
+    () => (
+      <>
+        <label for="pickup-cutoff">마감 시간</label>
+        {field("pickup-cutoff")}
+      </>
+    ),
+    host,
+  );
+  const control = host.querySelector<HTMLElement>(selector)!;
+  expect(document.querySelectorAll('[id="pickup-cutoff"]')).toHaveLength(1);
+  expect(document.getElementById("pickup-cutoff")).toBe(control);
+  // The element a label click focuses and activates.
+  expect(host.querySelector("label")!.control).toBe(control);
+  expect(control).toHaveAccessibleName("마감 시간");
+});
+it.each<[string, () => JSX.Element]>([
+  ["Combobox", () => <Combobox label="Fruit" items={items} />],
+  ["TimePicker", () => <TimePicker label="마감 시간" />],
+  ["SelectPicker", () => <SelectPicker label="Fruit" items={items} />],
+])("%s clones no style attribute onto its validation input or list (strict CSP)", async (_, field) => {
+  // Solid writes a static style object into the cloned template HTML, which a
+  // style-src-attr CSP blocks; choice.css carries these rules as classes.
+  const host = document.body.appendChild(document.createElement("div"));
+  dispose = render(field, host);
+  await vi.waitFor(() => expect(document.querySelector(".dds-choice-content")).not.toBeNull());
+  expect(host.querySelector(".dds-choice-validation")!.getAttribute("style")).toBeNull();
+  expect(document.querySelector(".dds-choice-content")!.getAttribute("style")).toBeNull();
 });
