@@ -30,8 +30,8 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 ```html
 <button class="dds-btn dds-btn--primary">저장</button>
 <button class="dds-btn dds-btn--secondary dds-btn--sm">취소</button>
-<button class="dds-btn dds-btn--primary" aria-busy="true">
-  <span class="dds-spinner" aria-hidden="true"></span>저장 중…
+<button class="dds-btn dds-btn--primary" aria-busy="true" disabled>
+  <span class="dds-spinner" aria-hidden="true"></span>저장
 </button>
 ```
 
@@ -39,8 +39,17 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
   / 기본(40px) / `--lg`(48px) — 높이는 간격 스케일에서.
 - 상태: hover/pressed는 토큰으로(`bg.brand-hover`, 알파 틴트); disabled는
   `[disabled]`(opacity 0.45 — 유일하게 허용되는 opacity 상태); loading은
-  `aria-busy="true"` + `.dds-spinner` 자식(포인터 차단, "저장 중…" 같은
-  접근 가능한 이름 유지).
+  `aria-busy="true"` + `.dds-spinner` 자식(포인터 차단). **loading은 버튼
+  크기를 바꾸지 않습니다**(D-042): 라벨과 아이콘은 자리와 접근성 트리에
+  그대로 남아 접근 가능한 이름이 바뀌지 않고, 그려지지만 않습니다. 스피너는
+  버튼 글자색으로 그 위 가운데에 겹칩니다. 옆 요소가 밀리지 않고, 줄바꿈된
+  라벨도 다시 접히지 않습니다. `[disabled]`가 함께 있어도(프레임워크
+  Button은 둘 다 붙임) 흐리게 하지 않아 스피너가 3:1 이상을 유지합니다.
+  강제 색상 모드에서는 시스템 색(버튼 면, `GrayText` 테두리,
+  `ButtonText` 스피너)을 씁니다.
+- **진행 중에도 라벨을 바꾸지 마세요.** 숨긴 라벨이 여전히 폭을 정하므로
+  "저장"을 "저장 중…"으로 바꾸면 버튼 크기가 바뀝니다. 작업이 끝났거나
+  실패했음을 화면 낭독기 사용자에게 알리려면 상태 메시지(Toast)를 쓰세요.
 - **접근성**: primary 텍스트는 `on-brand`(zinc.950, 약 8:1 — 스펙 §3.1 노트);
   danger 텍스트는 `on-status`(라이트=흰색, 다크=zinc.950); 포커스 링 2px
   `border.focus` + offset 2px; 아이콘 단독 버튼은 `aria-label` 필수.
@@ -64,6 +73,9 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
   / 기본(40) / `--lg`(48) — `.dds-btn`과 같은 높이라, 옆의 텍스트 버튼과
   몇 px 어긋나는 일이 생기지 않습니다.
 - 아이콘은 `currentColor`를 상속합니다. `<svg>`에는 `aria-hidden="true"`.
+- loading(`aria-busy="true"`; 프레임워크의 `loading` prop은 아이콘을
+  `.dds-spinner`로 바꿈): 같은 크기·같은 `aria-label`, 포인터 차단,
+  Button과 같이 흐리게 하지 않음(D-042).
 - **접근성**: `aria-label` 필수 — 아이콘에는 접근 가능한 이름이 없습니다.
   `--sm`(32×32)은 웹 최소선 24×24는 넘지만 터치 타깃 44×44에는 못 미칩니다.
   터치 화면에서는 기본 크기를 쓰세요.
@@ -244,7 +256,9 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 
 - Spinner는 `currentColor` 상속(primary 버튼 안에서도 올바른 색). 단독
   사용 시 `role="status"` + `aria-label` 필수. 모션 감소 설정에서는 멈추지
-  않고 느려집니다 — 멈춘 스피너는 행(hang)으로 읽힙니다.
+  않고 느려집니다 — 멈춘 스피너는 행(hang)으로 읽힙니다. 강제 색상
+  모드에서는 `CanvasText`로 직접 그려 틈이 유지됩니다(그대로 두면 강제
+  색상이 투명한 윗부분까지 칠해 멈춘 듯한 고리가 됩니다).
 - Skeleton 채움은 알파 틴트(두 테마의 default·subtle 배경 모두에서 자연스러움).
   크기는 소비자 몫(width/height); `--text`는 한 줄, `--circle`은 아바타.
   영역에 `aria-busy="true"`, 스켈레톤 요소는 `aria-hidden="true"`; 펄스는

@@ -31,8 +31,8 @@ native implementation waits for a native consumer (Phase 3).
 ```html
 <button class="dds-btn dds-btn--primary">Save</button>
 <button class="dds-btn dds-btn--secondary dds-btn--sm">Cancel</button>
-<button class="dds-btn dds-btn--primary" aria-busy="true">
-  <span class="dds-spinner" aria-hidden="true"></span>Saving…
+<button class="dds-btn dds-btn--primary" aria-busy="true" disabled>
+  <span class="dds-spinner" aria-hidden="true"></span>Save
 </button>
 ```
 
@@ -41,7 +41,17 @@ native implementation waits for a native consumer (Phase 3).
 - States: hover/pressed via tokens (`bg.brand-hover`, alpha tints);
   disabled = `[disabled]` (opacity 0.45 — the one allowed opacity state);
   loading = `aria-busy="true"` + a `.dds-spinner` child (blocks pointer
-  events; the accessible name stays, e.g. "Saving…").
+  events). **Loading keeps the button's size** (D-042): the label and icons
+  stay in place and in the accessibility tree, so the accessible name does
+  not change, but they are not painted; the spinner is centred over them in
+  the button's text color. Neighbours do not move and a wrapped label does
+  not wrap again. A loading button is not dimmed, even with `[disabled]`
+  (the framework Buttons set both), so the spinner keeps 3:1 or better. In
+  forced colors it uses system colors (button face, `GrayText` border,
+  `ButtonText` spinner).
+- **Keep the label while loading.** The hidden label still sets the width,
+  so swapping "Save" for "Saving…" resizes the button. To tell screen reader
+  users that the work finished or failed, use a status message (Toast).
 - **A11y**: primary text is `on-brand` (zinc.950, ~8:1 — spec §3.1 note);
   danger text is `on-status` (white/light, dark/zinc.950); focus ring 2px
   `border.focus` offset 2px; icon-only buttons must add `aria-label`.
@@ -66,6 +76,9 @@ native implementation waits for a native consumer (Phase 3).
   `--sm` (32) / default (40) / `--lg` (48) — the same heights as `.dds-btn`,
   so an icon button never sits a few px off the text button beside it.
 - The icon inherits `currentColor`; give the `<svg>` `aria-hidden="true"`.
+- Loading (`aria-busy="true"`; the framework `loading` prop swaps the icon
+  for a `.dds-spinner`): same box, same `aria-label`, pointer blocked and,
+  like Button, not dimmed (D-042).
 - **A11y**: `aria-label` is mandatory — an icon has no accessible name. `--sm`
   (32×32) clears the 24×24 web floor but not the 44×44 touch target: on
   touch surfaces use the default size.
@@ -254,7 +267,9 @@ native implementation waits for a native consumer (Phase 3).
 - Spinner inherits `currentColor` (correct on any surface, including inside
   a primary button). Standalone spinners need `role="status"` +
   `aria-label`. Under reduced motion it slows instead of freezing — a
-  stopped spinner reads as a hang.
+  stopped spinner reads as a hang. In forced colors it paints itself in
+  `CanvasText` so its gap stays open (forced colors would otherwise fill
+  the transparent top and leave a ring that looks still).
 - Skeleton fill is an alpha tint (works on default and subtle backgrounds in
   both themes). Size is the consumer's (width/height inline or via layout);
   `--text` is one line, `--circle` for avatars. Mark the region

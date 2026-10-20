@@ -20,6 +20,9 @@ EmptyState** (BottomSheet은 Dialog의 네이티브 짝 — Phase 3).
 - 다크 모드는 공짜: `<html>` 또는 임의 서브트리에 `data-theme="dark"`
   (`data-theme="light"`로 되고정). 어떤 컴포넌트에도 다크 분기가 없습니다.
 - 개별 임포트: `@devslab/dds-css/components/button.css` 등.
+- 진행 중인 버튼(`aria-busy="true"` + `.dds-spinner` 자식)은 크기와 이름을
+  그대로 유지합니다. 라벨은 지우지 않고 숨기고, 스피너를 그 위에 겹쳐
+  그립니다(D-042).
 - 컴포넌트별 마크업 계약·상태·접근성 체크리스트·do/don't:
   [`docs/components.ko.md`](../../docs/components.ko.md).
   라이브 레퍼런스: `preview/components.html` (먼저 `pnpm build`).

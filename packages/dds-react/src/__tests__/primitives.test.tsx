@@ -21,10 +21,15 @@ describe("React DDS behavior", () => {
     const click = vi.fn();
     render(
       <Button ref={ref} loading onClick={click}>
+        <svg aria-hidden="true" />
         저장
       </Button>
     );
+    // The label stays in the button while loading (it is only not painted,
+    // D-042), so the name does not change and the spinner adds nothing to it.
     expect(ref.current).toBe(screen.getByRole("button", { name: "저장" }));
+    expect(ref.current).toHaveAccessibleName("저장");
+    expect(ref.current).toBeDisabled();
     await userEvent.click(ref.current!);
     expect(click).not.toHaveBeenCalled();
     expect(ref.current).toHaveAttribute("aria-busy", "true");

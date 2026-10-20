@@ -17,7 +17,7 @@ import { Button, Field, Select, Dialog } from '@devslab/dds-react';
 
 Button, IconButton, Field, Checkbox, Radio, Select, Switch, RadioGroup, Dialog, Tabs/TabList/Tab/TabPanel, Tooltip, Icon, ToastProvider/useToast, ConsoleShell 및 props 타입을 제공합니다. 모든 제품 문구와 접근성 이름은 호출자가 전달합니다.
 
-React DOM 속성(`className`, `htmlFor`, `onChange`)과 객체/콜백 ref를 사용합니다. Checkbox/Radio/Switch는 `checked`, `defaultChecked`, `onCheckedChange(boolean)`을 지원하고, Select는 네이티브 value/onChange를 사용합니다. RadioGroup은 label/options와 value/defaultValue/onValueChange(string)을 받습니다. Tabs는 Ark 옵션과 onValueChange(string)을 지원합니다.
+React DOM 속성(`className`, `htmlFor`, `onChange`)과 객체/콜백 ref를 사용합니다. Button은 기본 `type="button"`이고, loading 중에는 눌리지 않으며 이름과 크기를 그대로 유지합니다. 라벨은 지우지 않고 숨기며 스피너를 그 위에 그리므로(D-042) 진행 중에도 라벨은 바꾸지 마세요. Checkbox/Radio/Switch는 `checked`, `defaultChecked`, `onCheckedChange(boolean)`을 지원하고, Select는 네이티브 value/onChange를 사용합니다. RadioGroup은 label/options와 value/defaultValue/onValueChange(string)을 받습니다. Tabs는 Ark 옵션과 onValueChange(string)을 지원합니다.
 
 Dialog는 기본적으로 portal을 사용하며 Ark가 중첩 모달, 포커스 복원, Escape, 스크롤 잠금을 관리합니다. `portal={false}`로 SSR 열린 콘텐츠를 인라인 렌더링할 수 있습니다. `contentProps`, `actions`, `frame`, `initialFocus`, `finalFocus`, `unstyled`와 Ark root 옵션을 제공합니다. Solid의 커스텀 additionalFocusContainers는 모방하지 않습니다. 고급 구성은 ArkDialog/ArkTabs/ArkTooltip/ArkRadioGroup/ArkCheckbox/ArkSwitch/ArkField/ArkToast 네임스페이스를 사용하세요.
 

@@ -1,0 +1,5 @@
+.button-grid { display:grid; gap:12px; justify-items:start; }
+.button-case { display:flex; align-items:center; }
+.button-case--narrow { inline-size:12rem; }
+/* The neighbour: it moves if the button's width changes. */
+.button-after { inline-size:2px; align-self:stretch; background:var(--dds-color-status-danger); }
