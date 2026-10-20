@@ -70,6 +70,16 @@
       "types": "./dist/date-picker.d.ts",
       "import": "./dist/date-picker.js",
       "default": "./dist/date-picker.js"
+    },
+    "./segmented-control": {
+      "types": "./dist/segmented-control.d.ts",
+      "import": "./dist/segmented-control.js",
+      "default": "./dist/segmented-control.js"
+    },
+    "./number-input": {
+      "types": "./dist/number-input.d.ts",
+      "import": "./dist/number-input.js",
+      "default": "./dist/number-input.js"
     }
   },
   "scripts": {

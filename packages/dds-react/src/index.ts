@@ -25,3 +25,5 @@ export * from "./select-picker";
 export * from "./dropdown-menu";
 export * from "./popover";
 export * from "./calendar";
+export * from "./segmented-control";
+export * from "./number-input";

@@ -15,7 +15,7 @@ import { DatePicker } from '@devslab/dds-react/date-picker';
 
 ## Input과 InputGroup은 일반 입력 기반
 
-검색 전용이 아니다. text, search, email, tel, url, password, number와 네이티브 name/form/required/readOnly/disabled/ref/입력 이벤트를 지원한다. type="number"는 브라우저 기본 입력이다. 천 단위 표시·단위·− / + 버튼이 필요하면 아래 NumberInput(Solid)을 쓴다.
+검색 전용이 아니다. text, search, email, tel, url, password, number와 네이티브 name/form/required/readOnly/disabled/ref/입력 이벤트를 지원한다. type="number"는 브라우저 기본 입력이다. 천 단위 표시·단위·− / + 버튼이 필요하면 아래 NumberInput을 쓴다.
 
 ```tsx
 <Input type="email" name="email" label="이메일" required />
@@ -132,26 +132,26 @@ import { TimePicker } from '@devslab/dds-solid/time-picker';
 
 화살표로 이동하고 Enter로 고르며 Escape로 닫는다(Dialog 안에서는 한 겹씩 닫힌다). Tab으로 다음 칸으로 간다. `name`은 `HH:MM`을 제출하고 `required`는 브라우저 기본 검사를 쓰며, 폼 초기화는 `defaultValue`로 되돌린다. disabled와 readOnly에서는 열거나 고칠 수 없다. 기본 문구는 `locale`(기본 ko-KR)에 따라 한국어 또는 영어로 나오고 `messages`(open, clear, empty)로 바꿀 수 있다. 1분 간격처럼 목록이 길면 가상화한다.
 
-## SegmentedControl (Solid)
+## SegmentedControl
 
 SegmentedControl은 보기 전환이나 목록 필터처럼 눈에 보이는 몇 가지 중 하나를 고르는 컨트롤이다. 라디오 그룹으로 동작한다. Tab으로 한 번만 들어가고 화살표 키로 이동하면서 선택하며(글 방향을 따른다), 각 칸이 브라우저 기본 라디오라서 name/form으로 선택한 항목 ID가 제출되고 폼 초기화 시 처음 값으로 돌아간다. 직접 만든 `aria-pressed` 버튼 묶음 대신 쓴다.
 
 ```tsx
-import { SegmentedControl } from '@devslab/dds-solid/segmented-control';
+import { SegmentedControl } from '@devslab/dds-solid/segmented-control'; // React는 '@devslab/dds-react/segmented-control'
 <SegmentedControl label="보기" name="view" value={view()} onValueChange={setView}
   items={[{ value: 'day', label: '일' }, { value: 'week', label: '주' }, { value: 'month', label: '월' }]} />
 <SegmentedControl aria-label="상태 필터" size="sm" fullWidth defaultValue="open"
   items={[{ value: 'all', label: '전체' }, { value: 'open', label: '접수' }, { value: 'done', label: '완료', disabled: true }]} />
 ```
 
-items의 value는 비어 있지 않고 서로 달라야 한다. 목록이 비었거나 중복되면 오류를 낸다. value/defaultValue/onValueChange는 공통 방식과 같고, onValueChange는 사용자가 고를 때만 호출된다. 보이는 label을 주거나 aria-label/aria-labelledby를 준다. size는 md(40px, 다른 한 줄 컨트롤과 같은 높이)와 sm(32px)이다. 기본은 칸이 글자 길이만큼 넓어지고 잘리지 않는다. 칸이 너무 많아 폭을 넘으면 트랙 안에서 가로로 스크롤된다. fullWidth는 폭을 똑같이 나누고 긴 글자는 말줄임으로 줄이며 전체 글자는 툴팁으로 보여 준다. disabled, readOnly, invalid, required를 지원하고 항목별로 비활성화할 수 있다. 선택된 글자는 굵게 바뀌지만 옆 칸은 움직이지 않는다. React 버전은 후속 작업이며 이번에는 dds-solid에만 들어간다.
+items의 value는 비어 있지 않고 서로 달라야 한다. 목록이 비었거나 중복되면 오류를 낸다. value/defaultValue/onValueChange는 공통 방식과 같고, onValueChange는 사용자가 고를 때만 호출된다. 보이는 label을 주거나 aria-label/aria-labelledby를 준다. size는 md(40px, 다른 한 줄 컨트롤과 같은 높이)와 sm(32px)이다. 기본은 칸이 글자 길이만큼 넓어지고 잘리지 않는다. 칸이 너무 많아 폭을 넘으면 트랙 안에서 가로로 스크롤된다. fullWidth는 폭을 똑같이 나누고 긴 글자는 말줄임으로 줄이며 전체 글자는 툴팁으로 보여 준다. disabled, readOnly, invalid, required를 지원하고 항목별로 비활성화할 수 있다. 선택된 글자는 굵게 바뀌지만 옆 칸은 움직이지 않는다. Solid와 React는 속성·값 규칙·DOM이 같다. React에서는 class 대신 className을 쓴다.
 
-## NumberInput (Solid)
+## NumberInput
 
 NumberInput은 지역 형식에 맞춘 숫자 입력이다. − / + 버튼과 단위를 붙일 수 있다. 값은 숫자이고, 비어 있으면 null이다(0이 아니다). 입력창 글자는 Intl로 꾸민 표시용(기본은 천 단위 쉼표)이며 밖으로 나가지 않는다. name/form에는 `1,234,567`이 아니라 숫자 그대로 `1234567`이 제출된다.
 
 ```tsx
-import { NumberInput } from '@devslab/dds-solid/number-input';
+import { NumberInput } from '@devslab/dds-solid/number-input'; // React는 '@devslab/dds-react/number-input'
 <NumberInput label="금액" name="amount" suffix="원" min={0} max={10000000}
   value={amount()} onValueChange={setAmount} />
 <NumberInput label="비율" formatOptions={{ maximumFractionDigits: 2 }} step={0.5} stepper={false} />
@@ -161,7 +161,7 @@ locale 기본값은 `ko-KR`이며 숫자 형식과 버튼 이름을 정한다(�
 
 키보드: 위/아래 화살표는 step만큼, PageUp/PageDown은 step의 10배만큼 바꾼다. Home/End는 min/max가 있을 때만 그 값으로 가고, 없으면 커서를 옮긴다. 마우스 휠로는 값이 바뀌지 않는다. min/max를 벗어나 있는 동안은 오류로 표시하고, 입력창을 벗어나면 범위 안으로 맞춘다. 빈 입력은 그대로 비어 있고 required가 아니면 오류가 아니다. 글자나 다른 문자는 추측해서 바꾸지 않고 받지 않는다. min이 0 이상이면 빼기 기호를, 소수를 허용하지 않으면 소수점을 받지 않는다. 일본어·중국어 입력기에서 들어오는 전각 숫자는 일반 숫자로 바꾸고, 조합 중인 글자는 조합이 끝난 뒤에 읽는다.
 
-단위(suffix)는 숫자 뒤 컨트롤 안에 놓이고 값과 함께 읽히며 숫자와 겹치지 않는다. − / + 버튼은 범위 끝에서 비활성화되고 폭은 최소 32px(터치 화면은 44px)이다. label은 outside(기본) 또는 hidden이며, label이 없으면 aria-label 또는 aria-labelledby를 준다. required, disabled, readOnly, invalid, placeholder를 지원한다. React 버전은 후속 작업이며 이번에는 dds-solid에만 들어간다.
+단위(suffix)는 숫자 뒤 컨트롤 안에 놓이고 값과 함께 읽히며 숫자와 겹치지 않는다. − / + 버튼은 범위 끝에서 비활성화되고 폭은 최소 32px(터치 화면은 44px)이다. label은 outside(기본) 또는 hidden이며, label이 없으면 aria-label 또는 aria-labelledby를 준다. required, disabled, readOnly, invalid, placeholder를 지원한다. Solid와 React는 속성·값 규칙·DOM이 같다. React에서는 class 대신 className을 쓴다.
 
 ## Solid 테이블 이름 이전
 
