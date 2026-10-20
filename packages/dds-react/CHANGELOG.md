@@ -1,5 +1,15 @@
 # @devslab/dds-react
 
+## 0.25.1
+
+### Patch Changes
+
+- 437ae34: Put a Combobox, SelectPicker or TimePicker `id` on the visible control: the text box (Combobox, TimePicker) or the button (SelectPicker). Before this, the id only seeded Ark's prefixed part IDs, so the input was `combobox:<id>:input` and no element carried `<id>` itself. A form field that renders its own `<label for={id}>` could not reach the control: clicking the label did nothing and the control had no accessible name. Now the label names the control and focuses it on click. Other part IDs (`combobox:<id>:content`, `select:<id>:label`, …) are unchanged. Code that targeted `combobox:<id>:input` or `select:<id>:trigger` by string should use `<id>` instead.
+- 437ae34: Render Combobox, SelectPicker and TimePicker without `style` attributes, so pages with a strict `style-src-attr` CSP no longer log violations. The hidden validation input and the option list carried inline copies of rules `choice.css` already has. Solid writes a static style object into the HTML it clones, and both frameworks server-render it as a `style` attribute, which such a CSP blocks (FM saw two per TimePicker). The rules now come only from `.dds-choice-validation` and `.dds-choice-content`. Load `@devslab/dds-css` (`dds.css` or `components/choice.css`) for the validation input to stay hidden, as for every other DDS component.
+  - @devslab/dds-tokens@0.25.1
+  - @devslab/dds-css@0.25.1
+  - @devslab/dds-icons@0.25.1
+
 ## 0.25.0
 
 ### Minor Changes
