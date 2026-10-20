@@ -55,6 +55,8 @@ value는 유일하고 비어 있지 않은 문자열 ID이며 선택 없음은 �
 
 선택한 뒤 검색어를 바꿨다가 후보 확정 없이 벗어나면 기존 선택 label로 돌아간다. 단순 타이핑은 선택 완료가 아니며, clear는 선택값과 검색어를 비운다. name/form/required를 지원하고 제출값은 표시 label이 아니라 선택 ID다. required 검증 실패는 보이는 컨트롤에 초점을 준다.
 
+`id`는 눈에 보이는 컨트롤에 붙는다. Combobox·TimePicker는 입력칸, SelectPicker는 버튼이다. 그래서 폼 필드가 직접 그린 `<label for={id}>`가 그 컨트롤의 이름이 되고, 라벨을 누르면 컨트롤로 초점이 간다. Ark가 이 id로 만드는 나머지 부품 id(`combobox:<id>:content` 등)는 내부용이니 직접 가리키지 않는다.
+
 ## 메뉴와 Popover
 
 ```tsx

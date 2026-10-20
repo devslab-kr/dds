@@ -867,6 +867,12 @@ test.describe("Solid TimePicker", () => {
       await form.evaluate((element) => new FormData(element as HTMLFormElement).get("resetTime")),
     ).toBe("08:30");
   });
+  test("an outside label with for={id} names the time box and focuses it on click", async ({ page }) => {
+    const input = page.getByRole("combobox", { name: "Outside label time", exact: true });
+    await expect(input).toHaveAttribute("id", "outside-time");
+    await page.locator('label[for="outside-time"]').click();
+    await expect(input).toBeFocused();
+  });
   test("inside a modal Escape closes the time list before the dialog", async ({
     page,
   }) => {

@@ -48,6 +48,8 @@ For remote search use filterMode="external" and pass server-filtered items. Cont
 
 Typing alone does not commit an option. Blurring an uncommitted query with an existing selection restores that selection's label. Clear resets both query and selected ID. Native form data contains the selected ID rather than the label. Required invalidity focuses the visible control. readOnly prevents selection changes.
 
+`id` goes on the visible control: the text box of Combobox and TimePicker, the button of SelectPicker. A form field that renders its own `<label for={id}>` therefore names the control, and clicking the label focuses it. The other part IDs Ark derives from it (such as `combobox:<id>:content`) are internal; do not target them.
+
 ## Menus and popovers
 
 DropdownMenu exposes Root, Trigger, Content, Item, Group, Label, Separator, CheckboxItem, RadioGroup, RadioItem, ItemText, ItemIndicator, Submenu and SubmenuTrigger. Item.onSelect runs an action; Root.onSelect receives an ID and Root.onOpenChange receives a boolean. Compose submenus from Submenu + SubmenuTrigger + Content. Use the framework's Ark asChild convention for native links or existing DDS buttons; do not nest buttons.

@@ -339,6 +339,15 @@ export function Choice(props: ComboboxProps & ChoiceInternals) {
       {...rootProps}
       {...inputProps}
       id={props.id ?? id}
+      // A consumer id lands on the control a <label for> targets (text box, or
+      // SelectPicker's button), not on Zag's prefixed part IDs.
+      ids={
+        props.id
+          ? props.searchable
+            ? { input: props.id }
+            : { trigger: props.id }
+          : undefined
+      }
       class={props.rootClass ? `dds-choice ${props.rootClass}` : "dds-choice"}
       data-label-placement={props.labelPlacement ?? "outside"}
       data-has-value={value() || inputValue() ? "" : undefined}
