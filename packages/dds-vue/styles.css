@@ -1,0 +1,3 @@
+@import "@devslab/dds-tokens/tokens.css";
+@import "@devslab/dds-css/dds.css";
+@import "./dist/dds-vue.css";

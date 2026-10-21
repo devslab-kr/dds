@@ -1301,3 +1301,12 @@ PR" 규칙이 같은 디렉토리에서 충돌한다.
 
 **재검토 시점.** 토큰 소스만 따로 버저닝할 필요가 생기면 (지금은 lockstep이라
 없음).
+
+
+## Vue 실사용 컴포넌트 패키지 승격 (2026-10-22)
+
+**결정.** 사용자 요청과 EDS Desktop의 Button·Icon·검색 13곳·날짜 5곳을 기준으로 `@devslab/dds-vue`를 제공한다. 토큰/CSS 코어는 그대로 공통으로 두고 달력 동작은 Ark UI Vue, 소비자 연결은 Vue의 v-model·이벤트·ref로 구현한다. React 브리지를 유지하지 않는다.
+
+**범위.** 첫 버전은 현재 사용하는 네 컴포넌트와 날짜 검증만 제공한다. React/Solid 전체 패리티를 선행 구현하지 않으며 실제 필요마다 확장한다. 달력 CSS는 React/Solid에서 동일하므로 dds-css로 승격한다. EDS 전용 테마와 레이아웃, 서버 계약은 소비자에 남긴다. 기존 lockstep Changesets·CI·배포 검증에 포함한다.
+
+**Tradeoff.** A new maintained Vue adapter is justified by the concrete EDS consumer and explicit request. Keep the initial inventory small, use shared CSS/Ark interaction, and grow only with real consumption. No product palette changes are included.

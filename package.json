@@ -43,7 +43,9 @@
     "verify:table-solid:test": "node --test tests/dds-table-contracts.test.mjs && pnpm --filter @devslab/dds-table-solid run test && pnpm --filter @devslab/dds-table-solid run check && pnpm --filter @devslab/dds-table-solid run build",
     "verify:table-solid:a11y": "pnpm --filter @devslab/dds-table-solid run test:a11y",
     "verify:table-solid:release": "pnpm run verify:foundation:core && pnpm --filter @devslab/dds-table-solid run build && pnpm --filter @devslab/dds-table run build && node scripts/verify-table-release.mjs",
-    "verify:components": "node --test tests/component-entries.test.mjs && playwright test --config playwright.components.config.ts"
+    "verify:components": "node --test tests/component-entries.test.mjs && playwright test --config playwright.components.config.ts",
+    "verify:vue:test": "pnpm --filter @devslab/dds-vue run check && pnpm --filter @devslab/dds-vue run test",
+    "verify:vue:release": "pnpm --filter @devslab/dds-vue run build && node scripts/verify-vue-release.mjs"
   },
   "engines": {
     "node": ">=20"

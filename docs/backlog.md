@@ -262,3 +262,7 @@ D-034. 허용 전에는 구글에 닿는 것이 없다 — 코어 매니저·쿠
 
 - 미리보기 아티팩트: 파운데이션 https://claude.ai/code/artifact/0df45005-15d3-4567-a61d-71d0419498b9 · 브랜드 https://claude.ai/code/artifact/05925654-5d02-4f80-a58a-3b1e171f0eab
 - 토큰 포맷: [W3C Design Tokens](https://design-tokens.github.io/community-group/format/)
+
+## Vue 공통 패키지 — `진행 중` (2026-10-22)
+
+EDS Desktop 실사용 Button·Icon·Input·DatePicker부터 dds-vue에 승격하고 배포한다. 공통 달력 CSS는 CSS 계층에 두고, React 브리지는 제거한다. 전체 패리티는 필요할 때 확장한다.

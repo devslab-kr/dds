@@ -47,6 +47,7 @@
 | `@devslab/dds-css` | CSS 컴포넌트 레이어 (클래스 기반, 프레임워크 무관) | SSR 페이지, 바닐라 위젯, Vue, React, Ionic |
 | `@devslab/dds-native` | React Native 컴포넌트 | 모바일 앱 (RN 선택 시) |
 | `@devslab/dds-icons` | 아이콘 (SVG 단일 소스 → 플랫폼별 코드 생성) | 모든 곳 |
+| `@devslab/dds-vue` | Ark UI + 공통 CSS 기반 Vue 3 컴포넌트 | EDS Desktop 및 이후 Vue 소비자 |
 
 토큰 빌드는 [Style Dictionary](https://styledictionary.com/) 계열 도구로
 **한 소스에서** 모든 플랫폼 산출물을 생성한다. 웹과 네이티브가 각자 값을 들고
@@ -72,10 +73,7 @@
   Tailwind 프리셋을 뽑아주므로 `bg-brand`, `text-primary`, `p-4` 같은
   유틸리티가 곧 DDS 토큰이다. Tailwind 임의값 (`bg-[#06b6d4]`, `p-[13px]`)
   사용은 토큰 하드코딩과 동일한 위반이다.
-- **Vue** — 별도 `dds-vue` 패키지를 만들지 않는다. Vue 프로젝트는
-  `dds-css` 클래스 + Tailwind 유틸리티를 그대로 쓰고, 래핑이 필요하면 제품
-  레포 안에서 얇게 감싼다. Vue 제품이 실제로 둘 이상 생기면 그때 패키지
-  승격을 검토한다 (§4.3 승격 규칙과 동일한 논리).
+- **Vue** — 실제 EDS Desktop 소비자를 기준으로 `dds-vue` 패키지를 제공한다. 공통 CSS/토큰 위에 Button·Icon·Input·Ark UI DatePicker부터 옮기고, 실제 필요가 생길 때 추가한다. 제품 테마와 업무 로직은 패키지에 포함하지 않는다.
 - **Ionic** — Ionic 컴포넌트는 CSS 변수 (`--ion-color-*`) 로 테마되는 웹
   컴포넌트이므로, `dds-tokens` 의 Ionic 매핑 파일 하나로 Ionic 전체가 DDS
   색·타이포를 입는다. 모바일을 RN 대신 Ionic 으로 가더라도 토큰·계약 레이어는

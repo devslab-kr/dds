@@ -41,7 +41,7 @@ test("workspace exposes deterministic foundation and release verification", asyn
   assert.equal(root.devDependencies?.["@changesets/cli"], "2.29.7");
 
   const config = await json(".changeset/config.json");
-  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit", "@devslab/dds-table", "@devslab/dds-table-solid", "@devslab/dds-react", "@devslab/dds-table-react"]]);
+  assert.deepEqual(config.fixed, [["@devslab/dds-tokens", "@devslab/dds-css", "@devslab/dds-icons", "@devslab/dds-solid", "@devslab/site-kit", "@devslab/dds-table", "@devslab/dds-table-solid", "@devslab/dds-react", "@devslab/dds-table-react", "@devslab/dds-vue"]]);
   assert.equal(config.access, "public");
   assert.match(await read("LICENSE"), /DevsLab Source-Available License 1\.0/);
   const workflow = await read(".github/workflows/release.yml");
