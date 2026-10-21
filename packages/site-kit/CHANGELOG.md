@@ -1,5 +1,12 @@
 # @devslab/site-kit
 
+## 0.27.0
+
+### Patch Changes
+
+- Updated dependencies [867b98b]
+  - @devslab/dds-solid@0.27.0
+
 ## 0.26.0
 
 ### Patch Changes
