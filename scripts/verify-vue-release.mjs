@@ -33,7 +33,9 @@ try {
     tarballs.push(join(temp, `devslab-${directory}-${manifest.version}.tgz`));
   }
   const vueTarball = tarballs.at(-1);
-  const report = JSON.parse(run(npm, [...npmPrefix, 'publish', vueTarball, '--dry-run', '--ignore-scripts', '--provenance=false', '--json'], workspace));
+  run(npm, [...npmPrefix, 'publish', vueTarball, '--dry-run', '--ignore-scripts', '--provenance=false', '--json'], workspace);
+  // npm publish JSON differs across npm majors; pack owns the file-list contract.
+  const [report] = JSON.parse(run(npm, [...npmPrefix, 'pack', vueTarball, '--dry-run', '--ignore-scripts', '--json'], temp));
   const files = report.files.map(file => file.path);
   for (const file of ['LICENSE', 'dist/index.js', 'dist/index.d.ts', 'dist/date-only.js', 'dist/dds-vue.css', 'styles.css']) {
     assert.ok(files.includes(file), `${file} must be published`);
