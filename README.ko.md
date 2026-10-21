@@ -35,6 +35,7 @@ peer dependency, 사용 가능한 exports를 확인할 수 있다.
 | [`@devslab/dds-solid`](https://www.npmjs.com/package/@devslab/dds-solid) | [dds-solid](packages/dds-solid/README.ko.md) |
 | [`@devslab/site-kit`](https://www.npmjs.com/package/@devslab/site-kit) | [site-kit](packages/site-kit/README.ko.md) |
 | [`@devslab/dds-react`](https://www.npmjs.com/package/@devslab/dds-react) | [dds-react](packages/dds-react/README.ko.md) |
+| [`@devslab/dds-vue`](https://www.npmjs.com/package/@devslab/dds-vue) | [dds-vue](packages/dds-vue/README.ko.md) |
 | [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.ko.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.ko.md) |
 
@@ -60,6 +61,7 @@ peer dependency, 사용 가능한 exports를 확인할 수 있다.
 | [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — controlled/uncontrolled 상태, SSR·hydration, 키보드, 포커스, 수명주기 계약을 갖춘 SolidJS 접근성 primitive |
 | [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — 엄격한 14개 로케일 i18n, SEO/GEO 생성기, TanStack Start 메타데이터 어댑터, 옵트인 분석 동의(D-034), 접근 가능한 SolidJS 공통 셸을 담은 공개 제품 사이트 인프라 |
 | [`packages/dds-react/`](packages/dds-react/) | `@devslab/dds-react` — Ark UI 기반 React 컴포넌트, DDS 스타일·ref·키보드·포커스·SSR 계약 |
+| [`packages/dds-vue/`](packages/dds-vue/) | `@devslab/dds-vue` — EDS 실사용에서 옮긴 네이티브 Vue 3 Button·Icon·Input·Ark DatePicker |
 | [`packages/dds-table-solid/`](packages/dds-table-solid/) | `@devslab/dds-table-solid` — 기존 SolidJS TanStack 테이블 |
 | [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS 테마를 적용한 AG Grid Community React 래퍼. 네이티브 옵션·API를 그대로 사용 |
 | [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림 — `components.html`, `icons.html`도 함께) |

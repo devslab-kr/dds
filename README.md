@@ -36,6 +36,7 @@ setup, peer dependencies, and available exports.
 | [`@devslab/dds-solid`](https://www.npmjs.com/package/@devslab/dds-solid) | [dds-solid](packages/dds-solid/README.md) |
 | [`@devslab/site-kit`](https://www.npmjs.com/package/@devslab/site-kit) | [site-kit](packages/site-kit/README.md) |
 | [`@devslab/dds-react`](https://www.npmjs.com/package/@devslab/dds-react) | [dds-react](packages/dds-react/README.md) |
+| [`@devslab/dds-vue`](https://www.npmjs.com/package/@devslab/dds-vue) | [dds-vue](packages/dds-vue/README.md) |
 | [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.md) |
 
@@ -62,6 +63,7 @@ Use the `@devslab/*` npm packages above and remove any obsolete
 | [`packages/dds-solid/`](packages/dds-solid/) | `@devslab/dds-solid` — SolidJS accessible primitives with controlled/uncontrolled state, SSR/hydration, keyboard, focus, and lifecycle contracts |
 | [`packages/site-kit/`](packages/site-kit/) | `@devslab/site-kit` — public infrastructure for product sites: strict 14-locale i18n, SEO/GEO builders, TanStack Start metadata adapter, opt-in analytics consent (D-034), and accessible SolidJS shared shells |
 | [`packages/dds-react/`](packages/dds-react/) | `@devslab/dds-react` — Ark UI based React primitives with DDS styles, refs, keyboard/focus and SSR contracts |
+| [`packages/dds-vue/`](packages/dds-vue/) | `@devslab/dds-vue` — Native Vue 3 Button/Icon/Input/Ark DatePicker, grown from EDS consumption |
 | [`packages/dds-table-solid/`](packages/dds-table-solid/) | `@devslab/dds-table-solid` — existing SolidJS TanStack table |
 | [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS themed AG Grid Community React wrapper; native grid options and API remain available |
 | [`preview/index.html`](preview/index.html) | Self-contained foundations & components preview — open in a browser (`components.html`, `icons.html` alongside) |

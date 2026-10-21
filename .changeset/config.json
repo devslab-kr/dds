@@ -12,7 +12,8 @@
       "@devslab/dds-table",
       "@devslab/dds-table-solid",
       "@devslab/dds-react",
-      "@devslab/dds-table-react"
+      "@devslab/dds-table-react",
+      "@devslab/dds-vue"
     ]
   ],
   "linked": [],

@@ -49,6 +49,7 @@ Three layers. The lower, the more platform-neutral.
 | `@devslab/dds-css` | CSS component layer (class-based, framework-agnostic) | SSR pages, vanilla widget, Vue, React, Ionic |
 | `@devslab/dds-native` | React Native components | mobile apps (if RN is chosen) |
 | `@devslab/dds-icons` | Icons (single SVG source → per-platform codegen) | everywhere |
+| `@devslab/dds-vue` | Vue 3 adapters on Ark UI and shared CSS | EDS Desktop, future Vue consumers |
 
 Token builds use a [Style Dictionary](https://styledictionary.com/)-class tool
 to generate every platform output **from one source**. The moment web and
@@ -75,10 +76,7 @@ Ionic, and SSR pages all share the same parts.
   `dds-tokens` emits a Tailwind preset, so utilities like `bg-brand`,
   `text-primary`, `p-4` *are* DDS tokens. Tailwind arbitrary values
   (`bg-[#06b6d4]`, `p-[13px]`) are the same violation as hard-coding tokens.
-- **Vue** — no separate `dds-vue` package. Vue projects use `dds-css` classes
-  and Tailwind utilities directly, wrapping thinly inside the product repo if
-  needed. If two or more Vue products actually exist, package promotion is
-  reconsidered then (same logic as the §4.3 promotion rule).
+- **Vue** — `dds-vue` is now the native Vue consumer of the shared CSS/token core, starting with EDS Desktop Button, Icon, Input and Ark UI DatePicker. Add more only for real consumer needs; product themes and business logic stay outside the package.
 - **Ionic** — Ionic components are web components themed via CSS variables
   (`--ion-color-*`), so a single Ionic mapping file from `dds-tokens` dresses
   all of Ionic in DDS colors and typography. Even if mobile goes Ionic instead
