@@ -1,5 +1,11 @@
 # @devslab/dds-icons
 
+## 0.27.0
+
+### Minor Changes
+
+- 867b98b: Add the framework-neutral layout-grid icon for workspace screen switching.
+
 ## 0.26.0
 
 ## 0.25.1

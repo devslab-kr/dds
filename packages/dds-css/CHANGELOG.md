@@ -1,5 +1,11 @@
 # @devslab/dds-css
 
+## 0.27.0
+
+### Minor Changes
+
+- 867b98b: Move framework-neutral calendar styles to DDS CSS so Vue/Ark consumers can share DatePicker visuals without a React or Solid runtime. Existing framework styles continue importing DDS CSS.
+
 ## 0.26.0
 
 ### Minor Changes
