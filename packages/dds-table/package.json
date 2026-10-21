@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-table",
-  "version": "0.25.1",
+  "version": "0.26.0",
   "description": "Compatibility re-export of @devslab/dds-table-solid; use the explicit Solid package for new code",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -36,7 +36,7 @@
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@devslab/dds-table-solid": "workspace:0.25.1"
+    "@devslab/dds-table-solid": "workspace:0.26.0"
   },
   "peerDependencies": {
     "solid-js": "1.9.15"
