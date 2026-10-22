@@ -38,6 +38,7 @@ peer dependency, 사용 가능한 exports를 확인할 수 있다.
 | [`@devslab/dds-vue`](https://www.npmjs.com/package/@devslab/dds-vue) | [dds-vue](packages/dds-vue/README.ko.md) |
 | [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.ko.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.ko.md) |
+| [`@devslab/dds-table-vue`](https://www.npmjs.com/package/@devslab/dds-table-vue) | [dds-table-vue](packages/dds-table-vue/README.ko.md) |
 
 [GitHub Releases](https://github.com/devslab-kr/dds/releases)는 버전별 변경 사항과
 릴리스 노트를 기록하는 곳이며, 패키지는 npm에서 설치한다. 패키지에는

@@ -1,0 +1,2 @@
+import { defineConfig } from '@playwright/test'
+export default defineConfig({ testDir: './tests/browser', testMatch: 'vue.spec.ts', workers: 1, retries: 0, forbidOnly: true, reporter: 'line', use: { baseURL: 'http://127.0.0.1:5283', headless: true, trace: 'retain-on-failure' }, webServer: { command: 'pnpm exec vite --config tests/fixtures/vue/vite.config.ts', url: 'http://127.0.0.1:5283', reuseExistingServer: !process.env.CI } })

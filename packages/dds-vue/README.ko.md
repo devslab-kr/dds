@@ -2,7 +2,22 @@
 
 Vue 3용 DDS 공통 컴포넌트입니다. 달력 동작은 Ark UI Vue, 디자인은 공통 CSS·토큰이 담당하며 React/Solid 런타임이나 명령형 root 브리지를 사용하지 않습니다.
 
-첫 범위는 EDS Desktop에서 옮긴 **Button, Icon, Input, DatePicker**입니다. 실제 소비자가 필요로 할 때 추가합니다. React/Solid의 전체 컴포넌트와 동등한 범위라는 뜻은 아닙니다.
+기존 DDS React/Solid의 공개 컴포넌트 목록을 기준으로 Vue 구현을 확장했습니다. 테이블은 `@devslab/dds-table-vue`로 분리해 일반 입력을 사용할 때 AG Grid가 따라오지 않습니다.
+
+| 구분 | 컴포넌트·도우미 |
+| --- | --- |
+| 기본 컨트롤 | Button, IconButton, Icon, Field, Select, Checkbox, Radio, Switch, RadioGroup, Input, InputGroup, NumberInput, SegmentedControl |
+| 선택·날짜 | Combobox, SelectPicker, DatePicker, DateRangePicker, MonthPicker, TimePicker, Calendar |
+| 탐색·오버레이 | Tabs, TabList, Tab, TabPanel, Dialog, Tooltip, DropdownMenu, Popover, ToastProvider/useToast, ConsoleShell |
+| 도우미 | usePendingAction/createPendingAction, createStatusPill, 날짜·월·시간 검증 |
+
+값은 v-model/update:modelValue, 대화상자 열림은 v-model:open으로 연결합니다. React render prop 대신 Vue slot을 사용합니다. DropdownMenu/Popover의 compound 부품은 Ark Vue의 기본 props/events를 따릅니다. ConsoleShell은 기본 내용·actions·foot 슬롯, Field는 `{ control }` 기본 슬롯을 제공합니다. IconButton에는 label이 필요합니다.
+
+NumberInput은 number/null, 선택기는 문자열 ID, 기간은 `{start,end}` ISO 날짜, MonthPicker는 YYYY-MM, TimePicker는 HH:MM을 저장합니다. 잘못된 초안은 그대로 보여주고 native form 제출을 차단합니다. disabled/readonly에서 사용자 변경을 확정하지 않습니다. 비동기 도우미는 current.value/busy.value를 제공하며 교체·초기화·scope 종료 시 AbortSignal을 취소합니다.
+
+input, combobox, select-picker, dropdown-menu, popover, calendar, date-picker, time-picker, date-range-picker, month-picker, segmented-control, number-input의 12개 개별 import 경로를 제공합니다. Input 의존 경로에는 grid·virtualizer·다른 프레임워크 런타임이 없습니다.
+
+컴포넌트 목록을 맞춘 것이며 프레임워크별 API가 완전히 같다는 뜻은 아닙니다. Vue는 model/slot 계약을 따르고, 선택 목록 가상화와 Calendar/NumberInput 사용자 지정 메시지 객체는 아직 포함하지 않습니다. 대용량 업무 그리드는 별도 Community 테이블 어댑터를 사용합니다. 기존 DatePicker의 한국어·Asia/Seoul 계약은 유지합니다.
 
 ```sh
 pnpm add @devslab/dds-vue vue

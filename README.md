@@ -39,6 +39,7 @@ setup, peer dependencies, and available exports.
 | [`@devslab/dds-vue`](https://www.npmjs.com/package/@devslab/dds-vue) | [dds-vue](packages/dds-vue/README.md) |
 | [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.md) |
+| [`@devslab/dds-table-vue`](https://www.npmjs.com/package/@devslab/dds-table-vue) | [dds-table-vue](packages/dds-table-vue/README.md) |
 
 [GitHub Releases](https://github.com/devslab-kr/dds/releases) records version
 changes and release notes; install the packages from npm. The packages use the
