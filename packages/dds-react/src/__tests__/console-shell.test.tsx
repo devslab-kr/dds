@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
+import { LeftNav } from "../left-nav";
 import { ConsoleShell, type ConsoleNavGroup } from "../console-shell";
 const base = {
   surface: "test", activePath: "/products", brand: { href: "/", name: "DevsLab", mark: "/mark.svg" },
@@ -52,4 +53,14 @@ it("assigns distinct disclosure targets to multiple shells", () => {
   const ids = screen.getAllByRole("button", { name: "Services" }).map(button => button.getAttribute("aria-controls"));
   expect(new Set(ids).size).toBe(2);
   for (const id of ids) expect(document.getElementById(id!)).not.toBeNull();
+});
+
+it("composes a standalone menu inside the shell navigation slot", async () => {
+  const navigate = vi.fn();
+  render(<ConsoleShell {...base} navigation={<LeftNav surface="test" activePath="/products" nav={nav} labels={base.labels} onNavigate={navigate} />} />);
+  expect(screen.getAllByRole("navigation")).toHaveLength(1);
+  await userEvent.click(screen.getByRole("link", { name: "Products" }));
+  expect(navigate).toHaveBeenCalledOnce();
+  await userEvent.click(screen.getByRole("button", { name: "Settings" }));
+  expect(screen.getByRole("link", { name: "Policies" })).toBeVisible();
 });
