@@ -63,6 +63,26 @@ const reload = (key: "search" | "page") => list.run(key, async (signal) => {
 }, { replace: true });
 ```
 
+## ConsoleShell navigation groups
+
+Groups remain open by default. Set `collapsible: true` on a group to render a native disclosure button, and give it a stable `id` for expansion state (otherwise the key is `group-${index}`). Only active collapsible groups open initially, using the same route matching and item `active` override as the navigation links.
+
+`LeftNav` is also exported separately for composing a menu in your own layout. It takes `surface`, `activePath`, `nav`, `labels` (`nav` and `badge`), the expansion props below, and optional `onNavigate`. To compose it inside `ConsoleShell`, pass it as `navigation={<LeftNav ... />}`; the slot replaces the built-in menu and the shell's `nav` can be omitted. The shell continues to own branding, the header, content and mobile drawer. For a custom menu, connect `onNavigate` to any application-specific drawer handling.
+
+```tsx
+const [expandedGroups, setExpandedGroups] = createSignal<readonly string[]>(["build"]);
+<ConsoleShell
+  {...shellProps}
+  nav={[{ id: "build", label: "Build", collapsible: true, items: [
+    { id: "projects", href: "/dashboard/projects", label: "Projects", icon: <svg viewBox="0 0 16 16"><path d="M2 3h5l2 2h5v8H2z" /></svg> },
+  ] }]}
+  expandedGroups={expandedGroups()}
+  onExpandedGroupsChange={setExpandedGroups}
+>Content</ConsoleShell>
+```
+
+Use `defaultExpandedGroups` for uncontrolled initial state; `[]` explicitly closes every collapsible group. Use `expandedGroups` and `onExpandedGroupsChange` for controlled state. Later route-driven expansion and persistence belong to the application. Item `icon` is decorative; `label` still supplies the link name and badges keep their accessible labels.
+
 ## DatePicker
 
 ```tsx

@@ -8,7 +8,8 @@ import {
   Tab, TabList, TabPanel, Tabs, ToastProvider, Tooltip, useToast,
 } from "../index";
 import { createStatusPill } from "../status-pill";
-import { ConsoleShell, type ConsoleNavItem } from "../console-shell";
+import { ConsoleShell, type ConsoleNavItem, type ConsoleShellProps } from "../console-shell";
+import { LeftNav } from "../left-nav";
 
 let dispose: (() => void) | undefined;
 afterEach(() => { vi.useRealTimers(); dispose?.(); dispose = undefined; document.body.replaceChildren(); });
@@ -422,6 +423,21 @@ describe("ConsoleShell", () => {
     { id: "jobs", href: "/dashboard/jobs", label: "Jobs", badge: 3 },
   ] }];
   const labels = { skip: "Skip to content", menuOpen: "Open menu", menuClose: "Close menu", nav: "Dashboard navigation", badge: "{count} pending" };
+  it("composes standalone navigation into a shell without duplicating menus", () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const navigate = vi.fn();
+    dispose = render(() => <ConsoleShell surface="dashboard" activePath="/dashboard/jobs"
+      brand={{ href: "/dashboard", name: "VisionLinq", mark: "/mark.svg" }} labels={labels} header={{ title: "Jobs" }}
+      navigation={<LeftNav surface="custom" activePath="/dashboard/jobs" nav={nav} labels={labels} onNavigate={navigate} />}>
+      <p>body</p>
+    </ConsoleShell>, host);
+    expect(host.querySelectorAll("nav")).toHaveLength(1);
+    const jobs = host.querySelector<HTMLAnchorElement>('[data-nav="custom.jobs"]')!;
+    expect(jobs).toHaveAttribute("aria-current", "page");
+    jobs.addEventListener("click", event => event.preventDefault());
+    jobs.click();
+    expect(navigate).toHaveBeenCalledOnce();
+  });
   const shell = () => (
     <ConsoleShell
       surface="dashboard" activePath="/dashboard/jobs"
@@ -431,6 +447,67 @@ describe("ConsoleShell", () => {
       <p data-body>body</p>
     </ConsoleShell>
   );
+
+  const renderGroups = (overrides: Partial<ConsoleShellProps> = {}) => {
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <ConsoleShell surface="dashboard" activePath="/dashboard/jobs/42"
+      brand={{ href: "/dashboard", name: "VisionLinq", mark: "/brand/mark.svg" }}
+      nav={[
+        { id: "build", label: "Build", collapsible: true, items: nav[0]!.items },
+        { label: "Manage", collapsible: true, items: [{ id: "team", href: "/dashboard/team", label: "Team", icon: <svg aria-label="Decorative team" /> }] },
+        { label: "Legacy", items: [{ id: "help", href: "/help", label: "Help" }] },
+      ]} labels={labels} header={{ title: "Jobs" }} {...overrides}><p>body</p></ConsoleShell>, host);
+    return host;
+  };
+
+  it("defaults to the active collapsible group and toggles uncontrolled groups with stable fallback keys", () => {
+    const changed = vi.fn();
+    const host = renderGroups({ onExpandedGroupsChange: changed });
+    const buttons = host.querySelectorAll<HTMLButtonElement>("h2 button");
+    expect(buttons).toHaveLength(2);
+    const buildList = document.getElementById(buttons[0]!.getAttribute("aria-controls")!)!;
+    const manageList = document.getElementById(buttons[1]!.getAttribute("aria-controls")!)!;
+    expect(buttons[0]!).toHaveAttribute("aria-expanded", "true");
+    expect(buildList).not.toHaveAttribute("hidden");
+    expect(manageList).toHaveAttribute("hidden");
+    expect(host.querySelector('a[href="/help"]')!.closest("ul")).not.toHaveAttribute("hidden");
+    buttons[1]!.click();
+    expect(changed).toHaveBeenLastCalledWith(["build", "group-1"]);
+    expect(manageList).not.toHaveAttribute("hidden");
+    buttons[0]!.click();
+    expect(changed).toHaveBeenLastCalledWith(["group-1"]);
+    expect(buildList).toHaveAttribute("hidden");
+    expect(buttons[0]!.type).toBe("button");
+    buttons[0]!.focus();
+    expect(document.activeElement).toBe(buttons[0]!);
+  });
+
+  it("honors an explicitly empty default and renders decorative icons without replacing the label", () => {
+    const host = renderGroups({ defaultExpandedGroups: [] });
+    expect([...host.querySelectorAll("h2 button")].every(button => button.getAttribute("aria-expanded") === "false")).toBe(true);
+    const team = host.querySelector('a[href="/dashboard/team"]')!;
+    expect(team).toHaveTextContent("Team");
+    expect(team.querySelector("svg")!.parentElement).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("leaves controlled expansion to the caller and reacts to updates", () => {
+    const [expanded, setExpanded] = createSignal<readonly string[]>([]);
+    const changed = vi.fn();
+    const overrides = { get expandedGroups() { return expanded(); }, onExpandedGroupsChange: changed };
+    const host = renderGroups(overrides);
+    const build = host.querySelector<HTMLButtonElement>("h2 button")!;
+    build.click();
+    expect(changed).toHaveBeenLastCalledWith(["build"]);
+    expect(build).toHaveAttribute("aria-expanded", "false");
+    setExpanded(["build"]);
+    expect(build).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("keeps legacy groups open without disclosure buttons", () => {
+    const host = renderGroups({ nav, expandedGroups: [] });
+    expect(host.querySelector("h2 button")).toBeNull();
+    expect(host.querySelector("nav ul")).not.toHaveAttribute("hidden");
+  });
 
   it("marks the active item by exact match on an index route and by prefix elsewhere", () => {
     const host = document.body.appendChild(document.createElement("div"));
