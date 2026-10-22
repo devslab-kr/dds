@@ -201,3 +201,37 @@ for (const framework of ["react", "solid", "vue", "svelte"]) {
     ).toBeGreaterThanOrEqual(44);
   });
 }
+
+test("react regression: delayed frame cannot overwrite user focus", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 850 });
+  await page.addInitScript(() => {
+    const pending = new Map<number, FrameRequestCallback>();
+    let id = 0;
+    window.requestAnimationFrame = (callback) => {
+      pending.set(++id, callback);
+      return id;
+    };
+    window.cancelAnimationFrame = (handle) => {
+      pending.delete(handle);
+    };
+    Object.assign(window, {
+      flushFrames: () => {
+        const callbacks = [...pending.values()];
+        pending.clear();
+        callbacks.forEach((callback) => callback(performance.now()));
+      },
+    });
+  });
+  await page.goto(
+    "/tests/fixtures/layouts/index.html?framework=react&layout=top",
+  );
+  await page.locator('[data-action="toggle-rail"]').click();
+  const last = page.locator("summary").last();
+  await last.focus();
+  await page.evaluate(() =>
+    (window as unknown as { flushFrames(): void }).flushFrames(),
+  );
+  await expect(last).toBeFocused();
+});
