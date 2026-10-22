@@ -1,5 +1,11 @@
 # @devslab/dds-css
 
+## 0.29.0
+
+### Minor Changes
+
+- c645ff6: Add composable Layout, LeftNav and TopNav with shared geometry and typography across React, Solid, Vue and Svelte. Preserve ConsoleShell compatibility, add optional group disclosure and decorative icons, and unify mobile focus and keyboard navigation. Includes the new minimal Svelte application-shell package.
+
 ## 0.28.0
 
 ## 0.27.0

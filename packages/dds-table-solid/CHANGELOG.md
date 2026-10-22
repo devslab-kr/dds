@@ -1,5 +1,13 @@
 # @devslab/dds-table
 
+## 0.29.0
+
+### Patch Changes
+
+- Updated dependencies [c645ff6]
+  - @devslab/dds-css@0.29.0
+  - @devslab/dds-tokens@0.29.0
+
 ## 0.28.0
 
 ### Patch Changes
