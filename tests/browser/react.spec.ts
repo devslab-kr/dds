@@ -170,3 +170,27 @@ test.describe("touch and media policies", () => {
     ).toEqual([]);
   });
 });
+
+for (const width of [1280, 390]) {
+  test(`ui console disclosures preserve visibility and keyboard access at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/console");
+    if (width < 900) await page.getByRole("button", { name: "Open menu" }).click();
+    const settings = page.getByRole("button", { name: "Settings", exact: true });
+    const services = page.getByRole("button", { name: "Services", exact: true });
+    await expect(page.getByRole("link", { name: "Policies", exact: true })).toHaveCount(0);
+    await settings.focus(); await page.keyboard.press("Enter");
+    await expect(page.getByRole("link", { name: "Policies", exact: true })).toBeVisible();
+    await expect(services).toHaveAttribute("aria-expanded", "true");
+    await services.focus(); await page.keyboard.press("Space");
+    await expect(page.getByRole("link", { name: "Products", exact: true })).toHaveCount(0);
+    await expect(services).toBeFocused();
+    expect((await new AxeBuilder({ page }).include('.dds-console-rail__nav').analyze()).violations).toEqual([]);
+    await settings.click();
+    await expect(page.locator('a[data-nav="demo.policies"]')).toBeHidden();
+    if (width < 900) {
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+    }
+  });
+}

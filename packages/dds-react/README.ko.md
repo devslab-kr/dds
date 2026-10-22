@@ -80,3 +80,17 @@ Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 �
 
 상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/date-range-picker`, `/month-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
 상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
+
+## 선택형 콘솔 메뉴 그룹
+
+기존 그룹은 계속 펼쳐집니다. 고유한 `id`와 `collapsible: true`를 지정한 그룹에만
+접기·펼치기 버튼을 제공합니다. 항목의 `icon`은 장식용이며 이름은 `label`로 제공합니다.
+`expandedGroups`와 `onExpandedGroupsChange`로 앱에서 상태를 제어합니다.
+외부 상태를 생략하면 내부 상태를 사용합니다. `defaultExpandedGroups`가 초기값이며,
+빈 배열은 모두 접기, 초기값 생략은 활성 항목을 포함한 그룹만 펼치기입니다.
+옵션이 없는 그룹은 항상 펼쳐지고 여러 그룹을 동시에 열 수 있습니다.
+ID 생략 시 `group-<index>`를 사용하므로 순서 변경·상태 보관에는 안정적인 고유 ID를 쓰세요.
+페이지 이동 시 그룹 열기와 세션 보관은 앱에서 처리합니다. 저장소는 hydration 이후 읽고
+서버와 최초 클라이언트 상태를 일치시키세요. DDS는 저장소에 접근하거나 제어 상태를
+임의로 덮어쓰지 않습니다. 데스크톱·모바일 모두 Enter/Space 조작과
+`aria-expanded`, `aria-controls`를 지원합니다.

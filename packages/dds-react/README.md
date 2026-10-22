@@ -114,3 +114,28 @@ Input/InputGroup are general-purpose native inputs, not search-only, with label 
 
 Use explicit subpaths `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/date-range-picker`, `/month-picker`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).
 Use explicit subpaths `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).
+
+## Optional console navigation groups
+
+`ConsoleShell` keeps legacy groups expanded. Set a unique, stable `id` and
+`collapsible: true` on a group to opt into disclosure buttons. An item's optional
+`icon` is decorative; keep its text `label`.
+
+```tsx
+<ConsoleShell {...shellProps}
+  nav={[{ id: "settings", label: "Settings", collapsible: true,
+    items: [{ id: "policies", href: "/policies", label: "Policies", icon: <Icon name="check" /> }] }]}
+  expandedGroups={expandedGroups}
+  onExpandedGroupsChange={setExpandedGroups}
+/>
+```
+
+Omit `expandedGroups` for internal state. `defaultExpandedGroups` supplies its
+initial value; `[]` starts all collapsible groups closed. With neither prop, only
+groups containing the active item start open. Other groups always stay open.
+Multiple groups may be expanded. Missing IDs fall back to `group-<index>`; prefer
+stable unique IDs for persistence or reordering. The app owns route-change
+expansion and persistence. Read browser storage after hydration, keeping server
+and initial client state equal. DDS never accesses storage or overwrites a
+controlled selection. Enter/Space and `aria-expanded`/`aria-controls` work in both
+the desktop rail and mobile drawer.
