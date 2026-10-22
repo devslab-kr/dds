@@ -265,4 +265,4 @@ D-034. 허용 전에는 구글에 닿는 것이 없다 — 코어 매니저·쿠
 
 ## Vue 공통 패키지 — `진행 중` (2026-10-22)
 
-EDS Desktop 실사용 Button·Icon·Input·DatePicker부터 dds-vue에 승격하고 배포한다. 공통 달력 CSS는 CSS 계층에 두고, React 브리지는 제거한다. 전체 패리티는 필요할 때 확장한다.
+EDS Desktop 실사용 Button·Icon·Input·DatePicker부터 dds-vue에 승격하고 배포한다. 공통 달력 CSS는 CSS 계층에 두고, React 브리지는 제거한다. 초기 0.27.0 배포 후 사용자 요청으로 컴포넌트 목록을 선제 확장하고, 별도 dds-table-vue를 준비한다. 검증과 공개 배포 완료 시 상태를 갱신한다.

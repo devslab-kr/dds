@@ -1,0 +1,29 @@
+@import "@devslab/dds-tokens/tokens.css";
+@import "@devslab/dds-css/dds.css";
+
+.dds-data-grid {
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: calc(var(--dds-space-40) * 12);
+  min-inline-size: 0;
+  position: relative;
+  color: var(--dds-color-text-primary);
+  background: var(--dds-color-bg-default);
+  font-family: var(--dds-font-family-sans);
+  border-radius: var(--dds-radius-md);
+}
+.dds-data-grid > div { block-size: 100%; }
+.dds-data-grid .ag-cell:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: calc(-1 * var(--dds-space-2));
+}
+@media (prefers-reduced-motion: reduce) {
+  .dds-data-grid *, .dds-data-grid *::before, .dds-data-grid *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+@media (forced-colors: active) {
+  .dds-data-grid { forced-color-adjust: auto; }
+  .dds-data-grid .ag-cell:focus-visible { outline-color: Highlight; }
+}

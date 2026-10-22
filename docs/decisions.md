@@ -1309,4 +1309,12 @@ PR" 규칙이 같은 디렉토리에서 충돌한다.
 
 **범위.** 첫 버전은 현재 사용하는 네 컴포넌트와 날짜 검증만 제공한다. React/Solid 전체 패리티를 선행 구현하지 않으며 실제 필요마다 확장한다. 달력 CSS는 React/Solid에서 동일하므로 dds-css로 승격한다. EDS 전용 테마와 레이아웃, 서버 계약은 소비자에 남긴다. 기존 lockstep Changesets·CI·배포 검증에 포함한다.
 
-**Tradeoff.** A new maintained Vue adapter is justified by the concrete EDS consumer and explicit request. Keep the initial inventory small, use shared CSS/Ark interaction, and grow only with real consumption. No product palette changes are included.
+**Tradeoff.** A new maintained Vue adapter is justified by the concrete EDS consumer and explicit request. The initial release stays small. The subsequent explicit request extends the existing component inventory proactively; differences remain documented instead of promising identical framework APIs. No product palette changes are included.
+
+## Vue 컴포넌트 목록 확장과 독립 테이블 (2026-10-22)
+
+사용자 요청으로 기존 React/Solid 입력·선택·날짜·탭·오버레이·셸·비동기 헬퍼를 Vue에 선제 제공한다. Vue의 v-model/슬롯과 Ark Vue 동작을 사용하고 시각 표현은 기존 DDS CSS/토큰을 공유한다. 선택 목록 가상화와 일부 메시지 객체 API는 아직 동일하지 않으며 패키지 가이드에 명시한다.
+
+`@devslab/dds-table-vue`는 React와 같은 AG Grid Community 36.2.0을 사용한다. Solid의 TanStack 구현은 유지한다. 그리드는 별도 패키지이므로 기본 Input 상세 경로에 AG Grid나 다른 프레임워크 런타임이 들어오지 않는다. SSR은 placeholder 후 마운트한다. 실제 브라우저의 정렬·필터·열 크기·선택, 접근성, 패킹한 새 Vue 소비자 타입 검사를 릴리스 게이트에 포함한다.
+
+**English.** Explicitly requested proactive Vue inventory extension, with native Vue model/slot conventions and documented remaining differences. AG Grid Community lives in a separate Vue table package; existing Solid TanStack remains unchanged. Shared tokens and product palettes are not modified. All eleven packages use the fixed release train.

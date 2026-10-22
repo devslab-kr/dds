@@ -73,7 +73,7 @@
   Tailwind 프리셋을 뽑아주므로 `bg-brand`, `text-primary`, `p-4` 같은
   유틸리티가 곧 DDS 토큰이다. Tailwind 임의값 (`bg-[#06b6d4]`, `p-[13px]`)
   사용은 토큰 하드코딩과 동일한 위반이다.
-- **Vue** — 실제 EDS Desktop 소비자를 기준으로 `dds-vue` 패키지를 제공한다. 공통 CSS/토큰 위에 Button·Icon·Input·Ark UI DatePicker부터 옮기고, 실제 필요가 생길 때 추가한다. 제품 테마와 업무 로직은 패키지에 포함하지 않는다.
+- **Vue** — 실제 EDS Desktop 소비자를 기준으로 `dds-vue` 패키지를 제공한다. 공통 CSS/토큰 위에 Button·Icon·Input·Ark UI DatePicker부터 옮겼으며, 사용자 요청에 따라 기존 React/Solid 컴포넌트 목록을 선제 확장한다. Vue 고유 모델/슬롯과 API 차이는 가이드에 기록한다. 별도 dds-table-vue는 AG Grid Community를 연결한다. 제품 테마와 업무 로직은 패키지에 포함하지 않는다.
 - **Ionic** — Ionic 컴포넌트는 CSS 변수 (`--ion-color-*`) 로 테마되는 웹
   컴포넌트이므로, `dds-tokens` 의 Ionic 매핑 파일 하나로 Ionic 전체가 DDS
   색·타이포를 입는다. 모바일을 RN 대신 Ionic 으로 가더라도 토큰·계약 레이어는

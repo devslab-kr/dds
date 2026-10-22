@@ -310,6 +310,49 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(@types/node@26.3.0)(jsdom@30.0.1)(vite@8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
 
+  packages/dds-table-vue:
+    dependencies:
+      '@devslab/dds-css':
+        specifier: workspace:0.27.0
+        version: link:../dds-css
+      '@devslab/dds-tokens':
+        specifier: workspace:0.27.0
+        version: link:../dds-tokens
+      ag-grid-community:
+        specifier: 36.2.0
+        version: 36.2.0
+      ag-grid-vue3:
+        specifier: 36.2.0
+        version: 36.2.0(vue@3.5.39(typescript@6.0.3))
+    devDependencies:
+      '@vitejs/plugin-vue':
+        specifier: 6.0.7
+        version: 6.0.7(vite@7.3.6(@types/node@26.3.0)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.0))(vue@3.5.39(typescript@6.0.3))
+      '@vue/test-utils':
+        specifier: 2.4.6
+        version: 2.4.6
+      axe-core:
+        specifier: 4.13.0
+        version: 4.13.0
+      jsdom:
+        specifier: 30.0.1
+        version: 30.0.1
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vite:
+        specifier: 7.3.6
+        version: 7.3.6(@types/node@26.3.0)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.0)
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@26.3.0)(jsdom@30.0.1)(vite@7.3.6(@types/node@26.3.0)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.0))
+      vue:
+        specifier: 3.5.39
+        version: 3.5.39(typescript@6.0.3)
+      vue-tsc:
+        specifier: 3.3.6
+        version: 3.3.6(typescript@6.0.3)
+
   packages/dds-tokens:
     devDependencies:
       typescript:
@@ -2591,6 +2634,11 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  ag-grid-vue3@36.2.0:
+    resolution: {integrity: sha512-B6P5QHJGxY5g2LjHINAI904x1oMYb/VRlLWgmVylwEov0OicpowHSIxld28vgVkWkHGsdgqnbE4iDHQpVt4zPw==}
+    peerDependencies:
+      vue: ^3.5.32
+
   ag-stack@36.2.0:
     resolution: {integrity: sha512-f3XT2htFs9dUPcHni2z9ak69QNta5ODEpooHuuNvbjN98JkokpEqRQ9YLQHQJFdCcgi9Ybs/j3zkkvmNRamIPg==}
 
@@ -4392,7 +4440,7 @@ snapshots:
 
   '@babel/generator@7.29.8':
     dependencies:
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@babel/types': 7.29.8
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
@@ -4459,7 +4507,7 @@ snapshots:
   '@babel/template@7.29.7':
     dependencies:
       '@babel/code-frame': 7.29.7
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@babel/types': 7.29.8
 
   '@babel/traverse@7.29.8':
@@ -4467,7 +4515,7 @@ snapshots:
       '@babel/code-frame': 7.29.7
       '@babel/generator': 7.29.8
       '@babel/helper-globals': 7.29.7
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@babel/template': 7.29.7
       '@babel/types': 7.29.8
       debug: 4.4.3
@@ -5534,7 +5582,7 @@ snapshots:
   '@tanstack/router-utils@1.162.2':
     dependencies:
       '@babel/generator': 7.29.8
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@babel/types': 7.29.8
       ansis: 4.3.1
       babel-dead-code-elimination: 1.0.12
@@ -5743,7 +5791,7 @@ snapshots:
 
   '@types/babel__template@7.4.4':
     dependencies:
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@babel/types': 7.29.8
 
   '@types/babel__traverse@7.28.0':
@@ -5957,11 +6005,11 @@ snapshots:
 
   '@vue/compiler-core@3.5.39':
     dependencies:
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@vue/shared': 3.5.39
       entities: 7.0.1
       estree-walker: 2.0.2
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   '@vue/compiler-core@3.5.44':
     dependencies:
@@ -5983,7 +6031,7 @@ snapshots:
 
   '@vue/compiler-sfc@3.5.39':
     dependencies:
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@vue/compiler-core': 3.5.39
       '@vue/compiler-dom': 3.5.39
       '@vue/compiler-ssr': 3.5.39
@@ -5991,7 +6039,7 @@ snapshots:
       estree-walker: 2.0.2
       magic-string: 0.30.21
       postcss: 8.5.26
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   '@vue/compiler-ssr@3.5.39':
     dependencies:
@@ -6653,6 +6701,11 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
+  ag-grid-vue3@36.2.0(vue@3.5.39(typescript@6.0.3)):
+    dependencies:
+      ag-grid-community: 36.2.0
+      vue: 3.5.39(typescript@6.0.3)
+
   ag-stack@36.2.0: {}
 
   alien-signals@3.2.1: {}
@@ -6698,7 +6751,7 @@ snapshots:
   babel-dead-code-elimination@1.0.12:
     dependencies:
       '@babel/core': 7.29.7
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@babel/traverse': 7.29.8
       '@babel/types': 7.29.8
     transitivePeerDependencies:
@@ -6810,7 +6863,7 @@ snapshots:
   css-tree@3.2.1:
     dependencies:
       mdn-data: 2.27.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   css.escape@1.5.1: {}
 
