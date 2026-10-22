@@ -1,0 +1,20 @@
+.dds-top-nav { display: flex; align-items: center; flex-wrap: wrap; gap: var(--dds-space-8); font-family: var(--dds-font-family-sans); font-size: var(--dds-typo-body-2-font-size); line-height: var(--dds-typo-body-2-line-height); }
+.dds-top-nav[hidden] { display: none; }
+.dds-top-nav__group { position: relative; }
+.dds-top-nav__trigger, .dds-top-nav__item { display: flex; align-items: center; gap: var(--dds-space-8); min-block-size: var(--dds-space-40); padding: var(--dds-space-8) var(--dds-space-12); border-radius: var(--dds-radius-md); color: var(--dds-color-text-secondary); font-weight: 500; text-decoration: none; cursor: pointer; }
+.dds-top-nav__trigger[hidden], .dds-top-nav__item[hidden] { display: none; }
+.dds-top-nav__trigger { list-style: none; }
+.dds-top-nav__trigger::-webkit-details-marker { display: none; }
+.dds-top-nav__trigger::after { content: ""; inline-size: .375rem; block-size: .375rem; border-inline-end: 1.5px solid currentColor; border-block-end: 1.5px solid currentColor; transform: rotate(45deg); margin-inline-start: var(--dds-space-8); }
+.dds-top-nav__trigger:hover, .dds-top-nav__item:hover { background: var(--dds-color-bg-subtle); }
+.dds-top-nav__trigger:focus-visible, .dds-top-nav__item:focus-visible { outline: 2px solid var(--dds-color-border-focus); outline-offset: 2px; }
+.dds-top-nav__item[aria-current="page"] { color: var(--dds-color-text-brand); background: var(--dds-color-bg-brand-subtle); font-weight: 600; }
+.dds-top-nav__items { position: absolute; inset-inline-start: 0; z-index: 40; min-inline-size: 12rem; max-inline-size: min(24rem, 85vw); padding: var(--dds-space-8); margin: 0; list-style: none; border: 1px solid var(--dds-color-border-default); border-radius: var(--dds-radius-md); background: var(--dds-color-bg-elevated); overflow-wrap: anywhere; }
+.dds-top-nav__item-icon { display: inline-flex; flex: 0 0 1rem; inline-size: 1rem; block-size: 1rem; }
+.dds-top-nav__item-icon[hidden] { display: none; }
+.dds-top-nav__item-icon > svg { inline-size: 100%; block-size: 100%; }
+@media (max-width: 56.25rem) {
+ .dds-top-nav { flex-direction: column; align-items: stretch; }
+ .dds-top-nav__items { position: static; max-inline-size: none; border: 0; padding-inline-start: var(--dds-space-16); }
+ .dds-top-nav__trigger, .dds-top-nav__item { min-block-size: 2.75rem; }
+}
