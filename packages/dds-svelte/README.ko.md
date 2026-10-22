@@ -14,3 +14,8 @@ LeftNav의 expandedGroups/onExpandedGroupsChange는 외부 제어, defaultExpand
 Layout은 모바일 탐색과 초점 복귀를 담당하고 TopNav는 네이티브 disclosure를 사용합니다.
 
 [공통 화면 규격](../../docs/layouts.ko.md)을 참고하세요. 배포 전 test/check/build로 검증합니다.
+
+
+## 공통 업무 화면
+
+Layout·LeftNav·TopNav는 공통 간격과 타이포 규격을 사용합니다. [조립 방법과 수치](../../docs/layouts.ko.md)를 참고하세요.

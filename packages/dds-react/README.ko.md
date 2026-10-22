@@ -94,3 +94,8 @@ ID 생략 시 `group-<index>`를 사용하므로 순서 변경·상태 보관에
 서버와 최초 클라이언트 상태를 일치시키세요. DDS는 저장소에 접근하거나 제어 상태를
 임의로 덮어쓰지 않습니다. 데스크톱·모바일 모두 Enter/Space 조작과
 `aria-expanded`, `aria-controls`를 지원합니다.
+
+
+## 공통 업무 화면
+
+Layout·LeftNav·TopNav는 공통 간격과 타이포 규격을 사용합니다. [조립 방법과 수치](../../docs/layouts.ko.md)를 참고하세요.

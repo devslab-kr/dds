@@ -48,3 +48,8 @@ Validation: `pnpm --filter @devslab/dds-vue check`, `test`, `build`. Public rele
 
 
 
+
+
+## Shared application layouts
+
+Layout, LeftNav and TopNav use the common geometry and typography rules. See [composition and exact dimensions](../../docs/layouts.md).

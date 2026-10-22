@@ -19,3 +19,8 @@ native disclosure navigation, not a partial application menubar.
 
 See [shared layout guidance](../../docs/layouts.md) for exact dimensions and
 composition examples. Run package test/check/build before publication.
+
+
+## Shared application layouts
+
+Layout, LeftNav and TopNav use the common geometry and typography rules. See [composition and exact dimensions](../../docs/layouts.md).

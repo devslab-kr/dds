@@ -15,8 +15,10 @@ export interface ConsoleHeader {
   title: string;
   actions?: ReactNode;
 }
-export interface ConsoleShellProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "context"> {
+export interface ConsoleShellProps extends Omit<
+  HTMLAttributes<HTMLDivElement>,
+  "children" | "context"
+> {
   surface: string;
   activePath: string;
   brand: { href: string; name: string; mark: string };
@@ -32,13 +34,82 @@ export interface ConsoleShellProps
   foot?: ReactNode;
   children: ReactNode;
 }
-export const ConsoleShell = forwardRef<HTMLDivElement,ConsoleShellProps>(function ConsoleShell({surface,activePath,brand,context,nav=[],navigation,expandedGroups,defaultExpandedGroups,onExpandedGroupsChange,labels,header,foot,children,...rest},ref){
-  return <Layout {...rest} ref={ref} surface={surface} labels={labels}
-    railStart={<><a className="dds-console-rail__brand" href={brand.href}><img src={brand.mark} alt="" width={20} height={20}/><strong>{brand.name}</strong></a>
-      {context && context.length>0 && <dl className="dds-console-rail__context">{context.map((row,index)=><div key={index}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl>}</>}
-    navigation={navigation??<LeftNav surface={surface} activePath={activePath} nav={nav} labels={labels} expandedGroups={expandedGroups} defaultExpandedGroups={defaultExpandedGroups} onExpandedGroupsChange={onExpandedGroupsChange}/>}
-    railEnd={foot && <div className="dds-console-rail__foot">{foot}</div>}
-    header={<div className="dds-console-page-header"><div className="dds-console-page-header__text">{header.eyebrow && <p className="dds-console-page-eyebrow">{header.eyebrow}</p>}<h1>{header.title}</h1></div>{header.actions && <div className="dds-console-page-header__actions">{header.actions}</div>}</div>}>
-    {children}
-  </Layout>;
-});
+export const ConsoleShell = forwardRef<HTMLDivElement, ConsoleShellProps>(
+  function ConsoleShell(
+    {
+      surface,
+      activePath,
+      brand,
+      context,
+      nav = [],
+      navigation,
+      expandedGroups,
+      defaultExpandedGroups,
+      onExpandedGroupsChange,
+      labels,
+      header,
+      foot,
+      children,
+      ...rest
+    },
+    ref,
+  ) {
+    return (
+      <Layout
+        {...rest}
+        ref={ref}
+        surface={surface}
+        labels={labels}
+        railStart={
+          <>
+            <a className="dds-console-rail__brand" href={brand.href}>
+              <img src={brand.mark} alt="" width={20} height={20} />
+              <strong>{brand.name}</strong>
+            </a>
+            {context && context.length > 0 && (
+              <dl className="dds-console-rail__context">
+                {context.map((row, index) => (
+                  <div key={index}>
+                    <dt>{row.label}</dt>
+                    <dd>{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </>
+        }
+        navigation={
+          navigation ?? (
+            <LeftNav
+              surface={surface}
+              activePath={activePath}
+              nav={nav}
+              labels={labels}
+              expandedGroups={expandedGroups}
+              defaultExpandedGroups={defaultExpandedGroups}
+              onExpandedGroupsChange={onExpandedGroupsChange}
+            />
+          )
+        }
+        railEnd={foot && <div className="dds-console-rail__foot">{foot}</div>}
+        header={
+          <div className="dds-console-page-header">
+            <div className="dds-console-page-header__text">
+              {header.eyebrow && (
+                <p className="dds-console-page-eyebrow">{header.eyebrow}</p>
+              )}
+              <h1>{header.title}</h1>
+            </div>
+            {header.actions && (
+              <div className="dds-console-page-header__actions">
+                {header.actions}
+              </div>
+            )}
+          </div>
+        }
+      >
+        {children}
+      </Layout>
+    );
+  },
+);

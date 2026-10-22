@@ -139,3 +139,8 @@ expansion and persistence. Read browser storage after hydration, keeping server
 and initial client state equal. DDS never accesses storage or overwrites a
 controlled selection. Enter/Space and `aria-expanded`/`aria-controls` work in both
 the desktop rail and mobile drawer.
+
+
+## Shared application layouts
+
+Layout, LeftNav and TopNav use the common geometry and typography rules. See [composition and exact dimensions](../../docs/layouts.md).

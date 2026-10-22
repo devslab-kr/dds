@@ -39,6 +39,7 @@ peer dependency, 사용 가능한 exports를 확인할 수 있다.
 | [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.ko.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.ko.md) |
 | [`@devslab/dds-table-vue`](https://www.npmjs.com/package/@devslab/dds-table-vue) | [dds-table-vue](packages/dds-table-vue/README.ko.md) |
+| [`@devslab/dds-svelte`](https://www.npmjs.com/package/@devslab/dds-svelte) | [dds-svelte](packages/dds-svelte/README.ko.md) |
 
 [GitHub Releases](https://github.com/devslab-kr/dds/releases)는 버전별 변경 사항과
 릴리스 노트를 기록하는 곳이며, 패키지는 npm에서 설치한다. 패키지에는
@@ -121,3 +122,5 @@ AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` →
 ## 입력·선택·공유 달력 확장
 
 일반 Input/InputGroup, 가상화 Combobox/SelectPicker, DropdownMenu/Popover와 Calendar/DatePicker 공유 구조는 [사용 가이드](docs/components-input-choice-calendar.ko.md)를 참고하세요. 각 UI 패키지는 루트와 컴포넌트별 상세 경로를 함께 제공합니다. 기존 `@devslab/dds-table`은 `@devslab/dds-table-solid`의 호환 진입점으로 유지합니다.
+
+[공통 업무 화면 규격](docs/layouts.ko.md): React·Solid·Vue·Svelte의 Layout·LeftNav·TopNav.

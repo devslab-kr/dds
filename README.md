@@ -40,6 +40,7 @@ setup, peer dependencies, and available exports.
 | [`@devslab/dds-table-solid`](https://www.npmjs.com/package/@devslab/dds-table-solid) | [dds-table-solid](packages/dds-table-solid/README.md) |
 | [`@devslab/dds-table-react`](https://www.npmjs.com/package/@devslab/dds-table-react) | [dds-table-react](packages/dds-table-react/README.md) |
 | [`@devslab/dds-table-vue`](https://www.npmjs.com/package/@devslab/dds-table-vue) | [dds-table-vue](packages/dds-table-vue/README.md) |
+| [`@devslab/dds-svelte`](https://www.npmjs.com/package/@devslab/dds-svelte) | [dds-svelte](packages/dds-svelte/README.md) |
 
 [GitHub Releases](https://github.com/devslab-kr/dds/releases) records version
 changes and release notes; install the packages from npm. The packages use the
@@ -125,3 +126,5 @@ theme mapping, depending on how mobile goes.
 ## Input, choice and shared calendar additions
 
 See the [usage guide](docs/components-input-choice-calendar.md) for general Input/InputGroup, virtualized Combobox/SelectPicker, DropdownMenu/Popover and shared Calendar/DatePicker views. Framework packages expose both root and detailed component entries. `@devslab/dds-table` remains a compatible entry for `@devslab/dds-table-solid`.
+
+[Common application layouts](docs/layouts.md): Layout, LeftNav, TopNav across React/Solid/Vue/Svelte.

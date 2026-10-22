@@ -70,11 +70,64 @@ export interface ConsoleShellProps {
   children: JSX.Element;
 }
 
-export function ConsoleShell(props:ConsoleShellProps):JSX.Element {
- return <Layout labels={props.labels} surface={props.surface}
- railStart={<><a class="dds-console-rail__brand" href={props.brand.href}><img src={props.brand.mark} alt="" width="20" height="20"/><strong>{props.brand.name}</strong></a><Show when={props.context&&props.context.length>0}><dl class="dds-console-rail__context"><For each={props.context}>{row=><div><dt>{row.label}</dt><dd>{row.value}</dd></div>}</For></dl></Show></>}
- navigation={props.navigation??<LeftNav surface={props.surface} activePath={props.activePath} nav={props.nav??[]} labels={props.labels} expandedGroups={props.expandedGroups} defaultExpandedGroups={props.defaultExpandedGroups} onExpandedGroupsChange={props.onExpandedGroupsChange}/>}
- railEnd={props.foot&&<div class="dds-console-rail__foot">{props.foot}</div>}
- header={<div class="dds-console-page-header"><div class="dds-console-page-header__text"><Show when={props.header.eyebrow}><p class="dds-console-page-eyebrow">{props.header.eyebrow}</p></Show><h1>{props.header.title}</h1></div><Show when={props.header.actions}><div class="dds-console-page-header__actions">{props.header.actions}</div></Show></div>}>
- {props.children}</Layout>;
+export function ConsoleShell(props: ConsoleShellProps): JSX.Element {
+  return (
+    <Layout
+      labels={props.labels}
+      surface={props.surface}
+      railStart={
+        <>
+          <a class="dds-console-rail__brand" href={props.brand.href}>
+            <img src={props.brand.mark} alt="" width="20" height="20" />
+            <strong>{props.brand.name}</strong>
+          </a>
+          <Show when={props.context && props.context.length > 0}>
+            <dl class="dds-console-rail__context">
+              <For each={props.context}>
+                {(row) => (
+                  <div>
+                    <dt>{row.label}</dt>
+                    <dd>{row.value}</dd>
+                  </div>
+                )}
+              </For>
+            </dl>
+          </Show>
+        </>
+      }
+      navigation={
+        props.navigation ?? (
+          <LeftNav
+            surface={props.surface}
+            activePath={props.activePath}
+            nav={props.nav ?? []}
+            labels={props.labels}
+            expandedGroups={props.expandedGroups}
+            defaultExpandedGroups={props.defaultExpandedGroups}
+            onExpandedGroupsChange={props.onExpandedGroupsChange}
+          />
+        )
+      }
+      railEnd={
+        props.foot && <div class="dds-console-rail__foot">{props.foot}</div>
+      }
+      header={
+        <div class="dds-console-page-header">
+          <div class="dds-console-page-header__text">
+            <Show when={props.header.eyebrow}>
+              <p class="dds-console-page-eyebrow">{props.header.eyebrow}</p>
+            </Show>
+            <h1>{props.header.title}</h1>
+          </div>
+          <Show when={props.header.actions}>
+            <div class="dds-console-page-header__actions">
+              {props.header.actions}
+            </div>
+          </Show>
+        </div>
+      }
+    >
+      {props.children}
+    </Layout>
+  );
 }
