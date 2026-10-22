@@ -86,7 +86,7 @@ export const Layout = forwardRef<HTMLDivElement, LayoutProps>(function Layout(
           ) &&
           !el.hasAttribute("disabled"),
       );
-    const frame = requestAnimationFrame(() => focusable()[1]?.focus());
+    focusable()[1]?.focus();
     function key(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -107,7 +107,6 @@ export const Layout = forwardRef<HTMLDivElement, LayoutProps>(function Layout(
     }
     document.addEventListener("keydown", key);
     return () => {
-      cancelAnimationFrame(frame);
       document.removeEventListener("keydown", key);
     };
   }, [open]);
