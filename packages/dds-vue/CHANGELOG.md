@@ -1,5 +1,17 @@
 # @devslab/dds-vue
 
+## 0.28.0
+
+### Minor Changes
+
+- 833f1c4: Extend native Vue controls, choices, calendars, overlays, toast, console shell and async/status helpers with isolated component entries. Add a separate AG Grid Community based Vue table adapter with semantic DDS theming, native Vue grid options and SSR placeholders.
+
+### Patch Changes
+
+- @devslab/dds-tokens@0.28.0
+- @devslab/dds-css@0.28.0
+- @devslab/dds-icons@0.28.0
+
 ## 0.27.0
 
 ### Minor Changes
