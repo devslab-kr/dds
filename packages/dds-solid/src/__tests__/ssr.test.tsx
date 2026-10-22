@@ -191,6 +191,23 @@ it("server-renders ConsoleShell without the client-only hydration claim", () => 
   expect(html).not.toContain("data-hydrated");
 });
 
+it("server-renders independent ConsoleShell disclosures with unique list relationships", () => {
+  const shell = (expandedGroups?: readonly string[]) => <ConsoleShell surface="dashboard"
+    activePath="/dashboard/projects/42" brand={{ href: "/dashboard", name: "VisionLinq", mark: "/mark.svg" }}
+    nav={[{ id: "build", label: "Build", collapsible: true, items: [{ id: "projects", href: "/dashboard/projects", label: "Projects" }] }]}
+    expandedGroups={expandedGroups}
+    labels={{ skip: "Skip", menuOpen: "Open", menuClose: "Close", nav: "Navigation", badge: "{count} pending" }}
+    header={{ title: "Projects" }}><p>body</p></ConsoleShell>;
+  const html = renderToString(() => <>{shell()}{shell([])}</>);
+  const controls = [...html.matchAll(/class="dds-console-rail__group-toggle"[^>]*aria-expanded="(true|false)"[^>]*aria-controls="([^"]+)"/g)];
+  expect(controls).toHaveLength(2);
+  expect(controls.map(match => match[1])).toEqual(["true", "false"]);
+  expect(new Set(controls.map(match => match[2])).size).toBe(2);
+  expect(html).toMatch(new RegExp(`<ul[^>]*id="${controls[0]![2]}"[^>]*>`));
+  expect(html).toMatch(new RegExp(`<ul[^>]*id="${controls[1]![2]}"[^>]*hidden`));
+  expect(html).not.toContain("data-hydrated");
+});
+
 it("server-renders TimePicker with the HH:MM value, label and clock trigger", () => {
   const html = renderToString(() => (
     <form>

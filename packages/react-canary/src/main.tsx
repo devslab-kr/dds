@@ -15,6 +15,7 @@ import {
   Tooltip,
   useToast,
 } from "@devslab/dds-react";
+import { ConsoleDemo } from "./console-demo";
 import { DataTable } from "@devslab/dds-table-react";
 import type { ColDef, GridApi } from "ag-grid-community";
 import "@devslab/dds-react/styles.css";
@@ -151,7 +152,7 @@ function App() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ToastProvider regionLabel="알림 영역" dismissLabel="알림 닫기">
-      <App />
+      {window.location.pathname === "/console" ? <ConsoleDemo /> : <App />}
     </ToastProvider>
   </StrictMode>,
 );

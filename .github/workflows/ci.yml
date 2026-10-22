@@ -50,6 +50,9 @@ jobs:
       - run: pnpm run verify:table:release
       - run: pnpm run verify:vue:test
       - run: pnpm run verify:vue:release
+      - run: pnpm run verify:svelte:test
+      - run: pnpm run verify:svelte:release
+      - run: pnpm run verify:foundation:layouts
       - run: pnpm run verify:table-vue:test
       - run: pnpm run verify:table-vue:release
       - run: pnpm run verify:vue:browser

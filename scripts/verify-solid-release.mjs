@@ -5,19 +5,46 @@ import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 
-const workspace = resolve(new URL("..", import.meta.url).pathname.replace(/^\/(?:([A-Za-z]:))/, "$1"));
+const workspace = resolve(
+  new URL("..", import.meta.url).pathname.replace(/^\/(?:([A-Za-z]:))/, "$1"),
+);
 const temp = await mkdtemp(join(tmpdir(), "dds-solid-release-"));
 const npmCli = process.platform === "win32" ? process.execPath : "npm";
-const npmPrefix = process.platform === "win32" ? [join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js")] : [];
+const npmPrefix =
+  process.platform === "win32"
+    ? [
+        join(
+          dirname(process.execPath),
+          "node_modules",
+          "npm",
+          "bin",
+          "npm-cli.js",
+        ),
+      ]
+    : [];
 const pnpmCli = process.platform === "win32" ? process.execPath : "pnpm";
-const pnpmPrefix = process.platform === "win32" ? [join(dirname(process.execPath), "node_modules", "corepack", "dist", "pnpm.js")] : [];
+const pnpmPrefix =
+  process.platform === "win32"
+    ? [
+        join(
+          dirname(process.execPath),
+          "node_modules",
+          "corepack",
+          "dist",
+          "pnpm.js",
+        ),
+      ]
+    : [];
 const run = (args, cwd) => {
   const result = spawnSync(npmCli, [...npmPrefix, ...args], {
     cwd,
     encoding: "utf8",
     env: { ...process.env, NPM_CONFIG_CACHE: join(temp, ".npm-cache") },
   });
-  if (result.status !== 0) throw new Error(`${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
+  if (result.status !== 0)
+    throw new Error(
+      `${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`,
+    );
   return result.stdout;
 };
 const runPnpm = (args, cwd) => {
@@ -26,7 +53,10 @@ const runPnpm = (args, cwd) => {
     encoding: "utf8",
     env: { ...process.env, NO_COLOR: "1" },
   });
-  if (result.status !== 0) throw new Error(`pnpm ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
+  if (result.status !== 0)
+    throw new Error(
+      `pnpm ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`,
+    );
   return result.stdout;
 };
 // `npm publish --dry-run` still asks the registry whether the version exists and
@@ -34,22 +64,38 @@ const runPnpm = (args, cwd) => {
 // the normal state, not a defect — the pack, the manifest and the fresh-consumer
 // install are what this gate checks — so "already published" counts as passed.
 const publishDryRun = (tarball, cwd) => {
-  const result = spawnSync(npmCli, [...npmPrefix, "publish", tarball, "--dry-run", "--json", "--ignore-scripts"], {
-    cwd,
-    encoding: "utf8",
-    env: { ...process.env, NPM_CONFIG_CACHE: join(temp, ".npm-cache") },
-  });
+  const result = spawnSync(
+    npmCli,
+    [
+      ...npmPrefix,
+      "publish",
+      tarball,
+      "--dry-run",
+      "--json",
+      "--ignore-scripts",
+    ],
+    {
+      cwd,
+      encoding: "utf8",
+      env: { ...process.env, NPM_CONFIG_CACHE: join(temp, ".npm-cache") },
+    },
+  );
   if (result.status === 0) return;
   const output = `${result.stdout}\n${result.stderr}`;
   if (/cannot publish over the previously published versions/i.test(output)) {
-    console.log(`${basename(tarball)} is already on npm; publish dry-run skipped`);
+    console.log(
+      `${basename(tarball)} is already on npm; publish dry-run skipped`,
+    );
     return;
   }
   throw new Error(`publish ${basename(tarball)} --dry-run failed\n${output}`);
 };
 const runNode = (args, cwd) => {
   const result = spawnSync(process.execPath, args, { cwd, encoding: "utf8" });
-  if (result.status !== 0) throw new Error(`node ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
+  if (result.status !== 0)
+    throw new Error(
+      `node ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`,
+    );
   return result.stdout;
 };
 
@@ -59,44 +105,85 @@ try {
   let solidTarball = "";
   for (const packageName of packageNames) {
     const packageRoot = join(workspace, "packages", packageName);
-    const manifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
+    const manifest = JSON.parse(
+      await readFile(join(packageRoot, "package.json"), "utf8"),
+    );
     runPnpm(["pack", "--pack-destination", temp], packageRoot);
-    const tarball = join(temp, `${manifest.name.replace(/^@/, "").replace("/", "-")}-${manifest.version}.tgz`);
+    const tarball = join(
+      temp,
+      `${manifest.name.replace(/^@/, "").replace("/", "-")}-${manifest.version}.tgz`,
+    );
     tarballs.push(tarball);
     if (packageName === "dds-solid") solidTarball = tarball;
   }
   const packageRoot = join(workspace, "packages", "dds-solid");
   for (const bundle of ["dist/index.js", "dist/server.js"]) {
     const source = await readFile(join(packageRoot, bundle), "utf8");
-    assert.match(source, /from\s+["']@devslab\/dds-icons["']/, `${bundle} must externalize dds-icons`);
+    assert.match(
+      source,
+      /from\s+["']@devslab\/dds-icons["']/,
+      `${bundle} must externalize dds-icons`,
+    );
   }
   publishDryRun(solidTarball, packageRoot);
-  await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
-  run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
+  await writeFile(
+    join(temp, "package.json"),
+    JSON.stringify({ private: true, type: "module" }),
+    "utf8",
+  );
+  run(
+    [
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      ...tarballs,
+      "solid-js@1.9.15",
+      "jsdom@30.0.1",
+    ],
+    temp,
+  );
   const installedRoot = join(temp, "node_modules", "@devslab", "dds-solid");
   // Node always enables its `node` export condition, even with
   // --conditions=browser. Load the installed browser entry explicitly for the
   // hydration harness, as a browser bundler would (SSR uses normal exports).
   const browserEntry = pathToFileURL(join(installedRoot, "dist/index.js")).href;
-  const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
+  const manifest = JSON.parse(
+    await readFile(join(installedRoot, "package.json"), "utf8"),
+  );
   assert.equal(manifest.name, "@devslab/dds-solid");
-  for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts", "styles.css"]) {
+  for (const path of [
+    "dist/index.js",
+    "dist/server.js",
+    "dist/index.d.ts",
+    "styles.css",
+  ]) {
     await access(join(installedRoot, path));
   }
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
   const ssrScript = join(temp, "consumer-ssr.mjs");
-  await writeFile(ssrScript, `
+  await writeFile(
+    ssrScript,
+    `
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
-import { Button, Icon } from "@devslab/dds-solid";
+import { Button, Icon, Layout, LeftNav, TopNav } from "@devslab/dds-solid";
 const html = renderToString(() => createComponent(Button, { get children() { return ["Fresh consumer ", createComponent(Icon, { name: "check", label: "Complete" })]; } }));
 if (!html.includes("Fresh consumer") || !html.includes("aria-label=\\"Complete\\"")) throw new Error("fresh consumer SSR failed");
+for (const Component of [Layout, LeftNav, TopNav]) {
+ const result=renderToString(()=>createComponent(Component,{surface:"fresh",activePath:"/",nav:[],labels:{skip:"Skip",menuOpen:"Open",menuClose:"Close",nav:"Navigation",badge:"{count}"},get children(){return "Content"}}));
+ if(!result.length)throw new Error("Shared layout export did not SSR");
+}
 process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html }));
-`, "utf8");
+`,
+    "utf8",
+  );
   const ssrPayload = runNode([ssrScript], temp);
   await writeFile(join(temp, "ssr.json"), ssrPayload, "utf8");
   const hydrationScript = join(temp, "consumer-hydrate.mjs");
-  await writeFile(hydrationScript, `
+  await writeFile(
+    hydrationScript,
+    `
 import { readFile } from "node:fs/promises";
 import { JSDOM } from "jsdom";
 const { bootstrap, html } = JSON.parse(await readFile(new URL("./ssr.json", import.meta.url), "utf8"));
@@ -115,23 +202,48 @@ const dispose = hydrate(() => createComponent(Button, { get children() { return 
 await Promise.resolve();
 dispose(); console.warn = warn; console.error = error;
 if (diagnostics.length) throw new Error('fresh consumer hydration diagnostics: ' + diagnostics.join("\\n"));
-`, "utf8");
+`,
+    "utf8",
+  );
   runNode(["--conditions=browser", hydrationScript], temp);
   // The native Button/Icon check above cannot detect mismatches in Ark state,
   // component IDs, presence boundaries or defaultChecked. Exercise the new
   // interactive wrappers through the actual packed package as well.
-  await writeFile(join(temp, "ark-app.mjs"), await readFile(join(workspace, "scripts/fixtures/solid-ark-consumer.mjs"), "utf8"));
-  await writeFile(join(temp, "ark-ssr.mjs"), `
+  await writeFile(
+    join(temp, "ark-app.mjs"),
+    await readFile(
+      join(workspace, "scripts/fixtures/solid-ark-consumer.mjs"),
+      "utf8",
+    ),
+  );
+  await writeFile(
+    join(temp, "ark-ssr.mjs"),
+    `
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
 import { App, NativeSectionApp } from "./ark-app.mjs";
 const component = process.argv[2] === "section" ? NativeSectionApp : App;
 process.stdout.write(JSON.stringify({ bootstrap: generateHydrationScript(), html: renderToString(() => createComponent(component, {})) }));
-`);
-  await writeFile(join(temp, "ark-ssr.json"), runNode([join(temp, "ark-ssr.mjs")], temp));
-  await writeFile(join(temp, "section-ssr.json"), runNode([join(temp, "ark-ssr.mjs"), "section"], temp));
-  await writeFile(join(temp, "ark-client-app.mjs"), (await readFile(join(temp, "ark-app.mjs"), "utf8")).replace('"@devslab/dds-solid"', JSON.stringify(browserEntry)));
-  await writeFile(join(temp, "ark-hydrate.mjs"), `
+`,
+  );
+  await writeFile(
+    join(temp, "ark-ssr.json"),
+    runNode([join(temp, "ark-ssr.mjs")], temp),
+  );
+  await writeFile(
+    join(temp, "section-ssr.json"),
+    runNode([join(temp, "ark-ssr.mjs"), "section"], temp),
+  );
+  await writeFile(
+    join(temp, "ark-client-app.mjs"),
+    (await readFile(join(temp, "ark-app.mjs"), "utf8")).replace(
+      '"@devslab/dds-solid"',
+      JSON.stringify(browserEntry),
+    ),
+  );
+  await writeFile(
+    join(temp, "ark-hydrate.mjs"),
+    `
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { JSDOM } from "jsdom";
@@ -183,15 +295,29 @@ assert.equal(host.querySelector('[role="dialog"]'), null);
 dispose(); console.warn = warn; console.error = error;
 assert.deepEqual(diagnostics, []);
 dom.window.close();
-`);
+`,
+  );
   runNode(["--conditions=browser", join(temp, "ark-hydrate.mjs")], temp);
-  runNode(["--conditions=browser", join(temp, "ark-hydrate.mjs"), "section"], temp);
+  runNode(
+    ["--conditions=browser", join(temp, "ark-hydrate.mjs"), "section"],
+    temp,
+  );
   // Reuse this fresh tarball install for the new control inventory. Keep the
   // separate process boundaries: server exports must never see browser globals.
-  const componentApp = await readFile(join(workspace, "scripts/fixtures/component-solid-consumer.mjs"), "utf8");
+  const componentApp = await readFile(
+    join(workspace, "scripts/fixtures/component-solid-consumer.mjs"),
+    "utf8",
+  );
   await writeFile(join(temp, "component-app.mjs"), componentApp);
-  await writeFile(join(temp, "component-client-app.mjs"), componentApp.replace('"@devslab/dds-solid"', JSON.stringify(browserEntry)).replace("'@devslab/dds-solid'", JSON.stringify(browserEntry)));
-  await writeFile(join(temp, "component-ssr.mjs"), `
+  await writeFile(
+    join(temp, "component-client-app.mjs"),
+    componentApp
+      .replace('"@devslab/dds-solid"', JSON.stringify(browserEntry))
+      .replace("'@devslab/dds-solid'", JSON.stringify(browserEntry)),
+  );
+  await writeFile(
+    join(temp, "component-ssr.mjs"),
+    `
 import assert from "node:assert/strict";
 import { generateHydrationScript, renderToString } from "solid-js/web";
 import { createComponent } from "solid-js";
@@ -203,16 +329,31 @@ const { App }=await import("./component-app.mjs");
 const html=renderToString(()=>createComponent(App,{}));
 assert.deepEqual(diagnostics,[],"New components emitted browser-free SSR diagnostics");
 process.stdout.write(JSON.stringify({bootstrap:generateHydrationScript(),html}));
-`);
-  await writeFile(join(temp, "component-ssr.json"), runNode([join(temp, "component-ssr.mjs")], temp));
-  await writeFile(join(temp, "component-hydrate.mjs"), await readFile(join(workspace, "scripts/fixtures/component-solid-hydrate.mjs"), "utf8"));
+`,
+  );
+  await writeFile(
+    join(temp, "component-ssr.json"),
+    runNode([join(temp, "component-ssr.mjs")], temp),
+  );
+  await writeFile(
+    join(temp, "component-hydrate.mjs"),
+    await readFile(
+      join(workspace, "scripts/fixtures/component-solid-hydrate.mjs"),
+      "utf8",
+    ),
+  );
   runNode(["--conditions=browser", join(temp, "component-hydrate.mjs")], temp);
-  await writeFile(join(temp, "component-subpaths.mjs"), `import assert from "node:assert/strict";
+  await writeFile(
+    join(temp, "component-subpaths.mjs"),
+    `import assert from "node:assert/strict";
 import * as root from "@devslab/dds-solid";
 for (const [path,names] of Object.entries({input:["Input","InputGroup"],combobox:["Combobox"],"select-picker":["SelectPicker"],"dropdown-menu":["DropdownMenu"],popover:["Popover"],calendar:["Calendar"],"date-picker":["DatePicker"],"time-picker":["TimePicker"],"segmented-control":["SegmentedControl"],"number-input":["NumberInput"],"date-range-picker":["DateRangePicker"],"month-picker":["MonthPicker"]})) {const part=await import("@devslab/dds-solid/"+path); for(const name of names) assert.equal(root[name],part[name],name+" must share root/subpath identity");}
-`);
-  runNode([join(temp,"component-subpaths.mjs")],temp);
-  console.log("dds-solid pack, publish dry-run, and fresh consumer import, SSR, and hydration passed");
+`,
+  );
+  runNode([join(temp, "component-subpaths.mjs")], temp);
+  console.log(
+    "dds-solid pack, publish dry-run, and fresh consumer import, SSR, and hydration passed",
+  );
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

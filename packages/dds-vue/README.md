@@ -45,3 +45,11 @@ DatePicker emits only canonical `YYYY-MM-DD` or optional empty values, displays 
 Use shared semantic tokens to theme products; no EDS-specific colors, toolbar positions or IPC/store logic belong in this package. Import styles once. The date-only helper is available at `@devslab/dds-vue/date-only`.
 
 Validation: `pnpm --filter @devslab/dds-vue check`, `test`, `build`. Public release follows the DDS lockstep Changesets/CI workflow.
+
+
+
+
+
+## Shared application layouts
+
+Layout, LeftNav and TopNav use the common geometry and typography rules. See [composition and exact dimensions](../../docs/layouts.md).

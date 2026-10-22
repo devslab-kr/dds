@@ -50,3 +50,11 @@ Vue >=3.5는 peer 의존성입니다. 스타일은 한 번만 import합니다. �
 EDS 전용 색상·도구 모음 위치·IPC/스토어는 제품 코드에 남깁니다. 공통 의미 토큰으로 제품 테마를 적용하세요.
 
 검증 명령은 `pnpm --filter @devslab/dds-vue check`, `test`, `build`입니다. 루트 `verify:vue:test`와 `verify:vue:release`가 CI 및 배포에 연결되며, 공개 배포는 기존 DDS lockstep Changesets 절차를 따릅니다.
+
+
+
+
+
+## 공통 업무 화면
+
+Layout·LeftNav·TopNav는 공통 간격과 타이포 규격을 사용합니다. [조립 방법과 수치](../../docs/layouts.ko.md)를 참고하세요.

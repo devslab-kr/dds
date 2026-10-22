@@ -46,6 +46,8 @@ export const FILES = [
   "emptystate.css",
   "table.css",
   "console-shell.css",
+  "layout.css",
+  "top-nav.css",
 ];
 
 const banner = `/* @devslab/dds-css — generated bundle, do not edit. Source: src/*.css

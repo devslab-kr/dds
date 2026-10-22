@@ -48,7 +48,10 @@
     "verify:vue:release": "pnpm --filter @devslab/dds-vue run build && node scripts/verify-vue-release.mjs",
     "verify:table-vue:test": "pnpm --filter @devslab/dds-table-vue run check && pnpm --filter @devslab/dds-table-vue run test",
     "verify:table-vue:release": "pnpm --filter @devslab/dds-table-vue run build && node scripts/verify-vue-release.mjs table-vue",
-    "verify:vue:browser": "pnpm --filter @devslab/dds-vue run build && pnpm --filter @devslab/dds-table-vue run build && playwright test --config playwright.vue.config.ts"
+    "verify:vue:browser": "pnpm --filter @devslab/dds-vue run build && pnpm --filter @devslab/dds-table-vue run build && playwright test --config playwright.vue.config.ts",
+    "verify:foundation:layouts": "playwright test --config playwright.layouts.config.ts",
+    "verify:svelte:test": "pnpm --filter @devslab/dds-svelte run test && pnpm --filter @devslab/dds-svelte run check && pnpm --filter @devslab/dds-svelte run build",
+    "verify:svelte:release": "pnpm --filter @devslab/dds-svelte run build && node scripts/verify-svelte-release.mjs"
   },
   "engines": {
     "node": ">=20"
@@ -59,8 +62,19 @@
     "@changesets/cli": "2.29.7",
     "@playwright/test": "1.62.1",
     "@storybook/html-vite": "10.5.7",
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "@vitejs/plugin-react": "6.0.1",
+    "@vitejs/plugin-vue": "6.0.7",
+    "prettier": "3.9.10",
+    "prettier-plugin-svelte": "4.1.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "solid-js": "1.9.15",
     "storybook": "10.5.7",
+    "svelte": "5.57.2",
     "typescript": "7.0.2",
-    "vite": "8.2.1"
+    "vite": "8.2.1",
+    "vite-plugin-solid": "2.11.14",
+    "vue": "3.5.39"
   }
 }

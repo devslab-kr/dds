@@ -229,3 +229,20 @@ it("server-renders choice controls without style attributes (strict style-src-at
     expect(html).not.toMatch(/\sstyle=/);
   }
 });
+
+it("server-renders optional console disclosures with unique controlled lists", () => {
+  const shell = {
+    surface: "admin", activePath: "/policies",
+    brand: { href: "/", name: "DevsLab", mark: "/mark.svg" },
+    labels: { skip: "Skip", menuOpen: "Open", menuClose: "Close", nav: "Navigation", badge: "{count}" },
+    header: { title: "Policies" },
+    nav: [{ id: "settings", collapsible: true, label: "Settings", items: [{ id: "policies", href: "/policies", label: "Policies" }] }],
+    defaultExpandedGroups: [] as string[],
+  };
+  const html = renderToString(<><ConsoleShell {...shell}>One</ConsoleShell><ConsoleShell {...shell}>Two</ConsoleShell></>);
+  expect(html).toContain('aria-expanded="false"');
+  expect(html.match(/<ul[^>]*hidden/g)).toHaveLength(2);
+  const ids = [...html.matchAll(/id="([^"]+)"/g)].map(match => match[1]);
+  expect(new Set(ids).size).toBe(ids.length);
+  for (const target of html.matchAll(/aria-controls="([^"]+)"/g)) expect(ids).toContain(target[1]);
+});

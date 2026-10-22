@@ -358,3 +358,63 @@
     transition: none;
   }
 }
+
+/* Optional disclosures: legacy navigation retains its layout. */
+.dds-console-rail__group[data-collapsible="true"] > ul {
+  padding-inline-start: var(--dds-space-12);
+}
+.dds-console-rail__group[data-collapsible="true"] > .dds-console-rail__group-label {
+  padding: 0;
+}
+.dds-console-rail__group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dds-space-8);
+  inline-size: 100%;
+  min-block-size: var(--dds-space-40);
+  padding: var(--dds-space-8);
+  border: 0;
+  border-radius: var(--dds-radius-md);
+  background: transparent;
+  color: var(--dds-color-text-secondary);
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 650;
+  letter-spacing: normal;
+  text-align: start;
+  cursor: pointer;
+}
+.dds-console-rail__group-toggle[hidden] { display: none; }
+.dds-console-rail__group-toggle:hover { background: var(--dds-color-bg-subtle); }
+.dds-console-rail__group-toggle:focus-visible {
+  outline: 2px solid var(--dds-color-border-focus);
+  outline-offset: 2px;
+}
+.dds-console-rail__chevron {
+  inline-size: .375rem;
+  block-size: .375rem;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+}
+.dds-console-rail__group-toggle[aria-expanded="true"] .dds-console-rail__chevron {
+  transform: rotate(45deg);
+}
+.dds-console-rail__item-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dds-space-8);
+  min-inline-size: 0;
+}
+.dds-console-rail__item-content[hidden] { display: none; }
+.dds-console-rail__item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 1rem;
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+.dds-console-rail__item-icon[hidden] { display: none; }
+.dds-console-rail__item-icon > svg { inline-size: 100%; block-size: 100%; }

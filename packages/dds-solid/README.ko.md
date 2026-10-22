@@ -66,6 +66,26 @@ const reload = (key: "search" | "page") => list.run(key, async (signal) => {
 }, { replace: true });
 ```
 
+## ConsoleShell 탐색 그룹
+
+기존 그룹은 기본으로 펼쳐집니다. 그룹에 `collapsible: true`를 지정하면 기본 HTML 버튼으로 접고 펼칠 수 있습니다. 펼침 상태에 사용할 안정적인 `id`를 지정하세요. 생략하면 `group-${index}`가 키가 됩니다. 초기에는 현재 경로에 해당하는 접이식 그룹만 열리며, 탐색 링크와 같은 경로 판정 및 항목의 `active` 재정의를 사용합니다.
+
+`LeftNav`는 별도로 내보내므로 직접 만든 레이아웃에도 메뉴를 조합할 수 있습니다. `surface`, `activePath`, `nav`, `labels`의 `nav`·`badge`, 아래 펼침 상태 속성, 선택적인 `onNavigate`를 받습니다. `ConsoleShell` 안에 조합하려면 `navigation={<LeftNav ... />}`로 전달하세요. 이 슬롯이 기본 메뉴를 대체하므로 셸의 `nav`는 생략할 수 있습니다. 브랜드, 헤더, 본문과 모바일 서랍은 셸이 담당합니다. 사용자 정의 메뉴의 `onNavigate`에는 앱에서 필요한 서랍 동작을 연결하세요.
+
+```tsx
+const [expandedGroups, setExpandedGroups] = createSignal<readonly string[]>(["build"]);
+<ConsoleShell
+  {...shellProps}
+  nav={[{ id: "build", label: "Build", collapsible: true, items: [
+    { id: "projects", href: "/dashboard/projects", label: "Projects", icon: <svg viewBox="0 0 16 16"><path d="M2 3h5l2 2h5v8H2z" /></svg> },
+  ] }]}
+  expandedGroups={expandedGroups()}
+  onExpandedGroupsChange={setExpandedGroups}
+>Content</ConsoleShell>
+```
+
+비제어 초기 상태는 `defaultExpandedGroups`로 지정합니다. `[]`를 전달하면 모든 접이식 그룹이 닫힙니다. 제어 상태는 `expandedGroups`와 `onExpandedGroupsChange`를 사용하세요. 이후 경로 변경에 따른 펼침과 상태 저장은 앱이 담당합니다. 항목의 `icon`은 장식이며, 링크 이름은 `label`이 제공하고 배지는 접근성 라벨을 유지합니다.
+
 ## DatePicker
 
 ```tsx
@@ -93,3 +113,8 @@ Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 �
 상세 import: `@devslab/dds-solid/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/segmented-control`, `/number-input`, `/date-range-picker`, `/month-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
 Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker는 공유 달력을 제공합니다. DateRangePicker(시작일~종료일 기간)와 MonthPicker(YYYY-MM 월)도 같은 달력을 씁니다.
 
+
+
+## 공통 업무 화면
+
+Layout·LeftNav·TopNav는 공통 간격과 타이포 규격을 사용합니다. [조립 방법과 수치](../../docs/layouts.ko.md)를 참고하세요.
