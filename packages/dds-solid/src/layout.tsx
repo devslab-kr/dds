@@ -41,11 +41,25 @@ export function Layout(props: LayoutProps): JSX.Element {
         !!el &&
         !el.closest("[hidden]") &&
         el.getClientRects().length > 0 &&
+        getComputedStyle(el).visibility !== "hidden" &&
+        !Array.from(rail?.querySelectorAll("details:not([open])") ?? []).some(
+          (details) =>
+            details.contains(el) &&
+            !details.querySelector("summary")?.contains(el),
+        ) &&
         !el.hasAttribute("disabled"),
     );
   }
   onMount(() => {
     setHydrated(true);
+    if (typeof window.matchMedia === "function") {
+      const media = window.matchMedia("(max-width: 56.25rem)");
+      const resize = () => {
+        if (!media.matches) setOpen(false);
+      };
+      media.addEventListener("change", resize);
+      onCleanup(() => media.removeEventListener("change", resize));
+    }
     function key(event: KeyboardEvent) {
       if (!open()) return;
       if (event.key === "Escape") {

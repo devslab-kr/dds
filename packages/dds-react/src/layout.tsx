@@ -53,6 +53,13 @@ export const Layout = forwardRef<HTMLDivElement, LayoutProps>(function Layout(
   }
   useEffect(() => {
     setHydrated(true);
+    if (typeof window.matchMedia !== "function") return;
+    const media = window.matchMedia("(max-width: 56.25rem)");
+    const resize = () => {
+      if (!media.matches) setOpen(false);
+    };
+    media.addEventListener("change", resize);
+    return () => media.removeEventListener("change", resize);
   }, []);
   useEffect(() => {
     if (!open) return;
@@ -69,6 +76,14 @@ export const Layout = forwardRef<HTMLDivElement, LayoutProps>(function Layout(
           !!el &&
           !el.closest("[hidden]") &&
           el.getClientRects().length > 0 &&
+          getComputedStyle(el).visibility !== "hidden" &&
+          !Array.from(
+            rail.current?.querySelectorAll("details:not([open])") ?? [],
+          ).some(
+            (details) =>
+              details.contains(el) &&
+              !details.querySelector("summary")?.contains(el),
+          ) &&
           !el.hasAttribute("disabled"),
       );
     const frame = requestAnimationFrame(() => focusable()[1]?.focus());

@@ -37,6 +37,12 @@
         el &&
         !el.closest("[hidden]") &&
         el.getClientRects().length > 0 &&
+        getComputedStyle(el).visibility !== "hidden" &&
+        !Array.from(rail?.querySelectorAll("details:not([open])") ?? []).some(
+          (details) =>
+            details.contains(el) &&
+            !details.querySelector("summary")?.contains(el),
+        ) &&
         !el.hasAttribute("disabled"),
     );
   }
@@ -77,8 +83,19 @@
   }
   onMount(() => {
     hydrated = true;
+    const media =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(max-width: 56.25rem)")
+        : undefined;
+    const resize = () => {
+      if (!media?.matches) open = false;
+    };
+    media?.addEventListener("change", resize);
     document.addEventListener("keydown", key);
-    return () => document.removeEventListener("keydown", key);
+    return () => {
+      document.removeEventListener("keydown", key);
+      media?.removeEventListener("change", resize);
+    };
   });
 </script>
 

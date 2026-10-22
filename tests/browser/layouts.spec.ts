@@ -128,3 +128,76 @@ for (const framework of ["react", "solid", "vue", "svelte"])
       expect(errors).toEqual([]);
     });
   }
+
+for (const framework of ["react", "solid", "vue", "svelte"]) {
+  test(`${framework} regression: compact horizontal top bar`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 850 });
+    await page.goto(
+      `/tests/fixtures/layouts/index.html?framework=${framework}&layout=top`,
+    );
+    const bar = page.locator(".dds-layout__navigation");
+    await expect(bar).toBeVisible();
+    await expect(bar).toHaveCSS("flex-direction", "row");
+    expect((await bar.boundingBox())!.height).toBeLessThan(70);
+  });
+  test(`${framework} regression: closed disclosures cannot escape drawer focus`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 850 });
+    await page.goto(
+      `/tests/fixtures/layouts/index.html?framework=${framework}&layout=top`,
+    );
+    const opener = page.locator('[data-action="toggle-rail"]');
+    await opener.click();
+    const last = page.locator("summary").last();
+    await last.focus();
+    await page.keyboard.press("Tab");
+    await expect(opener).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(last).toBeFocused();
+  });
+  test(`${framework} regression: desktop resize releases mobile trap`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 850 });
+    await page.goto(
+      `/tests/fixtures/layouts/index.html?framework=${framework}&layout=left`,
+    );
+    const opener = page.locator('[data-action="toggle-rail"]');
+    await opener.click();
+    await page.setViewportSize({ width: 1280, height: 850 });
+    await expect(opener).toHaveAttribute("aria-expanded", "false");
+    await page.getByRole("button", { name: "Settings", exact: true }).focus();
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("textbox", { name: "Name" })).toBeFocused();
+  });
+  test(`${framework} regression: standalone LeftNav keeps its own type and targets`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 850 });
+    await page.goto(
+      `/tests/fixtures/layouts/index.html?framework=${framework}&layout=left`,
+    );
+    await expect(page.locator(".dds-console-rail__nav")).toHaveCount(1);
+    await page.evaluate(() => {
+      document.body.style.fontFamily = "serif";
+      document.body.append(document.querySelector(".dds-console-rail__nav")!);
+    });
+    const nav = page.locator(".dds-console-rail__nav");
+    await expect(nav).toHaveCSS("font-family", /Geist/);
+    await expect(
+      nav.locator(".dds-console-rail__group-toggle").first(),
+    ).toHaveCSS("font-size", "12px");
+    expect(
+      (await nav
+        .locator(".dds-console-rail__group-toggle")
+        .first()
+        .boundingBox())!.height,
+    ).toBeGreaterThanOrEqual(44);
+    expect(
+      (await nav.locator("a").first().boundingBox())!.height,
+    ).toBeGreaterThanOrEqual(44);
+  });
+}

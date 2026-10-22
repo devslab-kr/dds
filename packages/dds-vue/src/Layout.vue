@@ -30,6 +30,14 @@ function focusables() {
       !!el &&
       !el.closest("[hidden]") &&
       el.getClientRects().length > 0 &&
+      getComputedStyle(el).visibility !== "hidden" &&
+      !Array.from(
+        rail.value?.querySelectorAll("details:not([open])") ?? [],
+      ).some(
+        (details) =>
+          details.contains(el) &&
+          !details.querySelector("summary")?.contains(el),
+      ) &&
       !el.hasAttribute("disabled"),
   );
 }
@@ -68,11 +76,22 @@ function navigate(event: MouseEvent) {
   )
     close();
 }
+let media: MediaQueryList | undefined;
+const resize = () => {
+  if (!media?.matches) open.value = false;
+};
 onMounted(() => {
   hydrated.value = true;
+  if (typeof window.matchMedia === "function") {
+    media = window.matchMedia("(max-width: 56.25rem)");
+    media.addEventListener("change", resize);
+  }
   document.addEventListener("keydown", key);
 });
-onUnmounted(() => document.removeEventListener("keydown", key));
+onUnmounted(() => {
+  document.removeEventListener("keydown", key);
+  media?.removeEventListener("change", resize);
+});
 </script>
 <template>
   <div

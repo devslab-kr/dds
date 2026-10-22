@@ -59,7 +59,7 @@ export function LeftNav(props: LeftNavProps): JSX.Element {
     props.onExpandedGroupsChange?.(next);
   };
   return (
-    <nav class="dds-console-rail__nav" aria-label={props.labels.nav}>
+    <nav class="dds-console-rail__nav dds-left-nav" aria-label={props.labels.nav}>
       <For each={props.nav}>
         {(group, index) => {
           const groupId = `dds-console-group-${createUniqueId()}`;

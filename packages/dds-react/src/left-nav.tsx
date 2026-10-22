@@ -66,7 +66,7 @@ export function LeftNav({
     onExpandedGroupsChange?.(next);
   }
   return (
-    <nav className="dds-console-rail__nav" aria-label={labels.nav}>
+    <nav className="dds-console-rail__nav dds-left-nav" aria-label={labels.nav}>
       {nav.map((group, index) => (
         <section
           key={group.id ?? index}

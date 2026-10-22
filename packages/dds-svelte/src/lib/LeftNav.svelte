@@ -41,7 +41,7 @@
   }
 </script>
 
-<nav class="dds-console-rail__nav" aria-label={labels.nav}>
+<nav class="dds-console-rail__nav dds-left-nav" aria-label={labels.nav}>
   {#each nav as group, index (group.id ?? index)}
     <section
       class="dds-console-rail__group"

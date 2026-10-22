@@ -219,7 +219,9 @@ ${
 const { Layout, LeftNav, TopNav } = await import("@devslab/dds-react");
 for (const Component of [Layout, LeftNav, TopNav]) {
  assert.equal(typeof Component === "function" || typeof Component === "object", true);
- const layoutHtml = renderToString(createElement(Component, { surface:"fresh", activePath:"/", nav:[], labels:{skip:"Skip",menuOpen:"Open",menuClose:"Close",nav:"Navigation",badge:"{count}"} }, createElement("p",null,"Layout content")));
+ const labels={skip:"Skip",menuOpen:"Open",menuClose:"Close",nav:"Navigation",badge:"{count}"};
+ const props=Component===Layout?{labels}:{surface:"fresh",activePath:"/",nav:[],labels};
+ const layoutHtml=renderToString(createElement(Component,props,createElement("p",null,"Layout content")));
  assert.ok(layoutHtml.length > 0);
 }
 `

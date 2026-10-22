@@ -37,7 +37,7 @@ function toggleGroup(groupId: string) {
 </script>
 
 <template>
-  <nav class="dds-console-rail__nav" :aria-label="labels.nav">
+  <nav class="dds-console-rail__nav dds-left-nav" :aria-label="labels.nav">
     <section
       v-for="(group, index) in nav"
       :key="group.id ?? index"
