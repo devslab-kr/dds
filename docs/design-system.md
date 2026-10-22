@@ -76,7 +76,7 @@ Ionic, and SSR pages all share the same parts.
   `dds-tokens` emits a Tailwind preset, so utilities like `bg-brand`,
   `text-primary`, `p-4` *are* DDS tokens. Tailwind arbitrary values
   (`bg-[#06b6d4]`, `p-[13px]`) are the same violation as hard-coding tokens.
-- **Vue** — `dds-vue` is now the native Vue consumer of the shared CSS/token core, starting with EDS Desktop Button, Icon, Input and Ark UI DatePicker. Add more only for real consumer needs; product themes and business logic stay outside the package.
+- **Vue** — `dds-vue` is now the native Vue consumer of the shared CSS/token core, starting with EDS Desktop Button, Icon, Input and Ark UI DatePicker. The explicitly requested proactive extension covers the existing React/Solid component inventory; Vue uses native models/slots, with documented API differences. The separate dds-table-vue wraps AG Grid Community. Product themes and business logic stay outside the packages.
 - **Ionic** — Ionic components are web components themed via CSS variables
   (`--ion-color-*`), so a single Ionic mapping file from `dds-tokens` dresses
   all of Ionic in DDS colors and typography. Even if mobile goes Ionic instead

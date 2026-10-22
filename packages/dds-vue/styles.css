@@ -1,3 +1,11 @@
 @import "@devslab/dds-tokens/tokens.css";
 @import "@devslab/dds-css/dds.css";
 @import "./dist/dds-vue.css";
+
+.dds-tabs-root { display: contents; }
+.dds-tab-panel[hidden] { display: none; }
+.dds-tooltip__bubble[data-scope="tooltip"] { position: relative; inset: auto; transform: none; opacity: 1; }
+.dds-toast[data-scope="toast"] { transform: translate(var(--x), var(--y)); opacity: var(--opacity); }
+.dds-console-shell .dds-console-rail__group-label,
+.dds-console-shell .dds-console-page-eyebrow { color: var(--dds-color-text-secondary); }
+.dds-radio-group { display: flex; flex-wrap: wrap; gap: var(--dds-space-16); }

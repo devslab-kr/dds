@@ -2,7 +2,22 @@
 
 Native Vue 3 DDS components. Ark UI Vue owns calendar interaction; DDS CSS/tokens own presentation. No React/Solid runtime or imperative root bridge.
 
-Inventory: **Button, Icon, Input, DatePicker, ConsoleShell, LeftNav**. Expand only when a real consumer needs another component. This package does not claim the full React/Solid inventory.
+Native Vue counterparts now cover the existing DDS React/Solid component inventory. No app theme or business logic is bundled. The table is a separate `@devslab/dds-table-vue` package, so basic controls do not pull in AG Grid.
+
+| Family | Components/helpers |
+| --- | --- |
+| Controls | Button, IconButton, Icon, Field, Select, Checkbox, Radio, Switch, RadioGroup, Input, InputGroup, NumberInput, SegmentedControl |
+| Choices and dates | Combobox, SelectPicker, DatePicker, DateRangePicker, MonthPicker, TimePicker, Calendar |
+| Navigation and overlays | Tabs, TabList, Tab, TabPanel, Dialog, Tooltip, DropdownMenu, Popover, ToastProvider/useToast, ConsoleShell |
+| Helpers | usePendingAction/createPendingAction, createStatusPill, date/month/time validation |
+
+Values use `v-model`/`update:modelValue`; dialogs use `v-model:open`. Content uses Vue slots rather than React render props. Compound DropdownMenu and Popover components retain Ark Vue's native props/events. ConsoleShell uses default content, `actions`, and `foot` slots. Field's default slot exposes `{ control }` for native input attributes. IconButton requires `label`.
+
+NumberInput is `number | null`; choices persist string IDs; ranges are `{start,end}` ISO dates; MonthPicker persists YYYY-MM; TimePicker persists HH:MM. Typed invalid drafts remain visible and block native form submission. Disabled/readonly controls never commit user changes. Async actions return Vue refs (`current.value`, `busy.value`) and abort when replaced/reset/disposed.
+
+Each of the twelve component entries (`input`, `combobox`, `select-picker`, `dropdown-menu`, `popover`, `calendar`, `date-picker`, `time-picker`, `date-range-picker`, `month-picker`, `segmented-control`, `number-input`) can be imported independently. Input's dependency graph excludes grid/virtualizer and other-framework runtimes.
+
+This is component inventory parity, not identical framework APIs: Vue uses its own model/slot contracts; choice-list virtualization and custom Calendar/NumberInput message objects are not yet included. Large operational grids use the separate Community table adapter. Existing DatePicker's first-consumer Korean/Asia-Seoul contract is unchanged.
 
 ```sh
 pnpm add @devslab/dds-vue vue
@@ -31,29 +46,5 @@ Use shared semantic tokens to theme products; no EDS-specific colors, toolbar po
 
 Validation: `pnpm --filter @devslab/dds-vue check`, `test`, `build`. Public release follows the DDS lockstep Changesets/CI workflow.
 
-`ConsoleShell` provides the shared responsive console rail, skip link, context rows, page header, and mobile scrim/Escape behavior. Required props are `surface`, `activePath`, `brand` (`href`, `name`, `mark`), `labels` (`skip`, `menuOpen`, `menuClose`, `nav`, `badge`, with `{count}` in the badge template), and `header` (`title`, optional `eyebrow`). Optional `context` contains label/value rows. Its slots are default page content, `header-actions`, `foot`, and `navigation` (receives a `close` function for mobile navigation). Native attributes and events fall through to the shell root. The optional `nav` prop defaults to `[]` and renders a `LeftNav`; the navigation slot replaces it.
 
-```vue
-<ConsoleShell surface="ops" :active-path="route.path" :brand="brand" :nav="nav"
-  :labels="labels" :header="{ title: 'Orders' }" v-model:expanded-groups="expandedGroups">
-  <template #header-actions><Button>Create order</Button></template>
-  <p>Order content</p>
-  <template #foot><a href="/account">Account</a></template>
-</ConsoleShell>
-```
 
-`LeftNav` can render independently in any layout. It accepts `surface`, `activePath`, `nav`, `labels` containing only `nav`/`badge`, and the expansion props below. It emits `navigate` when a link is clicked and `update:expandedGroups` when expansion is requested. Layout and menu can also be composed explicitly:
-
-```vue
-<ConsoleShell surface="ops" :active-path="route.path" :brand="brand" :labels="labels" :header="{ title: 'Orders' }">
-  <template #navigation="{ close }">
-    <LeftNav surface="ops" :active-path="route.path" :nav="nav" :labels="labels"
-      v-model:expanded-groups="expandedGroups" @navigate="close" />
-  </template>
-  <p>Order content</p>
-</ConsoleShell>
-```
-
-Each nav group accepts `label`, `items`, optional stable `id`, and opt-in `collapsible`. Without `collapsible`, groups stay expanded. Collapsible groups initially open when they contain an active item. `defaultExpandedGroups` overrides that initial state; `[]` closes all collapsible groups. `expandedGroups` controls the state and `update:expandedGroups` emits requested arrays (use `v-model:expanded-groups`). Uncontrolled shells also emit changes. A group without an ID uses `group-${index}`; supply stable IDs when reordering or persisting groups. Route changes and persistence belong to the application; the shell does not reopen groups after initial setup.
-
-Nav items accept `id`, `href`, `label`, optional positive `badge`, `active` override, and decorative Vue `Component` `icon` rendered with `:is`. For example, `icon: markRaw(OrderIcon)` avoids reactive component warnings when nav data is reactive; wrap DDS `Icon` in a component to supply its props. `ConsoleNavItem`, `ConsoleNavGroup`, `LeftNavProps`, `ConsoleShellLabels`, `ConsoleHeader`, and `ConsoleShellProps` are exported types. Native disclosure buttons provide keyboard activation and ARIA targets use Vue `useId` for SSR/hydration. When mounting multiple independent Vue apps in one document, assign a distinct `app.config.idPrefix` to each app, using the same prefix on server and client.

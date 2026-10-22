@@ -1,0 +1,60 @@
+{
+  "name": "@devslab/dds-table-vue",
+  "version": "0.27.0",
+  "description": "DDS themed Community AG Grid for Vue 3",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devslab-kr/dds.git",
+    "directory": "packages/dds-table-vue"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "styles.css",
+    "README.md",
+    "README.ko.md"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "dependencies": {
+    "@devslab/dds-css": "workspace:0.27.0",
+    "@devslab/dds-tokens": "workspace:0.27.0",
+    "ag-grid-community": "36.2.0",
+    "ag-grid-vue3": "36.2.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "vue": "3.5.39",
+    "@vitejs/plugin-vue": "6.0.7",
+    "vite": "7.3.6",
+    "typescript": "6.0.3",
+    "vue-tsc": "3.3.6",
+    "vitest": "4.1.9",
+    "@vue/test-utils": "2.4.6",
+    "jsdom": "30.0.1",
+    "axe-core": "4.13.0"
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "check": "vue-tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}

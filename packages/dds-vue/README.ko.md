@@ -2,7 +2,22 @@
 
 Vue 3용 DDS 공통 컴포넌트입니다. 달력 동작은 Ark UI Vue, 디자인은 공통 CSS·토큰이 담당하며 React/Solid 런타임이나 명령형 root 브리지를 사용하지 않습니다.
 
-제공 범위는 **Button, Icon, Input, DatePicker, ConsoleShell, LeftNav**입니다. 실제 소비자가 필요로 할 때 추가합니다. React/Solid의 전체 컴포넌트와 동등한 범위라는 뜻은 아닙니다.
+기존 DDS React/Solid의 공개 컴포넌트 목록을 기준으로 Vue 구현을 확장했습니다. 테이블은 `@devslab/dds-table-vue`로 분리해 일반 입력을 사용할 때 AG Grid가 따라오지 않습니다.
+
+| 구분 | 컴포넌트·도우미 |
+| --- | --- |
+| 기본 컨트롤 | Button, IconButton, Icon, Field, Select, Checkbox, Radio, Switch, RadioGroup, Input, InputGroup, NumberInput, SegmentedControl |
+| 선택·날짜 | Combobox, SelectPicker, DatePicker, DateRangePicker, MonthPicker, TimePicker, Calendar |
+| 탐색·오버레이 | Tabs, TabList, Tab, TabPanel, Dialog, Tooltip, DropdownMenu, Popover, ToastProvider/useToast, ConsoleShell |
+| 도우미 | usePendingAction/createPendingAction, createStatusPill, 날짜·월·시간 검증 |
+
+값은 v-model/update:modelValue, 대화상자 열림은 v-model:open으로 연결합니다. React render prop 대신 Vue slot을 사용합니다. DropdownMenu/Popover의 compound 부품은 Ark Vue의 기본 props/events를 따릅니다. ConsoleShell은 기본 내용·actions·foot 슬롯, Field는 `{ control }` 기본 슬롯을 제공합니다. IconButton에는 label이 필요합니다.
+
+NumberInput은 number/null, 선택기는 문자열 ID, 기간은 `{start,end}` ISO 날짜, MonthPicker는 YYYY-MM, TimePicker는 HH:MM을 저장합니다. 잘못된 초안은 그대로 보여주고 native form 제출을 차단합니다. disabled/readonly에서 사용자 변경을 확정하지 않습니다. 비동기 도우미는 current.value/busy.value를 제공하며 교체·초기화·scope 종료 시 AbortSignal을 취소합니다.
+
+input, combobox, select-picker, dropdown-menu, popover, calendar, date-picker, time-picker, date-range-picker, month-picker, segmented-control, number-input의 12개 개별 import 경로를 제공합니다. Input 의존 경로에는 grid·virtualizer·다른 프레임워크 런타임이 없습니다.
+
+컴포넌트 목록을 맞춘 것이며 프레임워크별 API가 완전히 같다는 뜻은 아닙니다. Vue는 model/slot 계약을 따르고, 선택 목록 가상화와 Calendar/NumberInput 사용자 지정 메시지 객체는 아직 포함하지 않습니다. 대용량 업무 그리드는 별도 Community 테이블 어댑터를 사용합니다. 기존 DatePicker의 한국어·Asia/Seoul 계약은 유지합니다.
 
 ```sh
 pnpm add @devslab/dds-vue vue
@@ -36,29 +51,5 @@ EDS 전용 색상·도구 모음 위치·IPC/스토어는 제품 코드에 남�
 
 검증 명령은 `pnpm --filter @devslab/dds-vue check`, `test`, `build`입니다. 루트 `verify:vue:test`와 `verify:vue:release`가 CI 및 배포에 연결되며, 공개 배포는 기존 DDS lockstep Changesets 절차를 따릅니다.
 
-`ConsoleShell`은 반응형 콘솔 레일, 본문 건너뛰기 링크, 컨텍스트 행, 페이지 헤더, 모바일 배경 클릭/Escape 닫기를 제공합니다. 필수 props는 `surface`, `activePath`, `brand` (`href`, `name`, `mark`), `labels` (`skip`, `menuOpen`, `menuClose`, `nav`, `{count}`를 포함하는 `badge`), `header` (`title`, 선택적 `eyebrow`)입니다. 선택적 `context`는 label/value 행 배열입니다. 기본 슬롯은 페이지 본문, `header-actions`는 헤더 액션, `foot`은 레일 하단, `navigation`은 메뉴 교체 슬롯입니다. `navigation`은 모바일 메뉴를 닫는 `close` 함수를 받습니다. 기본 HTML 속성·이벤트는 루트에 전달됩니다. 선택적 `nav`는 기본값 `[]`이며 기본 `LeftNav`에 전달되고, navigation 슬롯을 지정하면 그 슬롯으로 교체합니다.
 
-```vue
-<ConsoleShell surface="ops" :active-path="route.path" :brand="brand" :nav="nav"
-  :labels="labels" :header="{ title: '주문' }" v-model:expanded-groups="expandedGroups">
-  <template #header-actions><Button>주문 추가</Button></template>
-  <p>주문 본문</p>
-  <template #foot><a href="/account">계정</a></template>
-</ConsoleShell>
-```
 
-`LeftNav`는 어떤 레이아웃에서도 독립적으로 사용할 수 있습니다. `surface`, `activePath`, `nav`, `nav`/`badge`만 있는 `labels`, 아래 펼침 상태 props를 받습니다. 링크 클릭 시 `navigate`, 펼침 변경 요청 시 `update:expandedGroups`를 보냅니다. 레이아웃과 메뉴를 따로 조합하는 예입니다.
-
-```vue
-<ConsoleShell surface="ops" :active-path="route.path" :brand="brand" :labels="labels" :header="{ title: '주문' }">
-  <template #navigation="{ close }">
-    <LeftNav surface="ops" :active-path="route.path" :nav="nav" :labels="labels"
-      v-model:expanded-groups="expandedGroups" @navigate="close" />
-  </template>
-  <p>주문 본문</p>
-</ConsoleShell>
-```
-
-그룹은 `label`, `items`, 선택적 고정 `id`, 선택적 `collapsible`을 받습니다. `collapsible`이 없으면 기존처럼 항상 펼칩니다. 접기 가능한 그룹은 최초 렌더 시 활성 항목이 있으면 펼칩니다. `defaultExpandedGroups`로 초기 상태를 지정하며 `[]`는 모두 접습니다. `expandedGroups`는 제어 상태, `update:expandedGroups`는 요청한 ID 배열 이벤트입니다 (`v-model:expanded-groups`). 비제어 모드에서도 변경 이벤트를 보냅니다. ID 생략 시 `group-${index}`를 사용하므로 순서 변경·저장에는 고정 ID를 지정하세요. 최초 설정 이후의 경로 변경과 상태 저장은 앱이 담당하며 자동으로 다시 펼치지 않습니다.
-
-항목은 `id`, `href`, `label`, 선택적 양수 `badge`, `active` 재정의, 장식용 Vue `Component`인 `icon`을 받습니다. 아이콘은 `:is`로 렌더합니다. 반응형 nav 데이터에는 `icon: markRaw(OrderIcon)`을 사용하면 컴포넌트 반응형 경고를 피할 수 있습니다. DDS `Icon`에 props를 전달하려면 래퍼 컴포넌트를 사용하세요. `ConsoleNavItem`, `ConsoleNavGroup`, `LeftNavProps`, `ConsoleShellLabels`, `ConsoleHeader`, `ConsoleShellProps` 타입을 export합니다. 기본 button이 키보드 활성화를 제공하고 Vue `useId`가 SSR/hydration의 ARIA 연결을 유지합니다. 같은 문서에 독립 Vue 앱을 여러 개 마운트하면 각 앱의 `app.config.idPrefix`를 다르게 지정하고 서버·클라이언트에서 동일한 값을 사용하세요.
