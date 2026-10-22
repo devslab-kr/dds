@@ -1,0 +1,1 @@
+<script lang="ts">import ConsoleShell from '../../src/lib/ConsoleShell.svelte';import type {ConsoleShellProps} from '../../src/lib/types';let props:ConsoleShellProps=$props();</script><ConsoleShell {...props}/><ConsoleShell {...props}/>
