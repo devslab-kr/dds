@@ -43,6 +43,11 @@ const i = icons.phone; // { viewBox, strokeWidth, set, body }
   32–40px marketing display. The `site-` prefix is part of the name; the
   folder is only organization.
 
+Product controls use `settings` for preferences (a gear), `log-out` for
+signing out (a door with an outward arrow), `search` for search fields and
+`chevron-down` for selection triggers. `tool` remains the repair/tool action;
+`arrow-right` remains directional navigation.
+
 ## Rules (enforced by `scripts/check-icons.mjs`, so CI fails, not review)
 
 - `viewBox="0 0 24 24"`, `width`/`height` 24

@@ -42,7 +42,8 @@ Vue >=3.5는 peer 의존성입니다. 스타일은 한 번만 import합니다. �
 
 - `Button`: tone·size·type·loading·disabled와 기본 HTML 속성/이벤트를 지원합니다.
 - `Icon`: DDS 아이콘 이름, 선택적 접근성 label과 size를 받습니다. label 없는 아이콘은 장식용입니다.
-- `Input`: v-model과 기본 input 속성/이벤트, outside/inside/hidden 라벨, 선택적 clear, readonly/disabled, 노출된 focus/select 메서드를 제공합니다. 검색은 type=search로 사용합니다.
+- `Input`: v-model과 기본 input 속성/이벤트, outside/inside/hidden 라벨, 선택적 clear, readonly/disabled, 노출된 focus/select 메서드를 제공합니다. 검색은 type=search로 사용하며 장식용 DDS 검색 아이콘을 기본으로 표시합니다. clearable을 켜면 DDS 지우기 버튼을 사용합니다.
+- `SelectPicker`: DDS 아래 화살표를 기본으로 표시하며 선택값은 한 줄로 유지합니다. 직접 title을 지정하지 않으면 전체 선택 라벨을 트리거의 title로 제공합니다. 팝업 항목은 줄바꿈하여 전체 라벨을 보여줍니다.
 - `DatePicker`: 저장값은 YYYY-MM-DD, 한국어 표시는 YYYY/MM/DD입니다. required 기본값은 true, min/max는 양끝을 포함하는 ISO 날짜입니다. 첫 소비자 기준 언어/시간대는 한국어·Asia/Seoul입니다.
 
 날짜의 잘못된 초안은 그대로 보여주고 오류 문구와 연결합니다. 이전 정상 날짜로 몰래 저장하지 않습니다. 버튼/API 저장은 `validityChange`도 검사하세요. 명시적으로 같은 값을 초기화할 때는 편집기 key를 새로 지정합니다. Ark UI Vue가 달력 탐색·위치·키보드를 담당하고, 대화상자 안에서는 포털도 해당 대화상자에 유지합니다. 날짜 검증 헬퍼는 `@devslab/dds-vue/date-only`에서 제공합니다.

@@ -42,6 +42,11 @@ const i = icons.phone; // { viewBox, strokeWidth, set, body }
   표면에서 32–40px로 크게 쓰이도록 그려진 세트. `site-` 접두는 이름의
   일부이고 폴더는 정리용입니다.
 
+제품 컨트롤은 환경설정에 `settings`(톱니바퀴), 로그아웃에
+`log-out`(문 밖으로 나가는 화살표), 검색 입력에 `search`, 선택 트리거에
+`chevron-down`을 사용합니다. `tool`은 수리·도구 동작,
+`arrow-right`는 방향 이동에 사용하는 기존 아이콘입니다.
+
 ## 규칙 (`scripts/check-icons.mjs`가 기계적으로 강제 — 리뷰가 아니라 CI가 막습니다)
 
 - `viewBox="0 0 24 24"`, `width`/`height` 24

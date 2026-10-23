@@ -1,4 +1,4 @@
-import { it, expect, afterEach } from 'vitest'
+import { it, expect, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, ref, nextTick } from 'vue'
 import * as DDS from '../index'
@@ -43,4 +43,35 @@ it('submits a combobox selection ID once rather than its visible label', async (
   const data = new FormData(wrapper.get('form').element as HTMLFormElement)
   expect(data.getAll('city')).toEqual(['a'])
   wrapper.unmount()
+})
+it('keeps the full selected label available when a select field truncates its display', async () => {
+  const fullLabel = '서울 강남구에 위치한 아주 긴 이름의 치과기공소'
+  const wrapper = mount(DDS.SelectPicker, { attachTo: document.body, props: { label: '기공소', modelValue: 'a', selectedOption: { value: 'a', label: fullLabel }, items: [{ value: 'b', label: '부산' }] } })
+  try {
+    const trigger = wrapper.get('[role="combobox"]')
+    await vi.waitFor(() => expect(trigger.attributes('title')).toBe(fullLabel))
+    expect(trigger.text()).toBe(fullLabel)
+    await wrapper.setProps({ modelValue: 'b' })
+    expect(trigger.attributes('title')).toBe('부산')
+    await wrapper.setProps({ modelValue: '' })
+    expect(trigger.attributes('title')).toBeUndefined()
+  } finally { wrapper.unmount() }
+  const withoutTitle = mount(DDS.SelectPicker, { props: { label: '기공소', modelValue: 'a', items: [{ value: 'a', label: fullLabel }] }, attrs: { title: null } })
+  try { expect(withoutTitle.get('[role="combobox"]').attributes('title')).toBeUndefined() }
+  finally { withoutTitle.unmount() }
+})
+it('selects with the keyboard and emits the option ID once', async () => {
+  const fullLabel = '서울 강남구에 위치한 아주 긴 이름의 치과기공소'
+  const wrapper = mount(DDS.SelectPicker, { attachTo: document.body, props: { label: '기공소', items: [{ value: 'a', label: fullLabel }, { value: 'b', label: '부산', disabled: true }] } })
+  try {
+    const trigger = wrapper.get('[role="combobox"]')
+    ;(trigger.element as HTMLElement).focus()
+    await trigger.trigger('keydown', { key: 'ArrowDown' })
+    await vi.waitFor(() => expect(document.querySelector('[role="option"]')?.textContent).toBe(fullLabel))
+    await vi.waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('listbox'))
+    document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    await vi.waitFor(() => expect(wrapper.emitted('update:modelValue')).toEqual([['a']]))
+    expect(wrapper.emitted('change')).toEqual([['a']])
+    await vi.waitFor(() => expect(trigger.attributes('title')).toBe(fullLabel))
+  } finally { wrapper.unmount() }
 })
