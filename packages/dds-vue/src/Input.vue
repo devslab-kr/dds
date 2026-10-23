@@ -27,6 +27,7 @@ onMounted(() => { if (attrs.autofocus !== undefined && attrs.autofocus !== false
 <template>
   <span class="dds-input" :data-label-placement="labelPlacement" :data-filled="modelValue ? '' : undefined" :data-disabled="disabled ? '' : undefined">
       <label class="dds-input__label" :for="id">{{ label }}</label>
+      <Icon v-if="type === 'search'" name="search" class="dds-input__search" :size="16" />
       <input v-bind="attrs" :id="id" ref="input" :type="type" class="dds-input__control" :readonly="readOnly" :value="modelValue" :disabled="disabled"
         @input="update(($event.target as HTMLInputElement).value)" @keydown="onKeydown" />
       <button v-if="clearable && modelValue && !disabled && !readOnly" type="button" class="dds-input__clear" :aria-label="clearLabel"

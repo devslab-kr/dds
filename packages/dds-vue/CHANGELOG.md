@@ -1,5 +1,15 @@
 # @devslab/dds-vue
 
+## 0.29.1
+
+### Patch Changes
+
+- Show DDS chevrons in Vue SelectPicker, keep selected labels on one line with their full text available on hover, and wrap full option labels in its popup. Add the default DDS search icon to Vue search inputs without changing input, IME or clear events. Add canonical settings and log-out icons for product controls.
+- Updated dependencies
+  - @devslab/dds-css@0.29.1
+  - @devslab/dds-icons@0.29.1
+  - @devslab/dds-tokens@0.29.1
+
 ## 0.29.0
 
 ### Minor Changes

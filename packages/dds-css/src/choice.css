@@ -7,6 +7,14 @@
 .dds-choice-input {flex:1;inline-size:100%;outline:none;}
 .dds-choice-trigger {cursor:pointer;text-align:start;}
 .dds-choice-control > .dds-choice-trigger:first-child {inline-size:100%;}
+/* SelectPicker keeps a single line in the field; the popup exposes full labels.
+ * Other choice adapters may virtualize fixed rows, so wrapping is opt-in here. */
+.dds-select-picker .dds-choice-control {block-size:var(--dds-space-40);}
+.dds-select-picker .dds-choice-trigger {display:flex;align-items:center;gap:var(--dds-space-8);flex:1;}
+.dds-select-picker .dds-choice-value {flex:1;min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dds-select-picker .dds-choice-indicator {display:flex;align-items:center;flex:none;color:var(--dds-color-text-secondary);pointer-events:none;}
+.dds-select-picker[data-label-placement="inside"] .dds-choice-control {block-size:calc(var(--dds-space-40) + var(--dds-space-16));}
+.dds-select-picker-content .dds-choice-item {padding-block:var(--dds-space-8);white-space:normal;overflow-wrap:anywhere;}
 .dds-choice-clear {flex:none;min-inline-size:var(--dds-space-32);min-block-size:var(--dds-space-32);padding:var(--dds-space-4);border:0;border-radius:var(--dds-radius-sm);background:transparent;color:var(--dds-color-text-secondary);cursor:pointer;}
 .dds-choice-content {box-sizing:border-box;min-inline-size:var(--reference-width);max-inline-size:calc(100vw - var(--dds-space-32));max-block-size:min(320px,var(--available-height,320px));overflow:auto;padding:var(--dds-space-4);background:var(--dds-color-bg-elevated);color:var(--dds-color-text-primary);border:1px solid var(--dds-color-border-default);border-radius:var(--dds-radius-md);box-shadow:var(--dds-elevation-2);font-family:var(--dds-font-family-sans);font-size:var(--dds-typo-body-2-font-size);}
 .dds-choice-item {box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;min-block-size:var(--dds-space-40);padding-inline:var(--dds-space-12);border-radius:var(--dds-radius-sm);cursor:pointer;outline:none;overflow:hidden;white-space:nowrap;}
@@ -26,4 +34,4 @@
 .dds-choice[data-label-placement="inside"]:not(:focus-within):not([data-has-value]) .dds-choice-input::placeholder {color:transparent;}
 .dds-choice[data-label-placement="inside"]:not(:focus-within):not([data-has-value]) .dds-choice-value {visibility:hidden;}
 .dds-choice[data-disabled] {opacity:.45;}
-@media(pointer:coarse){.dds-choice-input,.dds-choice-trigger,.dds-choice-clear {min-block-size:44px;min-inline-size:44px;}}
+@media(pointer:coarse){.dds-select-picker .dds-choice-control {min-block-size:44px;}.dds-choice-input,.dds-choice-trigger,.dds-choice-clear {min-block-size:44px;min-inline-size:44px;}}

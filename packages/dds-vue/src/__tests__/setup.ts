@@ -5,3 +5,5 @@ if (!globalThis.ResizeObserver) globalThis.ResizeObserver = class {
   unobserve() {}
   disconnect() {}
 }
+// Ark Select scrolls its popup after keyboard selection; jsdom has no scrolling.
+if (typeof HTMLElement !== 'undefined' && !HTMLElement.prototype.scrollTo) HTMLElement.prototype.scrollTo = function () {}

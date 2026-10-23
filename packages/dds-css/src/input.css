@@ -5,6 +5,10 @@
 .dds-input__control::placeholder {color:var(--dds-color-text-muted);}
 .dds-input__control:focus-visible {outline:var(--dds-space-2) solid var(--dds-color-border-focus);outline-offset:0;}
 .dds-input__control[aria-invalid="true"] {border-color:var(--dds-color-status-danger);}
+.dds-input:has(.dds-input__search) .dds-input__control {padding-inline-start:var(--dds-space-40);}
+.dds-input__search {position:absolute;inset-inline-start:var(--dds-space-12);inset-block-end:var(--dds-space-12);color:var(--dds-color-text-secondary);pointer-events:none;}
+.dds-input[data-label-placement="inside"]:has(.dds-input__search) .dds-input__label {inset-inline-start:var(--dds-space-40);}
+.dds-input[data-label-placement="inside"] .dds-input__search {inset-block-end:var(--dds-space-20);}
 .dds-input:has(.dds-input__clear) .dds-input__control {padding-inline-end:var(--dds-space-48);}
 .dds-input__clear {position:absolute;inset-inline-end:var(--dds-space-4);inset-block-end:var(--dds-space-4);display:grid;place-items:center;inline-size:var(--dds-space-32);block-size:var(--dds-space-32);padding:0;border:0;border-radius:var(--dds-radius-sm);background:transparent;color:var(--dds-color-text-secondary);font:inherit;cursor:pointer;}
 .dds-input__clear:hover {background:var(--dds-color-bg-subtle);}
@@ -17,7 +21,7 @@
 .dds-input[data-label-placement="inside"]:is(:focus-within,[data-filled],:has(input:-webkit-autofill)) .dds-input__label {inset-block-start:var(--dds-space-4);font-size:var(--dds-typo-caption-font-size);}
 .dds-input[data-label-placement="inside"]:not(:focus-within):not([data-filled]):not(:has(input:-webkit-autofill)) .dds-input__control::placeholder {color:transparent;}
 .dds-input[data-label-placement="inside"] .dds-input__clear {inset-block-end:var(--dds-space-12);}
-.dds-input__control[type="search"]::-webkit-search-cancel-button {appearance:none;}
+.dds-input__control[type="search"]::-webkit-search-cancel-button,.dds-input__control[type="search"]::-webkit-search-decoration {appearance:none;}
 .dds-input-group {display:flex;align-items:flex-end;gap:var(--dds-space-8);inline-size:100%;min-inline-size:0;color:var(--dds-color-text-primary);}
 .dds-input-group > .dds-input {flex:1;min-inline-size:0;}
 .dds-input-group__start,.dds-input-group__end {display:flex;align-items:center;justify-content:center;flex:none;min-block-size:var(--dds-space-40);color:var(--dds-color-text-secondary);}

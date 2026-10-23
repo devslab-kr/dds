@@ -38,7 +38,9 @@ const dateValid = ref(true)
 </template>
 ```
 
-Vue >=3.5 is a peer. CSS/tokens/icons stay framework neutral. `Input` accepts native input attributes/events, has labelled outside/inside/hidden placement, optional clear, readonly/disabled and exposed focus/select methods. `Button` uses tone/size/type/loading/disabled; Icon accepts a DDS name and optional accessible label.
+Vue >=3.5 is a peer. CSS/tokens/icons stay framework neutral. `Input` accepts native input attributes/events, has labelled outside/inside/hidden placement, optional clear, readonly/disabled and exposed focus/select methods. Search inputs (`type="search"`) include a decorative DDS search icon and use the DDS clear button when `clearable` is enabled. `Button` uses tone/size/type/loading/disabled; Icon accepts a DDS name and optional accessible label.
+
+`SelectPicker` includes a DDS chevron and keeps its selected label on one line. The full selected label is available in the trigger's `title` unless an explicit `title` is supplied; popup options wrap to show their complete labels.
 
 DatePicker emits only canonical `YYYY-MM-DD` or optional empty values, displays Korean dates as `YYYY/MM/DD`, and exposes validityChange for button/API saves. Invalid drafts remain visible, are linked to their error, and never silently commit a previous valid date. Calendar interaction, navigation and positioning use `@ark-ui/vue`; portals stay inside their owning dialog. Required defaults true; min/max are inclusive ISO dates. Mount a fresh editor key when the consumer explicitly resets an unchanged value. Current first-consumer locale is Korean/Asia-Seoul.
 
