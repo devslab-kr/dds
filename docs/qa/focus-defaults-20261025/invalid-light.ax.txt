@@ -1,0 +1,360 @@
+Browser tab: 8, Title: "DDS 컴포넌트 — dds-css v1 인벤토리", URL: "http://127.0.0.1:8770/preview/components.html".
+0 AXWebArea DDS 컴포넌트 — dds-css v1 인벤토리, URL: 127.0.0.1:8770/preview/components.html
+	1 container
+		2 heading DDS 컴포넌트, Value: 1
+			3 text DDS 컴포넌트
+		4 button 테마 전환, ID: themeToggle
+		5 text @devslab/dds-css · v1 인벤토리 20종
+		6 container DDS 쇼케이스
+			7 link Description: > ./dds --foundation, Value: 127.0.0.1:8770/preview/index.html
+			8 link Description: > ./dds --icons, Value: 127.0.0.1:8770/preview/icons.html
+			9 link Description: > ./brand --guide, Value: devslab.kr/brand/
+			10 link Description: > cd devslab.kr, Value: devslab.kr/
+	11 heading Button — variant × size × 상태, Value: 2
+		12 text Button — variant × size × 상태
+	13 text LIGHT
+	14 button 저장
+	15 button 취소
+	16 button 자세히
+	17 button 삭제
+	18 button 작게
+	19 button 보통
+	20 button 크게
+	21 button (disabled) 비활성
+	22 text disabled
+	23 button 저장
+	24 text loading
+	25 button (disabled) 비활성
+	26 text danger disabled
+	27 text DARK (DATA-THEME 스코프 고정)
+	28 button 저장
+	29 button 취소
+	30 button 자세히
+	31 button 삭제
+	32 button 작게
+	33 button 보통
+	34 button 크게
+	35 button (disabled) 비활성
+	36 text disabled
+	37 button 저장
+	38 text loading
+	39 button (disabled) 비활성
+	40 text danger disabled
+	41 heading IconButton — variant × size (버튼과 같은 높이), Value: 2
+		42 text IconButton — variant × size (버튼과 같은 높이)
+	43 text LIGHT
+	44 button 닫기
+	45 text ghost
+	46 button 수정
+	47 text secondary
+	48 button 자료 삭제
+	49 text danger
+	50 button (disabled) 닫기
+	51 text disabled
+	52 button 수정
+	53 text sm 32
+	54 button 수정
+	55 text md 40
+	56 button 수정
+	57 text lg 48
+	58 button 텍스트 버튼
+	59 text 높이 대조
+	60 text DARK (DATA-THEME 스코프 고정)
+	61 button 닫기
+	62 text ghost
+	63 button 수정
+	64 text secondary
+	65 button 자료 삭제
+	66 text danger
+	67 button (disabled) 닫기
+	68 text disabled
+	69 button 수정
+	70 text sm 32
+	71 button 수정
+	72 text md 40
+	73 button 수정
+	74 text lg 48
+	75 button 텍스트 버튼
+	76 text 높이 대조
+	77 heading TextField — 기본 · 에러 · 비활성, Value: 2
+		78 text TextField — 기본 · 에러 · 비활성
+	79 text LIGHT
+	80 text 회사 이름
+	81 text field (settable) 회사 이름, ID: lf1
+	82 text 방문자에게 표시되는 이름입니다.
+	83 text 이메일
+	84 text field (settable) 이메일, Value: hello@devslab, ID: lf2
+	85 text 이메일 형식이 아닙니다. 예: hello@devslab.kr
+	86 text 사업자 번호
+	87 text field (disabled) 사업자 번호, Value: 000-00-00000, ID: lf3
+	88 text 가입 후에는 바꿀 수 없습니다.
+	89 text DARK
+	90 text 회사 이름
+	91 text field (settable) 회사 이름, ID: df1
+	92 text 방문자에게 표시되는 이름입니다.
+	93 text 이메일
+	94 text field (settable) 이메일, Value: hello@devslab, ID: df2
+	95 text 이메일 형식이 아닙니다. 예: hello@devslab.kr
+	96 text 사업자 번호
+	97 text field (disabled) 사업자 번호, Value: 000-00-00000, ID: df3
+	98 text 가입 후에는 바꿀 수 없습니다.
+	99 heading Textarea · Select — 같은 .dds-field 안에서, Value: 2
+		100 text Textarea · Select — 같은 .dds-field 안에서
+	101 text LIGHT
+	102 text 회사 소개
+	103 text entry area (settable) 회사 소개, Value: 데브스랩은 SaaS 제품을 만드는 1인 개발 스튜디오입니다., ID: ta1-light
+	104 text 방문자에게 표시됩니다.
+	105 text 기본 언어
+	106 pop up button (collapsed, settable) 기본 언어, Value: 한국어, ID: sel1-light, Secondary Actions: Expand
+		107 menu
+			108 (selected) 한국어
+			109 English
+			110 日本語
+	111 text 알림 주기
+	112 pop up button (disabled, collapsed, settable) 알림 주기, Value: 매일, ID: sel2-light, Secondary Actions: Expand
+		113 menu
+			114 (disabled) 매일
+	115 text disabled
+	116 text 답변 추가 지시
+	117 text entry area (settable) 답변 추가 지시, Value: 가격은 절대 말하지 마, ID: ta2-light
+	118 text 지시문은 200자를 넘을 수 없습니다.
+	119 text DARK (DATA-THEME 스코프 고정)
+	120 text 회사 소개
+	121 text entry area (settable) 회사 소개, Value: 데브스랩은 SaaS 제품을 만드는 1인 개발 스튜디오입니다., ID: ta1-dark
+	122 text 방문자에게 표시됩니다.
+	123 text 기본 언어
+	124 pop up button (collapsed, settable) 기본 언어, Value: 한국어, ID: sel1-dark, Secondary Actions: Expand
+		125 menu
+			126 (selected) 한국어
+			127 English
+			128 日本語
+	129 text 알림 주기
+	130 pop up button (disabled, collapsed, settable) 알림 주기, Value: 매일, ID: sel2-dark, Secondary Actions: Expand
+		131 menu
+			132 (disabled) 매일
+	133 text disabled
+	134 text 답변 추가 지시
+	135 text entry area (settable) 답변 추가 지시, Value: 가격은 절대 말하지 마, ID: ta2-dark
+	136 text 지시문은 200자를 넘을 수 없습니다.
+	137 heading Checkbox · Radio · Switch, Value: 2
+		138 text Checkbox · Radio · Switch
+	139 text LIGHT
+	140 checkbox (settable, integer) Description: 주간 다이제스트, Value: 1
+	141 checkbox (settable, integer) Description: 즉시 알림, Value: 0
+	142 checkbox (settable, integer) Description: 일부 선택, Value: 2, ID: cb-ind-light
+	143 checkbox (disabled, settable, integer) Description: 고정됨, Value: 1
+	144 radio button (settable, integer) Description: 매일, Value: 1
+	145 radio button (settable, integer) Description: 매주, Value: 0
+	146 radio button (disabled, settable, integer) Description: 사용 안 함, Value: 0
+	147 switch (settable, boolean) Description: 문의 알림, Value: 1
+	148 switch (settable, boolean) Description: 방문자 이어보기, Value: 0
+	149 switch (disabled, settable, boolean) Description: 베타 모드, Value: 1
+	150 text DARK (DATA-THEME 스코프 고정)
+	151 checkbox (settable, integer) Description: 주간 다이제스트, Value: 1
+	152 checkbox (settable, integer) Description: 즉시 알림, Value: 0
+	153 checkbox (settable, integer) Description: 일부 선택, Value: 2, ID: cb-ind-dark
+	154 checkbox (disabled, settable, integer) Description: 고정됨, Value: 1
+	155 radio button (settable, integer) Description: 매일, Value: 1
+	156 radio button (settable, integer) Description: 매주, Value: 0
+	157 radio button (disabled, settable, integer) Description: 사용 안 함, Value: 0
+	158 switch (settable, boolean) Description: 문의 알림, Value: 1
+	159 switch (settable, boolean) Description: 방문자 이어보기, Value: 0
+	160 switch (disabled, settable, boolean) Description: 베타 모드, Value: 1
+	161 heading Badge · Spinner · Skeleton, Value: 2
+		162 text Badge · Spinner · Skeleton
+	163 text LIGHT
+	164 text Beta
+	165 text 연결됨
+	166 text 확인 필요
+	167 text 실패
+	168 text 안내
+	169 container 불러오는 중
+	170 container 불러오는 중
+	171 container 불러오는 중
+	172 text DARK
+	173 text Beta
+	174 text 연결됨
+	175 text 확인 필요
+	176 text 실패
+	177 text 안내
+	178 container 불러오는 중
+	179 container 불러오는 중
+	180 container 불러오는 중
+	181 heading Chip · Avatar, Value: 2
+		182 text Chip · Avatar
+	183 text LIGHT
+	184 checkbox 미답변, Value: 1
+	185 button 웹페이지
+	186 button 파일
+	187 button (disabled) 보관됨
+	188 text sm 32
+	189 text md 40
+	190 text lg 48
+	191 text square
+	192 text DARK (DATA-THEME 스코프 고정)
+	193 checkbox 미답변, Value: 1
+	194 button 웹페이지
+	195 button 파일
+	196 button (disabled) 보관됨
+	197 text sm 32
+	198 text md 40
+	199 text lg 48
+	200 text square
+	201 heading Divider · Card, Value: 2
+		202 text Divider · Card
+	203 text LIGHT
+	204 container
+		205 heading 재크롤 일정, Value: 5
+			206 text 재크롤 일정
+		207 text 매일 04:00(KST)에 등록된 자료를 다시 읽습니다.
+	208 container
+		209 heading --subtle, Value: 5
+			210 text --subtle
+		211 text 이미 떠 있는 면 안에서 쓰는 납작한 변형.
+	212 text 왼쪽
+	213 text 오른쪽
+	214 text DARK (DATA-THEME 스코프 고정)
+	215 container
+		216 heading 재크롤 일정, Value: 5
+			217 text 재크롤 일정
+		218 text 매일 04:00(KST)에 등록된 자료를 다시 읽습니다.
+	219 container
+		220 heading --subtle, Value: 5
+			221 text --subtle
+		222 text 이미 떠 있는 면 안에서 쓰는 납작한 변형.
+	223 text 왼쪽
+	224 text 오른쪽
+	225 heading ListRow — 자기완결형 행 (leading · body · actions), Value: 2
+		226 text ListRow — 자기완결형 행 (leading · body · actions)
+	227 text LIGHT
+	228 content list
+		229 button 강신 대표 · 오늘 접속 활성
+			230 text 강신
+			231 text 대표 · 오늘 접속
+			232 text 활성
+		233 button 김민수 · 영업팀 · 아주 긴 이름은 말줄임으로 잘립니다 초대함 · 7일 후 만료 대기
+			234 text 김민수 · 영업팀 · 아주 긴 이름은 말줄임으로 잘립니다
+			235 text 초대함 · 7일 후 만료
+			236 text 대기
+		237 container
+			238 text 박지현 비활성
+			239 button 수정
+			240 button 삭제
+	241 text DARK (DATA-THEME 스코프 고정)
+	242 content list
+		243 button 강신 대표 · 오늘 접속 활성
+			244 text 강신
+			245 text 대표 · 오늘 접속
+			246 text 활성
+		247 button 김민수 · 영업팀 · 아주 긴 이름은 말줄임으로 잘립니다 초대함 · 7일 후 만료 대기
+			248 text 김민수 · 영업팀 · 아주 긴 이름은 말줄임으로 잘립니다
+			249 text 초대함 · 7일 후 만료
+			250 text 대기
+		251 container
+			252 text 박지현 비활성
+			253 button 수정
+			254 button 삭제
+	255 heading Tabs — 잉크 언더라인, aria-selected, Value: 2
+		256 text Tabs — 잉크 언더라인, aria-selected
+	257 text LIGHT
+	258 tab group
+		259 tab (selected, settable, boolean) 자료, Value: 1, ID: tb-a-light
+		260 tab (selectable, settable, boolean) 방문자 질문, Value: 0, ID: tb-b-light
+		261 tab (selectable, settable, boolean) 알림, Value: 0, ID: tb-c-light
+		262 tab (selectable, disabled, settable, boolean) API 연동, Value: 0
+	263 container Description: 자료, ID: tp-a-light
+		264 text 선택된 탭의 패널.
+	265 text DARK (DATA-THEME 스코프 고정)
+	266 tab group
+		267 tab (selected, settable, boolean) 자료, Value: 1, ID: tb-a-dark
+		268 tab (selectable, settable, boolean) 방문자 질문, Value: 0, ID: tb-b-dark
+		269 tab (selectable, settable, boolean) 알림, Value: 0, ID: tb-c-dark
+		270 tab (selectable, disabled, settable, boolean) API 연동, Value: 0
+	271 container Description: 자료, ID: tp-a-dark
+		272 text 선택된 탭의 패널.
+	273 heading Dialog — 딤 오버레이 + elevation.3, Value: 2
+		274 text Dialog — 딤 오버레이 + elevation.3
+	275 text LIGHT
+	276 container 자료를 다시 색인할까요?
+		277 heading 자료를 다시 색인할까요?, Value: 5, ID: ld-t
+			278 text 자료를 다시 색인할까요?
+		279 text 수정된 회사 소개 문서가 즉시 답변에 반영됩니다.
+		280 button 나중에
+		281 button 색인하기
+	282 text DARK
+	283 container 자료를 다시 색인할까요?
+		284 heading 자료를 다시 색인할까요?, Value: 5, ID: dd-t
+			285 text 자료를 다시 색인할까요?
+		286 text 수정된 회사 소개 문서가 즉시 답변에 반영됩니다.
+		287 button 나중에
+		288 button 색인하기
+	289 heading Toast — bg.elevated + elevation.2, 상태 도트, Value: 2
+		290 text Toast — bg.elevated + elevation.2, 상태 도트
+	291 text LIGHT
+	292 container
+		293 text 설정을 저장했습니다. 자료 색인이 끝났습니다. 크롤 결과가 부족합니다. 메일 발송에 실패했습니다.
+	294 text DARK
+	295 container
+		296 text 설정을 저장했습니다. 자료 색인이 끝났습니다. 크롤 결과가 부족합니다. 메일 발송에 실패했습니다.
+	297 heading 멀티브랜드 — data-brand × data-theme, Value: 2
+		298 text 멀티브랜드 — 
+		299 text data-brand
+		300 text  × 
+		301 text data-theme
+	302 container
+		303 text 아래 매핑은  DDS 산출물이 아니라 제품이 소유하는 예시 다 (D-010·D-012). 여섯 토큰만 덮으면 컴포넌트는 한 줄도 바뀌지 않고 재착색된다 — 다크 모드가 매핑 교체인 것과 같은 성질.
+	304 container brandGrid
+		305 text ASKLINQ · LIGHT
+		306 button 저장
+		307 button 자세히
+		308 text Beta
+		309 checkbox 선택됨, Value: 1
+		310 switch (settable, boolean) Description: 알림, Value: 1
+		311 checkbox (settable, integer) Description: 동의, Value: 1
+		312 text field (settable) Description: 포커스 링 확인, Value: 포커스 링
+		313 text ASKLINQ · DARK
+		314 button 저장
+		315 button 자세히
+		316 text Beta
+		317 checkbox 선택됨, Value: 1
+		318 switch (settable, boolean) Description: 알림, Value: 1
+		319 checkbox (settable, integer) Description: 동의, Value: 1
+		320 text field (settable) Description: 포커스 링 확인, Value: 포커스 링
+		321 text BOOKLINQ · LIGHT
+		322 button 저장
+		323 button 자세히
+		324 text Beta
+		325 checkbox 선택됨, Value: 1
+		326 switch (settable, boolean) Description: 알림, Value: 1
+		327 checkbox (settable, integer) Description: 동의, Value: 1
+		328 text field (settable) Description: 포커스 링 확인, Value: 포커스 링
+		329 text BOOKLINQ · DARK
+		330 button 저장
+		331 button 자세히
+		332 text Beta
+		333 checkbox 선택됨, Value: 1
+		334 switch (settable, boolean) Description: 알림, Value: 1
+		335 checkbox (settable, integer) Description: 동의, Value: 1
+		336 text field (settable) Description: 포커스 링 확인, Value: 포커스 링
+	337 heading Tooltip · EmptyState, Value: 2
+		338 text Tooltip · EmptyState
+	339 text LIGHT
+	340 button 재크롤
+	341 container 지금 다시 읽기, ID: tip1-light
+		342 text 지금 다시 읽기
+	343 text hover · focus 양쪽에서 열림 (Tab으로 확인)
+	344 text 등록된 자료가 없습니다
+	345 text 웹페이지 주소나 PDF를 추가하면 AI가 그 내용으로 답합니다.
+	346 button 자료 추가
+	347 button 직접 입력
+	348 text DARK (DATA-THEME 스코프 고정)
+	349 button 재크롤
+	350 container 지금 다시 읽기, ID: tip1-dark
+		351 text 지금 다시 읽기
+	352 text hover · focus 양쪽에서 열림 (Tab으로 확인)
+	353 text 등록된 자료가 없습니다
+	354 text 웹페이지 주소나 PDF를 추가하면 AI가 그 내용으로 답합니다.
+	355 button 자료 추가
+	356 button 직접 입력
+
+The focused UI element is 84 text field (settable) 이메일, Value: hello@devslab, ID: lf2

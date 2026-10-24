@@ -26,6 +26,10 @@
       "900": { "$value": "#18181b", "$type": "color" },
       "950": { "$value": "#09090b", "$type": "color" }
     },
+    "neutral-focus": {
+      "light": { "$value": "#52606d", "$type": "color" },
+      "dark": { "$value": "#b0bbc4", "$type": "color" }
+    },
     "red": {
       "50": { "$value": "#fef2f2", "$type": "color" },
       "100": { "$value": "#fee2e2", "$type": "color" },

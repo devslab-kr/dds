@@ -179,7 +179,7 @@
 | `color.text.brand` | `cyan.700` | `cyan.400` | 브랜드 텍스트·링크 |
 | `color.border.default` | `zinc.200` | `zinc.800` | 기본 보더 |
 | `color.border.strong` | `zinc.300` | `zinc.700` | 입력 필드 등 강조 보더 |
-| `color.border.focus` | `cyan.500` | `cyan.400` | 포커스 링 |
+| `color.border.focus` | `neutral-focus.light` (`#52606d`) | `neutral-focus.dark` (`#b0bbc4`) | 중립색 포커스 링 |
 | `color.status.success` / `.success-bg` | `green.700` / `green.50` | `green.400` / `green.900` | 성공 |
 | `color.status.warning` / `.warning-bg` | `amber.700` / `amber.50` | `amber.400` / `amber.900` | 경고 |
 | `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.400` / `red.900` | 위험·오류 |
@@ -437,7 +437,11 @@ Dialog, BottomSheet (native) / Modal (web), Toast, Tooltip (web), EmptyState.
 - 텍스트 대비 4.5:1 이상, 대형 텍스트·UI 요소 3:1 이상 (WCAG AA)
 - 터치 타깃 44×44 (모바일) / 클릭 타깃 24×24 (웹) 이상
 - 웹: 모든 인터랙티브 요소 키보드 도달 가능, `focus-visible` 링 표시
-  (`color.border.focus`, 2px, offset 2px)
+  (`color.border.focus`, 2px). 텍스트·여러 줄·선택·복합 선택·숫자·날짜/기간
+  입력은 offset -2px로 기존 테두리 안쪽에 맞춘다. 오류 입력은 -3px로
+  1px 오류 경계를 보존한다. 작은 컨트롤의 위치는 각 컴포넌트 규칙을
+  유지한다. 달력 팝업 초점도 같은 의미 색상을 사용한다.
+  제품 테마는 토큰을 명시적으로 덮어쓸 수 있으며 브랜드색·오류색과 구분한다.
 - 아이콘 단독 버튼은 `aria-label` (웹) / `accessibilityLabel` (RN) 필수
 - 색만으로 상태를 전달하지 않는다 (아이콘·텍스트 병행)
 - 모션 감소 설정 존중 (§3.6)

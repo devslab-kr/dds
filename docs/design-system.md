@@ -187,7 +187,7 @@ toggle**; both mappings are first-class from day one.
 | `color.text.brand` | `cyan.700` | `cyan.400` | brand text & links |
 | `color.border.default` | `zinc.200` | `zinc.800` | default borders |
 | `color.border.strong` | `zinc.300` | `zinc.700` | emphasized borders (inputs) |
-| `color.border.focus` | `cyan.500` | `cyan.400` | focus ring |
+| `color.border.focus` | `neutral-focus.light` (`#52606d`) | `neutral-focus.dark` (`#b0bbc4`) | neutral focus ring |
 | `color.status.success` / `.success-bg` | `green.700` / `green.50` | `green.400` / `green.900` | success |
 | `color.status.warning` / `.warning-bg` | `amber.700` / `amber.50` | `amber.400` / `amber.900` | warning |
 | `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.400` / `red.900` | danger · errors |
@@ -458,7 +458,12 @@ the docs.
 - Text contrast ≥ 4.5:1; large text and UI elements ≥ 3:1 (WCAG AA)
 - Touch targets ≥ 44×44 (mobile) / click targets ≥ 24×24 (web)
 - Web: every interactive element keyboard-reachable, with a `focus-visible`
-  ring (`color.border.focus`, 2px, offset 2px)
+  ring (`color.border.focus`, 2px). Text, multiline, select, choice, number and
+  date/range input rings use offset -2px, inside the existing border box.
+  Invalid fields use -3px to leave their 1px error border visible.
+  Small controls retain their component-specific offset. Calendar popup focus
+  uses the same semantic focus color. Product themes may explicitly override
+  the token; brand and error colors remain separate.
 - Icon-only buttons require `aria-label` (web) / `accessibilityLabel` (RN)
 - Never convey state by color alone (pair with icon or text)
 - Respect reduced-motion settings (§3.6)
