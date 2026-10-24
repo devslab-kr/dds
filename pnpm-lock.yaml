@@ -66,7 +66,7 @@ importers:
   packages/compatibility-canary:
     dependencies:
       '@devslab/dds-table-solid':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-table-solid
       '@tanstack/solid-query':
         specifier: 5.102.8
@@ -119,13 +119,13 @@ importers:
         specifier: 5.39.3
         version: 5.39.3(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@devslab/dds-css':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-css
       '@devslab/dds-icons':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-icons
       '@devslab/dds-tokens':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-tokens
       '@tanstack/react-virtual':
         specifier: 3.14.21
@@ -177,13 +177,13 @@ importers:
         specifier: 5.39.3
         version: 5.39.3(solid-js@1.9.15)
       '@devslab/dds-css':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-css
       '@devslab/dds-icons':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-icons
       '@devslab/dds-tokens':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-tokens
       '@tanstack/solid-virtual':
         specifier: 3.13.48
@@ -269,7 +269,7 @@ importers:
   packages/dds-table:
     dependencies:
       '@devslab/dds-table-solid':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-table-solid
     devDependencies:
       '@testing-library/jest-dom':
@@ -303,10 +303,10 @@ importers:
   packages/dds-table-react:
     dependencies:
       '@devslab/dds-css':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-css
       '@devslab/dds-tokens':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-tokens
       ag-grid-community:
         specifier: 36.2.0
@@ -349,10 +349,10 @@ importers:
   packages/dds-table-solid:
     dependencies:
       '@devslab/dds-css':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-css
       '@devslab/dds-tokens':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-tokens
       '@tanstack/solid-table':
         specifier: 9.2.4
@@ -389,10 +389,10 @@ importers:
   packages/dds-table-vue:
     dependencies:
       '@devslab/dds-css':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-css
       '@devslab/dds-tokens':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-tokens
       ag-grid-community:
         specifier: 36.2.0
@@ -441,13 +441,13 @@ importers:
         specifier: 5.39.3
         version: 5.39.3(vue@3.5.39(typescript@6.0.3))
       '@devslab/dds-css':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-css
       '@devslab/dds-icons':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-icons
       '@devslab/dds-tokens':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-tokens
     devDependencies:
       '@vitejs/plugin-vue':
@@ -515,7 +515,7 @@ importers:
   packages/site-kit:
     dependencies:
       '@devslab/dds-solid':
-        specifier: workspace:0.29.1
+        specifier: workspace:0.29.2
         version: link:../dds-solid
     devDependencies:
       '@tanstack/solid-router':
