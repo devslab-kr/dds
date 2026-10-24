@@ -50,19 +50,28 @@ try {
     tarballs.push(join(temp, `devslab-${name}-${manifest.version}.tgz`));
   }
   const tarball = tarballs.at(-1);
-  run(
-    npm,
-    [
-      ...prefix,
-      "publish",
-      tarball,
-      "--dry-run",
-      "--ignore-scripts",
-      "--provenance=false",
-      "--json",
-    ],
-    workspace,
-  );
+  try {
+    run(
+      npm,
+      [
+        ...prefix,
+        "publish",
+        tarball,
+        "--dry-run",
+        "--ignore-scripts",
+        "--provenance=false",
+        "--json",
+      ],
+      workspace,
+    );
+  } catch (error) {
+    // Source PRs can share the latest published version. As in the Vue gate,
+    // only this registry collision is expected; the exact packed files and
+    // isolated SSR/client consumer below must still pass.
+    if (!/cannot publish over the previously published versions/i.test(String(error)))
+      throw error;
+    console.log("Published version already exists; publish dry-run collision only.");
+  }
   const [report] = JSON.parse(
     run(
       npm,

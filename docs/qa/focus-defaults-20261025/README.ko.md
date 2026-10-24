@@ -22,3 +22,9 @@
 - 독립 정적 리뷰에서 초기 오류 border 가림을 발견했고, 오류 상태 -3px 예외와 실제 두 테마 이미지로 해결 확인했다.
 
 이 문서는 패키지 발행 전 소스/부분 수동 검수 기록이다. 모든 프레임워크·폭·상태의 실검수 통과나 npm 발행 완료로 대신하지 않는다. 발행은 정상 PR CI → 병합 → Changesets 릴리스 PR → 검증 후 npm 발행 및 registry 확인 순서로 이어간다. FM의 기존 자동 검사/앱 배포 제한은 유지한다.
+
+## 발행 검증의 최초 실패와 수정
+
+- PR122 최초 head `baff33202765958045395ea24b301b98b5019dd5`의 CI run `40106128250`, verify job `120908136902`는 Svelte 발행 모의검증에서 실패했다. Svelte 빌드와 앞 단계는 통과했으나 npm이 이미 공개된 `0.29.1`의 publish dry-run을 거부했다. [최초 실패 로그](https://github.com/devslab-kr/dds/actions/runs/40106128250/job/120908136902)를 보존한다.
+- `verify-svelte-release.mjs`를 기존 Vue 검증과 동일하게 수정했다. 이미 발행된 버전이라는 정확한 registry 충돌만 구분하며, 다른 실패는 다시 던진다. tarball의 exports/types/styles/license 및 별도 소비 앱 SSR·클라이언트 검증은 그대로 필수다. 실제 npm 발행이나 CI 기준 완화는 하지 않았다.
+- 수정 후 `pnpm run verify:svelte:release`: exit0. 기존 버전 충돌을 명시한 뒤 패키지 구성과 별도 소비 앱의 SSR·클라이언트 마운트 검증을 통과했다. 이 결과는 새 head의 전체 CI 또는 npm 발행 완료를 대신하지 않는다.
