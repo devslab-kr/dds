@@ -13,14 +13,15 @@
 .dds-date-picker-table [data-outside-range] {color:var(--dds-color-text-secondary);}
 .dds-date-picker-table [data-part="table-cell-trigger"][data-selected] {background:var(--dds-color-bg-brand);color:var(--dds-color-text-on-brand);}
 .dds-date-picker-table [data-today]:not([data-selected]) {text-decoration:underline;text-underline-offset:var(--dds-space-4);}
-.dds-date-picker-content :focus-visible {outline:var(--dds-space-2) solid var(--dds-color-text-brand);outline-offset:var(--dds-space-2);}
+.dds-date-picker-content :focus-visible {outline:var(--dds-space-2) solid var(--dds-color-border-focus);outline-offset:var(--dds-space-2);}
 .dds-date-picker-footer {display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--dds-space-12);margin-top:var(--dds-space-12);padding-top:var(--dds-space-12);border-top:calc(var(--dds-space-2) / 2) solid var(--dds-color-border-default);}
 
 /* Text box shared by DatePicker, MonthPicker and the DateRangePicker pair: same var(--dds-space-40) DDS input look. */
 .dds-date-picker-control > input,.dds-date-range-box {box-sizing:border-box;flex:1;min-inline-size:0;block-size:var(--dds-space-40);border:calc(var(--dds-space-2) / 2) solid var(--dds-color-border-strong);border-radius:var(--dds-radius-md);background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);font-family:inherit;font-size:var(--dds-typo-body-2-font-size);font-variant-numeric:tabular-nums;}
 .dds-date-picker-control > input {padding-inline:var(--dds-space-12);}
-.dds-date-picker-control > input:focus-visible,.dds-date-range-box:focus-within {outline:var(--dds-space-2) solid var(--dds-color-border-focus);outline-offset:0;}
+.dds-date-picker-control > input:focus-visible,.dds-date-range-box:focus-within {outline:var(--dds-space-2) solid var(--dds-color-border-focus);outline-offset:calc(var(--dds-space-2) * -1);}
 .dds-date-picker-control > input[aria-invalid="true"],.dds-date-range-box[data-invalid] {border-color:var(--dds-color-status-danger);}
+.dds-date-picker-control > input[aria-invalid="true"]:focus-visible,.dds-date-range-box[data-invalid]:focus-within {outline-offset:calc(var(--dds-space-2) * -1.5);}
 .dds-date-picker-control > input:disabled,.dds-date-range-box[data-disabled] {opacity:.45;cursor:not-allowed;background:var(--dds-color-bg-subtle);}
 .dds-date-picker-control > input::placeholder,.dds-date-range-input::placeholder {color:var(--dds-color-text-muted);}
 .dds-date-range-box {display:flex;align-items:center;gap:var(--dds-space-8);padding-inline:var(--dds-space-12);}

@@ -25,7 +25,7 @@
 
 .dds-textarea:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: 0;
+  outline-offset: calc(var(--dds-space-2) * -1);
   border-color: transparent;
 }
 
@@ -39,4 +39,8 @@
 .dds-field--error .dds-textarea,
 .dds-textarea[aria-invalid="true"] {
   border-color: var(--dds-color-status-danger);
+}
+.dds-field--error .dds-textarea:focus-visible,
+.dds-textarea[aria-invalid="true"]:focus-visible {
+  outline-offset: calc(var(--dds-space-2) * -1.5);
 }

@@ -1,0 +1,35 @@
+{
+  "normalLight": {
+    "color": "rgb(82, 96, 109)",
+    "id": "lf1",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "width": "1.96078px"
+  },
+  "invalidLight": {
+    "borderColor": "rgb(185, 28, 28)",
+    "borderWidth": "0.980392px",
+    "id": "lf2",
+    "invalid": "true",
+    "outline": "solid",
+    "outlineColor": "rgb(82, 96, 109)",
+    "outlineOffset": "-2.94118px",
+    "outlineWidth": "1.96078px",
+    "rect": {
+      "height": 39.9969367980957,
+      "width": 319.9908142089844,
+      "x": 159.05331420898438,
+      "y": 429.0134887695313
+    }
+  },
+  "invalidDark": {
+    "borderColor": "rgb(248, 113, 113)",
+    "borderWidth": "0.980392px",
+    "id": "df2",
+    "invalid": "true",
+    "outline": "solid",
+    "outlineColor": "rgb(176, 187, 196)",
+    "outlineOffset": "-2.94118px",
+    "outlineWidth": "1.96078px"
+  }
+}

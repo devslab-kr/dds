@@ -36,7 +36,7 @@
 
 .dds-input:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: 0;
+  outline-offset: calc(var(--dds-space-2) * -1);
   border-color: transparent;
 }
 
@@ -57,6 +57,10 @@
 .dds-field--error .dds-input,
 .dds-input[aria-invalid="true"] {
   border-color: var(--dds-color-status-danger);
+}
+.dds-field--error .dds-input:focus-visible,
+.dds-input[aria-invalid="true"]:focus-visible {
+  outline-offset: calc(var(--dds-space-2) * -1.5);
 }
 .dds-field--error .dds-field__help {
   color: var(--dds-color-status-danger);

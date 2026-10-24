@@ -1,0 +1,80 @@
+[
+  {
+    "name": "Input",
+    "box": {
+      "height": 39.9969367980957,
+      "width": 719.9907836914062
+    },
+    "color": "rgb(82, 96, 109)",
+    "inputClass": "dds-input__control",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "ownerClass": "dds-input__control",
+    "width": "1.96078px"
+  },
+  {
+    "name": "Choice",
+    "box": {
+      "height": 39.9969367980957,
+      "width": 719.9907836914062
+    },
+    "color": "rgb(82, 96, 109)",
+    "inputClass": "dds-choice-input",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "ownerClass": "dds-choice-control",
+    "width": "1.96078px"
+  },
+  {
+    "name": "Number",
+    "box": {
+      "height": 39.9969367980957,
+      "width": 719.9907836914062
+    },
+    "color": "rgb(82, 96, 109)",
+    "inputClass": "dds-number-input__field",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "ownerClass": "dds-number-input__control",
+    "width": "1.96078px"
+  },
+  {
+    "name": "Date",
+    "box": {
+      "height": 39.9969367980957,
+      "width": 667.9993896484375
+    },
+    "color": "rgb(82, 96, 109)",
+    "inputClass": "",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "ownerClass": "",
+    "width": "1.96078px"
+  },
+  {
+    "name": "Time",
+    "box": {
+      "height": 39.9969367980957,
+      "width": 719.9907836914062
+    },
+    "color": "rgb(82, 96, 109)",
+    "inputClass": "dds-choice-input",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "ownerClass": "dds-choice-control",
+    "width": "1.96078px"
+  },
+  {
+    "name": "Month",
+    "box": {
+      "height": 39.9969367980957,
+      "width": 667.9993896484375
+    },
+    "color": "rgb(82, 96, 109)",
+    "inputClass": "",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "ownerClass": "",
+    "width": "1.96078px"
+  }
+]

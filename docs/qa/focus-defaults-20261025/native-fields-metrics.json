@@ -1,0 +1,19 @@
+{
+  "select": {
+    "color": "rgb(82, 96, 109)",
+    "id": "sel1-light",
+    "offset": "-1.96078px",
+    "outline": "solid",
+    "tag": "SELECT",
+    "width": "1.96078px"
+  },
+  "textareaInvalid": {
+    "border": "rgb(185, 28, 28)",
+    "color": "rgb(82, 96, 109)",
+    "id": "ta2-light",
+    "offset": "-2.94118px",
+    "outline": "solid",
+    "tag": "TEXTAREA",
+    "width": "1.96078px"
+  }
+}

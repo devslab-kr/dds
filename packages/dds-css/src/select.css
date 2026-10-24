@@ -33,7 +33,7 @@
 
 .dds-select__input:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: 0;
+  outline-offset: calc(var(--dds-space-2) * -1);
   border-color: transparent;
 }
 
@@ -47,6 +47,10 @@
 .dds-field--error .dds-select__input,
 .dds-select__input[aria-invalid="true"] {
   border-color: var(--dds-color-status-danger);
+}
+.dds-field--error .dds-select__input:focus-visible,
+.dds-select__input[aria-invalid="true"]:focus-visible {
+  outline-offset: calc(var(--dds-space-2) * -1.5);
 }
 
 /* Chevron glyph geometry (8px box, 1.6px stroke) is drawn, not spaced — the

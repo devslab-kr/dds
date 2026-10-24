@@ -243,6 +243,7 @@
   .panel .plabel { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--pmuted); margin: 0 0 18px; font-weight: 500; }
   .panel--light {
+    --pfocus: #52606d;
     --pbg: #ffffff; --pbg-subtle: #fafafa; --ptext: #09090b; --ptext-2: #52525b;
     --pmuted: #71717a; --pborder: #e4e4e7; --pborder-strong: #d4d4d8;
     --pbrand: #06b6d4; --pbrand-hover: #22d3ee; --pon-brand: #09090b; --pbrand-text: #0e7490;
@@ -252,6 +253,7 @@
     --poverlay: rgba(0, 0, 0, 0.25);
   }
   .panel--dark {
+    --pfocus: #b0bbc4;
     --pbg: #09090b; --pbg-subtle: #18181b; --ptext: #fafafa; --ptext-2: #a1a1aa;
     --pmuted: #71717a; --pborder: #27272a; --pborder-strong: #3f3f46;
     --pbrand: #06b6d4; --pbrand-hover: #22d3ee; --pon-brand: #09090b; --pbrand-text: #22d3ee;
@@ -272,7 +274,7 @@
     display: inline-flex; align-items: center; gap: 8px;
     background: none; color: var(--ptext); transition: background 100ms cubic-bezier(0.2, 0, 0, 1);
   }
-  .btn:focus-visible { outline: 2px solid var(--pbrand); outline-offset: 2px; }
+  .btn:focus-visible { outline: 2px solid var(--pfocus); outline-offset: 2px; }
   .btn--sm { height: 32px; padding: 0 12px; border-radius: 8px; font-size: 12px; }
   .btn--lg { height: 48px; padding: 0 20px; font-size: 15px; border-radius: 8px; }
   .btn--primary { background: var(--pbrand); color: var(--pon-brand); font-weight: 600; }
@@ -295,7 +297,7 @@
   @media (prefers-reduced-motion: reduce) { .btn .spin { animation: none; } }
   .btn.demo-hover { background: var(--pbrand-hover); }
   .btn.demo-press { background: var(--pbrand-hover); box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.08); }
-  .btn.demo-focus { outline: 2px solid var(--pbrand); outline-offset: 2px; }
+  .btn.demo-focus { outline: 2px solid var(--pfocus); outline-offset: 2px; }
   .statecap { font-size: 11px; color: var(--pmuted); display: block; margin-top: 6px; text-align: center; }
   .statecell { display: flex; flex-direction: column; align-items: center; }
 
@@ -309,9 +311,10 @@
     height: 40px; padding: 0 12px;
   }
   .field input::placeholder { color: var(--pmuted); }
-  .field input:focus-visible { outline: 2px solid var(--pbrand); outline-offset: 0; border-color: transparent; }
+  .field input:focus-visible { outline: 2px solid var(--pfocus); outline-offset: -2px; border-color: transparent; }
   .field .help { font-size: 12px; line-height: 16px; color: var(--pmuted); }
   .field.is-error input { border-color: var(--pdanger); }
+  .field.is-error input:focus-visible { outline-offset: -3px; }
   .field.is-error .help { color: var(--pdanger); }
 
   /* badges */
@@ -715,7 +718,7 @@
     ["color.text.brand","#0e7490","#22d3ee","브랜드 텍스트·링크"],
     ["color.border.default","#e4e4e7","#27272a","기본 보더"],
     ["color.border.strong","#d4d4d8","#3f3f46","입력 필드 보더"],
-    ["color.border.focus","#06b6d4","#22d3ee","포커스 링"],
+    ["color.border.focus","#52606d","#b0bbc4","중립색 포커스 링"],
     ["color.status.success","#15803d","#4ade80","성공 (bg: green.50 / green.900)"],
     ["color.status.warning","#b45309","#fbbf24","경고 (bg: amber.50 / amber.900)"],
     ["color.status.danger","#b91c1c","#f87171","위험·오류 (bg: red.50 / red.900)"],

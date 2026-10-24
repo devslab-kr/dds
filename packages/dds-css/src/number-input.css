@@ -47,9 +47,13 @@
 }
 .dds-number-input__control:focus-within {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: calc(var(--dds-space-2) * -1);
 }
 .dds-number-input__control[data-invalid] {
   border-color: var(--dds-color-status-danger);
+}
+.dds-number-input__control[data-invalid]:focus-within {
+  outline-offset: calc(var(--dds-space-2) * -1.5);
 }
 
 .dds-number-input__field {
