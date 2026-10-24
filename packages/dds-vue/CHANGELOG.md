@@ -1,5 +1,14 @@
 # @devslab/dds-vue
 
+## 0.29.2
+
+### Patch Changes
+
+- Updated dependencies [6ab7a49]
+  - @devslab/dds-tokens@0.29.2
+  - @devslab/dds-css@0.29.2
+  - @devslab/dds-icons@0.29.2
+
 ## 0.29.1
 
 ### Patch Changes
