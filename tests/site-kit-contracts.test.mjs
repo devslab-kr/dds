@@ -378,7 +378,11 @@ test("atomic font opt-in keeps Korean in one complete face without late-swapping
   const css = await read("packages/site-kit/fonts-atomic.css");
   const faces = fontFaces(css);
   const legacy = fontFaces(await read("packages/site-kit/fonts.css"));
-  const korean = faces.filter(({ family }) => family === "Pretendard");
+  const korean = faces.filter(({ family }) => family === "DDS Pretendard Atomic");
+  const sourceStack = (await json("tokens/foundation.json")).font.family.sans.$value;
+  const optInStack = css.match(/--dds-font-family-sans:\s*([^;]+);/)?.[1];
+  assert.deepEqual(familyNames(optInStack), familyNames(sourceStack).map((name) => name === "Pretendard" ? "DDS Pretendard Atomic" : name), "the opt-in stack changes only the Korean CSS alias");
+  assert.ok(!faces.some(({ family }) => family === "Pretendard"), "an installed same-name Pretendard cannot become the optional fallback");
   assert.equal(korean.length, 1, "all Korean glyphs share one loading decision");
   assert.equal(korean[0].src, 'url("./fonts/pretendard/PretendardVariable.woff2") format("woff2")');
   assert.equal(korean[0].range, undefined, "the complete Korean face is not split by unicode-range");

@@ -34,6 +34,8 @@ const pkg = join(dirname(fileURLToPath(import.meta.url)), "..");
 const fontsDir = join(pkg, "fonts");
 const manifestPath = join(fontsDir, "manifest.json");
 const cssPath = join(pkg, "fonts.css");
+const sansStack = JSON.parse(readFileSync(join(pkg, "..", "..", "tokens", "foundation.json"), "utf8")).font.family.sans.$value;
+const atomicKoreanFamily = "DDS Pretendard Atomic";
 
 /**
  * The faces the family ships. `family` is the CSS name, and it is the name
@@ -103,14 +105,19 @@ export function renderFontsCss(manifest) {
 
 /** The explicit atomic opt-in preserves legacy subsets but makes one Korean loading decision. */
 export function renderAtomicFontsCss(manifest) {
-  const blocks = [];
+  // A distinct CSS alias prevents fallback through an installed same-name face
+  // after the optional webfont has missed its first-paint window.
+  const names = sansStack.split(",").map((name) => name.trim());
+  if (names.filter((name) => name === "Pretendard").length !== 1) throw new Error("Expected one Pretendard entry in the sans token");
+  const atomicStack = names.map((name) => name === "Pretendard" ? JSON.stringify(atomicKoreanFamily) : name).join(", ");
+  const blocks = [":root {\n  --dds-font-family-sans: " + atomicStack + ";\n}"];
   for (const family of manifest.families) {
     const faces = family.family === "Pretendard" ? [family.atomicFace] : family.faces;
     if (!faces[0]) throw new Error("Pretendard atomicFace is missing from the font manifest");
     for (const face of faces) {
       blocks.push([
         "@font-face {",
-        '  font-family: "' + family.family + '";',
+        '  font-family: "' + (family.family === "Pretendard" ? atomicKoreanFamily : family.family) + '";',
         "  font-style: normal;",
         "  font-weight: " + family.weight + ";",
         "  font-display: optional;",
@@ -120,7 +127,7 @@ export function renderAtomicFontsCss(manifest) {
       ].join("\n"));
     }
   }
-  return "/* Generated atomic opt-in by scripts/build-fonts.mjs. Legacy fonts.css is unchanged.\n * Full Pretendard is one unmodified face; every UI family is optional, so late arrivals do not swap.\n * Same-origin relative WOFF2 URLs preserve font-src 'self'; no local() or inline data fonts.\n */\n\n" + blocks.join("\n\n") + "\n";
+  return "/* Generated atomic opt-in by scripts/build-fonts.mjs. Legacy fonts.css is unchanged.\n * Full Pretendard uses a distinct CSS alias and one optional loading decision.\n * Only the opt-in sans token alias changes; installed Pretendard cannot become a late fallback.\n * Same-origin relative WOFF2 URLs preserve font-src 'self'; no local() or inline data fonts.\n */\n\n" + blocks.join("\n\n") + "\n";
 }
 
 /** Every @font-face of an upstream stylesheet: file name, weight range, unicode-range. */

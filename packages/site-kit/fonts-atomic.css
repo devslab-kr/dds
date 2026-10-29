@@ -1,7 +1,12 @@
 /* Generated atomic opt-in by scripts/build-fonts.mjs. Legacy fonts.css is unchanged.
- * Full Pretendard is one unmodified face; every UI family is optional, so late arrivals do not swap.
+ * Full Pretendard uses a distinct CSS alias and one optional loading decision.
+ * Only the opt-in sans token alias changes; installed Pretendard cannot become a late fallback.
  * Same-origin relative WOFF2 URLs preserve font-src 'self'; no local() or inline data fonts.
  */
+
+:root {
+  --dds-font-family-sans: Geist, "DDS Pretendard Atomic", -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
 
 @font-face {
   font-family: "Geist";
@@ -103,7 +108,7 @@
 }
 
 @font-face {
-  font-family: "Pretendard";
+  font-family: "DDS Pretendard Atomic";
   font-style: normal;
   font-weight: 45 920;
   font-display: optional;
