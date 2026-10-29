@@ -43,11 +43,11 @@ test('reserved application routes reject static export before any output is writ
 });
 
 test('static export rejects metadata symlinks before writing any asset or external target',t=>{
- for(const file of ['manifest.json','cache-descriptors.json']){
-  const{dir,pkg}=fixture(t),out=join(dir,'export'),target=join(dir,'unrelated.json');mkdirSync(out);writeFileSync(target,'preserve');
+ for(const file of ['manifest.json','cache-descriptors.json'])for(const exists of [true,false]){
+  const{dir,pkg}=fixture(t),out=join(dir,'export'),target=join(dir,'unrelated.json');mkdirSync(out);if(exists)writeFileSync(target,'preserve');
   try{symlinkSync(target,join(out,file),'file');}catch(error){if(['EPERM','EACCES','ENOSYS'].includes(error.code)){t.skip('File symlinks unavailable here; covered on CI Linux');return;}throw error;}
   assert.throws(()=>exportFamilyFonts({packageDir:pkg,outDir:out,baseURL:'/dds-fonts'}),/symbolic-link/);
-  assert.equal(readFileSync(target,'utf8'),'preserve');assert.equal(existsSync(join(out,bundle.manifest.assets[0].file)),false);
+  if(exists)assert.equal(readFileSync(target,'utf8'),'preserve');else assert.equal(existsSync(target),false);assert.equal(existsSync(join(out,bundle.manifest.assets[0].file)),false);
  }
 });
 

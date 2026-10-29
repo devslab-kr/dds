@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /** Static materialization of the same DDS manifest; output files are generated, never a new source. */
-import {readFileSync,writeFileSync,mkdirSync,lstatSync,existsSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,lstatSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {dirname,resolve,join,relative,isAbsolute,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createFamilyFontAPI} from './runtime.mjs';
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 function within(root,file){if(typeof file!=='string'||/[\\\x00-\x1f:]/.test(file)||file.split('/').some(p=>!p||p==='.'||p==='..'))throw Error('Invalid DDS artifact path');const dest=resolve(root,file),rel=relative(root,dest);if(!rel||rel==='..'||rel.startsWith('..'+sep)||isAbsolute(rel))throw Error('DDS asset escapes destination');return dest;}
-function noLinks(file){let current=resolve(file);while(true){if(existsSync(current)&&lstatSync(current).isSymbolicLink())throw Error('DDS export rejects symbolic-link paths');const parent=dirname(current);if(parent===current)break;current=parent;}}
+function noLinks(file){let current=resolve(file);while(true){let stat;try{stat=lstatSync(current);}catch(error){if(error.code!=='ENOENT')throw error;}if(stat?.isSymbolicLink())throw Error('DDS export rejects symbolic-link paths');const parent=dirname(current);if(parent===current)break;current=parent;}}
 export function exportFamilyFonts({packageDir=dirname(fileURLToPath(import.meta.url)),outDir,baseURL,headOutput,monospace=false}){
  if(!outDir||!baseURL)throw Error('Expected outDir and baseURL');
  const root=resolve(packageDir),output=resolve(outDir),manifest=JSON.parse(readFileSync(join(root,'manifest.json'),'utf8')),api=createFamilyFontAPI(manifest);
