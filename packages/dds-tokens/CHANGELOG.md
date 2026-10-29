@@ -1,5 +1,7 @@
 # @devslab/dds-tokens
 
+## 0.29.3
+
 ## 0.29.2
 
 ### Patch Changes
