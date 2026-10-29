@@ -511,3 +511,14 @@ import하는 소비자는 kit 전체로 클라이언트 JS ~150 KB가 아니라 
 `pnpm check`가 최소 소비자(`fixtures/bundle-probe`)를 빌드해 국기 본문이 메인
 청크로 되돌아오면 실패시킨다. 본문은 서버 렌더 HTML에는 여전히 실린다 —
 가져오는 파일로 옮기는 것은 별도 결정이다.
+
+
+### Atomic UI font opt-in
+
+Keep legacy fonts.css for consumers that require its subset-and-swap behavior. Products that need stable first-paint UI text can replace that import with @devslab/site-kit/fonts-atomic.css. Import one stylesheet, not both. The opt-in keeps the same DDS family names and fallback token stack. It uses one complete unmodified Pretendard 1.3.9 WOFF2 without unicode-range/local(), and optional display for Geist, Geist Mono and Pretendard. A slow first visit may retain system fallback for that page; it does not promise that every visit uses the custom font.
+
+Use the pure ESM @devslab/site-kit/fonts subpath and fontPreloadLinks([geistLatinUrl, fullKoreanUrl]) in the initial HTML/head. Vite application imports use @devslab/site-kit/fonts/geist/geist-latin-wght-normal.woff2?url and @devslab/site-kit/fonts/pretendard/PretendardVariable.woff2?url, so preload and CSS refer to identical content-hashed files. FAMILY_FONT_PRELOAD_FILE is the existing Latin path; FAMILY_FONT_ATOMIC_FILE is the complete Korean path; FAMILY_FONT_MONO_FILE is available when the initial screen uses mono text. Plain HTML/Vite consumers may generate head links from final emitted asset URLs in their HTML build step. Late client-side JS is not an early preload.
+
+fontPreloadLinks still accepts only same-origin absolute WOFF2 URLs and supplies type font/woff2 plus anonymous CORS mode. The CSS keeps external same-origin URLs; no inline/data font or CSP expansion is required. Content-hashed public WOFF2 caching belongs to the consuming application asset response. Do not change HTML, API or account cache policy as part of a font cache rule.
+
+Both stylesheets and the complete font are generated/verified from fonts/manifest.json. The full font is 2,057,688 bytes, SHA256 9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4, from pretendard@1.3.9 dist/web/variable/woff2/PretendardVariable.woff2. It shares the packaged OFL-1.1 license with the preserved upstream subsets. This opt-in does not copy application-specific inline critical fonts or calibrated local font metrics; consumers must verify real first-paint glyphs/layout under cold, warm and delayed font loading.

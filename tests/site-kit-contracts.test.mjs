@@ -296,7 +296,9 @@ test("every url() in fonts.css is package-relative and names a real woff2 the pa
   const { readFileSync, readdirSync, existsSync } = await import("node:fs");
   const pkg = new URL("../packages/site-kit/", import.meta.url);
   const css = await read("packages/site-kit/fonts.css");
-  const urls = [...css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url);
+  const atomicCss = await read("packages/site-kit/fonts-atomic.css");
+  const atomicUrls = [...atomicCss.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url);
+  const urls = [...new Set([...css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url).concat(atomicUrls))];
   assert.ok(urls.length > 0);
   for (const url of urls) {
     assert.ok(url.startsWith("./fonts/"), `${url}: relative to fonts.css, so a bundler rewrites it to the product's own /assets`);
@@ -367,4 +369,30 @@ test("the font files match their manifest and ship their OFL licenses", async ()
     assert.match(text, /fonts\.css/, `${readme} documents fonts.css`);
     assert.match(text, /OFL|Open Font License/, `${readme} names the font licenses`);
   }
+});
+
+
+test("atomic font opt-in keeps Korean in one complete face without late-swapping a UI family", async () => {
+  const css = await read("packages/site-kit/fonts-atomic.css");
+  const faces = fontFaces(css);
+  const legacy = fontFaces(await read("packages/site-kit/fonts.css"));
+  const korean = faces.filter(({ family }) => family === "Pretendard");
+  assert.equal(korean.length, 1, "all Korean glyphs share one loading decision");
+  assert.equal(korean[0].src, 'url("./fonts/pretendard/PretendardVariable.woff2") format("woff2")');
+  assert.equal(korean[0].range, undefined, "the complete Korean face is not split by unicode-range");
+  assert.doesNotMatch(css.replace(/\/\*[\s\S]*?\*\//g, ""), /local\(/, "the shipped face does not depend on locally installed fonts");
+  for (const face of faces) assert.equal(face.display, "optional", face.family + " does not late-swap");
+  for (const family of ["Geist", "Geist Mono"]) {
+    const withoutDisplay = ({ display, ...face }) => face;
+    assert.deepEqual(faces.filter((face) => face.family === family).map(withoutDisplay), legacy.filter((face) => face.family === family).map(withoutDisplay));
+  }
+  const manifest = await json("packages/site-kit/package.json");
+  assert.equal(manifest.exports["./fonts-atomic.css"], "./fonts-atomic.css");
+  assert.deepEqual(manifest.exports["./fonts"], { types: "./src/core/fonts.d.mts", import: "./src/core/fonts.mjs" });
+  assert.ok(manifest.files.includes("fonts-atomic.css"));
+  assert.ok(manifest.sideEffects.includes("./fonts-atomic.css"));
+  const family = (await json("packages/site-kit/fonts/manifest.json")).families.find(({ family }) => family === "Pretendard");
+  assert.equal(family.atomicFace.file, "PretendardVariable.woff2");
+  assert.equal(family.atomicFace.sourcePath, "dist/web/variable/woff2/PretendardVariable.woff2");
+  assert.equal(family.atomicFace.sha256, "9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4", "the unmodified complete Pretendard 1.3.9 file");
 });

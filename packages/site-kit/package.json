@@ -7,7 +7,8 @@
   "sideEffects": [
     "./styles.css",
     "./site-sections.css",
-    "./fonts.css"
+    "./fonts.css",
+    "./fonts-atomic.css"
   ],
   "repository": {
     "type": "git",
@@ -30,7 +31,8 @@
     "site-sections.css",
     "fonts.css",
     "README.md",
-    "README.ko.md"
+    "README.ko.md",
+    "fonts-atomic.css"
   ],
   "main": "./src/core/index.mjs",
   "types": "./src/core/index.d.mts",
@@ -62,7 +64,12 @@
     "./styles.css": "./styles.css",
     "./site-sections.css": "./site-sections.css",
     "./fonts.css": "./fonts.css",
-    "./fonts/*": "./fonts/*"
+    "./fonts/*": "./fonts/*",
+    "./fonts-atomic.css": "./fonts-atomic.css",
+    "./fonts": {
+      "types": "./src/core/fonts.d.mts",
+      "import": "./src/core/fonts.mjs"
+    }
   },
   "scripts": {
     "build": "vite build && vite build --config vite.server.config.ts && tsc -p tsconfig.build.json --emitDeclarationOnly",

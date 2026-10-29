@@ -65,7 +65,13 @@ async function verifyFamilyFonts(installedRoot, manifest) {
   const fontsManifest = JSON.parse(await readFile(join(installedRoot, "fonts", "manifest.json"), "utf8"));
   const faces = fontsManifest.families.flatMap((family) => family.faces.map((face) => `./fonts/${family.dir}/${face.file}`));
   assert.deepEqual([...urls].sort(), [...faces].sort(), "the packed fonts.css references exactly the manifest's faces");
-  for (const url of urls) await access(join(installedRoot, url));
+  const atomicCss = await readFile(join(installedRoot, "fonts-atomic.css"), "utf8");
+  const atomicUrls = [...atomicCss.matchAll(/url\("([^"]+)"\)/g)].map(([, url]) => url);
+  const atomicFaces = fontsManifest.families.flatMap((family) => (family.atomicFace ? [family.atomicFace] : family.faces).map((face) => './fonts/' + family.dir + '/' + face.file));
+  assert.deepEqual([...atomicUrls].sort(), [...atomicFaces].sort(), "atomic CSS references one complete Korean face and the existing Latin/Mono faces");
+  assert.equal(manifest.exports["./fonts-atomic.css"], "./fonts-atomic.css");
+  assert.deepEqual(manifest.exports["./fonts"], { types: "./src/core/fonts.d.mts", import: "./src/core/fonts.mjs" });
+  for (const url of [...new Set([...urls, ...atomicUrls])]) await access(join(installedRoot, url));
   for (const family of fontsManifest.families) await access(join(installedRoot, "fonts", family.dir, "LICENSE.txt"));
 
   const app = join(temp, "font-app");

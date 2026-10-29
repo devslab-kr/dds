@@ -62,6 +62,7 @@ const FAMILIES = [
     dir: "pretendard",
     source: { package: "pretendard", version: "1.3.9" },
     css: "dist/web/variable/pretendardvariable-dynamic-subset.css",
+    atomicSourcePath: "dist/web/variable/woff2/PretendardVariable.woff2",
     license: "dist/LICENSE.txt",
   },
 ];
@@ -98,6 +99,28 @@ export function renderFontsCss(manifest) {
     ),
   );
   return `${header}\n\n${blocks.join("\n\n")}\n`;
+}
+
+/** The explicit atomic opt-in preserves legacy subsets but makes one Korean loading decision. */
+export function renderAtomicFontsCss(manifest) {
+  const blocks = [];
+  for (const family of manifest.families) {
+    const faces = family.family === "Pretendard" ? [family.atomicFace] : family.faces;
+    if (!faces[0]) throw new Error("Pretendard atomicFace is missing from the font manifest");
+    for (const face of faces) {
+      blocks.push([
+        "@font-face {",
+        '  font-family: "' + family.family + '";',
+        "  font-style: normal;",
+        "  font-weight: " + family.weight + ";",
+        "  font-display: optional;",
+        '  src: url("./fonts/' + family.dir + '/' + face.file + '") format("woff2");',
+        ...(face.unicodeRange ? ["  unicode-range: " + face.unicodeRange + ";"] : []),
+        "}",
+      ].join("\n"));
+    }
+  }
+  return "/* Generated atomic opt-in by scripts/build-fonts.mjs. Legacy fonts.css is unchanged.\n * Full Pretendard is one unmodified face; every UI family is optional, so late arrivals do not swap.\n * Same-origin relative WOFF2 URLs preserve font-src 'self'; no local() or inline data fonts.\n */\n\n" + blocks.join("\n\n") + "\n";
 }
 
 /** Every @font-face of an upstream stylesheet: file name, weight range, unicode-range. */
@@ -152,6 +175,7 @@ async function fetchTarball({ package: name, version }) {
 }
 
 async function vendor() {
+  if (resolve(fontsDir) !== resolve(pkg, "fonts")) throw new Error("Refusing to replace a directory outside this package fonts/");
   rmSync(fontsDir, { recursive: true, force: true });
   const families = [];
   for (const spec of FAMILIES) {
@@ -175,6 +199,14 @@ async function vendor() {
     if (!licenseText) throw new Error(`${spec.source.package}: ${spec.license} not in the tarball`);
     const normalisedLicense = Buffer.from(licenseText.toString("utf8").replaceAll("\r\n", "\n"));
     writeFileSync(join(out, "LICENSE.txt"), normalisedLicense);
+    let atomicFace;
+    if (spec.atomicSourcePath) {
+      const bytes = files.get(spec.atomicSourcePath);
+      if (!bytes) throw new Error(spec.source.package + ": atomic font missing from pinned tarball");
+      const file = spec.atomicSourcePath.split("/").at(-1);
+      writeFileSync(join(out, file), bytes);
+      atomicFace = { file, bytes: bytes.length, sha256: sha256(bytes), sourcePath: spec.atomicSourcePath };
+    }
     families.push({
       family: spec.family,
       dir: spec.dir,
@@ -182,11 +214,13 @@ async function vendor() {
       source: { ...spec.source, integrity, license },
       license: { file: "LICENSE.txt", sha256: sha256(normalisedLicense) },
       faces,
+      ...(atomicFace ? { atomicFace } : {}),
     });
   }
   const manifest = { generatedBy: "scripts/build-fonts.mjs --vendor", families };
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   writeFileSync(cssPath, renderFontsCss(manifest));
+  writeFileSync(join(pkg, "fonts-atomic.css"), renderAtomicFontsCss(manifest));
   const total = families.reduce((sum, f) => sum + f.faces.length, 0);
   console.log(`vendored ${total} faces into fonts/ and rewrote fonts.css`);
 }
@@ -197,6 +231,9 @@ function check() {
   const expectedCss = renderFontsCss(manifest);
   const actualCss = existsSync(cssPath) ? readFileSync(cssPath, "utf8").replaceAll("\r\n", "\n") : "";
   if (actualCss !== expectedCss) errors.push("fonts.css differs from the manifest — run node scripts/build-fonts.mjs");
+  const atomicCssPath = join(pkg, "fonts-atomic.css");
+  const actualAtomicCss = existsSync(atomicCssPath) ? readFileSync(atomicCssPath, "utf8").replaceAll("\r\n", "\n") : "";
+  if (actualAtomicCss !== renderAtomicFontsCss(manifest)) errors.push("fonts-atomic.css differs from the manifest — run node scripts/build-fonts.mjs");
   const families = new Map(FAMILIES.map((f) => [f.dir, f]));
   for (const family of manifest.families) {
     const spec = families.get(family.dir);
@@ -204,11 +241,15 @@ function check() {
       errors.push(`manifest family ${family.dir} does not match FAMILIES — run with --vendor`);
     }
     const dir = join(fontsDir, family.dir);
-    const listed = new Set([family.license.file, ...family.faces.map((face) => face.file)]);
+    if (!!family.atomicFace !== !!spec?.atomicSourcePath || (family.atomicFace && family.atomicFace.sourcePath !== spec.atomicSourcePath)) {
+      errors.push("manifest atomicFace does not match the pinned full-font source: " + family.dir);
+    }
+    const allFaces = [...family.faces, ...(family.atomicFace ? [family.atomicFace] : [])];
+    const listed = new Set([family.license.file, ...allFaces.map((face) => face.file)]);
     for (const name of existsSync(dir) ? readdirSync(dir) : []) {
       if (!listed.has(name)) errors.push(`fonts/${family.dir}/${name} is not in the manifest`);
     }
-    for (const face of family.faces) {
+    for (const face of allFaces) {
       const path = join(dir, face.file);
       if (!existsSync(path)) { errors.push(`fonts/${family.dir}/${face.file} is missing`); continue; }
       const bytes = readFileSync(path);
@@ -235,7 +276,9 @@ if (invokedDirectly) {
   if (process.argv.includes("--vendor")) await vendor();
   else if (process.argv.includes("--check")) check();
   else {
-    writeFileSync(cssPath, renderFontsCss(JSON.parse(readFileSync(manifestPath, "utf8"))));
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    writeFileSync(cssPath, renderFontsCss(manifest));
+    writeFileSync(join(pkg, "fonts-atomic.css"), renderAtomicFontsCss(manifest));
     console.log("rewrote fonts.css from fonts/manifest.json");
   }
 }
