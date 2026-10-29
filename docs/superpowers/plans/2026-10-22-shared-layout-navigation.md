@@ -45,7 +45,7 @@
 **Files:** Create `packages/dds-css/src/layout.css`, `packages/dds-css/src/top-nav.css`; Modify `packages/dds-css/src/console-shell.css`, `packages/dds-css/build.mjs`.
 **Produces:** `.dds-layout`, `[data-navigation-position="left"|"top"]`, `.dds-layout__header`, `.dds-layout__navigation`, `.dds-layout__main`, `.dds-layout__content[data-width]`, `.dds-layout__footer`, `.dds-layout__section`, `.dds-layout__panel`, `.dds-layout__fields`, `.dds-layout__reading`, `.dds-layout__caption`, `.dds-top-nav` 및 자식 클래스. 기존 rail nav 클래스는 LeftNav 공용으로 유지한다.
 
-- [ ] `graft callers ConsoleShell --depth all`로 실제 사용처와 SSR/browser/패키지 진입점을 확인하고, 고정 ID/클래스에 의존하는 공개 계약을 기록한다. 오래된 그래프가 누락한 새 파일만 rg로 보완한다.
+- [ ] `rg`로 `ConsoleShell`의 실제 사용처와 SSR/browser/패키지 진입점을 전부 찾아 확인하고, 고정 ID/클래스에 의존하는 공개 계약을 기록한다.
 - [ ] Task 5에서 확장할 공통 fixture 파일과 실측 검증을 먼저 만들고, 초기에는 표준 클래스의 정적 HTML로 `24px/32px` 제목, `14px/20px` 본문, `32px/16px` 여백을 확인하고 아직 없는 규격 때문에 실패하는 것을 확인한다.
 - [ ] Global Constraints 수치를 토큰으로 연결한다. 제목 h1/h2/h3와 기본 컨트롤 타이포는 Layout 내부에 한정한다. `[hidden]`과 모바일 닫힘 상태에서 표시·초점이 새지 않게 한다. 상태 칩에 고정 원형 너비를 주지 않는다.
 - [ ] Run `pnpm run verify:foundation:core`; PASS: CSS 토큰/색상/hidden/bundle 검사가 모두 통과한다. 실제 크기 검증은 Task 5에서 확정한다.
