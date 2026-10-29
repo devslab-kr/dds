@@ -16,6 +16,11 @@
  */
 export const FAMILY_FONT_PRELOAD_FILE = "fonts/geist/geist-latin-wght-normal.woff2";
 
+/** Complete unmodified Korean face for the atomic opt-in stylesheet. */
+export const FAMILY_FONT_ATOMIC_FILE = "fonts/pretendard/PretendardVariable.woff2";
+/** Preload this only when the initial screen has monospaced UI text. */
+export const FAMILY_FONT_MONO_FILE = "fonts/geist-mono/geist-mono-latin-wght-normal.woff2";
+
 const SAME_ORIGIN_PATH = /^\/(?!\/)/;
 
 /**

@@ -468,3 +468,15 @@ test("the TanStack adapter appends font preloads only when asked, after the icon
   assert.deepEqual(withFont.links.at(-1), { rel: "preload", href: "/assets/geist-latin.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" });
   assert.throws(() => toTanStackHead(metadata, { fontPreload: "https://fonts.example.com/geist.woff2" }), RangeError);
 });
+
+
+test("atomic and mono preload paths are additive and use the existing CORS helper", async () => {
+  const { FAMILY_FONT_ATOMIC_FILE, FAMILY_FONT_MONO_FILE, fontPreloadLinks } = await import("../packages/site-kit/src/core/fonts.mjs");
+  assert.equal(FAMILY_FONT_ATOMIC_FILE, "fonts/pretendard/PretendardVariable.woff2");
+  assert.equal(FAMILY_FONT_MONO_FILE, "fonts/geist-mono/geist-mono-latin-wght-normal.woff2");
+  assert.deepEqual(fontPreloadLinks(["/assets/PretendardVariable-full1234.woff2", "/assets/geist-mono-latin-mono1234.woff2"]).map(({ crossorigin, as, type }) => ({ crossorigin, as, type })), [
+    { crossorigin: "anonymous", as: "font", type: "font/woff2" },
+    { crossorigin: "anonymous", as: "font", type: "font/woff2" },
+  ]);
+  for (const name of ["FAMILY_FONT_ATOMIC_FILE", "FAMILY_FONT_MONO_FILE"]) assert.ok(name in coreIndex, name);
+});
