@@ -298,7 +298,10 @@ test("every url() in fonts.css is package-relative and names a real woff2 the pa
   const css = await read("packages/site-kit/fonts.css");
   const atomicCss = await read("packages/site-kit/fonts-atomic.css");
   const atomicUrls = [...atomicCss.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url);
-  const urls = [...new Set([...css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url).concat(atomicUrls))];
+  const legacyUrls = [...css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(([, url]) => url);
+  assert.equal(new Set(legacyUrls).size, legacyUrls.length, "each legacy face is referenced once");
+  assert.equal(new Set(atomicUrls).size, atomicUrls.length, "each atomic face is referenced once");
+  const urls = [...new Set([...legacyUrls, ...atomicUrls])];
   assert.ok(urls.length > 0);
   for (const url of urls) {
     assert.ok(url.startsWith("./fonts/"), `${url}: relative to fonts.css, so a bundler rewrites it to the product's own /assets`);
@@ -311,7 +314,6 @@ test("every url() in fonts.css is package-relative and names a real woff2 the pa
     // product CSP of font-src 'self' blocks those. No face may be that small.
     assert.ok(bytes.length > 4096, `${url} is ${bytes.length} bytes — a bundler would inline it as data:`);
   }
-  assert.equal(new Set(urls).size, urls.length, "each face is referenced once");
   const shipped = ["geist", "geist-mono", "pretendard"].flatMap((dir) =>
     readdirSync(new URL(`fonts/${dir}/`, pkg)).filter((name) => name.endsWith(".woff2")).map((name) => `./fonts/${dir}/${name}`),
   );
