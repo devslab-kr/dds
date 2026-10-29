@@ -26,4 +26,3 @@ export function exportFamilyFonts({packageDir=dirname(fileURLToPath(import.meta.
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{const options={};const names={'--out-dir':'outDir','--base-url':'baseURL','--head-output':'headOutput','--package-dir':'packageDir'};for(let i=2;i<process.argv.length;i++){if(process.argv[i]==='--monospace'){options.monospace=true;continue;}const key=names[process.argv[i]];if(!key||!process.argv[i+1]||options[key])throw Error('Unknown or duplicate font export option');options[key]=process.argv[++i];}console.log(JSON.stringify(exportFamilyFonts(options),null,2));}catch(e){console.error(e.message);process.exitCode=1;}
 }
-

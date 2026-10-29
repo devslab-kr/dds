@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,existsSync,symlinkSync}from'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,existsSync,symlinkSync,cpSync}from'node:fs';
 import {tmpdir}from'node:os';import{resolve,join,dirname,basename,sep}from'node:path';import{fileURLToPath}from'node:url';import{createHash}from'node:crypto';
 import{buildFamilyFontArtifact}from'../packages/site-kit/scripts/build-family-font-artifact.mjs';
 import{exportFamilyFonts}from'../packages/site-kit/src/family-fonts/export.mjs';
@@ -51,3 +51,13 @@ test('static export rejects metadata symlinks before writing any asset or extern
  }
 });
 
+
+test('DDS source text line endings do not change the pinned font distribution',t=>{
+ const{dir}=fixture(t),copy=join(dir,'dds-source'),kit=join(copy,'packages/site-kit');mkdirSync(kit,{recursive:true});
+ cpSync(join(root,'packages/site-kit/fonts'),join(kit,'fonts'),{recursive:true});
+ for(const file of ['tokens/foundation.json','LICENSE','packages/site-kit/fonts-atomic.css','packages/site-kit/src/family-fonts/runtime.mjs','packages/site-kit/src/family-fonts/runtime.d.mts','packages/site-kit/src/family-fonts/export.mjs']){
+  const dest=join(copy,file);mkdirSync(dirname(dest),{recursive:true});writeFileSync(dest,readFileSync(join(root,file),'utf8').replace(/\r?\n/g,'\r\n'));
+ }
+ const windows=buildFamilyFontArtifact({sourceRoot:copy,sourceRef:'test-source'});assert.deepEqual(windows.archive,bundle.archive);
+ for(const file of ['runtime.mjs','runtime.d.mts','export.mjs','fonts.css','provenance/build-family-font-artifact.mjs'])assert.ok(!bundle.files.get(file).data.includes(13));
+});

@@ -9,13 +9,14 @@ import {FAMILY_FONT_CACHE_CONTROL} from '../src/family-fonts/runtime.mjs';
 const defaultRoot=resolve(dirname(fileURLToPath(import.meta.url)),'../../..');
 const hash=(bytes,algo='sha256',encoding='hex')=>createHash(algo).update(bytes).digest(encoding);
 const json=x=>Buffer.from(JSON.stringify(x,null,2)+'\n');
+const sourceText=file=>readFileSync(file,'utf8').replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n');
 const apiNames=['fontManifest','getFontHeadLinks','getFontAssetHeaders','fontAssetHeaders','withFamilyFontCache','getBundleFontPreloadLinks','getBundleFontAssetHeaders','isFamilyFontAssetRequest'];
 
 export function buildFamilyFontArtifact({sourceRoot=defaultRoot,sourceRef='working-tree'}={}){
  if(!/^[A-Za-z0-9._+-]{1,100}$/.test(sourceRef))throw Error('Invalid DDS source reference');
  const kit=join(sourceRoot,'packages/site-kit'),legacy=JSON.parse(readFileSync(join(kit,'fonts/manifest.json'),'utf8'));
  const tokens=JSON.parse(readFileSync(join(sourceRoot,'tokens/foundation.json'),'utf8'));
- const originalCss=readFileSync(join(kit,'fonts-atomic.css'),'utf8');
+ const originalCss=sourceText(join(kit,'fonts-atomic.css'));
  const sources=new Map(legacy.families.map(f=>[f.dir,f]));
  const assets=[],licenses=[],files=new Map(),urlMap=new Map();
  const put=(file,data,mode=0o644)=>files.set(file,{data:Buffer.isBuffer(data)?data:Buffer.from(data),mode});
@@ -39,9 +40,9 @@ export function buildFamilyFontArtifact({sourceRoot=defaultRoot,sourceRef='worki
  css=css.replace(':root {',':root {\n  --dds-font-family-mono: '+tokens.font.family.mono.$value+';');
  if(/\bsrc\s*:[^;]*\blocal\s*\(/i.test(css)||/PretendardVariable\.subset/.test(css))throw Error('Unexpected local or split Korean source');
  put('fonts.css',css);
- for(const file of ['runtime.mjs','runtime.d.mts','export.mjs'])put(file,readFileSync(join(kit,'src/family-fonts',file)),file==='export.mjs'?0o755:0o644);
- put('provenance/build-family-font-artifact.mjs',readFileSync(fileURLToPath(import.meta.url)));
- const rootLicense=join(sourceRoot,'LICENSE');if(existsSync(rootLicense))put('LICENSE',readFileSync(rootLicense));
+ for(const file of ['runtime.mjs','runtime.d.mts','export.mjs'])put(file,sourceText(join(kit,'src/family-fonts',file)),file==='export.mjs'?0o755:0o644);
+ put('provenance/build-family-font-artifact.mjs',sourceText(fileURLToPath(import.meta.url)));
+ const rootLicense=join(sourceRoot,'LICENSE');if(existsSync(rootLicense))put('LICENSE',sourceText(rootLicense));
  const sourceDigest=hash(Buffer.concat([...files].sort(([a],[b])=>a.localeCompare(b)).flatMap(([name,entry])=>[Buffer.from(name+'\0'),entry.data])));
  const manifest={schemaVersion:1,source:{repository:'https://github.com/devslab-kr/dds',ref:sourceRef,contentSha256:sourceDigest},css:{file:'fonts.css',bytes:Buffer.byteLength(css),sha256:hash(css)},tokens:{sans:css.match(/--dds-font-family-sans:\s*([^;]+);/)[1],mono:tokens.font.family.mono.$value},assets,licenses,preload:{default:['geist/geist-latin-wght-normal.woff2','pretendard/PretendardVariable.woff2'],monospace:['geist-mono/geist-mono-latin-wght-normal.woff2']},cache:{control:FAMILY_FONT_CACHE_CONTROL,scope:'Exact known content-hashed public WOFF2 paths only; host adapter preserves private/error responses'}};
  put('manifest.json',json(manifest));put('manifest.mjs','export default '+JSON.stringify(manifest,null,2)+';\n');
