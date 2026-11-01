@@ -53,3 +53,44 @@ const StatusPill = createStatusPill({
 ```
 
 Unknown closed-domain status values throw to expose incomplete catalogs. Domains listed in `openDomains` instead show the unknown value as escaped text.
+
+### DatePicker manual input and saving
+
+`value`/`onChange` remain canonical date-only `YYYY-MM-DD` strings (or intentional clear `''`). Complete real dates commit while typing; invalid/incomplete text stays visible and never becomes a replacement date. `required` forwards native/accessible required state; `readOnly` prevents edits/calendar opening. Locked transitions close the portal. Invalid persisted values render an error without being parsed or cleared.
+
+Subscribe to `onValidityChange(state: DatePickerValidity)` for the exact displayed `inputValue`, canonical `value` (or null while invalid), `valid`, and reason (`valid`, `required`, `incomplete`, `invalid`, `rangeUnderflow`, `rangeOverflow`). Native forms use the visible input's custom validity. API/button/shortcut saves MUST also check the callback state; a canonical parent value may still contain the last valid selection while the visible draft is invalid. Start unknown/blocked until the initial callback. Do not infer validity from `value` alone.
+
+```tsx
+const [date, setDate] = useState('2028-02-28');
+const [dateValidity, setDateValidity] = useState<DatePickerValidity | null>(null);
+<DatePicker label="Date" value={date} onChange={setDate}
+  required onValidityChange={setDateValidity} />
+// In every save handler (including shortcuts):
+if (!dateValidity?.valid || dateValidity.value === null) return;
+await save({ date: dateValidity.value });
+```
+
+Strict Gregorian dates and inclusive min/max are validated without timezone normalization or silent clamping. Clearing always reports `onChange('')`; required clear remains invalid. Keep authoritative server validation. Library tests alone do not establish that a consumer's request handler uses this guard.
+Korean (`ko`, `ko-KR`, including the default locale) displays `YYYY/MM/DD`; `value`, `onChange`, min/max and `DatePickerValidity.value` remain `YYYY-MM-DD`. Consumers must not replace separators or persist `inputValue`. ISO paste is accepted by the common parser and normalized only once it is a complete valid date. Date-only values do not shift with timeZone.
+
+`onValidityChange` reports initially and on semantic draft/constraint/controlled-value changes, including invalid/partial edits that do not emit `onChange`. Use it for dirty/navigation guards and to cancel a pending publish confirmation when input changes. Replacing only the callback function does not replay an identical report: this prevents inline setState render loops. Key the owning editor by document identity/reset revision, and keep callbacks stable with useCallback. A new keyed instance receives a fresh initial report even for an identical date. Compare canonical value for valid dates and the raw inputValue for invalid drafts when tracking the pristine baseline; do not generate a consumer-side display formatter. Remount/reset that baseline only on an intentional editor change/reset.
+
+```tsx
+<PolicyDateEditor key={`${document.id}:${document.revision}`} document={document} />
+// Inside PolicyDateEditor (one editor identity):
+const baseline = useRef<string | undefined>(undefined);
+const previous = useRef<string | undefined>(undefined);
+const onDateValidity = useCallback((state: DatePickerValidity) => {
+  setDateValidity(state);
+  const stateKey = JSON.stringify(state.valid ? [true, state.value] : [false, state.inputValue]);
+  if (baseline.current === undefined) baseline.current = stateKey;
+  setDirty(stateKey !== baseline.current);
+  if (previous.current !== undefined && previous.current !== stateKey) {
+    closePublishConfirmation();
+  }
+  previous.current = stateKey;
+}, [closePublishConfirmation]); // Keep closePublishConfirmation stable too.
+// Every button/API/shortcut Save checks valid and persists state.value only.
+```
+
+Delayed controlled echoes matching an outstanding local emission acknowledge that occurrence without replacing a newer draft. Repeated B/C/B is retained as three occurrences; duplicate blur/Enter does not emit again. A changed value not among pending emissions is an external reset and clears pending history. The string-only API cannot distinguish an intentional reset to a still-outstanding identical value from its acknowledgement; use a keyed editor remount for an explicit reset. Keep local controlled state synchronous and persist to the server separately. Unacknowledged emissions are retained until acknowledgement, external reset or unmount.
