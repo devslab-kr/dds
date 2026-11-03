@@ -1,5 +1,13 @@
 # @devslab/dds-react
 
+## 0.29.3
+
+### Patch Changes
+
+- @devslab/dds-tokens@0.29.3
+- @devslab/dds-css@0.29.3
+- @devslab/dds-icons@0.29.3
+
 ## 0.29.2
 
 ### Patch Changes
