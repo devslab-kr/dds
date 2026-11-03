@@ -68,8 +68,9 @@ hex/rgb/hsl/color-mix를 CI에서 기계 차단, D-007).
 링크)로 배포. 장기적으로 Storybook 도입 검토 (스펙 4.4의 스토리 요구사항).
 - [x] **쇼케이스 배포 — GitHub Pages 대신 devslab.kr에 실어서** (devlab.kr#31):
       repo 공개 없이 공개 URL 확보. `preview/index.html` → devslab.kr/dds/,
-      `preview/components.html` → /dds/components.html (vendored 사본 +
-      sync 스크립트, D-009 모델). brand/는 사이트 자체 /brand 페이지가 대체.
+      `preview/components.html` → /dds/components.html (페이지 손 사본 +
+      sync 스크립트 — 산출물 사본이 아니라 D-044 뒤에도 그대로). brand/는
+      사이트 자체 /brand 페이지가 대체.
       /brand의 design system 블록에서 링크. **preview를 고치면
       devlab.kr에서 `node scripts/sync-dds-showcase.mjs` 재실행 필요.**
       (2026-08-15 devlab.kr#34로 `icons.html` 추가 — sync 스크립트가 이제
@@ -146,6 +147,12 @@ devslab.kr과 동일한 `localStorage 'theme'` 키 + `data-theme` 속성 패턴�
       사본 + sync 스크립트): body·electric 스케일·시맨틱 유틸리티가 토큰
       한 소스, ThemeProvider가 class+data-theme 동시 스위치, ::selection
       on-brand 규칙 적용(기존 흰 글자 2.3:1 수정).
+- [x] devslab.kr npm 소비 전환 (devlab.kr#114, 2026-11-03, **D-044** —
+      D-009 폐기): `@devslab/dds-{tokens,css,icons,react}` 정확 핀 0.29.2,
+      빌드 시 `scripts/dds-assets.mjs`가 node_modules에서 `public/dds/*`·
+      `palette.json` 생성(gitignore), 옛 사본·`sync-dds-tokens.mjs` 삭제,
+      Dependabot 주간 bump. `check-consumers`에서 devslab 제거. 남은 사본은
+      asklinq `apps/api/src/dds/tokens.ts` 하나(그 레포 몫).
 
 ### 9. 폰트 전략 확정 — `웹 완료` (2026-10-05)
 Geist/Geist Mono 셀프호스팅 여부, Pretendard 서브셋, RN 번들 전략.

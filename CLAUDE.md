@@ -38,11 +38,17 @@ AskLinq, BookLinq, FlowLinq, 이후의 모바일 앱)이 공유하는 디자인 
   asklinq의 Decision Log 형식)에 결정 기록을 남긴다.
 - 패키지가 생기면 lockstep semver (tokens/css/native 같은 버전 트레인).
   토큰 이름 변경·삭제 = breaking.
-- **토큰을 바꿨으면 소비자 사본까지가 그 작업이다.** D-009로 소비자는
-  커밋 사본을 들고 있으므로, 여기서 값이 바뀌면 asklinq·devslab이 낡는다.
-  `pnpm run check`가 `scripts/check-consumers.mjs`로 이를 잡는다(로컬 전용 —
-  체크아웃이 없는 소비자는 실패가 아니라 skip). 걸리면 해당 레포에서
-  재동기화하고 **거기서 커밋**한다.
+- **토큰을 바꿨으면 소비자까지가 그 작업이다.** 소비자는 npm 패키지를 핀으로
+  설치한다(D-044 — D-009의 커밋 사본 모델은 폐기). devslab.kr은 전환 완료
+  (devlab.kr#114, 정확 핀 + Dependabot 주간 bump)라 여기서 값이 바뀌면
+  **발행 뒤 bump PR**로 전해진다. 아직 사본을 든 소비자는 asklinq
+  `apps/api/src/dds/tokens.ts` 하나이고, `pnpm run check`가
+  `scripts/check-consumers.mjs`로 그 드리프트를 잡는다(로컬 전용 — 체크아웃이
+  없는 소비자는 실패가 아니라 skip). 걸리면 해당 레포에서 재동기화하고
+  **거기서 커밋**한다. devslab.kr의 `/dds/*` 쇼케이스 페이지는
+  `preview/*.html`의 손 사본 — preview를 고치면 devlab.kr에서
+  `node scripts/sync-dds-showcase.mjs`를 다시 돈다(페이지 사본이라 D-044
+  범위 밖).
 - main 직접 푸시는 문서·토큰 수정까지만. 빌드 파이프라인 등 구조 변경은
   브랜치 + PR로.
 
