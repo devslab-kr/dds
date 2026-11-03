@@ -1,14 +1,22 @@
 /**
  * Vendored-copy drift check (companion to check-docs-sync.mjs).
  *
- * D-009 says consumers hold committed copies of the build outputs until the
- * publishing question is settled. That decision has no expiry and, until now,
- * no detector: when tokens change here, nothing tells anyone that asklinq and
- * devslab.kr are still serving the old values.
+ * D-009 (2026-08-13) had consumers hold committed copies of the build outputs
+ * until publishing was settled. D-044 (2026-11-03) retired that model: the
+ * packages are on public npm and consumers install them pinned. devslab.kr
+ * switched in jlc488/devlab.kr#114 (exact pin, build-time copy from
+ * node_modules, Dependabot bumps) and holds no output copy any more, so it is
+ * no longer listed here. Its /dds/* showcase pages are still hand-copied from
+ * preview/*.html by its own sync-dds-showcase.mjs, but those are pages, not
+ * build outputs, and nothing here mirrors them.
  *
- * It went wrong exactly once already. D-011 (2026-08-15) added
- * bg.inverse / text.on-inverse; both vendored copies sat two tokens behind for
- * two weeks, and the gap was found by hand, not by a check.
+ * The check stays for the copies that still exist. When the last entry in
+ * CONSUMERS is gone, delete this script and the `check:consumers` entry in
+ * package.json with it.
+ *
+ * Why a detector at all: D-011 (2026-08-15) added bg.inverse / text.on-inverse;
+ * both vendored copies of the day sat two tokens behind for two weeks, and the
+ * gap was found by hand, not by a check.
  *
  * So: after `pnpm run build`, compare every known vendored file against the
  * dist it mirrors and say plainly which consumer needs a re-sync.
@@ -27,14 +35,13 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "packages", "dds-tokens", "dist");
 
 // Consumers live beside this repo. dds sits at <home>/code/workspace/dds and
-// the products at <home>/workspace/<name>, which is what the consumers' own
-// sync scripts already assume (devslab: scripts/sync-dds-tokens.mjs).
+// the products at <home>/workspace/<name>.
 const consumerRoot = process.env.DDS_CONSUMER_ROOT
   ? resolve(process.env.DDS_CONSUMER_ROOT)
   : resolve(root, "..", "..", "..", "workspace");
@@ -45,14 +52,6 @@ const CONSUMERS = [
     repo: "asklinq",
     resync: "cp <dds>/packages/dds-tokens/dist/tokens.ts apps/api/src/dds/tokens.ts",
     files: [{ vendored: "apps/api/src/dds/tokens.ts", source: "tokens.ts" }],
-  },
-  {
-    repo: "devslab",
-    resync: "node scripts/sync-dds-tokens.mjs",
-    files: [
-      { vendored: "src/styles/dds/tokens.css", source: "tokens.css" },
-      { vendored: "src/styles/dds/preset.cjs", source: join("tailwind", "preset.cjs") },
-    ],
   },
 ];
 
@@ -95,18 +94,6 @@ for (const consumer of CONSUMERS) {
     console.error(`✗ ${consumer.repo}: ${stale.length} file(s) behind dist`);
     for (const f of stale) console.error(`    ${f}`);
     console.error(`    re-sync: (in ${consumer.repo}) ${consumer.resync}`);
-  }
-}
-
-// palette.json is derived rather than copied, so compare the parsed value.
-const devslabPalette = join(consumerRoot, "devslab", "src", "styles", "dds", "palette.json");
-if (existsSync(devslabPalette)) {
-  const { default: tokens } = await import(pathToFileURL(join(dist, "tokens.js")).href);
-  checked++;
-  if (JSON.stringify(JSON.parse(readFileSync(devslabPalette, "utf8"))) !== JSON.stringify(tokens.palette)) {
-    drifted++;
-    console.error("✗ devslab: src/styles/dds/palette.json differs from dist palette");
-    console.error("    re-sync: (in devslab) node scripts/sync-dds-tokens.mjs");
   }
 }
 

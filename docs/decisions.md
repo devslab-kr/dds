@@ -5,6 +5,56 @@
 
 ---
 
+## D-044 — 소비는 npm 의존성으로, 빌드 산출물의 커밋 사본은 폐기한다 (2026-11-03)
+
+**결정.** D-009를 대체한다. 패키지는 공개 npm에 발행되고 있으므로
+(`@devslab/dds-*`, 이 시점 0.29.2) 소비자는 빌드 산출물(`tokens.css`·
+`tailwind/preset`·`palette.json`·`tokens.ts` 등)의 **커밋된 사본을 들지 않고
+패키지를 설치한다**. 소비자가 자기 공개 경로에 파일 형태로 필요하면 **빌드
+시점에 node_modules에서 복사**하고 그 결과물은 커밋하지 않는다(gitignore).
+
+**첫 소비자 — devslab.kr (jlc488/devlab.kr#114, 2026-11-03).**
+`@devslab/dds-tokens`·`dds-css`·`dds-icons`·`dds-react`를 **정확히 `0.29.2`로
+고정**해 설치. 빌드 스크립트 `scripts/dds-assets.mjs`가
+`public/dds/{tokens.css,dds.css,icons.js}`와 `src/styles/dds/palette.json`을
+node_modules에서 써 내며 전부 gitignore. `globals.css`는
+`@devslab/dds-tokens/tokens.css`를 import, `tailwind.config.js`는
+`@devslab/dds-tokens/tailwind/preset`을 require. Dependabot이 주간 bump PR을
+연다. 옛 사본 `src/styles/dds/tokens.css`·`preset.cjs`와 동기화 스크립트
+`scripts/sync-dds-tokens.mjs`는 삭제됐다.
+
+**남는 손동기화 — 페이지 사본이지 산출물 사본이 아니다.** devslab.kr의
+`/dds/`·`/dds/components.html`·`/dds/icons.html`은 이 레포 `preview/*.html`
+세 장의 사본이고, devslab 쪽 `scripts/sync-dds-showcase.mjs`가 devslab 자체
+소셜 메타를 끼워 복사한다. 이것은 어느 npm 패키지에도 들어 있지 않은
+**쇼케이스 페이지**의 사본이라 이 결정의 범위 밖이며 그대로 둔다
+(backlog P2 4번 — preview를 고치면 devlab.kr에서 그 스크립트를 다시 돈다).
+
+**다른 소비자 — 이 시점의 상태.** `scripts/check-consumers.mjs`가 아직
+추적하는 사본은 asklinq 하나: `apps/api/src/dds/tokens.ts`(dist `tokens.ts`의
+사본, 재동기화는 cp). 2026-11-03 로컬 체크아웃에 그 파일이 그대로 있고
+(2026-09-01 자, 같은 날 체크 실행에서 0.29.2 dist 대비 낡음으로 보고됨),
+같은 레포의 `apps/web-next`는 `@devslab/dds-css`·`dds-icons`·
+`dds-solid`를 이미 npm으로 소비한다. `apps/api` 전환은 asklinq 레포의 몫이고
+이 결정은 그것을 지시만 한다 — **전환됐다고 기록하지 않는다.** 전환되면
+그 엔트리와 스크립트·`check:consumers`를 함께 지운다.
+
+**근거.** D-009의 근거 두 가지(발행 미결, GitHub Packages 소비의 토큰
+시크릿)가 모두 사라졌다 — 공개 npm은 Cloudflare Workers Build에서 시크릿
+없이 설치된다. 정확 핀 + Dependabot이면 "어느 버전을 보고 있는가"가
+package.json 한 줄에 적히고, 사본 모델에서 손으로 하던 diff 리뷰는 bump
+PR의 diff가 된다. 소비자가 늘어도 사본은 늘지 않는다.
+
+**트레이드오프.** 소비자는 DDS 변경을 즉시 보지 않고 발행·bump를 거쳐
+본다(의도된 지연 — 발행이 곧 계약). 정확 핀이라 bump PR을 머지하지 않으면
+뒤처지며, 그것은 이 레포의 체크가 아니라 Dependabot 큐가 알린다. 빌드 시점
+복사는 빌드가 node_modules를 읽을 수 있다는 전제를 둔다(devslab에서 실측
+통과).
+
+**재검토 시점.** asklinq `apps/api` 사본이 사라질 때 — `check-consumers`
+삭제. 소비자 공개 경로가 패키지 파일을 직접 서빙할 수 있게 되면 빌드 시점
+복사도 불필요.
+
 ## D-043 — 진행 중인 버튼은 크기가 그대로다: 라벨은 숨기고 스피너는 가운데 겹친다 (2026-10-20)
 
 **맥락.** Button은 loading(`aria-busy="true"`)이면 `.dds-spinner`를 라벨 옆 흐름에 넣었다. 버튼이
@@ -1124,6 +1174,10 @@ DDS에 제품 브랜드 레지스트리(테마 파일)를 승격 검토.
 승격 여부 판단).
 
 ## D-009 — 미발행 기간의 소비 방식: vendored 사본 (2026-08-13)
+
+**상태.** D-044로 대체됨 (2026-11-03) — 발행이 결정·실행됐고(공개 npm) 첫
+소비자 devslab.kr이 사본을 지우고 의존성으로 전환했다(jlc488/devlab.kr#114).
+아래는 기록용으로 남긴다.
 
 **결정.** 패키지 발행(공개 여부·레지스트리)이 결정되기 전까지, 소비자는
 `dds-tokens` 빌드 산출물의 **커밋된 사본**을 든다. 첫 소비자 devslab.kr:
