@@ -24,6 +24,7 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "@devslab-kr/dds-auth",
+    "@devslab-kr/dds-email-template",
     "@devslab/compatibility-canary",
     "@devslab/react-canary"
   ]

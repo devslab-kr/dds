@@ -6,6 +6,8 @@ settings:
 
 importers:
 
+  packages/dds-email-template: {}
+
   .:
     devDependencies:
       '@axe-core/playwright':
