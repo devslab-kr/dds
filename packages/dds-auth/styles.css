@@ -1,0 +1,118 @@
+@import "@devslab/dds-react/styles.css";
+
+/* Operate mode: the product owns page composition; DDS owns this quiet login section. */
+.dds-login {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 28rem;
+  min-inline-size: 0;
+  padding: var(--dds-space-24);
+  color: var(--dds-color-text-primary);
+  font-family: var(--dds-font-family-sans);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.dds-login__header {
+  margin-block-end: var(--dds-space-24);
+}
+.dds-login__brand {
+  margin-block-end: var(--dds-space-24);
+  font-weight: 600;
+}
+.dds-login__brand img {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+.dds-login__title {
+  margin: 0;
+  font-size: var(--dds-typo-title-1-font-size);
+  font-weight: var(--dds-typo-title-1-font-weight);
+  line-height: var(--dds-typo-title-1-line-height);
+  text-wrap: balance;
+}
+.dds-login__description {
+  margin-block-start: var(--dds-space-8);
+  color: var(--dds-color-text-secondary);
+  font-size: var(--dds-typo-body-1-font-size);
+  line-height: var(--dds-typo-body-1-line-height);
+}
+.dds-login__content {
+  margin-block-end: var(--dds-space-24);
+}
+.dds-login__providers {
+  display: grid;
+  gap: var(--dds-space-12);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.dds-login__provider {
+  min-inline-size: 0;
+}
+.dds-login__button {
+  inline-size: 100%;
+  flex-wrap: wrap;
+}
+.dds-login__provider-icon {
+  display: inline-flex;
+  flex: none;
+  inline-size: var(--dds-space-20);
+  block-size: var(--dds-space-20);
+}
+.dds-login__provider-icon > * {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+/* Official Kakao symbol is black with transparency. Its provider-owned yellow
+   backing keeps the unchanged mark visible in both DDS themes (asset provenance). */
+.dds-login__provider[data-provider="kakao"] .dds-login__provider-icon {
+  background: var(--dds-auth-kakao-symbol-surface, #fee500);
+  border-radius: var(--dds-radius-sm);
+}
+.dds-login__provider-help,
+.dds-login__progress {
+  margin: var(--dds-space-8) 0 0;
+  color: var(--dds-color-text-secondary);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+}
+.dds-login__progress {
+  min-block-size: var(--dds-typo-body-2-line-height);
+}
+.dds-login__error {
+  margin-block: var(--dds-space-12);
+}
+.dds-login__error p {
+  margin: 0 0 var(--dds-space-12);
+  color: var(--dds-color-status-danger);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+}
+.dds-login__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dds-space-8) var(--dds-space-16);
+  margin-block-start: var(--dds-space-16);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+}
+.dds-login__legal a {
+  color: var(--dds-color-text-secondary);
+  text-underline-offset: var(--dds-space-4);
+}
+.dds-login__legal a:hover {
+  color: var(--dds-color-text-primary);
+}
+.dds-login__legal a:focus-visible {
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: var(--dds-space-4);
+}
+.dds-login__legal span {
+  color: var(--dds-color-text-secondary);
+}
+@media (max-width: 30rem) {
+  .dds-login {
+    padding: var(--dds-space-16);
+  }
+}

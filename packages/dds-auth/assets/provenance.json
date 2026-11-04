@@ -1,0 +1,32 @@
+{
+  "retrievedAt": "2026-11-02T01:49:35.438Z",
+  "assets": [
+    {
+      "file": "kakao-symbol.svg",
+      "source": "https://developers.kakao.com/tool/images/resource/preview/login-complete-ko.svg",
+      "sourceSha256": "ab90ab44616f14a671844cd991b3fbb33277f42c5bb2cc5a9422344a854c9398",
+      "sha256": "c4cd4159bf53ed88eee8270f8b02f22a0486dcab94c1be26692cc34fa9b7b4f9",
+      "transformation": "Exact first symbol path and original fill from official preview; viewBox only isolates symbol; no path redraw, geometry or color modification."
+    },
+    {
+      "file": "naver-symbol.png",
+      "source": "https://developers.naver.com/inc/devcenter/downloads/bi/NAVER_login_KR.zip",
+      "entry": "NAVER_login_KR/NAVER_login_Light_KR_green_icon_H56.png",
+      "sourceSha256": "83eeef830bee319b83737bde1c74509e9ac7b1a6659e23e318cfcd7d6640f0f7",
+      "sha256": "6376556828d6a508c610077208d8b2babc028b1edada9da9d3bc9b8f0ea0d56b",
+      "crop": {
+        "left": 72,
+        "top": 72,
+        "width": 80,
+        "height": 80
+      },
+      "transformation": "Pixel crop of the official white N; original green #03A94D and shape unchanged; no redraw/recolor."
+    },
+    {
+      "file": "google-g.png",
+      "source": "https://developers.google.com/static/identity/images/g-logo.png",
+      "sha256": "d1ce9c2af0b10a7333abc99bc706f9a6a199e5b65bf3e3009624f076b8638e6a",
+      "transformation": "Original downloaded PNG bytes unchanged."
+    }
+  ]
+}
