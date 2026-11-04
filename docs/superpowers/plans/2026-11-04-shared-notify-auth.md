@@ -37,10 +37,10 @@
 **Files:** `packages/notify-provider/*`, workspace manifest/lock, package documentation and reusable pack checks.
 **Interface:** `NotificationProvider.send` distinguishes accepted/rejected/unknown. `lookup` distinguishes found/not_found/unknown. `createSolapiProvider` injects credentials, Fetch, Crypto and timeout.
 
-- [ ] Add failing behavior tests for ATA native fallback, timeout/5xx/malformed responses, safe recovery and replacement adapter.
-- [ ] Implement zero-runtime-dependency SOLAPI adapter without altering Notify billing/HTTP contracts.
-- [ ] Run package tests, typecheck/build and packed Node/Workers consumer verification.
-- [ ] Review exact artifact and publish/install fixed `@devslab-kr/notify-provider@0.1.0` after all gates pass.
+- [x] Add failing behavior tests for ATA native fallback, timeout/5xx/malformed responses, safe recovery and replacement adapter.
+- [x] Implement zero-runtime-dependency SOLAPI adapter without altering Notify billing/HTTP contracts.
+- [x] Run package tests, typecheck/build and packed Node/Workers consumer verification.
+- [x] Review exact artifact and publish/install fixed `@devslab-kr/notify-provider@0.1.0` after all gates pass.
 
 ## Task 2: DDS auth and login package
 
@@ -48,11 +48,11 @@
 **Files:** `packages/dds-auth/*`, isolated React canary login fixture, workspace manifest/lock and package guide.
 **Interface:** provider availability, safe auth errors and start/callback/session/sign-out adapter contracts; `LoginPanel` delegates start/navigation to app-supplied client.
 
-- [ ] Add failing behavior tests for configuration, errors, duplicate starts, redirects, keyboard/ARIA and SSR.
-- [ ] Implement `@devslab-kr/dds-auth@0.1.0`, React entry and styles using stable published DDS dependency range.
-- [ ] Apply Taste to the operational login composition and record final Polish on spacing, focus, wrapping, states and responsive layouts.
-- [ ] Run package tests/check/build, browser/accessibility checks and packed install verification.
-- [ ] Review exact artifact and publish/install the fixed version after all gates pass.
+- [x] Add failing behavior tests for configuration, errors, duplicate starts, redirects, keyboard/ARIA and SSR.
+- [x] Implement `@devslab-kr/dds-auth@0.1.0`, React entry and styles using stable published DDS dependency range.
+- [x] Apply Taste to the operational login composition and record final Polish on spacing, focus, wrapping, states and responsive layouts.
+- [x] Run package tests/check/build, browser/accessibility checks and packed install verification.
+- [x] Review exact artifact and publish/install the fixed version after all gates pass.
 
 ## Task 3: Consumer integration
 
@@ -80,13 +80,13 @@
 - Ruling: the detailed continuation spec supplies implementation authorization; do not add a design approval loop.
 - Ruling: use permanent plan/progress files and existing repos; user prohibition overrides skill scratch-workspace/worktree defaults.
 - Ruling: isolate login in `@devslab-kr/dds-auth` instead of changing/releasing the existing DDS fixed train. Local DDS is 0.29.1, public latest is 0.29.2; preserve unrelated branch changes.
-- Ruling: GitHub Packages matches Notify's existing package registry and authenticated access. Public npm `whoami` returns E401; no public npm credentials are created or copied.
+- Ruling: GitHub Packages matches Notify's existing package registry and authenticated access. Public npm `whoami` returns E401; no public npm credentials are created or copied. Exclude the separate GitHub auth package from the existing public npm Changesets train to preserve its release path.
 - Registry evidence: Notify contract latest 0.3.0, Notify UI latest 0.2.0. Authenticated read succeeds using existing GitHub credential in process memory; no secret written.
 - Baselines: DDS `91c5fa2`; Notify `2165aee`; qoqo `d7d5be3` (existing unrelated changes); JN `803fc80` (existing unrelated changes).
 - State stack: login uses local ephemeral interaction state; no server-data cache or business input form introduced. Preserve each app's existing Query/Form/store design; reassess only if integration changes that scope.
-- NOT RUN: package release/install, live provider login/send, Android verification and store submission (dependent implementation/configuration gates pending).
+- Both package release/install gates passed; see the progress record for versions, source commits, published integrity and Node/Workers evidence. NOT RUN: real provider login/send, web/Android/Windows acceptance and store submission.
 - 2026-11-04 16:37–16:38 KST: created and submitted JN request template `KA01TP261104073723957S96EdmWErcJ` and completed template `KA01TP261104073737484vV01ms4SKOq`; both `INSPECTING`. No real message sent. Category 008002 was verified against current provider categories.
 - Source event boundaries: invitation claim verifies recipient and `/join/<token>`; PG signing request verifies document/revision/rights/recipient and `/s/<token>`. Completed invitation acceptance/signing/confirmation exist, but completion notification event/outbox and verified recipient selection are not connected yet. No payout event inferred.
 - User confirmed JN has no existing Naver app and requested setup after logging in. Registered service-local `정산나우` after explicit action-time approval of Naver API terms/privacy duties. PC/Mobile web use jeongsan.now and JN's own Supabase callback; name/contact email/mobile are optional. Development state only, review/login NOT RUN.
-- Naver credential handling exception: newly created overview returned Client Secret in a tool result. No credential copied to source/files/commits. User asked to reissue in console before Supabase configuration; credential changes are user handoff per browser policy. Do not repeat the value or read the full credential overview again.
+- Naver credential handling exception: newly created overview returned Client Secret in a tool result. No credential copied to source/files/commits. User completed reissue in console after a temporary reauthentication loop, entered credentials and approved provider activation. JN Supabase now shows `custom:naver` ENABLED; temporary credential variables were cleared. Do not repeat values or read the full credential overview again.
 - Windows evidence: qoqo Electron 45.2.1/builder 26.18.0 builds local DDS bundles and NSIS installers; registered schemes alone do not handle OAuth. JN has no desktop scaffolding. Existing JN mobile BFF state/PKCE/one-time handoff can underpin a protected main-process adapter, but native route coverage, safeStorage and real cold/warm process callbacks require implementation/tests.
