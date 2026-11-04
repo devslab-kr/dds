@@ -60,11 +60,11 @@
 **Files:** qoqo/JN manifests, existing notify providers and login UI/server adapters, existing focused regression tests.
 **Consumes:** the two verified exact npm versions; existing app business events, recovery records and session backends.
 
-- [ ] Record per-page current behavior and intended changes before source edits.
-- [ ] Replace app SOLAPI transport duplication through the shared package while retaining app-owned intent/authorization/outbox/CAS/recovery.
-- [ ] Connect real DDS LoginPanel clients/server adapters. Add JN Naver runtime/schema/profile verification through service-local Supabase custom provider.
-- [ ] Preserve service-local account/invitation/link rules, all cookie/PKCE/callback checks and logout cleanup.
-- [ ] Run targeted auth/notification tests and app-required checks. Record exact source revision and working-tree status.
+- [x] Record per-page current behavior and intended changes before source edits.
+- [x] Replace app SOLAPI transport duplication through the shared package while retaining app-owned intent/authorization/outbox/CAS/recovery.
+- [x] Connect real DDS LoginPanel clients/server adapters. Add JN Naver runtime/schema/profile verification through service-local Supabase custom provider.
+- [x] Preserve service-local account/invitation/link rules, all cookie/PKCE/callback checks and logout cleanup.
+- [x] Run targeted auth/notification tests and app-required checks. Record exact source revision and working-tree status; final full+affected fixture results are separate, see current progress.
 
 ## Task 4: JN template and release gates
 
@@ -73,7 +73,18 @@
 - [x] Create and submit approved text. Both responses are INSPECTING; approval/sendable verification remains pending.
 - [ ] Verify real Kakao/SMS fallback and all three logins on web/Android with authorized recipients/accounts.
 - [ ] Only after those gates, prepare existing-identity store artifacts and continue One Store/Google Play registration; distinguish submission/review/publication.
-- [ ] Implement and verify JN Windows app using qoqo's local React/DDS + isolated Electron main-process architecture; verify actual external browser return before PC release. qoqo's current Windows social handoff is not implemented and must not be claimed as working reference behavior.
+- [x] Implement and locally verify JN Windows using the actual local React/DDS screens and isolated Electron main process; final core37/Electron9/packaged3/NSIS PASS.
+- [x] Implement and locally verify Android encrypted snapshots/drafts and the same packaged business UI, preserving Compose/SIM/updater/identity; final JVM139/phone8/tablet8 PASS.
+- [ ] Verify actual external browser/OS cold and warm returns before PC/mobile public release. qoqo's missing Windows social handoff must not be claimed as a working reference.
+
+Windows implementation/local validation is complete (core37/Form42/Electron9/packaged3/NSIS PASS). Android same-bundle protected WebView/PDF and cache/draft integration is complete (JVM139/phone8/tablet8 on the same final APK, independent review clear). Both source commits3654915+7217c6d are pushed; shared UI be12d88d matches both final artifacts. Real browser/OS/login/send acceptance and operational release remain open. See the final progress handoff and JN's consolidated integration guide rather than the initial no-scaffolding assessment below.
+
+## User-added shared email task
+
+- [x] Create the explicitly requested separate user-owned chat for the common email library, publish/verify `@devslab-kr/dds-email-template@0.1.0`.
+- [x] Connect qoqo Worker and JN's source-only protected CF sender/Hook to the exact common renderer; preserve native Auth/UNKNOWN protections.
+- [x] Verify brand-only configuration, scoped link/code semantics, real responsive renderings, and install integrity. Keep unused hosted-template drafts out of the final implementation.
+- [ ] Provision separate operational package-read credentials and JN CF secrets/bucket/Hook, apply reviewed migrations and run owned-recipient real acceptance before activation.
 
 ## Decisions and verification record
 
