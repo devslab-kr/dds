@@ -11,6 +11,25 @@ Plan: [2026-11-04-shared-notify-auth.md](2026-11-04-shared-notify-auth.md)
 - Publishing: both exact versions published to existing GitHub Packages infrastructure. Public npm credentials were not created/copied. Separate auth package is excluded from the existing public npm Changesets release train.
 - User added JN Windows PC release, matching qoqo's architecture. Web/mobile/PC all require actual login/return checks; qoqo Windows OAuth bridge is itself missing, so no ready-PC-login claim.
 - JN Naver app registered after user approved terms. PC/Mobile web callback configuration entered, optional name/contact email/mobile; development state, review/login pending. User completed Client Secret reissue and entered credentials. After explicit activation approval, JN Supabase `custom:naver` is ENABLED (OIDC issuer nid.naver.com, openid/profile, provider-local email optional). Google/Kakao and global Confirm email remain enabled. Temporary credential variables cleared; no raw credential in source/files/commits.
+- Naver branding: existing JN 512px symbol and business category saved and verified by reload. No review submitted, no actual OAuth acceptance yet. Naver documents a 30-day overlap for reissued secrets; reissue is not evidence of immediate revocation of the prior key.
+- qoqo integration source is frozen on `sexysinny/shared-platform-libraries` from `d7d5be3b6ee6dbf0daeeb17a60d1d1b6853ae072`. Exact package versions installed; Worker167, social server/state26, native UI103, workspace types, web/native builds and Worker dry-run PASS. Same compiled web build `RX-jYrP0gu8F0y_WQyhMQ`: nine cases PASS, then failed/affected four PASS, covering twelve distinct cases. Independent review pending; no commit/deployment/live OAuth/send.
+- User explicitly requires JN screens/assets inside the app and offline operation. Windows design reuses the real JN DDS UI, encrypted scope-bound GET snapshots and explicit draft restore. Financial/contract/send mutations require online current authority/CAS and never auto-submit on reconnect. Root business-only desktop proxy has ten focused tests PASS; the Windows client/installer is not implemented yet.
+
+## JN release isolation — current hold
+
+The source UI chat explicitly requested release isolation for its already committed UI work plus its own authentication-test fix. All agents stopped JN writes/tests/builds. Our 58 owned JN files are preserved in named stash `codex-jn-shared-auth-notify-desktop-2026-11-04-release-isolation`, object **`4ea6f8a8fe30c083dc2f5c3c12384ba96402d60b`**, created on source UI HEAD `339c811a24520a7f983565cee112054e0a2084f2` and branch `sexysinny/list-search-loading`.
+
+Preserved groups: auth23 (including new Naver profile/shared social UI/query isolation), notifications27 (including disabled completion outbox SQL/protected dispatcher/template policy), root8 (package.json, package-lock.json, .npmrc, desktop proxy/map/route/test and Windows implementation document). New files are in the stash's third parent. Use the object ID rather than a mutable stash index to restore after the separate release; inspect any intervening source changes first. Do not drop the stash before verified restoration.
+
+Excluded files were hashed before/after and unchanged: `tests/client/validated-form-render.test.ts` (source UI's seven passing cases), both existing Android documents and `next-env.d.ts`. Existing untracked Android/design/browser material remains untouched. Numkey0.6.1 is retained in the restored HEAD manifests. The remaining tracked dirty files are exactly those four exclusions. Extra installed package directories are not deployable source.
+
+JN source verification before isolation: notification focused16files171 tests PASS; auth runtime90 PASS and UI keyboard/loading/responsive/axe checks PASS, with earlier affected checks recorded separately in the stashed guides. No combined final suite/build was run after the latest changes. The independent auth review found remote-session cleanup incomplete in identity-link post-exchange exceptions; fix plus regression is pending restoration. Also investigate synthetic Naver contact checks across password/recovery paths and BFCache transient navigation-lock reset. Completion outbox still needs an automatic bounded postcommit scheduling path before claiming end-to-end completion notifications.
+
+JN modifications remain frozen until the source UI release finishes. Other repositories may continue. No JN remote SQL, deployment, financial write, OTP/send, or store submission was performed by this task.
+
+## Cleanup exception
+
+The two root registry-check tarball files were safely removed individually. Automatic approval review rejected recursive removal of this task's Notify registry consumer dependency/cache directories before dispatch (`blocked by policy`). They remain at `C:\\Users\\jlc48\\Documents\\Codex\\2026-10-17\\separation\\notify\\packages\\notify-provider\\tests\\consumer\\node_modules` and sibling `.wrangler`; no alternative deletion method was used to bypass that rejection. Existing qoqo artifacts and the DDS reusable consumer dependencies were preserved.
 
 ## Page tracking
 
