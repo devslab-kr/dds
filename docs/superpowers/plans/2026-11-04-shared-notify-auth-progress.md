@@ -2,6 +2,19 @@
 
 Plan: [2026-11-04-shared-notify-auth.md](2026-11-04-shared-notify-auth.md)
 
+## 2026-11-05 이메일 라이브러리 정식 인수 재확인
+
+별도 이메일 세션의 사용자 승인 전달을 받아 패키지 진행 기록, README, 선언 타입, 브랜드 fixtures와 정적 미리보기 index를 읽고 최신 소비자 상태를 대조했다. 이전 HEAD로 되돌리거나 기존 연결을 중복 구현하지 않았다.
+
+- 고정 게시본 `@devslab-kr/dds-email-template@0.1.0`, 소스 `14ac038f050a2b22196ee422f63d8b91101fc8e9`, 최초 인수 기록 `d9f49376804382f759361cbc8ce115f5d52e69f2`를 확인했다. 현재 DDS HEAD는 그 이후의 `3d036d9bf895825ee67fbb7537bcdf9fe7de24b3`였으며 브랜치는 바꾸지 않았다.
+- JN `7217c6dd6851203681b0565dd10e80231db2881d`의 실제 CF 이메일 Worker와 코코 `cb6312116abdb8f3a53963cc5c3bf3851c4ff7a6`의 실제 이메일 adapter가 이미 공통 renderer를 import한다. 두 manifest는 exact `0.1.0`, 두 lockfile integrity는 전달된 `sha512-g2Tfv53VbEaky/5cpi/OUCR7OoHf6Lq3vz22Lp6q6qNQKEkYMhasx4miOiVezm1rOZhE8nRShhzZqyQBqiPYLQ==`와 일치했다.
+- DDS 배포 dist와 두 소비자의 설치된 dist SHA256은 모두 `a1b29049e47c77b434f42b66123681bfab589c1caf79774cb1b0c74c4ba8c146`이다. 서로 다른 HTML/CSS 프레임 사본 없이 브랜드 설정·목적별 내용만 각 소비자에 남겼다. JN 이메일8자리와 코코 초대 이메일6자리, 실제 링크/기한/권한 및 UNKNOWN 전송 정책은 그대로다.
+- 브랜드 설정 차이 한 가지는 의도적으로 유지했다. 라이브러리 README/fixture의 코코 예시는 `align:center`이고, 기존 소비자는 승인된 기존 헤더 배치를 보존한 `align:left`다. 같은 renderer의 지원 설정 차이이며, 인수 참고 자료만으로 기존 화면 정렬을 다시 바꾸지 않았다. 로고 URL·표시 크기·색상은 전달된 브랜드 설정과 일치한다.
+- 기존 소비자 검증 기록(코코 Worker167·브라우저13, JN 메일 관련50·Worker7·로컬 workerd·브라우저10)을 유지한다. 이번에는 소스 변경이 없어 설치·테스트·빌드·401 재시도를 반복하지 않았다. 별도 읽기 전용 담당도 버전/무결성/실제 import/자리수·링크·만료·UNKNOWN 보존을 확인했고 미해결 연동 누락을 찾지 못했다.
+- 파일 소유권은 유지한다. 이 세션은 JN 단일 쓰기 담당이며, 이번 변경은 이 공통 진행 문서뿐이다. JN의 기존 Android 문서 두 건과 코코의 기존 next-env 변경은 건드리지 않았다. 게시된 auth/provider/email 패키지 버전과 소스도 변경하지 않았다. UI 변경이 없어 이번 문서 확인에 대한 Taste/Polish 추가 적용은 해당 없음이다.
+
+운영 조건은 그대로 남는다. 별도 `read:packages` 빌드 인증을 준비하고 실제 설정 상태를 확인하기 전에는 기존 인증401을 재시도하지 않는다. 광범위한 로컬 gh 토큰을 Vercel/CF로 복사하지 않는다. JN SQL·CF private bucket/Worker/서명 Hook·준비 플래그의 운영 적용, 실제 수신/인증/발송 검증, 배포·스토어 제출은 별도 단계다. 정산·SMS 중단을 유지했으며 이번 인수로 소스 외 운영 변경·활성화·발송 권한을 확장하지 않았다. 이메일 세션의 0 코드·가상 날짜·example.invalid 주소는 소비자 운영값으로 사용하지 않았다.
+
 ## Final source handoff — 2026-11-04
 
 This section is authoritative. All sections below are retained historical checkpoints; their unfinished wording and superseded artifact hashes must not override this handoff. Source implementation and local verification are finished. Operational activation/release remains gated below.
