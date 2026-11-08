@@ -26,7 +26,7 @@ export { createPendingAction, type PendingAction, type PendingActionRunOptions }
 export { createStatusPill } from "./status-pill";
 export type { StatusTone } from "./status-pill";
 export { Tab, TabList, TabPanel, Tabs, type TabPanelProps, type TabProps, type TabsProps } from "./tabs";
-export { ToastProvider, useToast, type ToastApi, type ToastInput, type ToastProviderProps, type ToastTone } from "./toast";
+export { ToastProvider, useToast, type ToastAction, type ToastApi, type ToastInput, type ToastLoadingInput, type ToastPromise, type ToastPromiseOptions, type ToastProviderProps, type ToastRecord, type ToastTone, type ToastUpdate } from "./toast";
 export { Tooltip, type TooltipProps, type TooltipTriggerProps } from "./tooltip";
 
 export { DatePicker, type DatePickerProps } from "./date-picker";

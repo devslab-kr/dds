@@ -38,7 +38,8 @@
   width: max-content;
   inset-inline-end: 0;
   max-width: min(360px, calc(100vw - var(--dds-space-32)));
-  animation: dds-toast-in var(--dds-motion-duration-base) var(--dds-motion-easing-enter);
+  animation: dds-toast-in var(--dds-motion-duration-base)
+    var(--dds-motion-easing-enter);
 }
 
 /* A long unbroken string (a URL, an ID) wraps inside the box instead of
@@ -46,6 +47,42 @@
 .dds-toast [data-part="description"] {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* Put the action beneath its message so long localized labels and notices do
+ * not compete for the same narrow mobile row. The close control stays beside
+ * the first line; the tone indicator/spinner owns the first column. */
+.dds-toast--action {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.dds-toast--action [data-part="description"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dds-toast--action [data-part="close-trigger"] {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.dds-toast--action::before,
+.dds-toast--action > .dds-spinner {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+.dds-toast__action {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: start;
 }
 
 .dds-toast--success::before,

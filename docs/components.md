@@ -385,6 +385,12 @@ native implementation waits for a native consumer (Phase 3).
 
 ## Toast — `.dds-toast`
 
+React/Solid/Vue loading, update, promise and action APIs are documented in the
+[Toast guide](toast.md). The CSS-only markup below remains supported. Loading
+uses `.dds-spinner[aria-hidden="true"]`; actionable framework toasts use
+`.dds-toast--action` with a `.dds-toast__action[data-part="action-trigger"]`
+button beneath the message.
+
 ```html
 <div class="dds-toast-region" role="status">
   <div class="dds-toast dds-toast--success">Indexing finished.</div>

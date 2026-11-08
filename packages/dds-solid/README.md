@@ -25,6 +25,51 @@ same. See [the migration guide](../../docs/ark-migration.md) for integration det
 pointer/focus interaction and when the browser page is idle. A non-positive duration
 keeps the toast until dismissed.
 
+## Async Toast and actions
+
+Inside `ToastProvider`, `useToast()` returns `show`, `loading`, `update`,
+`promise`, `dismiss` and `clear`. All IDs and lifecycle state belong to that
+provider. A `loading` tone persists until it is updated or dismissed; its spinner
+is decorative, so supply a message that describes the work.
+
+```tsx
+const toast = useToast();
+const id = toast.loading({ message: "Saving changes" });
+toast.update(id, { message: "Changes saved", tone: "success" });
+
+const task = toast.promise(() => saveChanges(), {
+  loading: { message: "Saving changes" },
+  success: { message: "Changes saved" },
+  error: { message: "Could not save changes" },
+});
+// The same ID is available immediately; awaiting preserves the operation's result/error.
+const saved = await task;
+
+toast.show({
+  message: "Changes saved",
+  action: { label: "View changes", onClick: () => openChanges(saved) },
+});
+```
+
+`update(id, patch)` keeps omitted fields and changes the toast in place. An
+explicit `undefined` resets an optional field to its default; `action: null`
+removes the action. Unknown, expired and dismissed IDs are ignored. An action is
+a native button: it dismisses the toast before invoking its callback once and
+does not submit a surrounding form.
+
+`promise` accepts a promise or a once-only factory, including synchronous throws.
+Its `success` and `error` inputs can also be synchronous functions receiving the
+result or original error. It merges terminal input into the loading input,
+defaults terminal tones to success/danger, and uses the provider's normal
+duration after loading. It returns `Promise<T> & { readonly id: string }`.
+Handle rejected operations as you would any other promise. Dismissing, clearing,
+closing, activating an action, manually updating or disposing the provider
+supersedes the pending notification; settlement still reaches the caller but
+does not run its terminal message factory or recreate the notification. If a
+terminal message factory throws, the current notification is dismissed and the
+original operation outcome is preserved. Actions and promises introduce no
+retry, cancellation or inference of business success.
+
 ## Button loading
 
 `loading` keeps the button's size and accessible name: the label is hidden, not removed, and the

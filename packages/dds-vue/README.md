@@ -46,6 +46,35 @@ DatePicker emits only canonical `YYYY-MM-DD` or optional empty values, displays 
 
 Use shared semantic tokens to theme products; no EDS-specific colors, toolbar positions or IPC/store logic belong in this package. Import styles once. The date-only helper is available at `@devslab/dds-vue/date-only`.
 
+## Toast
+
+Mount `ToastProvider` above components that call `useToast()` in setup. Providers own separate notifications and retain the nearest dialog's portal. Defaults are `defaultDuration=5000`, `regionLabel="알림"`, and `dismissLabel="알림 닫기"`; labels can be localized through provider props.
+
+```ts
+import { useToast } from '@devslab/dds-vue'
+
+const toast = useToast()
+const id = toast.loading({ message: 'Saving…' })
+toast.update(id, { message: 'Saved', tone: 'success' })
+
+const saving = toast.promise(() => saveRecord(), {
+  loading: { message: 'Saving…' },
+  success: record => ({
+    message: `Saved ${record.name}`,
+    action: { label: 'View record', onClick: () => openRecord(record.id) },
+  }),
+  error: () => ({ message: 'Could not save. Check the form and try again.' }),
+})
+const record = await saving // Original result; original rejection on failure.
+// toast.dismiss(saving.id) can dismiss it while the operation is pending.
+```
+
+`ToastInput` accepts a Vue `VNodeChild` message, `tone` (`info`, `success`, `warning`, `danger`, `loading`), `duration`, and optional `action: { label, onClick }`. `show(input)` and `loading(input)` return an ID. Loading persists until updated or dismissed; duration <= 0 also persists. The spinner is decorative, so the message should describe progress.
+
+`update(id, patch)` updates a live notification in place. Omitted fields remain; explicit `undefined` resets optional fields to defaults, and `action: null` removes an action. Set a terminal tone to finish loading. Missing, expired, and dismissed IDs are ignored. `dismiss(id)` removes one notification and `clear()` removes the provider's notifications. The action is a native button that dismisses before calling its callback once; it does not automatically retry an operation.
+
+`promise(operation, { loading, success, error })` returns `ToastPromise<T>`, an awaitable promise with a readonly `id`. The operation can be a promise or a factory called exactly once; synchronous throws become rejections. Terminal inputs can be objects or synchronous callbacks receiving the result/error. Success/danger are the default terminal tones; other omitted fields retain their loading values. A manual update, dismiss, close, action, clear, or provider disposal suppresses terminal factories and later display changes, while the original operation still settles. If a terminal message factory throws, its notification is dismissed and the original result/rejection is preserved. Captured APIs do not render notifications after disposal. Toasts add no cancellation, retry, or inference of business success.
+
 Validation: `pnpm --filter @devslab/dds-vue check`, `test`, `build`. Public release follows the DDS lockstep Changesets/CI workflow.
 
 

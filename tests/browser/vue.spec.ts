@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import { registerToastChecks } from './toast-checks'
+
+registerToastChecks('Vue', '/')
 test('Vue controls, owned overlays and native Community grid interactions', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message))
   await page.goto('/')

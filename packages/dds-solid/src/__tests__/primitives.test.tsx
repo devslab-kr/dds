@@ -233,6 +233,174 @@ describe("native control behavior", () => {
   });
 });
 
+describe("async toast behavior", () => {
+  function mountToast(defaultDuration = 1000) {
+    let api!: ReturnType<typeof useToast>;
+    const Capture = () => { api = useToast(); return null; };
+    const host = document.body.appendChild(document.createElement("div"));
+    dispose = render(() => <form onSubmit={event => event.preventDefault()}><ToastProvider defaultDuration={defaultDuration} dismissLabel="닫기"><Capture /></ToastProvider></form>, host);
+    return { api, host };
+  }
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (reason: unknown) => void;
+    const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+    return { promise, resolve, reject };
+  }
+  it("keeps loading persistent then updates the same toast into an expiring success", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date", "performance"] });
+    const { api, host } = mountToast();
+    const id = api.loading({ message: "저장 중" });
+    await vi.advanceTimersByTimeAsync(0);
+    const toast = host.querySelector<HTMLElement>('[role="status"]')!;
+    expect(toast).toHaveTextContent("저장 중");
+    expect(toast.querySelector('.dds-spinner')).toHaveAttribute("aria-hidden", "true");
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(toast).toBeInTheDocument();
+    api.update(id, { message: "저장됨", tone: "success" });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(host.querySelector('[role="status"]')).toBe(toast);
+    expect(toast).toHaveTextContent("저장됨");
+    expect(toast.querySelector('.dds-spinner')).toBeNull();
+    await vi.advanceTimersByTimeAsync(1100);
+    expect(host.querySelector('[role="status"]')).toBeNull();
+    api.update(id, { message: "늦은 수정" });
+    api.update("missing", { message: "없는 알림" });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(host.querySelector('[role="status"]')).toBeNull();
+  });
+  it("merges updates, resets optional fields, and runs an action once after removal without submitting", async () => {
+    const { api, host } = mountToast(0);
+    let calls = 0;
+    let submitted = 0;
+    host.querySelector("form")!.addEventListener("submit", () => submitted++);
+    const id = api.show({ message: "작업 실패", tone: "danger", action: { label: "재시도", onClick: () => {
+      calls++;
+      expect(host.querySelector('[role="alert"]')).toBeNull();
+    } } });
+    await vi.waitFor(() => expect(host.querySelector('[role="alert"]')).not.toBeNull());
+    api.update(id, { message: "다시 시도 가능" });
+    await vi.waitFor(() => expect(host.querySelector('[role="alert"]')).toHaveTextContent("다시 시도 가능"));
+    const stale = host.querySelector<HTMLButtonElement>('[data-part="action-trigger"]')!;
+    expect(stale).toHaveAccessibleName("재시도");
+    expect(stale.type).toBe("button");
+    api.update(id, { action: null, tone: undefined });
+    await vi.waitFor(() => expect(host.querySelector('[data-part="action-trigger"]')).toBeNull());
+    expect(host.querySelector('[role="status"]')).toHaveTextContent("다시 시도 가능");
+    stale.click();
+    expect(calls).toBe(0);
+    api.update(id, { action: { label: "재시도", onClick: () => {
+      calls++;
+      expect(host.querySelector('[role="status"]')).toBeNull();
+    } } });
+    await vi.waitFor(() => expect(host.querySelector('[data-part="action-trigger"]')).not.toBeNull());
+    const action = host.querySelector<HTMLButtonElement>('[data-part="action-trigger"]')!;
+    action.click(); action.click();
+    await Promise.resolve();
+    expect(calls).toBe(1);
+    expect(submitted).toBe(0);
+    expect(host.querySelector('[role="status"]')).toBeNull();
+  });
+  it("returns an awaitable promise with one stable ID and the original result", async () => {
+    const { api, host } = mountToast(0);
+    const operation = deferred<number>();
+    let starts = 0;
+    const task = api.promise(() => { starts++; return operation.promise; }, {
+      loading: { message: "저장 중" },
+      success: value => ({ message: `${value}개 저장됨` }),
+      error: { message: "실패" },
+    });
+    expect(typeof task.id).toBe("string");
+    expect(Object.getOwnPropertyDescriptor(task, "id")?.writable).toBe(false);
+    await vi.waitFor(() => expect(host.querySelector('[role="status"]')).toHaveTextContent("저장 중"));
+    const toast = host.querySelector('[role="status"]');
+    operation.resolve(3);
+    await expect(task).resolves.toBe(3);
+    await vi.waitFor(() => expect(host.querySelector('[role="status"]')).toHaveTextContent("3개 저장됨"));
+    expect(host.querySelector('[role="status"]')).toBe(toast);
+    expect(starts).toBe(1);
+    api.dismiss(task.id);
+    await vi.waitFor(() => expect(host.querySelector('[role="status"]')).toBeNull());
+  });
+  it("preserves rejection identity including a synchronous once-only factory throw", async () => {
+    const { api, host } = mountToast(0);
+    const failure = new Error("original");
+    let starts = 0;
+    const task = api.promise(() => { starts++; throw failure; }, {
+      loading: { message: "진행 중" }, success: { message: "완료" },
+      error: error => ({ message: error === failure ? "원래 오류" : "다른 오류" }),
+    });
+    await expect(task).rejects.toBe(failure);
+    await vi.waitFor(() => expect(host.querySelector('[role="alert"]')).toHaveTextContent("원래 오류"));
+    expect(starts).toBe(1);
+  });
+  it.each(["update", "dismiss", "clear", "close", "action", "dispose"] as const)("does not settle a superseded promise toast after %s", async method => {
+    const { api, host } = mountToast(0);
+    const operation = deferred<string>();
+    let terminalCalls = 0;
+    const task = api.promise(operation.promise, {
+      loading: { message: "진행 중", action: { label: "취소", onClick: () => {} } },
+      success: () => { terminalCalls++; return { message: "늦은 완료" }; },
+      error: () => { terminalCalls++; return { message: "늦은 오류" }; },
+    });
+    await vi.waitFor(() => expect(host.querySelector('[role="status"]')).toHaveTextContent("진행 중"));
+    if (method === "update") api.update(task.id, { message: "수동 상태", tone: "info" });
+    if (method === "dismiss") api.dismiss(task.id);
+    if (method === "clear") api.clear();
+    if (method === "close") host.querySelector<HTMLButtonElement>('[data-part="close-trigger"]')!.click();
+    if (method === "action") host.querySelector<HTMLButtonElement>('[data-part="action-trigger"]')!.click();
+    if (method === "dispose") { dispose?.(); dispose = undefined; }
+    operation.resolve("result");
+    await expect(task).resolves.toBe("result");
+    expect(terminalCalls).toBe(0);
+    expect(host).not.toHaveTextContent("늦은 완료");
+    if (method === "update") expect(host).toHaveTextContent("수동 상태");
+    else await vi.waitFor(() => expect(host.querySelector('[role="status"]')).toBeNull());
+  });
+  it("does not run terminal factories or recreate notifications through a disposed API", async () => {
+    const { api, host } = mountToast(0);
+    dispose?.(); dispose = undefined;
+    let terminalCalls = 0;
+    api.show({ message: "늦은 알림" });
+    api.loading({ message: "늦은 진행" });
+    const task = api.promise(Promise.reject("failure"), {
+      loading: { message: "진행 중" }, success: () => { terminalCalls++; return { message: "완료" }; },
+      error: () => { terminalCalls++; return { message: "실패" }; },
+    });
+    await expect(task).rejects.toBe("failure");
+    api.update(task.id, { message: "늦은 수정" });
+    expect(terminalCalls).toBe(0);
+    expect(host.textContent).toBe("");
+  });
+  it.each(["resolve", "reject"] as const)("preserves the operation outcome when its %s message factory throws", async outcome => {
+    const { api, host } = mountToast(0);
+    const operation = deferred<string>();
+    const task = api.promise(operation.promise, {
+      loading: { message: "진행 중" },
+      success: () => { throw new Error("presentation"); },
+      error: () => { throw new Error("presentation"); },
+    });
+    await vi.waitFor(() => expect(host.querySelector('[role="status"]')).not.toBeNull());
+    if (outcome === "resolve") { operation.resolve("original"); await expect(task).resolves.toBe("original"); }
+    else { operation.reject("original"); await expect(task).rejects.toBe("original"); }
+    await vi.waitFor(() => expect(host.querySelector('[role="status"]')).toBeNull());
+  });
+  it("honors a manual update made inside the terminal factory", async () => {
+    const { api, host } = mountToast(0);
+    const operation = deferred<string>();
+    const task = api.promise(operation.promise, {
+      loading: { message: "진행 중" },
+      success: () => { api.update(task.id, { message: "수동 완료", tone: "info" }); return { message: "덮어쓰면 안 됨" }; },
+      error: { message: "실패" },
+    });
+    await vi.waitFor(() => expect(host.querySelector('[role="status"]')).not.toBeNull());
+    operation.resolve("original");
+    await expect(task).resolves.toBe("original");
+    expect(host).toHaveTextContent("수동 완료");
+    expect(host).not.toHaveTextContent("덮어쓰면 안 됨");
+  });
+});
+
 describe("keyboard lifecycle", () => {
   it("keeps an authorized external retry region in the dialog focus and accessibility scope", async () => {
     const rectangles = vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(() => [new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList);

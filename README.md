@@ -102,7 +102,7 @@ pnpm workspace. `pnpm install`, then:
 - `pnpm verify:react:test`, `verify:react:a11y`, `verify:react:browser`, `verify:react:release` — React behavior, accessibility, real browser and fresh packed SSR/hydration consumers
 - `pnpm verify:table-react:test`, `verify:table-react:browser`, `verify:table-react:release` — actual AG Grid behavior, browser layout/keyboard/axe and fresh packed consumers
 
-The nine public packages including the compatibility wrapper release in lockstep through Changesets, and the release
+The twelve public packages including the compatibility wrapper release in lockstep through Changesets, and the release
 is automatic: every push to `main` runs `.github/workflows/release.yml`, which
 passes the full verification gate and then lets `changesets/action` either open
 the "chore: release dds" version PR (when changeset files are waiting) or publish
@@ -113,7 +113,9 @@ lists ship as `@devslab/dds-icons/direction-policy.json`.
 
 All distributable DDS packages use `@devslab/*` on the public npm registry under the
 DevsLab Source-Available License 1.0. The compatibility canary remains private and
-unpublished. Releases use npm provenance and the repository `NPM_TOKEN` secret.
+unpublished. Releases use npm provenance and GitHub OIDC trusted publishing;
+the workflow also accepts a configured `NPM_TOKEN` when needed. Local npm login
+and manually pushed release tags are not required for the standard workflow.
 
 ## Roadmap
 
@@ -128,3 +130,6 @@ theme mapping, depending on how mobile goes.
 See the [usage guide](docs/components-input-choice-calendar.md) for general Input/InputGroup, virtualized Combobox/SelectPicker, DropdownMenu/Popover and shared Calendar/DatePicker views. Framework packages expose both root and detailed component entries. `@devslab/dds-table` remains a compatible entry for `@devslab/dds-table-solid`.
 
 [Common application layouts](docs/layouts.md): Layout, LeftNav, TopNav across React/Solid/Vue/Svelte.
+
+[Toast](docs/toast.md): matching loading/update/promise/action APIs and lifecycle
+contracts across React/Solid/Vue, retaining Ark UI and DDS styles.

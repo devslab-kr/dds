@@ -21,7 +21,29 @@ React DOM 속성(`className`, `htmlFor`, `onChange`)과 객체/콜백 ref를 사
 
 Dialog는 기본적으로 portal을 사용하며 Ark가 중첩 모달, 포커스 복원, Escape, 스크롤 잠금을 관리합니다. `portal={false}`로 SSR 열린 콘텐츠를 인라인 렌더링할 수 있습니다. `contentProps`, `actions`, `frame`, `initialFocus`, `finalFocus`, `unstyled`와 Ark root 옵션을 제공합니다. Solid의 커스텀 additionalFocusContainers는 모방하지 않습니다. 고급 구성은 ArkDialog/ArkTabs/ArkTooltip/ArkRadioGroup/ArkCheckbox/ArkSwitch/ArkField/ArkToast 네임스페이스를 사용하세요.
 
-Tooltip은 하나의 포커스 가능한 요소 또는 trigger props를 받는 render 함수를 사용합니다. ToastProvider의 regionLabel/dismissLabel은 호출자가 지정합니다. dismissLabel이 없으면 닫기 버튼이 없습니다. useToast는 show/dismiss/clear를 반환하며 duration 0은 유지됩니다. 언마운트 때 알림을 정리합니다.
+Tooltip은 하나의 포커스 가능한 요소 또는 trigger props를 받는 render 함수를 사용합니다. ToastProvider의 regionLabel/dismissLabel은 호출자가 지정합니다. dismissLabel이 없으면 닫기 버튼이 없습니다. useToast는 show/loading/update/promise/dismiss/clear를 반환하며 duration 0은 유지됩니다. 언마운트 때 알림을 정리합니다. React·Solid·Vue의 동일한 계약은 [Toast 가이드](../../docs/toast.ko.md)를 참고하세요.
+
+```tsx
+const toast = useToast(); // ToastProvider 내부
+const id = toast.loading({ message: "저장 중" });
+toast.update(id, { message: "저장 완료", tone: "success" });
+
+const pending = toast.promise(() => save(), {
+  loading: { message: "저장 중" },
+  success: { message: "저장 완료", action: { label: "결과 보기", onClick: openResult } },
+  error: { message: "저장에 실패했습니다" },
+});
+const result = await pending; // 원래 결과 또는 원래 rejection
+// 작업 중 pending.id를 update/dismiss에 전달할 수도 있습니다.
+```
+
+`action: { label, onClick }`으로 버튼을 추가하고 `update`의 `action: null`로
+제거합니다. 누르면 알림을 먼저 닫고 콜백을 실행합니다. loading은 유지되며,
+update에서 완료 tone을 지정하면 일반 만료 시간이 시작됩니다. 수동 갱신·닫기·
+clear·언마운트 후에는 늦은 Promise 완료가 해당 알림을 덮거나 재생성하지
+않습니다. 문구 함수가 예외를 던지면 아직 유효한 알림만 닫고 작업의 원래
+결과·오류는 보존합니다. 자동 재시도·요청 취소는 하지 않으며 작업의 rejection은
+호출자가 처리합니다.
 
 ConsoleShell은 brand/nav/header/labels/foot을 받으며 인스턴스별 고유 ID를 사용합니다. 브라우저 전역 없이 import와 SSR이 가능하고, React useId로 hydration 연결을 유지합니다. Solid accessor/ref/render 방식 대신 React JSX/ref와 Ark asChild 요소 구성을 사용합니다. AG Grid는 별도 패키지 `@devslab/dds-table-react`입니다.
 

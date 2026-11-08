@@ -16,6 +16,35 @@ const rows = ref<Row[]>([{id:'a',name:'서울',amount:300},{id:'b',name:'부산'
 const columns: ColDef<Row>[] = [{ field: 'name', headerName: '거래처', filter: true, flex: 1 }, { field: 'amount', headerName: '금액', filter: true, flex: 1 }]
 function addRow() { rows.value = [...rows.value, { id: 'd', name: '광주', amount: 400 }] }
 const Notify = defineComponent({ setup() { const toast = useToast(); return () => h(Button, { tone: 'secondary', onClick: () => toast.show({ message: '저장 완료', duration: 0 }) }, () => '토스트 표시') } })
+const NoticeControls = defineComponent({ setup() {
+  const toast = useToast(); const id = ref(''); const outcome = ref('idle'); const actions = ref(0)
+  let resolveDemo: (() => void) | undefined
+  function startPromise() {
+    toast.clear()
+    const operation = new Promise<void>(resolve => { resolveDemo = resolve })
+    const task = toast.promise(operation, { loading: { message: '비동기 알림 데모 진행 중' }, success: { message: '비동기 알림 데모 완료', duration: 0 }, error: { message: '비동기 알림 데모 오류', duration: 0 } })
+    id.value = task.id; outcome.value = 'pending'
+    void task.then(() => outcome.value = 'resolved', () => outcome.value = 'rejected')
+  }
+  const button = (label: string, onClick: () => void) => h('button', { type: 'button', onClick }, label)
+  return () => h('div', { class: 'actions' }, [
+    button('Show long notice', () => toast.show({ message: '연결된 서비스에서 결과를 확인하지 못했습니다. 잠시 후 다시 시도하고, 계속되면 관리자에게 문의해 주세요.', tone: 'danger', duration: 0 })),
+    button('Show short notice', () => toast.show({ message: '저장했습니다.', tone: 'success', duration: 0 })),
+    button('Show loading notice', () => { toast.clear(); id.value = toast.loading({ message: '알림 갱신 데모 진행 중' }) }),
+    button('Update demo notice', () => toast.update(id.value, { message: '알림 갱신 데모 완료', tone: 'success', duration: 0 })),
+    button('Start demo promise', startPromise),
+    button('Resolve demo promise', () => resolveDemo?.()),
+    button('Show action notice', () => { toast.clear(); id.value = toast.show({ message: '알림 데모에서 긴 한국어 문장과 액션 문구가 좁은 화면에서도 모두 읽히는지 확인합니다. ' + 'DDS-DEMO-'.repeat(16), duration: 0, action: { label: '데모 액션을 실행하고 이 알림을 닫습니다', onClick: () => actions.value++ } }) }),
+    button('Clear demo notices', () => toast.clear()),
+    h('output', { 'aria-label': 'Toast demo ID' }, id.value), h('output', { 'aria-label': 'Toast promise outcome' }, outcome.value), h('output', { 'aria-label': 'Toast action count' }, String(actions.value)),
+  ])
+} })
+const AsyncNotices = defineComponent({ setup() {
+  const submissions = ref(0)
+  return () => h('section', { 'aria-label': 'Toasts' }, [h('h2', 'Toasts'), h('form', { id: 'toast-demo-form', 'aria-label': 'Toast demo form', onSubmit: (event: Event) => { event.preventDefault(); submissions.value++ } }, [
+    h(ToastProvider, { regionLabel: 'Toast demos', dismissLabel: 'Close demo notice' }, { default: () => [h(NoticeControls), h('output', { 'aria-label': 'Toast form submissions' }, String(submissions.value))] }),
+  ])])
+} })
 </script>
 <template>
   <ConsoleShell surface="vue-components" active-path="/components" :brand="{ href: '#', name: 'DDS Vue', mark }" :nav="[{label:'컴포넌트',items:[{id:'components',href:'/components',label:'공통 컴포넌트'},{id:'table',href:'#table',label:'데이터 테이블'}]}]" :labels="{skip:'본문으로',menuOpen:'메뉴 열기',menuClose:'메뉴 닫기',nav:'검증 항목',badge:'{count}개 알림'}" :header="{eyebrow:'DEVELOPMENT · SAMPLE DATA',title:'Vue 컴포넌트 검증'}">
@@ -37,6 +66,7 @@ const Notify = defineComponent({ setup() { const toast = useToast(); return () =
           <DropdownMenu.Root @select="lastMenu = $event.value"><DropdownMenu.Trigger as-child><Button tone="secondary">메뉴 열기</Button></DropdownMenu.Trigger><DropdownMenu.Content><DropdownMenu.Item value="new">새 항목</DropdownMenu.Item><DropdownMenu.Item value="disabled" disabled>사용 불가</DropdownMenu.Item></DropdownMenu.Content></DropdownMenu.Root><output aria-label="메뉴 결과">{{ lastMenu }}</output><ToastProvider><Notify /></ToastProvider>
         </div>
       </section>
+      <AsyncNotices />
       <section id="table" aria-labelledby="table-title"><div class="section-heading"><h2 id="table-title">데이터 테이블</h2><Button tone="secondary" @click="addRow">행 추가</Button></div><p>표 선택 {{ selectedRows }}건 · 전체 {{ rows.length }}건</p><DataTable ref="grid" label="샘플 거래처" :rows="rows" :columns="columns" :density="segment === 'b' ? 'dense' : 'comfortable'" :grid-props="{getRowId:p=>p.data.id,rowSelection:{mode:'multiRow'},onSelectionChanged:e=>selectedRows=e.api.getSelectedRows().length}" /></section>
       <details><summary>독립 달력</summary><Calendar v-model="calendar" label="독립 달력" /></details>
     </div>

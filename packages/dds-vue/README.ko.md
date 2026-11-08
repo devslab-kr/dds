@@ -50,6 +50,35 @@ Vue >=3.5는 peer 의존성입니다. 스타일은 한 번만 import합니다. �
 
 EDS 전용 색상·도구 모음 위치·IPC/스토어는 제품 코드에 남깁니다. 공통 의미 토큰으로 제품 테마를 적용하세요.
 
+## Toast
+
+setup에서 `useToast()`를 호출하는 컴포넌트 위에 `ToastProvider`를 배치합니다. 공급자별 알림은 독립적이며, 대화상자 안에서는 해당 대화상자의 포털을 유지합니다. 기본값은 `defaultDuration=5000`, `regionLabel="알림"`, `dismissLabel="알림 닫기"`이며 공급자 props로 라벨을 번역할 수 있습니다.
+
+```ts
+import { useToast } from '@devslab/dds-vue'
+
+const toast = useToast()
+const id = toast.loading({ message: '저장 중…' })
+toast.update(id, { message: '저장됨', tone: 'success' })
+
+const saving = toast.promise(() => saveRecord(), {
+  loading: { message: '저장 중…' },
+  success: record => ({
+    message: `${record.name} 저장됨`,
+    action: { label: '내용 보기', onClick: () => openRecord(record.id) },
+  }),
+  error: () => ({ message: '저장하지 못했습니다. 입력 내용을 확인하고 다시 시도하세요.' }),
+})
+const record = await saving // 원래 결과를 반환하고 실패 시 원래 오류로 거부합니다.
+// 작업 중에도 toast.dismiss(saving.id)로 알림을 닫을 수 있습니다.
+```
+
+`ToastInput`은 Vue `VNodeChild` 메시지, `tone` (`info`, `success`, `warning`, `danger`, `loading`), `duration`, 선택적 `action: { label, onClick }`을 받습니다. `show(input)`과 `loading(input)`은 ID를 반환합니다. loading은 갱신하거나 닫을 때까지 유지하며 duration <= 0도 자동으로 닫지 않습니다. 스피너는 장식용이므로 메시지에 진행 상태를 작성하세요.
+
+`update(id, patch)`는 표시 중인 알림을 같은 자리에서 갱신합니다. 생략한 필드는 유지하고, 선택적 필드에 명시한 `undefined`는 기본값으로 되돌리며, `action: null`은 액션을 제거합니다. loading을 마치려면 완료 tone을 지정하세요. 없거나 만료·닫힌 ID는 무시합니다. `dismiss(id)`는 하나, `clear()`는 해당 공급자의 알림 전체를 제거합니다. 액션은 기본 button이며 알림을 먼저 닫고 콜백을 한 번 호출합니다. 작업을 자동 재시도하지 않습니다.
+
+`promise(operation, { loading, success, error })`는 readonly `id`가 있는 await 가능한 `ToastPromise<T>`를 반환합니다. Promise 또는 한 번만 호출하는 팩토리를 받으며 동기 throw도 거부로 전달합니다. 완료 입력은 객체 또는 결과/오류를 받는 동기 콜백입니다. 완료 tone 기본값은 success/danger이며 다른 생략 필드는 loading 입력을 유지합니다. 수동 갱신·닫기·액션·clear·공급자 해제 후에는 완료 메시지 팩토리와 후속 화면 변경을 실행하지 않으며 원래 작업 결과는 그대로 전달합니다. 완료 메시지 팩토리가 throw하면 해당 알림을 닫고 원래 결과/거부를 보존합니다. 해제 전에 보관한 API는 이후 알림을 표시하지 않습니다. 작업 취소·재시도·업무 성공 판정은 추가하지 않습니다.
+
 검증 명령은 `pnpm --filter @devslab/dds-vue check`, `test`, `build`입니다. 루트 `verify:vue:test`와 `verify:vue:release`가 CI 및 배포에 연결되며, 공개 배포는 기존 DDS lockstep Changesets 절차를 따릅니다.
 
 
