@@ -1,5 +1,13 @@
 # @devslab/site-kit
 
+## 0.30.0
+
+### Patch Changes
+
+- 45857bd: Add an opt-in atomic Korean UI font stylesheet, additive pure preload exports, and reproducible font-only overlays while preserving legacy subset CSS and asset paths.
+- Updated dependencies [96c2465]
+  - @devslab/dds-solid@0.30.0
+
 ## 0.29.2
 
 ### Patch Changes
