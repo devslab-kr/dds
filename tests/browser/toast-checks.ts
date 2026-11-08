@@ -82,6 +82,10 @@ export function registerToastChecks(framework: string, url: string) {
         const toast = page.locator(".dds-toast");
         await expect(toast).toHaveCount(1);
         await expect(toast.getByRole("button", { name: actionLabel, exact: true })).toBeVisible();
+        // Ark's initial --y:100% is CSS-visible before its mount frame;
+        // reduced-motion transitions can finish one paint after data-mounted.
+        await expect(toast).toHaveAttribute("data-mounted", "");
+        await expect(toast).toBeInViewport({ ratio: 1 });
         const geometry = await toast.evaluate(element => {
           const root = element.getBoundingClientRect();
           return {

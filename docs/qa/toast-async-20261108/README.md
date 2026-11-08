@@ -39,6 +39,17 @@ Source baseline: `fb83b8e3294a1f9c943963a3194706f2fa8ad02a`; feature branch:
 
 ## Local environment limitations
 
+The first full protected CI on `86d8402` passed source contracts and the package
+gates through Vue/Svelte/table consumers, then failed two new Vue dark-theme
+layout checks. A controlled-RAF browser diagnostic reproduced the exact
+1110px bottom coordinate: Ark starts at `--y:100%`, opacity 0, before placement;
+even after `data-mounted`, a short transition can remain until the next paint.
+The settled bottom was 884px in the 900px viewport. Layout checks now wait for
+Ark mount and whole-toast viewport entry before measuring, retaining every
+original boundary/wrapping assertion. No product CSS change was justified.
+Required CI runs again on the amended PR head; earlier skipped steps are not
+reported as passing.
+
 `pnpm run verify` completed all workspace builds, package checks and docs/token
 sync, then failed the existing local-only consumer check: AskLinq's vendored
 `apps/api/src/dds/tokens.ts` is stale. Token sources and the AskLinq repository

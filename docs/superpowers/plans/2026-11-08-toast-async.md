@@ -72,3 +72,10 @@ Playwright, pnpm, Changesets and GitHub npm trusted publishing.
 - Next: feature PR, protected CI, merge, Changesets 0.30.0 version PR and npm
   trusted publishing; actual publication must be checked in the workflow and
   registry, not inferred from these local results.
+- Feature PR: https://github.com/devslab-kr/dds/pull/129. Initial full CI on
+  `86d8402` passed source/package gates, then caught two Vue geometry reads
+  before Ark's placement transition had settled. A controlled-RAF diagnostic
+  reproduced bottom 1110 -> 884 in a 900px viewport. Ruling: wait for mounted
+  and full viewport entry, then preserve the original bounds assertions;
+  no product CSS change. Rerun affected local browser checks and required CI
+  on the amended head; do not retry an unchanged failing SHA to seek a pass.
