@@ -20,9 +20,9 @@ export const LoadingAndAction = {
   render: () => {
     const wrap = document.createElement("div");
     wrap.style.cssText =
-      "position:relative; min-height:320px; padding:var(--dds-space-16); background:var(--dds-color-bg-subtle)";
+      "position:relative; min-block-size:calc(var(--dds-space-64) * 5); padding:var(--dds-space-16); background:var(--dds-color-bg-subtle)";
     wrap.innerHTML = `
-      <div class="dds-toast-region" style="position:absolute" aria-label="알림 예제">
+      <div class="dds-toast-region" role="region" style="position:absolute" aria-label="알림 예제">
         <div class="dds-toast dds-toast--loading" role="status">
           <span class="dds-spinner" aria-hidden="true"></span>
           <span data-part="description">자료를 내보내고 있습니다.</span>
