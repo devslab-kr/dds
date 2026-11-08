@@ -81,4 +81,6 @@ Playwright, pnpm, Changesets and GitHub npm trusted publishing.
   on the amended head; do not retry an unchanged failing SHA to seek a pass.
 - Release hygiene: committed QA capture refresh is opt-in through
   `DDS_CAPTURE_TOAST_QA=1`. Normal tests retain all assertions while leaving
-  tracked PNGs untouched, avoiding incidental Changesets version-PR churn.
+  tracked PNGs untouched, keeping the publish worktree clean. The current
+  Changesets git-cli version path resets before staging; its publish path does
+  not, so no version-PR contamination is claimed for the present configuration.

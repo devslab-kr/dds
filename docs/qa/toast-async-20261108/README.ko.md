@@ -67,7 +67,9 @@ hydration은 해당 검사에서 NOT RUN입니다. 실제 OS 화면 낭독기·I
 주장하는 화면이 아닙니다.
 캡처를 의도적으로 갱신할 때만 `DDS_CAPTURE_TOAST_QA=1`을 설정합니다.
 일반 로컬·CI·릴리스 검사는 모든 assertion을 실행하되 추적 중인 캡처를
-덮지 않아 Changesets에 플랫폼별 화면 변경이 우연히 포함되지 않습니다.
+덮지 않아 발행 작업 트리에 플랫폼별 화면 변경이 남지 않습니다. 현재 Changesets
+git-cli 버전 작업은 먼저 초기화하지만 publish 경로는 그렇지 않으므로 버전 PR
+스테이징 여부와 별개로 검사 후 작업 트리를 유지합니다.
 
 발행 상태는 기능/버전 PR, GitHub `Release public packages` 실행과 npm
 provenance로 확인합니다. 소스 수정이나 이 로컬 검증 기록만으로 발행 완료를
