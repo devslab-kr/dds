@@ -19,8 +19,31 @@ import '../layout.css';
 import {items,externalItems,retainedOption} from '../data';
 // A real-length Korean notice: the toast must take the width of its text, not of its empty region.
 function Notices(){
+ const [submissions,setSubmissions]=createSignal(0);
+ return <form id="toast-demo-form" aria-label="Toast demo form" onSubmit={event=>{event.preventDefault();setSubmissions(value=>value+1);}}><ToastProvider regionLabel="Toast demos" dismissLabel="Close demo notice"><NoticeControls/><output aria-label="Toast form submissions">{submissions()}</output></ToastProvider></form>;
+}
+function NoticeControls(){
  const toast=useToast();
- return <section aria-label="Toasts"><h2>Toasts</h2><button onClick={()=>toast.show({message:'연결된 서비스에서 결과를 확인하지 못했습니다. 잠시 후 다시 시도하고, 계속되면 관리자에게 문의해 주세요.',tone:'danger',duration:0})}>Show long notice</button><button onClick={()=>toast.show({message:'저장했습니다.',tone:'success',duration:0})}>Show short notice</button></section>;
+ const [id,setId]=createSignal(''),[outcome,setOutcome]=createSignal('idle'),[actions,setActions]=createSignal(0);
+ let resolveDemo:(()=>void)|undefined;
+ function startPromise(){
+  toast.clear();
+  const operation=new Promise<void>(resolve=>{resolveDemo=resolve;});
+  const task=toast.promise(operation,{loading:{message:'비동기 알림 데모 진행 중'},success:{message:'비동기 알림 데모 완료',duration:0},error:{message:'비동기 알림 데모 오류',duration:0}});
+  setId(task.id);setOutcome('pending');
+  void task.then(()=>setOutcome('resolved'),()=>setOutcome('rejected'));
+ }
+ return <section aria-label="Toasts"><h2>Toasts</h2>
+ <button type="button" onClick={()=>toast.show({message:'연결된 서비스에서 결과를 확인하지 못했습니다. 잠시 후 다시 시도하고, 계속되면 관리자에게 문의해 주세요.',tone:'danger',duration:0})}>Show long notice</button>
+ <button type="button" onClick={()=>toast.show({message:'저장했습니다.',tone:'success',duration:0})}>Show short notice</button>
+ <button type="button" onClick={()=>{toast.clear();setId(toast.loading({message:'알림 갱신 데모 진행 중'}));}}>Show loading notice</button>
+ <button type="button" onClick={()=>toast.update(id(),{message:'알림 갱신 데모 완료',tone:'success',duration:0})}>Update demo notice</button>
+ <button type="button" onClick={startPromise}>Start demo promise</button>
+ <button type="button" onClick={()=>resolveDemo?.()}>Resolve demo promise</button>
+ <button type="button" onClick={()=>{toast.clear();setId(toast.show({message:'알림 데모에서 긴 한국어 문장과 액션 문구가 좁은 화면에서도 모두 읽히는지 확인합니다. '+ 'DDS-DEMO-'.repeat(16),duration:0,action:{label:'데모 액션을 실행하고 이 알림을 닫습니다',onClick:()=>setActions(value=>value+1)}}));}}>Show action notice</button>
+ <button type="button" onClick={()=>toast.clear()}>Clear demo notices</button>
+ <output aria-label="Toast demo ID">{id()}</output><output aria-label="Toast promise outcome">{outcome()}</output><output aria-label="Toast action count">{actions()}</output>
+ </section>;
 }
 function SegmentsAndNumbers(){
  const [view,setView]=createSignal('day'),[amount,setAmount]=createSignal<number|null>(15000),[submitted,setSubmitted]=createSignal('');

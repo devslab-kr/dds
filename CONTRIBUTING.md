@@ -58,4 +58,7 @@ pnpm run verify         # build + check (what CI runs first)
 ```
 
 Foundation-affecting changes need an entry in `docs/decisions.md`.
-Releases are cut by DevsLab via `dds-v*` tags; contributors never publish.
+DevsLab releases through the protected-main Changesets workflow: merge the
+feature PR, then the generated version PR, and let GitHub trusted publishing
+publish the verified packages with npm provenance. Do not push release tags by
+hand; contributors never publish.

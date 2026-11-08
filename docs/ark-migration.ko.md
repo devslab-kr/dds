@@ -10,7 +10,7 @@ Ark UI는 내부 접근성·상호작용 엔진이다. 별도 래퍼 패키지�
 | Tooltip | Ark Tooltip | 기존 render prop 사용; 전달한 속성을 트리거에 모두 spread |
 | Checkbox / Switch | Ark의 headless hooks + DDS 네이티브 input | boolean 콜백, name/value/form/required, DDS CSS 유지 |
 | Field | Ark Field + DDS control props | 기존 함수형 children, label/help/error 연결 |
-| ToastProvider / useToast | Ark toaster | show/dismiss/clear, DDS tone·message, 현지화된 닫기 이름 |
+| ToastProvider / useToast | Ark toaster + DDS 수명 관리 | show/loading/update/promise/dismiss/clear, action, DDS tone·message, 현지화된 닫기 이름 |
 | RadioGroup | Ark RadioGroup | options 배열, 문자열 선택, 폼 제출과 그룹 방향키 탐색 |
 | Radio / Button / IconButton / Select | 기존 네이티브 요소 | 기존 API 유지 |
 
@@ -28,6 +28,9 @@ router, 권한, 서버 요청과 도메인 상태는 소비 프로젝트가 담�
 
 ToastProvider는 보통 앱 최상위에 두며, 여러 provider의 큐와 DOM ID도 각각 분리한다. `regionLabel`과 `dismissLabel`은 소비 로케일에 맞게 주입한다.
 duration이 0 이하이면 알림을 유지하고, 포인터·포커스 상호작용 및 비활성 페이지에서는 타이머를 멈춘다.
+React·Solid·Vue는 [비동기 Toast 계약](toast.ko.md)을 공유한다. loading은 유지하고,
+update는 ID를 유지하며, action은 콜백 전에 닫는다. 수동 갱신·닫기·clear·폐기 후
+늦은 Promise 완료가 알림을 재생성하지 않는다.
 
 Tabs의 기본 선택 방식은 자동이며 `activationMode="manual"`이면 방향키는 포커스만 옮기고 Enter/Space로 선택한다. `tabId`/`panelId`로 접근성 ID를 지정한다. `unstyled`와 네이티브 속성을 받는 `asChild` 콜백으로 앱의 레이아웃과 버튼을 Ark import 없이 유지한다. 비활성 패널은 hidden/inert와 display 제외를 보장한다. 작업 모달과 허용된 재시도 영역은 [Dialog 프레임·외부 포커스 안내](dialog-focus.ko.md)를 참고한다.
 Tabs의 hidden 패널은 인스턴스를 유지하지만 실행 중인 effect나 서버 요청을 자동 중단하지 않는다.

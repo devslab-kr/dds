@@ -99,7 +99,7 @@ pnpm 워크스페이스. `pnpm install` 후:
 - `pnpm verify:react:test`, `verify:react:a11y`, `verify:react:browser`, `verify:react:release` — React 동작·접근성·실제 브라우저·패키징된 SSR/hydration 소비자 검증
 - `pnpm verify:table-react:test`, `verify:table-react:browser`, `verify:table-react:release` — 실제 AG Grid 동작·브라우저 레이아웃/키보드/axe·패키징된 소비자 검증
 
-호환 패키지를 포함한 아홉 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스하며, 릴리스는
+호환 패키지를 포함한 열두 공개 패키지는 Changesets의 lockstep 그룹으로 릴리스하며, 릴리스는
 자동이다: `main`에 푸시될 때마다 `.github/workflows/release.yml`이 전체 검증
 게이트를 통과한 뒤 `changesets/action`이 — 대기 중인 changeset 파일이 있으면
 "chore: release dds" 버전 PR을 열고, 그 PR이 방금 머지됐으면 `main`에는 있지만
@@ -109,7 +109,9 @@ mirror/유지 목록은 `@devslab/dds-icons/direction-policy.json`으로 함께 
 
 배포 가능한 DDS 패키지는 모두 공개 npm의 `@devslab/*`를 사용하며 DevsLab
 Source-Available License 1.0을 따른다. compatibility canary는 비공개·미배포로
-유지한다. 릴리스는 npm provenance와 저장소 `NPM_TOKEN` 시크릿을 사용한다.
+유지한다. 릴리스는 npm provenance와 GitHub OIDC trusted publishing을 사용하며,
+필요하면 설정된 `NPM_TOKEN`도 사용할 수 있다. 표준 흐름에는 로컬 npm 로그인이나
+수동 릴리스 태그 푸시가 필요하지 않다.
 
 ## 로드맵
 
@@ -124,3 +126,6 @@ AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` →
 일반 Input/InputGroup, 가상화 Combobox/SelectPicker, DropdownMenu/Popover와 Calendar/DatePicker 공유 구조는 [사용 가이드](docs/components-input-choice-calendar.ko.md)를 참고하세요. 각 UI 패키지는 루트와 컴포넌트별 상세 경로를 함께 제공합니다. 기존 `@devslab/dds-table`은 `@devslab/dds-table-solid`의 호환 진입점으로 유지합니다.
 
 [공통 업무 화면 규격](docs/layouts.ko.md): React·Solid·Vue·Svelte의 Layout·LeftNav·TopNav.
+
+[Toast](docs/toast.ko.md): Ark UI·DDS 스타일을 유지하는 React·Solid·Vue 공통
+loading/update/promise/action API와 수명 계약.

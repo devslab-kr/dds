@@ -25,7 +25,29 @@ Native DOM attributes use React spelling (`className`, `htmlFor`, `onChange`). D
 
 Tabs extends Ark root options, with `onValueChange(string)`; parts accept normal Ark DOM props including `asChild`. Dialog accepts Ark root options with `onOpenChange(boolean)`, `closeOnOutside`, `initialFocus`, `finalFocus`, `contentProps`, `actions`, `frame(parts)` and `unstyled`. Dialog portals by default; use `portal={false}` for inline markup, including open SSR content. Ark owns nested modal isolation, focus, Escape handling and scroll locking. Additional focus containers from the Solid package are not emulated; use Ark `persistentElements` and `modal`/`trapFocus` according to application needs.
 
-Tooltip accepts one element child (Ark `asChild`) or a render function receiving native button trigger props. Use a focusable trigger and preserve the supplied events. `ToastProvider` accepts optional caller `regionLabel` and `dismissLabel` (string or record-to-string function); without `dismissLabel` it renders no close button. `useToast()` returns `show({ message, tone?, duration? })`, `dismiss(id)`, and `clear()`; duration 0 persists. Providers clear their notifications on unmount.
+Tooltip accepts one element child (Ark `asChild`) or a render function receiving native button trigger props. Use a focusable trigger and preserve the supplied events. `ToastProvider` accepts optional caller `regionLabel` and `dismissLabel` (string or record-to-string function); without `dismissLabel` it renders no close button. `useToast()` returns `show`, `loading`, `update`, `promise`, `dismiss`, and `clear`; duration 0 persists. Providers clear their notifications on unmount. The [Toast guide](../../docs/toast.md) covers the identical React/Solid/Vue contract.
+
+```tsx
+const toast = useToast(); // inside ToastProvider
+const id = toast.loading({ message: "Saving…" });
+toast.update(id, { message: "Saved", tone: "success" });
+
+const pending = toast.promise(() => save(), {
+  loading: { message: "Saving…" },
+  success: { message: "Saved", action: { label: "View result", onClick: openResult } },
+  error: { message: "Save failed" },
+});
+const result = await pending; // original result, or original rejection
+// pending.id can also be passed to update/dismiss while the operation runs.
+```
+
+`action: { label, onClick }` adds a button and `action: null` removes it through
+`update`. Activation dismisses before invoking the callback. Loading persists;
+set a terminal tone with `update` to start normal expiry. Manual update,
+dismissal, clear or provider unmount prevents a pending promise from overwriting
+or recreating that notification. Message-factory exceptions dismiss the
+still-current notice without changing the task result/error. No retry or request
+cancellation is performed; callers still handle rejected operations.
 
 Advanced compositional parts are exported as `ArkDialog`, `ArkTabs`, `ArkTooltip`, `ArkRadioGroup`, `ArkCheckbox`, `ArkSwitch`, `ArkField`, and `ArkToast`. They are the pinned upstream Ark namespaces, useful inside convenience component children or for application-owned composition.
 

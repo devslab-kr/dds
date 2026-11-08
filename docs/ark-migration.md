@@ -10,7 +10,7 @@ Ark UI is the internal accessibility and interaction engine. No separate wrapper
 | Tooltip | Ark Tooltip | Existing render prop; spread all supplied attributes onto the trigger |
 | Checkbox / Switch | Ark headless hooks + DDS native input | Boolean callbacks, name/value/form/required, DDS CSS |
 | Field | Ark Field + DDS control props | Existing function children and label/help/error associations |
-| ToastProvider / useToast | Ark toaster | show/dismiss/clear, DDS tone/message, localized dismiss names |
+| ToastProvider / useToast | Ark toaster + DDS lifecycle | show/loading/update/promise/dismiss/clear, action, DDS tone/message, localized dismiss names |
 | RadioGroup | Ark RadioGroup | Options array, string selection, native forms and grouped arrow navigation |
 | Radio / Button / IconButton / Select | Existing native elements | Existing API |
 
@@ -28,6 +28,9 @@ legacy zero-argument trigger callbacks remain supported. Prefer `open`/`onOpenCh
 
 Normally use an application-level ToastProvider; multiple providers keep independent queues and DOM IDs. Inject localized `regionLabel` and `dismissLabel` values.
 Non-positive durations persist until dismissal; pointer/focus interaction and inactive pages pause expiry.
+React, Solid and Vue share the [async Toast contract](toast.md): loading persists,
+updates retain IDs, actions dismiss before their callback, and promise results
+cannot resurrect notices after manual update, dismissal, clear or disposal.
 Hidden Tabs panels preserve instances but do not automatically suspend effects or server requests.
 
 Tabs defaults to automatic activation; `activationMode="manual"` moves focus with arrows and activates on Enter/Space. `tabId`/`panelId` customize accessible IDs. `unstyled` and native-attribute `asChild` callbacks let Tabs/Tab retain an application's layout and buttons without Ark imports. Inactive panels own hidden/inert and display exclusion. See [Dialog frames and external focus regions](dialog-focus.md) for task dialogs and authorized retry regions.

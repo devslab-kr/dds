@@ -369,6 +369,12 @@ EmptyState. **BottomSheet은 의도적으로 없습니다** — Dialog의 네이
 
 ## Toast — `.dds-toast`
 
+React·Solid·Vue의 loading/update/promise/action API는 [Toast 가이드](toast.ko.md)를
+참고하세요. 아래 CSS 전용 마크업도 유지합니다. loading은
+`.dds-spinner[aria-hidden="true"]`를 사용하고, action이 있는 프레임워크 알림은
+`.dds-toast--action`과 `.dds-toast__action[data-part="action-trigger"]` 버튼을
+사용해 message 아래에 action을 배치합니다.
+
 ```html
 <div class="dds-toast-region" role="status">
   <div class="dds-toast dds-toast--success">색인이 끝났습니다.</div>

@@ -26,6 +26,48 @@ DDS가 공개 API와 시각 토큰을 소유한다. 기존 import와 콜백 값�
 포인터·포커스 상호작용 중과 브라우저 페이지가 비활성일 때는 알림 타이머가
 멈춘다. duration이 0 이하이면 명시적으로 닫을 때까지 유지한다.
 
+## 비동기 Toast와 액션
+
+`ToastProvider` 안의 `useToast()`는 `show`, `loading`, `update`, `promise`,
+`dismiss`, `clear`를 반환한다. ID와 수명 상태는 provider마다 독립적이다.
+`loading` tone은 수정하거나 닫을 때까지 유지한다. 스피너는 장식이므로 진행
+내용을 설명하는 메시지를 전달한다.
+
+```tsx
+const toast = useToast();
+const id = toast.loading({ message: "변경 사항 저장 중" });
+toast.update(id, { message: "변경 사항 저장됨", tone: "success" });
+
+const task = toast.promise(() => saveChanges(), {
+  loading: { message: "변경 사항 저장 중" },
+  success: { message: "변경 사항 저장됨" },
+  error: { message: "변경 사항을 저장하지 못했습니다" },
+});
+// 같은 ID를 즉시 사용할 수 있고, await는 원래 작업의 결과·오류를 전달한다.
+const saved = await task;
+
+toast.show({
+  message: "변경 사항 저장됨",
+  action: { label: "변경 사항 보기", onClick: () => openChanges(saved) },
+});
+```
+
+`update(id, patch)`는 생략한 필드를 유지하고 기존 알림을 수정한다. 선택적
+필드에 명시적으로 `undefined`를 전달하면 기본값으로 되돌리고, `action: null`은
+액션을 제거한다. 없거나 만료·닫힌 ID는 무시한다. 액션은 네이티브 버튼이며
+알림을 먼저 닫고 콜백을 한 번 실행한다. 주변 폼은 제출하지 않는다.
+
+`promise`는 Promise 또는 한 번 실행할 함수를 받으며 동기 예외도 rejection으로
+전달한다. `success`와 `error`는 입력 객체나 결과·원래 오류를 받는 동기 함수다.
+완료 입력은 loading 입력에 병합하며 완료 tone의 기본값은 success/danger이고,
+loading 이후에는 provider의 일반 유지 시간을 사용한다.
+반환형은 `Promise<T> & { readonly id: string }`이다. 다른 Promise와 동일하게
+rejection을 처리한다. dismiss·clear·닫기·액션 실행·수동 update·provider 해제는
+대기 중인 알림 갱신을 무효화한다. 원래 작업 결과는 호출자에게 전달되지만 완료
+메시지 함수는 호출하지 않고 알림도 다시 만들지 않는다. 완료 메시지 함수에서
+예외가 발생하면 현재 알림을 닫고 원래 작업의 결과·오류를 보존한다. 액션과
+Promise는 재시도·취소·업무 성공 판정을 추가하지 않는다.
+
 ## Button loading
 
 `loading`은 버튼의 크기와 접근 가능한 이름을 바꾸지 않는다. 라벨은 지우지 않고 숨기며
