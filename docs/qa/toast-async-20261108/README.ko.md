@@ -65,6 +65,9 @@ hydration은 해당 검사에서 NOT RUN입니다. 실제 OS 화면 낭독기·I
 이 폴더에 보관합니다. 재사용할 검증 자료이며 release 스크립트가 만든 임시
 소비자 의존성은 스크립트가 정리합니다. UI fixture의 데모 버튼은 업무 완료를
 주장하는 화면이 아닙니다.
+캡처를 의도적으로 갱신할 때만 `DDS_CAPTURE_TOAST_QA=1`을 설정합니다.
+일반 로컬·CI·릴리스 검사는 모든 assertion을 실행하되 추적 중인 캡처를
+덮지 않아 Changesets에 플랫폼별 화면 변경이 우연히 포함되지 않습니다.
 
 발행 상태는 기능/버전 PR, GitHub `Release public packages` 실행과 npm
 provenance로 확인합니다. 소스 수정이나 이 로컬 검증 기록만으로 발행 완료를

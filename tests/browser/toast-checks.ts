@@ -110,7 +110,9 @@ export function registerToastChecks(framework: string, url: string) {
           const results = await new AxeBuilder({ page }).include(".dds-toast-region").analyze();
           expect(results.violations).toEqual([]);
         }
-        if ((width === 1280 && theme === "light") || (width === 390 && theme === "dark")) {
+        // Keep CI/release worktrees clean; refresh the committed QA captures
+        // only during an intentional visual review.
+        if (process.env.DDS_CAPTURE_TOAST_QA === "1" && ((width === 1280 && theme === "light") || (width === 390 && theme === "dark"))) {
           const directory = resolve("docs/qa/toast-async-20261108");
           await mkdir(directory, { recursive: true });
           await page.screenshot({ path: resolve(directory, `${framework.toLowerCase()}-${width === 1280 ? "desktop" : "mobile"}-${theme}.png`) });

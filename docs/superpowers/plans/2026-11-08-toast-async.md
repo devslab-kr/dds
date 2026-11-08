@@ -79,3 +79,6 @@ Playwright, pnpm, Changesets and GitHub npm trusted publishing.
   and full viewport entry, then preserve the original bounds assertions;
   no product CSS change. Rerun affected local browser checks and required CI
   on the amended head; do not retry an unchanged failing SHA to seek a pass.
+- Release hygiene: committed QA capture refresh is opt-in through
+  `DDS_CAPTURE_TOAST_QA=1`. Normal tests retain all assertions while leaving
+  tracked PNGs untouched, avoiding incidental Changesets version-PR churn.

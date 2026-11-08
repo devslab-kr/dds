@@ -73,6 +73,9 @@ Six final representative screenshots are retained in this directory:
 artifacts; generated dependency consumers are temporary and removed by their
 release scripts. UI fixture controls are demonstration controls, not business
 success claims.
+Set `DDS_CAPTURE_TOAST_QA=1` only when intentionally refreshing these captures.
+Normal local/CI/release tests run every assertion without rewriting tracked
+screenshots, so Changesets cannot accidentally stage platform-specific captures.
 
 Publication status is recorded by the feature/version PRs, the GitHub
 `Release public packages` workflow and npm provenance. A source change or this
