@@ -5,6 +5,24 @@
 
 ---
 
+## D-046 — 제품 로케일용 국기 6개(MY·LA·KH·MM·PH·MN)를 더 벤더링한다 (2026-11-10)
+
+**결정.** flag-icons 7.5.0(MIT, 기존 14개와 같은 4x3 원본)에서 말레이시아·라오스·
+캄보디아·미얀마·필리핀·몽골 국기를 `flags/`에 추가한다. 가족 `LOCALES`·
+`FLAG_COUNTRY`는 **넓히지 않는다** — 제품 레지스트리가 `flagCountry: "my"` 식으로
+지목해 쓴다(D-018). 생성기에 `PRODUCT_COUNTRIES` 목록을 두어 `VENDORED`와
+`FLAGS_BY_COUNTRY`에만 들어가게 한다. 중국(`cn`)은 넣지 않는다.
+
+**근거.** 동남아·몽골어를 하는 제품(Qooroo 등)이 국기를 자기 안에 복사하지 않게
+하려는 D-018의 같은 이유다. 본문은 여전히 서버 빌드/지연 import로만 닿아
+클라이언트 번들 가드(`check-client-bundle`·`check-react-client-bundle`)가 그대로 통과한다.
+
+**트레이드오프.** 국기당 SVG 본문이 서버 번들에 더해진다(미얀마·캄보디아 등 큰 것 포함).
+
+**재검토 시점.** 제품이 `cn`처럼 정치적으로 민감하거나 아직 없는 국기를 요구하면.
+
+---
+
 ## D-045 — site-kit에 React 진입점 `@devslab/site-kit/react`를 둔다 (2026-11-09)
 
 **결정.** `@devslab/site-kit`에 Solid 진입점과 같은 디자인의 React 진입점
