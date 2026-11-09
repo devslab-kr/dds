@@ -27,7 +27,7 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 
 ## React·Next.js
 
-`@devslab/site-kit/react`는 React 18.3+/19 제품을 위한 같은 크롬이다(D-045): `LocaleMenu`(`variant="flag"` 또는 기본 select)·`SiteHeader`·`SiteFooter`·`ThemeToggle`·`MarketingShell`·`LegalLayout`·`StatusBanner`·`NotFoundLayout`·`ErrorLayout`·섹션 원시·`OssProductMark`·`ConsentSettingsButton`. `./solid`와 prop 이름이 같고(Solid의 `JSX.Element` 자리가 `ReactNode`) 클래스·마크업도 같다 — 같은 props로 둘을 렌더해 비교하는 테스트가 있다. Solid 제품처럼 `@devslab/site-kit/styles.css`(원시를 쓰면 `site-sections.css`도)를 import한다. `react`는 선택 피어이고, 이 진입점은 `@devslab/dds-react`에 의존하지 않는다.
+`@devslab/site-kit/react`는 React 18.3+/19 제품을 위한 같은 크롬이다(D-045): `LocaleMenu`(`variant="flag"` 또는 기본 select)·`SiteHeader`·`SiteFooter`·`ThemeToggle`·`MarketingShell`·`LegalLayout`·`StatusBanner`·`NotFoundLayout`·`ErrorLayout`·섹션 원시·`OssProductMark`·`ConsentSettingsButton`. `./solid`와 prop 이름이 같고(Solid의 `JSX.Element` 자리가 `ReactNode`) 클래스·마크업도 같다 — 같은 props로 둘을 렌더해 비교하는 테스트가 있다. Solid 제품처럼 `@devslab/site-kit/styles.css`(원시를 쓰면 `site-sections.css`도)를 import한다. `react`는 선택 피어이고, 이 진입점은 `@devslab/dds-react`에 의존하지 않는다. 패키지를 설치하면 `@devslab/dds-solid`(와 `solid-js`)는 여전히 함께 깔리지만(`styles.css`가 그 스타일시트를 import), React 앱의 브라우저 번들에는 들어가지 않는다.
 
 파일 첫 줄이 `"use client"`라 Next.js 서버 컴포넌트가 크롬을 렌더하면서 데이터와 서버에서 렌더한 children을 넘길 수 있다. 함수와 메서드 든 객체는 클라이언트 컴포넌트로 넘어가지 못하므로 서버 컴포넌트에서는:
 

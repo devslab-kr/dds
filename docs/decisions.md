@@ -39,8 +39,12 @@
    minor가 site-kit의 major로 번진다(changesets는 피어 의존자를 major로 올린다).
    크롬이 쓰는 것은 버튼·아이콘 버튼·아이콘 셋뿐이라 dds-react/dds-solid와 같은
    마크업을 직접 그리고 글리프는 `@devslab/dds-icons`(이미 fixed 그룹)에서 읽는다.
-   `react`는 선택 피어, 이참에 `solid-js`도 선택 피어로 바꾼다(React 제품에
-   Solid가 자동 설치되지 않게).
+   `react`는 선택 피어. `solid-js`도 site-kit의 선택 피어로 표시했지만, **React
+   제품에도 Solid는 여전히 설치된다** — site-kit이 `@devslab/dds-solid`를 일반
+   의존성으로 갖고(`styles.css`가 `@devslab/dds-solid/styles.css`를 import),
+   dds-solid가 `solid-js`를 필수 피어로 요구하므로 npm·pnpm이 함께 깐다
+   (`@ark-ui/solid` 등 포함). 디스크 설치만 늘 뿐 React 앱 번들에는 Solid 코드가
+   들어가지 않는다(Next.js 빌드 실측). 분리는 아래 "고려사항".
 3. **서버 컴포넌트가 넘길 수 있는 것만 받는다.** 진입 파일 첫 줄이
    `"use client"`이고 export는 컴포넌트와 타입뿐이다 — 거기서 export한 헬퍼는
    서버에서 클라이언트 참조가 되어 호출할 수 없다(첫 Next.js 빌드에서
@@ -117,6 +121,13 @@ gzip 7.0 kB, 본문 없음 + 조건 매핑 표). 팩한 tarball로 Next.js 16.4.
 렌더러를 `./react`(그리고 `./solid`)로 올린다. 두 사본을 대조해야 하는 추출이라 이
 PR 밖이다. 그동안 `SiteFooter`의 `links`는 제품의 Admin 기반 `/terms`·`/privacy`
 페이지를 가리키고 개인정보처리방침에 `emphasis: true`(D-029).
+
+**고려사항 — React 제품에서 Solid 설치를 걷어내기(언젠가).** `styles.css`가
+`@devslab/dds-solid/styles.css` 대신 `@devslab/dds-css`를 직접 import하게 하고,
+`@devslab/dds-solid`를 일반 의존성에서 선택 피어로 내리면 React 제품에
+Solid·Ark Solid가 깔리지 않는다. 대신 모든 Solid 제품이 dds-solid를 직접
+설치해야 하므로(설치 방식 변경) 소유자 결정과 별도 PR이 필요하다. 지금은 설치
+용량 문제일 뿐이라 보류(소유자, 2026-11-09).
 
 **재검토 시점.** React 제품이 동의 바를 필요로 할 때(대화상자 원시 결정),
 또는 dds-react가 fixed 그룹에서 빠질 때(피어로 바꿀 수 있다).

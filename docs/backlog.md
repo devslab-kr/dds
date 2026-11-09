@@ -245,6 +245,7 @@ D-045. `@devslab/site-kit/react`: 국기 `LocaleMenu`, 헤더·푸터·테마·�
 - [ ] `RequestAccessForm` React판, Next.js `Metadata` 어댑터.
 - [ ] Solid `dist/*.d.ts`의 `../core/*.mjs` 경로 결함(타입이 `any`로 풀림).
 - [ ] admin.devslab.kr 정책 v3 클라이언트(코어) + `PolicyDocument`(react·solid) — JeongsanNow·qoqo 사본에서 추출, Qooroo가 세 번째 소비자.
+- [ ] (고려사항, 언젠가) React 제품에서 Solid 설치 걷어내기 — `styles.css`가 `dds-css`를 직접 import, `dds-solid`를 선택 피어로. Solid 제품 설치 방식이 바뀌므로 소유자 결정 필요(D-045).
 - [ ] 마케팅 헤더와 `TopNav` 통합 여부 — dds-css 마케팅 변형으로 네 프레임워크 함께(별도 결정).
 - **다음(제품)**: Qooroo 랜딩이 첫 소비자 — 발행 후 `.site-brand__lockup`으로 마크+워드마크.
 

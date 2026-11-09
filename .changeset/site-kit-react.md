@@ -11,4 +11,6 @@ artwork resolves through `@devslab/site-kit/react/flag-bodies` per export
 condition, so the server writes the sprite and browser bundles carry no flag
 bodies. Adds `localeHrefs` to the core entry for Server Components, the opt-in
 `.site-brand__lockup` style for a mark beside a wordmark, `react` as an optional
-peer, and makes the `solid-js` peer optional (D-045).
+peer, and marks the `solid-js` peer optional. React products still install
+`@devslab/dds-solid` (and with it `solid-js`) as a dependency of this package;
+only their browser bundles leave Solid out (D-045).
