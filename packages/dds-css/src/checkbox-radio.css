@@ -79,6 +79,9 @@
 
 .dds-check__input:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  /* Kept apart, not flush (D-047): on an 18px box a flush ring just reads as
+   * a heavier box — the same signal the checked state gives — so the gap is
+   * what makes it read as focus. */
   outline-offset: var(--dds-space-2);
 }
 

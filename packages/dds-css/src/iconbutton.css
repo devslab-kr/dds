@@ -29,7 +29,8 @@
 }
 .dds-iconbtn:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: var(--dds-space-2);
+  /* Flush, same as .dds-btn (D-047) — the two sit side by side in toolbars. */
+  outline-offset: var(--dds-focus-offset);
 }
 
 /* opacity is allowed for disabled only (spec §4.2) */

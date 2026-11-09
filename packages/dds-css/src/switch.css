@@ -58,6 +58,8 @@
 
 .dds-switch__input:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  /* Kept apart, not flush (D-047): the off track is a grey close to the focus
+   * color, so a flush ring would merge into a slightly bigger track. */
   outline-offset: var(--dds-space-2);
 }
 

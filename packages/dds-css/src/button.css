@@ -37,7 +37,9 @@
 
 .dds-btn:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: var(--dds-space-2);
+  /* Flush (D-047): the ring sits on the control's own edge, so border/fill
+   * and ring read as one thicker line instead of border, gap, ring. */
+  outline-offset: var(--dds-focus-offset);
 }
 
 /* opacity is allowed for disabled only (spec §4.2) */

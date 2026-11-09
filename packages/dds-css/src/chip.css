@@ -34,7 +34,8 @@
 }
 .dds-chip:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: var(--dds-space-2);
+  /* Flush on the chip's own border (D-047). */
+  outline-offset: var(--dds-focus-offset);
 }
 
 .dds-chip[aria-pressed="true"],

@@ -142,6 +142,8 @@
 }
 .dds-table__sort:focus-visible {
   outline: 2px solid var(--dds-color-border-focus);
+  /* Kept apart (D-047): a borderless header label with no padding — flush,
+   * the ring would touch the glyphs. There is no edge to double. */
   outline-offset: 2px;
 }
 
