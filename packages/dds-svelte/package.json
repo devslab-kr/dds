@@ -1,6 +1,6 @@
 {
   "name": "@devslab/dds-svelte",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "Svelte 5 ConsoleShell for the DevsLab Design System",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
