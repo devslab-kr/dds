@@ -139,3 +139,21 @@ function acceptedLocales(header, canonicalLocale) {
 export const FAMILY_LOCALES = defineLocaleRegistry();
 
 export const { canonicalLocale, localeAttributes, resolveLocale } = FAMILY_LOCALES;
+
+/**
+ * Every language's href as plain data: `{ ko: "/ko", en: "/en", … }`.
+ *
+ * For a React Server Component that renders the `@devslab/site-kit/react`
+ * chrome. A function cannot cross from a Server Component to a Client
+ * Component, so the locale state goes over as `{ locale, hrefs }` instead of
+ * `{ locale, hrefForLocale }`. It lives here, in the framework-free entry, and
+ * not in `./react`: everything exported from a "use client" module is a client
+ * reference on the server, which a Server Component can render but not call.
+ *
+ * @param {{ LOCALES: ReadonlyArray<{ code: string }> }} registry
+ * @param {(locale: string) => string} hrefForLocale
+ * @returns {Record<string, string>}
+ */
+export function localeHrefs(registry, hrefForLocale) {
+  return Object.fromEntries(registry.LOCALES.map((entry) => [entry.code, hrefForLocale(entry.code)]));
+}

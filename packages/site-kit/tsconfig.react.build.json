@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.react.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/react",
+    "rootDir": "src/react"
+  },
+  "include": ["src/react/**/*.ts", "src/react/**/*.tsx"],
+  "exclude": ["src/react/**/__tests__/**"]
+}

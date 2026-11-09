@@ -224,12 +224,18 @@ try {
   assert.match(bundle, /from\s+["']@devslab\/dds-solid["']/, "site-kit must externalize dds-solid");
   publishDryRun(siteKitTarball, packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
-  run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs], temp);
+  // Both frameworks are optional peers (D-045): a product installs the one it
+  // renders with. This consumer installs both, at the versions the kit is
+  // tested against, so every entry point can be imported.
+  const kitManifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
+  const frameworks = ["solid-js", "react"].map((name) => `${name}@${kitManifest.devDependencies[name]}`);
+  run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, ...frameworks], temp);
   const installedRoot = join(temp, "node_modules", "@devslab", "site-kit");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
   assert.equal(manifest.name, "@devslab/site-kit");
   for (const path of [
     "dist/solid.js", "dist/index.d.ts",
+    "dist/react/index.js", "dist/react/index.d.ts", "dist/react/flag-bodies.js", "dist/react/flag-bodies.server.js", "dist/react/flag-bodies.d.ts",
     "src/core/index.mjs", "src/core/index.d.mts",
     "src/core/publisher.mjs", "src/core/publisher.d.mts", "src/core/devslab.mjs", "src/core/devslab.d.mts",
     "src/core/flags.mjs", "src/core/flags.d.mts",
@@ -243,6 +249,13 @@ try {
   assert.equal(manifest.publishConfig.access, "public");
   assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
   assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
+  // Neither framework is forced on a product that renders with the other.
+  assert.equal(manifest.peerDependenciesMeta["solid-js"]?.optional, true);
+  assert.equal(manifest.peerDependenciesMeta.react?.optional, true);
+  const reactEntry = await readFile(join(installedRoot, "dist", "react", "index.js"), "utf8");
+  assert.ok(reactEntry.startsWith('"use client";'), "the React entry must start with the \"use client\" directive");
+  assert.match(reactEntry, /from\s*["']@devslab\/site-kit\/react\/flag-bodies["']/, "the React entry must import its flag bodies by package name");
+  assert.doesNotMatch(reactEntry, /from\s*["']@devslab\/dds-react["']/, "the React entry must not depend on @devslab/dds-react");
   const core = await import(pathToFileURL(join(installedRoot, "src", "core", "index.mjs")));
   assert.equal(core.LOCALES.length, 14);
   assert.match(core.gtmHeadScript("GTM-ABC123"), /'GTM-ABC123'\);$/, "the packed core must export the Tag Manager loader");

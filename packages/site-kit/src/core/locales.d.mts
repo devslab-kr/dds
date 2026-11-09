@@ -41,3 +41,13 @@ export declare const FAMILY_LOCALES: LocaleRegistry<SiteLocale>;
 export declare function canonicalLocale(candidate: string | undefined | null): SiteLocale | undefined;
 export declare function localeAttributes(locale: string): { lang: SiteLocale; dir: TextDirection };
 export declare function resolveLocale(input: { pathname?: string; cookie?: string; acceptLanguage?: string; defaultLocale: SiteLocale }): { locale: SiteLocale; source: "route" | "cookie" | "accept-language" | "default" };
+
+/**
+ * Every language's href as plain data, for a React Server Component that
+ * passes `{ locale, hrefs }` to the `@devslab/site-kit/react` chrome — a
+ * function cannot cross from a Server Component to a Client Component.
+ */
+export declare function localeHrefs<Code extends string>(
+  registry: LocaleRegistry<Code>,
+  hrefForLocale: (locale: Code) => string,
+): Record<Code, string>;
