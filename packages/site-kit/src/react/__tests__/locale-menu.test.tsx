@@ -206,3 +206,28 @@ it("a product's own locale borrows a vendored country and shares its symbol", as
   expect(new Set(india).size).toBe(1);
   expect(registry.LOCALES.length).toBe(FAMILY_LOCALES.LOCALES.length + 1);
 });
+
+it.each([
+  ["ms", "my"],
+  ["lo", "la"],
+  ["km", "kh"],
+  ["my", "mm"],
+  ["fil", "ph"],
+  ["mn", "mn"],
+])("a product's %s locale renders the %s flag without throwing", async (code, flagCountry) => {
+  const registry = defineLocaleRegistry({
+    extra: [{ code, language: code, nativeName: code, dir: "ltr", flagCountry }],
+  });
+  const host = mount(<LocaleMenu variant="flag" state={locale} messages={messages} registry={registry} />);
+  const sprite = await spriteFilled(host);
+  expect(sprite.querySelectorAll("symbol")).toHaveLength(15);
+  const option = host.querySelector(`.site-locale-flag__option[lang="${code}"]`)!;
+  expect(option.querySelector("use")!.getAttribute("href")).toMatch(new RegExp(`^#site-flag-${flagCountry}-`));
+});
+
+it("an unknown flag country still throws", () => {
+  const registry = defineLocaleRegistry({
+    extra: [{ code: "zz", language: "Z", nativeName: "Z", dir: "ltr", flagCountry: "cn" }],
+  });
+  expect(() => mount(<LocaleMenu variant="flag" state={locale} messages={messages} registry={registry} />)).toThrow(/No vendored flag for country: cn/);
+});

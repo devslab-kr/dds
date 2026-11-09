@@ -31,7 +31,7 @@ import {
   buildVerifiedJsonLd,
   renderLlmsTxt,
 } from "../packages/site-kit/src/core/geo.mjs";
-import { FLAGS_BY_COUNTRY, FLAG_COUNTRY, LOCALE_FLAGS, flagFor } from "../packages/site-kit/src/core/flags.mjs";
+import { FLAGS_BY_COUNTRY, FLAG_COUNTRY, LOCALE_FLAGS, flagCountryFor, flagFor } from "../packages/site-kit/src/core/flags.mjs";
 
 const localeCodes = ["ko", "en", "ja", "zh-HK", "zh-TW", "hi", "vi", "id", "th", "pt-BR", "fr", "de", "es", "ar"];
 
@@ -209,6 +209,27 @@ test("product locales reuse a vendored flag rather than shipping a second copy",
   assert.throws(() => flagFor("ta"), /No flag for locale/);
   const noSuchCountry = defineLocaleRegistry({ extra: [{ code: "cy", language: "Welsh", nativeName: "Cymraeg", dir: "ltr", flagCountry: "wa" }] });
   assert.throws(() => flagFor("cy", noSuchCountry), /No vendored flag for country/);
+});
+
+const PRODUCT_FLAG_LOCALES = [
+  ["ms", "my"], ["lo", "la"], ["km", "kh"], ["my", "mm"], ["fil", "ph"], ["mn", "mn"],
+];
+
+test("flags for Malaysia, Laos, Cambodia, Myanmar, the Philippines and Mongolia resolve for product locales only", () => {
+  const registry = defineLocaleRegistry({
+    extra: PRODUCT_FLAG_LOCALES.map(([code, flagCountry]) => ({ code, language: code, nativeName: code, dir: "ltr", flagCountry })),
+  });
+  for (const [code, country] of PRODUCT_FLAG_LOCALES) {
+    assert.equal(flagCountryFor(code, registry), country);
+    assert.equal(flagFor(code, registry), FLAGS_BY_COUNTRY[country]);
+    assert.equal(FLAGS_BY_COUNTRY[country].viewBox, "0 0 640 480");
+    // A product locale, not a family one: the family list must not grow.
+    assert.equal(LOCALES.some((l) => l.code === code), false);
+    assert.throws(() => flagCountryFor(code), /No flag for locale/);
+  }
+  assert.equal(FLAG_COUNTRY.cn, undefined);
+  const unknown = defineLocaleRegistry({ extra: [{ code: "zz", language: "Z", nativeName: "Z", dir: "ltr", flagCountry: "cn" }] });
+  assert.throws(() => flagCountryFor("zz", unknown), /No vendored flag for country/);
 });
 
 test("catalogs and metadata cover the product's languages, not just the family's", () => {

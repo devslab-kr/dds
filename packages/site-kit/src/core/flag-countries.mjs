@@ -19,7 +19,7 @@ export const FLAG_COUNTRY = Object.freeze({
 /** Every vendored flag is 4:3 on this box, so any <use> can point at any symbol. */
 export const FLAG_VIEWBOX = "0 0 640 480";
 
-const VENDORED = new Set(Object.values(FLAG_COUNTRY));
+const VENDORED = new Set([...Object.values(FLAG_COUNTRY), ...["my","la","kh","mm","ph","mn"]]);
 
 /**
  * The country whose flag stands for a locale — a family locale through
