@@ -238,6 +238,16 @@ D-034. 허용 전에는 구글에 닿는 것이 없다 — 코어 매니저·쿠
 - **다음(제품마다, 각 레포)**: `gtm` → `consent` 옮기기, `ConsentBanner` + 바닥글 `consentSettings`, `/api/consent` 엔드포인트 + `consent_records` 마이그레이션 + 3년 정리 작업, 개인정보처리방침에 동의 기록 보관 기간, GTM 콘솔의 GA4 태그 "추가 동의 필요: analytics_storage".
 - **다음(devslab.kr)**: 정적 내보내기라 head는 기본값만, 매니저가 하이드레이션 뒤 로드(README "Solid 없이"). 백엔드가 없으므로 기록을 어디에 둘지 소유자 결정 필요.
 
+### 18. site-kit React 진입점 — `진행` (2026-11-09)
+D-045. `@devslab/site-kit/react`: 국기 `LocaleMenu`, 헤더·푸터·테마·셸·레이아웃·섹션 원시, Solid와 같은 클래스·마크업(테스트로 고정).
+- [x] 국기 본문 조건부 export(서버=본문, 브라우저=스텁), 하이드레이션 무패치, 번들 게이트, Next.js 16 실측.
+- [ ] React `ConsentBanner` — 대화상자 원시 결정 필요(dds-react 비의존 유지).
+- [ ] `RequestAccessForm` React판, Next.js `Metadata` 어댑터.
+- [ ] Solid `dist/*.d.ts`의 `../core/*.mjs` 경로 결함(타입이 `any`로 풀림).
+- [ ] admin.devslab.kr 정책 v3 클라이언트(코어) + `PolicyDocument`(react·solid) — JeongsanNow·qoqo 사본에서 추출, Qooroo가 세 번째 소비자.
+- [ ] 마케팅 헤더와 `TopNav` 통합 여부 — dds-css 마케팅 변형으로 네 프레임워크 함께(별도 결정).
+- **다음(제품)**: Qooroo 랜딩이 첫 소비자 — 발행 후 `.site-brand__lockup`으로 마크+워드마크.
+
 ---
 
 ## P3 — 모바일 이후

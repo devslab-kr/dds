@@ -1,11 +1,12 @@
 # @devslab/site-kit
 
-Public product-site infrastructure for DevsLab products. It provides strict catalogs over the family locales (extensible per product), locale negotiation, SEO/GEO document builders, and accessible SolidJS 2 site shells. Product names, claims, navigation, and translated copy always remain in the consuming application.
+Public product-site infrastructure for DevsLab products. It provides strict catalogs over the family locales (extensible per product), locale negotiation, SEO/GEO document builders, and accessible SolidJS 2 and React site shells. Product names, claims, navigation, and translated copy always remain in the consuming application.
 
 ## Entry points
 
 - `@devslab/site-kit` — runtime-neutral locale, catalog, SEO, sitemap, robots, verified-fact, Google Tag Manager and analytics-consent utilities.
 - `@devslab/site-kit/solid` — header, footer, locale/theme controls, marketing/legal/status/error layouts, request-access form, and the consent bar.
+- `@devslab/site-kit/react` — the same header, footer, locale/theme controls, layouts and section primitives for React and Next.js; see [React and Next.js](#react-and-nextjs).
 - `@devslab/site-kit/tanstack-start` — conversion of neutral metadata to TanStack Start head descriptors (with opt-in brand icons and the consent-gated Tag Manager loader).
 - `@devslab/site-kit/styles.css` — logical-property, RTL-aware shared site styles. It also gives the page root the family face (`:where(html) { font-family: var(--dds-font-family-sans) }`), so bare headings and paragraphs are not left in the browser's serif. The rule has zero specificity: a product's own rule on `html`, `:root`, `body` or `:lang()` wins.
 - `@devslab/site-kit/fonts.css` — the family font (Geist, Geist Mono, Pretendard) as self-hosted woff2 under the token's family names; see [Family font](#family-font).
@@ -23,6 +24,56 @@ control search indexing, citation crawlers, and model-training crawlers.
 `MarketingShell` reads `header` and `footer` once (a memo) before it renders anything. `header={{ … }}` compiles to a getter; if the shell re-read it per prop, any JSX built eagerly inside the literal (an `actions` anchor, a logo) would be built again on each read and consume hydration keys — a different number of times on the server than in the browser — and the client would rebuild the header from templates. A product that mounts `SiteHeader` or `SiteFooter` directly, outside the shell, has to read its own props once the same way. The flag sprite loads its bodies whenever it reaches the client empty, whatever the reason.
 
 The header and footer read `brand` (and the footer its `details`) once themselves, so a logo or details block built inline stays one build per side even outside the shell (D-029).
+
+## React and Next.js
+
+`@devslab/site-kit/react` is the same chrome for React 18.3+/19 products (D-045): `LocaleMenu` (`variant="flag"` or the default select), `SiteHeader`, `SiteFooter`, `ThemeToggle`, `MarketingShell`, `LegalLayout`, `StatusBanner`, `NotFoundLayout`, `ErrorLayout`, the section primitives, `OssProductMark` and `ConsentSettingsButton`. Same prop names as `./solid` (`ReactNode` where Solid takes `JSX.Element`), same classes, same markup — a test renders both from the same props and compares them. Import `@devslab/site-kit/styles.css` (and `site-sections.css` for the primitives) as a Solid product does. `react` is an optional peer; the entry does not depend on `@devslab/dds-react`.
+
+The file starts with `"use client"`, so a Next.js Server Component can render the chrome and hand it data and server-rendered children. Functions and objects with methods cannot cross into a Client Component, so from a Server Component:
+
+```tsx
+import { defineLocaleRegistry, localeHrefs } from "@devslab/site-kit";
+import { MarketingShell } from "@devslab/site-kit/react";
+
+const registry = defineLocaleRegistry({ only: ["ko", "en", "ja", "zh-TW"] });
+const state = { locale, hrefs: localeHrefs(registry, (code) => `/${code}`) }; // not hrefForLocale
+const locales = { LOCALES: registry.LOCALES };                             // not the registry
+
+<MarketingShell
+  messages={messages}
+  header={{
+    brand: { name: "", href: `/${locale}`, label: "쿠루 홈", logo: <span className="site-brand__lockup"><Mark /><span>쿠루</span></span> },
+    navigation, locale: state, localeVariant: "flag", localeRegistry: locales, theme: {}, messages,
+  }}
+  footer={{ brand, links, copyright, locale: state, localeRegistry: locales, messages }}
+>{children}</MarketingShell>
+```
+
+From a Client Component the Solid forms work too (`hrefForLocale`, a registry, `onLocaleChange`). `.site-brand__lockup` puts a mark and a wordmark on one centre line; without it the brand link is inline and text sits on its baseline.
+
+Flag artwork: the entry imports `@devslab/site-kit/react/flag-bodies`, which package.json resolves per export condition — `react-server`, `edge-light`, `workerd`, `worker` and `node` get the bodies, `browser` gets a stub. The server writes the sprite; hydration adopts it as written; only a render with no server HTML fetches the bodies as their own chunk. `scripts/check-react-client-bundle.mjs` keeps them out of the browser bundle.
+
+`LocaleMenu` is the same component `SiteHeader` composes, and it stands alone — in a footer, or on an app screen such as a settings page. It needs one string:
+
+```tsx
+"use client";
+import { defineLocaleRegistry } from "@devslab/site-kit";
+import { LocaleMenu } from "@devslab/site-kit/react";
+
+const registry = defineLocaleRegistry({ only: ["ko", "en", "ja", "zh-TW"] });
+
+export function LanguageSetting({ locale, onChange }) {
+  return <LocaleMenu variant="flag" registry={registry} messages={{ localeLabel: "언어" }}
+    state={{ locale, hrefForLocale: (code) => `?lang=${code}` }}
+    onLocaleChange={(code) => onChange(code)} />;
+}
+```
+
+Without `onLocaleChange` each entry is a plain link the browser follows. The flag variant is a `<details>` disclosure on purpose: it opens and its `hreflang` links work from server HTML alone, before hydration and without JavaScript, and it writes the same markup as the Solid menu (D-045).
+
+Legal links: point `SiteFooter`'s `links` at the product's terms and privacy pages backed by admin.devslab.kr (policy v3), with `emphasis: true` on the privacy policy (D-029). A shared v3 client and `PolicyDocument` renderer are the next step (D-045).
+
+Not in the React entry yet: `ConsentBanner` (it needs a focus-trapping dialog) and `RequestAccessForm`.
 
 ## Header and footer options
 

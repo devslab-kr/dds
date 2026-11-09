@@ -5,6 +5,124 @@
 
 ---
 
+## D-045 — site-kit에 React 진입점 `@devslab/site-kit/react`를 둔다 (2026-11-09)
+
+**결정.** `@devslab/site-kit`에 Solid 진입점과 같은 디자인의 React 진입점
+`./react`를 추가한다. 첫 조각은 국기 `LocaleMenu`(Qooroo 랜딩이 막혀 있던
+부분)이고, 같은 PR에 `SiteHeader`·`SiteFooter`·`ThemeToggle`·`MarketingShell`·
+`LegalLayout`·`StatusBanner`·`NotFoundLayout`·`ErrorLayout`·섹션 원시 여섯
+(`SectionBlock`·`SectionHead`·`HeroSplit`·`StepFlow`·`FeatureRows`·`PricingNote`)·
+`OssProductMark`·`ConsentSettingsButton`을 둔다. props는 Solid와 같은 이름·같은
+의미(`JSX.Element` 자리가 `ReactNode`), 클래스는 `styles.css`·`site-sections.css`
+그대로다. Solid 출력은 바꾸지 않는다.
+
+**왜 지금.** Next.js 16 + React 19 + `@devslab/dds-react` 제품이 셋이 됐다
+(qoqo, JeongsanNow, Qooroo). 앞의 둘은 site-kit을 설치만 하고 import하지 않았다 —
+마케팅 크롬이 Solid에만 있었기 때문이다. Qooroo는 국기 언어 메뉴와 로고 옆
+현지화 워드마크(ko "쿠루", ja "クル", en 없음)가 필요했고, 마크업을 제품에 복사하는
+대신 키트에 React 판을 두기로 소유자가 정했다. 2026-10-12의 미머지 브랜치
+`sexysinny/shared-react-site-chrome`(별도 `dds-site-*` 클래스·국기 메뉴 없음·
+한국어 고정)은 Solid와 다른 디자인이라 계승하지 않는다.
+
+**어떻게 — 결정 셋.**
+1. **국기 본문은 패키지 이름 경유 조건부 export.** React 진입 모듈은 본문을
+   상대경로가 아니라 `@devslab/site-kit/react/flag-bodies`로 import하고,
+   package.json이 조건별로 답한다 — `react-server`·`edge-light`·`workerd`·
+   `worker`·`node`는 본문을 든 서버 파일, `browser`·`default`는 스텁. 컴포넌트
+   모듈은 모든 레이어에서 같은 파일이어야 Next.js의 `"use client"` 참조가
+   맞으므로, 레이어마다 갈라지는 것은 이 한 import뿐이다(D-020의 React판).
+   서버가 `<symbol>` 스프라이트를 쓰고, 브라우저는 하이드레이션 때 서버가 쓴
+   요소의 innerHTML을 그대로 넘겨받아 React가 패치도 경고도 하지 않는다.
+   서버 HTML이 없으면(클라이언트 전용) 별도 청크를 가져온다.
+2. **`@devslab/dds-react`에 의존하지 않는다.** 일반 의존성이면 모든 Solid
+   제품에 React·Ark UI·가상화가 설치되고, 피어면 fixed 그룹에서 dds-react의
+   minor가 site-kit의 major로 번진다(changesets는 피어 의존자를 major로 올린다).
+   크롬이 쓰는 것은 버튼·아이콘 버튼·아이콘 셋뿐이라 dds-react/dds-solid와 같은
+   마크업을 직접 그리고 글리프는 `@devslab/dds-icons`(이미 fixed 그룹)에서 읽는다.
+   `react`는 선택 피어, 이참에 `solid-js`도 선택 피어로 바꾼다(React 제품에
+   Solid가 자동 설치되지 않게).
+3. **서버 컴포넌트가 넘길 수 있는 것만 받는다.** 진입 파일 첫 줄이
+   `"use client"`이고 export는 컴포넌트와 타입뿐이다 — 거기서 export한 헬퍼는
+   서버에서 클라이언트 참조가 되어 호출할 수 없다(첫 Next.js 빌드에서
+   `localeHrefs`가 그렇게 실패). 함수와 메서드 든 객체는 서버→클라이언트
+   경계를 못 넘으므로 `LocaleState`는 `{ locale, hrefForLocale }` 또는
+   `{ locale, hrefs }`이고, `hrefs`는 코어 `localeHrefs(registry, fn)`로 만든다.
+   레지스트리 prop 타입은 `LocaleList`(`{ LOCALES }`) — 레지스트리 자체도 맞고,
+   서버에서는 `{ LOCALES: registry.LOCALES }`를 넘긴다(두 번째 빌드에서
+   레지스트리의 메서드가 같은 이유로 실패).
+
+**규칙 — Solid↔React 패리티.** 두 빌드는 모양을 `styles.css`·`site-sections.css`
+한 곳에서만 받는다. 그래서 같은 props면 같은 요소 트리·클래스·ARIA·data 속성을
+써야 하고, `tests/site-kit-react-hydration.test.mjs`의 패리티 테스트(CI
+`verify:site-kit:ui`)가 국기 메뉴·select·헤더·푸터·셸·섹션 원시·레이아웃을 양쪽에서
+같은 입력으로 렌더해 비교한다. 한쪽만 바꾸면 CI가 빨개진다(빌드된 React 출력의
+클래스 하나를 바꿔 실패 확인). 무시하는 것은 하이드레이션 표식(data-hk·주석),
+렌더마다 다른 메뉴 uid, React 전용 스프라이트 조회 속성뿐이다. 이 규칙이 아래
+두 결정을 정했다.
+
+**국기 메뉴는 `<details>`, `dds-react` `DropdownMenu`가 아니다 — 무JS 경로 유지.**
+`DropdownMenu`는 Ark Menu를 클라이언트 전용 Portal에 그려 하이드레이션 전에는 열리지
+않고, 항목이 `role="menuitem"`이 된다. 언어 목록은 크롤러가 따라가야 하는
+`hreflang` 링크라(문서의 대체 언어) 메뉴 항목보다 내비게이션 링크가 맞고, 서버
+HTML만으로 열리고 따라가져야 한다. 그리고 Solid가 `<details>`이므로 React만
+바꾸면 패리티가 깨진다. 키보드: 네이티브 `<summary>`(Enter/Space)·Tab 순회·Escape가
+닫고 트리거로 포커스를 돌려준다(헤더 메뉴는 그 Escape를 건너뜀). 화살표 키 순회는
+없다 — 원하면 양쪽에 같이 넣는다.
+
+**헤더·셸은 `dds-react` `TopNav`·`Layout` 위에 올리지 않는다 — 간극 기록.**
+`TopNav`는 업무 화면의 그룹 내비(`dds-top-nav__group` 디스클로저, 레일 배지),
+`Layout`은 콘솔 기하(rail·navigationPosition)다. 마케팅 헤더는 평평한 링크 +
+워드마크 + 언어/테마/CTA 컨트롤이고, Solid `SiteHeader`도 `dds-solid`의 그것들을
+쓰지 않는다. React만 그 위에 올리면 마크업이 갈라지고 site-kit이 dds-react에
+의존하게 된다. 둘을 합치려면 마케팅 변형을 `dds-css`에 두고 네 프레임워크의
+TopNav가 함께 받는 별도 결정이 필요하다 — 이 PR은 두 번째 구현을 만들지 않고
+Solid의 마케팅 헤더를 그대로 옮겼다.
+
+**`LocaleMenu`는 독립 컴포넌트.** `SiteHeader`가 내부에서 조립하는 바로 그 공개
+export이고, 푸터·앱 화면(설정 페이지)에서 혼자 쓸 수 있도록 React판은 문자열 하나
+(`messages: { localeLabel }`)만 요구한다.
+
+**같이 들어간 것.** `styles.css`에 옵트인 `.site-brand__lockup`(마크와 워드마크를
+한 중심선에) — `.site-brand`는 인라인이라 마크+텍스트가 텍스트 기준선에 붙어
+낮게 보였다. 이미 배포된 제품의 로고 기하를 건드리지 않도록 기존 규칙은 그대로
+두고 새 클래스로 둔다.
+
+**검증.** jsdom 단위 54(국기 메뉴 단독 사용 포함·헤더 D-029 동작·푸터·섹션·export 규칙),
+SSR 7, axe 2, 빌드된 dist에 대한 실제 Node 조건 테스트 5
+(`tests/site-kit-react-hydration.test.mjs` — 서버는 본문, `--conditions=browser`는
+스텁으로 해석; React 개발 빌드 하이드레이션 진단 0·스프라이트와 헤더 노드가 서버
+것 그대로; 빈 스프라이트·클라이언트 전용은 청크로 채움; **같은 props에서 Solid와
+React의 마크업이 동일** — data-hk·uid 접미사·dds-solid의 class 끝 공백만 정규화),
+브라우저 번들 게이트 `scripts/check-react-client-bundle.mjs`(header-only 20.5 kB,
+gzip 7.0 kB, 본문 없음 + 조건 매핑 표). 팩한 tarball로 Next.js 16.4.5(Turbopack)
+앱을 빌드해 서버 컴포넌트 페이지 4개 로케일이 프리렌더되고, HTML에 스프라이트가
+있고, 본문 청크는 하이드레이션 때 요청되지 않음을 실측, 1280/375·라이트/다크
+스크린샷 확인.
+
+**아직 아닌 것.** React `ConsentBanner`(포커스 가둠 대화상자 — 마크업이 아니라
+동작이고 이 진입점은 dds-react에 의존하지 않으므로, 대화상자 원시를 어디서
+가져올지 따로 정한다)와 `RequestAccessForm`. `@devslab/site-kit/tanstack-start`에
+대응하는 Next.js `Metadata` 어댑터. 기존 Solid `dist/*.d.ts`가 `../core/*.mjs`를
+가리켜(패키지 루트에 `core/` 없음) `skipLibCheck` 소비자에서 해당 타입이 `any`로
+풀리는 잠복 결함 — React 선언은 패키지 자기 이름으로 import해 피했고, Solid 쪽은
+이 결정 밖의 후속.
+
+**다음 — 정책 문서(admin.devslab.kr v3).** 약관·개인정보처리방침은
+`GET https://admin.devslab.kr/api/public/policies/v3/services/{serviceId}/{slug}/{locale}`
+(schemaVersion 3)에서 온다. 지금 사본이 둘이다 — JeongsanNow
+`src/server/public-policy.ts`(zod 스키마·크기 상한·타임아웃) +
+`src/components/public-policy-page.tsx`, qoqo `apps/web/src/server/legal-display-publication.ts`
++ `src/preview/LegalDocument.tsx`. Qooroo가 세 번째 소비자가 되면(LinqKit D-118
+"쓰는 순간 올린다") 프레임워크 중립 v3 클라이언트를 site-kit 코어로, `PolicyDocument`
+렌더러를 `./react`(그리고 `./solid`)로 올린다. 두 사본을 대조해야 하는 추출이라 이
+PR 밖이다. 그동안 `SiteFooter`의 `links`는 제품의 Admin 기반 `/terms`·`/privacy`
+페이지를 가리키고 개인정보처리방침에 `emphasis: true`(D-029).
+
+**재검토 시점.** React 제품이 동의 바를 필요로 할 때(대화상자 원시 결정),
+또는 dds-react가 fixed 그룹에서 빠질 때(피어로 바꿀 수 있다).
+
+---
+
 ## D-044 — 소비는 npm 의존성으로, 빌드 산출물의 커밋 사본은 폐기한다 (2026-11-03)
 
 **결정.** D-009를 대체한다. 패키지는 공개 npm에 발행되고 있으므로

@@ -1,0 +1,208 @@
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
+import { useState } from "react";
+import { afterEach, expect, it, vi } from "vitest";
+
+// Wrapped, not replaced: the real dynamic import still runs, the wrapper only
+// counts how often the menu asks for the bodies.
+vi.mock("../flag-bodies", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../flag-bodies")>();
+  return { ...actual, loadFlagBodies: vi.fn(actual.loadFlagBodies) };
+});
+
+import { LocaleMenu, SiteHeader } from "../index";
+import { FAMILY_LOCALES, defineLocaleRegistry, localeHrefs } from "../../core/locales.mjs";
+import { locale, messages } from "./fixtures";
+
+afterEach(() => cleanup());
+
+const mount = (node: React.ReactElement) => render(node).container;
+
+it("keeps the select variant as the default, with the current language selected", () => {
+  const host = mount(<LocaleMenu state={locale} messages={messages} />);
+  const select = host.querySelector<HTMLSelectElement>("select.dds-select__input")!;
+  expect(select).not.toBeNull();
+  expect(select.value).toBe("en");
+  expect(host.querySelector(".site-locale-flag")).toBeNull();
+});
+
+it("flag variant renders a flag-only trigger named after the current language", () => {
+  const host = mount(<LocaleMenu variant="flag" state={locale} messages={messages} />);
+  const trigger = host.querySelector<HTMLElement>(".site-locale-flag__trigger")!;
+  expect(trigger.tagName).toBe("SUMMARY");
+  expect(trigger.textContent?.trim()).toBe("");
+  expect(trigger.getAttribute("aria-label")).toBe("Language: English");
+  expect(trigger.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
+});
+
+it("flag variant lists fourteen flag + native-name links with the current one marked", () => {
+  const host = mount(<LocaleMenu variant="flag" state={locale} messages={messages} />);
+  const options = [...host.querySelectorAll<HTMLAnchorElement>(".site-locale-flag__option")];
+  expect(options).toHaveLength(14);
+  for (const option of options) {
+    expect(option.querySelector("svg")).not.toBeNull();
+    expect(option.querySelector("span")?.textContent?.length).toBeGreaterThan(0);
+    expect(option.getAttribute("hreflang")).toBe(option.getAttribute("lang"));
+  }
+  const arabic = options.find((o) => o.lang === "ar")!;
+  expect(arabic.getAttribute("dir")).toBe("rtl");
+  expect(arabic.getAttribute("href")).toBe("/ar");
+  expect(options.find((o) => o.lang === "en")?.getAttribute("aria-current")).toBe("true");
+  expect(arabic.getAttribute("aria-current")).toBeNull();
+});
+
+it("a subset registry offers only the product's languages — Qooroo's four", () => {
+  const registry = defineLocaleRegistry({ only: ["ko", "en", "ja", "zh-TW"] });
+  const host = mount(<LocaleMenu variant="flag" state={{ ...locale, locale: "ko" }} messages={messages} registry={registry} />);
+  expect([...host.querySelectorAll(".site-locale-flag__option")].map((a) => a.getAttribute("lang"))).toEqual(["ko", "en", "ja", "zh-TW"]);
+  expect(host.querySelector(".site-locale-flag__trigger")?.getAttribute("aria-label")).toBe("Language: 한국어");
+});
+
+it("takes the hrefs as data, the form a Server Component can pass", () => {
+  const registry = defineLocaleRegistry({ only: ["ko", "en"] });
+  const hrefs = localeHrefs(registry, (code) => `/${code}/`);
+  expect(hrefs).toEqual({ ko: "/ko/", en: "/en/" });
+  const host = mount(<LocaleMenu variant="flag" state={{ locale: "en", hrefs }} messages={messages} registry={registry} />);
+  expect(host.querySelector<HTMLAnchorElement>('.site-locale-flag__option[lang="ko"]')?.getAttribute("href")).toBe("/ko/");
+});
+
+it("refuses a hrefs map that misses a listed language instead of linking to undefined", () => {
+  const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+  expect(() => render(<LocaleMenu variant="flag" state={{ locale: "en", hrefs: { en: "/" } }} messages={messages} />))
+    .toThrow(/no href for locale: ko/);
+  spy.mockRestore();
+});
+
+it("flag variant calls onLocaleChange with the locale and href, then closes", () => {
+  const onLocaleChange = vi.fn();
+  const host = mount(<LocaleMenu variant="flag" state={locale} messages={messages} onLocaleChange={onLocaleChange} />);
+  const details = host.querySelector<HTMLDetailsElement>("details")!;
+  details.open = true;
+  const japanese = host.querySelector<HTMLAnchorElement>('.site-locale-flag__option[lang="ja"]')!;
+  const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+  act(() => { japanese.dispatchEvent(event); });
+  expect(onLocaleChange).toHaveBeenCalledWith("ja", "/ja");
+  expect(event.defaultPrevented).toBe(true);
+  expect(details.open).toBe(false);
+});
+
+it("flag variant leaves navigation to the link when no handler is given", () => {
+  const host = mount(<LocaleMenu variant="flag" state={locale} messages={messages} />);
+  const japanese = host.querySelector<HTMLAnchorElement>('.site-locale-flag__option[lang="ja"]')!;
+  const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+  japanese.dispatchEvent(event);
+  expect(event.defaultPrevented).toBe(false);
+});
+
+it("Escape closes an open flag menu and returns focus to the trigger", () => {
+  const host = mount(<LocaleMenu variant="flag" state={locale} messages={messages} />);
+  const details = host.querySelector<HTMLDetailsElement>("details")!;
+  const trigger = host.querySelector<HTMLElement>("summary")!;
+  details.open = true;
+  host.querySelector<HTMLAnchorElement>('.site-locale-flag__option[lang="fr"]')!.focus();
+  fireEvent.keyDown(details, { key: "Escape" });
+  expect(details.open).toBe(false);
+  expect(document.activeElement).toBe(trigger);
+});
+
+it("stands alone on an app screen with one string and a callback", () => {
+  // A settings page in a Next.js app: no marketing catalog, no navigation.
+  const onLocaleChange = vi.fn();
+  const registry = defineLocaleRegistry({ only: ["ko", "en", "ja", "zh-TW"] });
+  const host = mount(<LocaleMenu variant="flag" messages={{ localeLabel: "언어" }} registry={registry}
+    state={{ locale: "ko", hrefForLocale: (code) => `/settings?lang=${code}` }} onLocaleChange={onLocaleChange} />);
+  expect(host.querySelector(".site-locale-flag__trigger")?.getAttribute("aria-label")).toBe("언어: 한국어");
+  act(() => { host.querySelector<HTMLAnchorElement>('.site-locale-flag__option[lang="ja"]')!.click(); });
+  expect(onLocaleChange).toHaveBeenCalledWith("ja", "/settings?lang=ja");
+});
+
+it("SiteHeader passes localeVariant through", () => {
+  const host = mount(<SiteHeader brand={{ name: "Fixture", href: "/" }} navigation={[]} locale={locale} messages={messages} localeVariant="flag" />);
+  expect(host.querySelector(".site-header__controls .site-locale-flag")).not.toBeNull();
+  expect(host.querySelector(".site-header__controls select")).toBeNull();
+});
+
+/**
+ * A render with no server HTML — this jsdom host — is the one case where the
+ * browser fetches the flag bodies: the sprite starts empty and fills once the
+ * chunk arrives. A hydrated page never takes that path.
+ */
+const spriteFilled = (host: HTMLElement) => vi.waitFor(() => {
+  const sprite = host.querySelector(".site-flag-sprite")!;
+  expect(sprite.querySelectorAll("symbol").length).toBeGreaterThan(0);
+  return sprite;
+});
+
+it("client-only render draws every flag as a <use> of one symbol per country, filled after the bodies load", async () => {
+  const host = mount(<LocaleMenu variant="flag" state={{ ...locale, locale: "ko" }} messages={messages} />);
+  expect(host.querySelectorAll(".site-locale-flag__svg use").length).toBe(15);
+  expect(host.querySelector(".site-flag-sprite")!.children.length).toBe(0);
+
+  const sprite = await spriteFilled(host);
+  const symbols = [...sprite.querySelectorAll("symbol")];
+  expect(symbols).toHaveLength(14);
+  const symbolIds = new Set(symbols.map((symbol) => symbol.id));
+  for (const use of host.querySelectorAll(".site-locale-flag__svg use")) {
+    const href = use.getAttribute("href")!;
+    expect(href.startsWith("#")).toBe(true);
+    expect(symbolIds.has(href.slice(1))).toBe(true);
+  }
+  const koUses = [...host.querySelectorAll(".site-locale-flag__svg use")].filter((use) => use.getAttribute("href")!.startsWith("#site-flag-kr-"));
+  expect(koUses).toHaveLength(2);
+});
+
+it("scopes the ids inside the flag artwork so a page with two menus cannot collide", async () => {
+  const host = mount(<>
+    <LocaleMenu variant="flag" state={locale} messages={messages} />
+    <LocaleMenu variant="flag" state={locale} messages={messages} />
+  </>);
+  await vi.waitFor(() => expect(host.querySelectorAll(".site-flag-sprite symbol")).toHaveLength(28));
+  const allIds = [...host.querySelectorAll(".site-flag-sprite [id]")].map((el) => el.id);
+  expect(new Set(allIds).size).toBe(allIds.length);
+  const ids = new Set(allIds);
+  for (const el of host.querySelectorAll(".site-flag-sprite *")) {
+    const href = el.getAttribute("href") ?? el.getAttribute("xlink:href");
+    if (href?.startsWith("#")) expect(ids.has(href.slice(1))).toBe(true);
+    for (const attribute of ["clip-path", "fill", "stroke", "mask", "filter"]) {
+      const url = el.getAttribute(attribute)?.match(/^url\(#([^)]+)\)$/)?.[1];
+      if (url) expect(ids.has(url)).toBe(true);
+    }
+  }
+  // Every id is safe in a fragment, url(#…) and a selector: no «», no colons.
+  expect(allIds.every((id) => /^[A-Za-z0-9_-]+$/.test(id))).toBe(true);
+});
+
+it("a locale change on the client only swaps the trigger's href — the bodies load once", async () => {
+  const { loadFlagBodies } = await import("../flag-bodies");
+  const loads = vi.mocked(loadFlagBodies);
+  loads.mockClear();
+  let setCurrent!: (code: "en" | "ko") => void;
+  function Harness() {
+    const [current, set] = useState<"en" | "ko">("en");
+    setCurrent = set;
+    return <LocaleMenu variant="flag" state={{ locale: current, hrefForLocale: locale.hrefForLocale! }} messages={messages} />;
+  }
+  const host = mount(<Harness />);
+  await spriteFilled(host);
+  const trigger = () => host.querySelector(".site-locale-flag__trigger > .site-locale-flag__svg > use")!.getAttribute("href")!;
+  expect(trigger()).toMatch(/^#site-flag-us-/);
+  act(() => setCurrent("ko"));
+  expect(trigger()).toMatch(/^#site-flag-kr-/);
+  expect(host.querySelector('.site-locale-flag__option[lang="ko"]')?.getAttribute("aria-current")).toBe("true");
+  expect(host.querySelectorAll(".site-flag-sprite symbol")).toHaveLength(14);
+  expect(loads).toHaveBeenCalledTimes(1);
+});
+
+it("a product's own locale borrows a vendored country and shares its symbol", async () => {
+  const registry = defineLocaleRegistry({
+    extra: [{ code: "ta", language: "Tamil", nativeName: "தமிழ்", dir: "ltr", flagCountry: "in" }],
+  });
+  const host = mount(<LocaleMenu variant="flag" state={locale} messages={messages} registry={registry} />);
+  const sprite = await spriteFilled(host);
+  expect(sprite.querySelectorAll("symbol")).toHaveLength(14);
+  const india = [...host.querySelectorAll(".site-locale-flag__option")]
+    .filter((option) => ["hi", "ta"].includes(option.getAttribute("lang")!))
+    .map((option) => option.querySelector("use")!.getAttribute("href"));
+  expect(india).toHaveLength(2);
+  expect(new Set(india).size).toBe(1);
+  expect(registry.LOCALES.length).toBe(FAMILY_LOCALES.LOCALES.length + 1);
+});

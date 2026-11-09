@@ -1,11 +1,12 @@
 # @devslab/site-kit
 
-DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. 가족 로케일에 대한 엄격한 카탈로그(제품별 확장 가능), 로케일 협상, SEO/GEO 문서 생성기, 접근 가능한 SolidJS 2 사이트 셸을 제공한다. 제품명·주장·내비게이션·번역 문구는 항상 소비 앱이 소유한다.
+DevsLab 제품의 공개 웹사이트를 위한 공개 인프라 패키지다. 가족 로케일에 대한 엄격한 카탈로그(제품별 확장 가능), 로케일 협상, SEO/GEO 문서 생성기, 접근 가능한 SolidJS 2·React 사이트 셸을 제공한다. 제품명·주장·내비게이션·번역 문구는 항상 소비 앱이 소유한다.
 
 ## 진입점
 
 - `@devslab/site-kit` — 런타임 중립 로케일·카탈로그·SEO·사이트맵·robots·검증된 사실·Google Tag Manager·분석 동의 유틸리티
 - `@devslab/site-kit/solid` — 헤더·푸터·언어/테마 컨트롤·마케팅/법률/상태/오류 레이아웃·접근 요청 폼·동의 바
+- `@devslab/site-kit/react` — React·Next.js용 같은 헤더·푸터·언어/테마 컨트롤·레이아웃·섹션 원시. [React·Next.js](#reactnextjs) 참고
 - `@devslab/site-kit/tanstack-start` — 중립 메타데이터를 TanStack Start head descriptor로 변환(브랜드 아이콘과 동의 게이트를 거친 Tag Manager 로더는 옵트인)
 - `@devslab/site-kit/styles.css` — 논리 속성과 RTL을 지원하는 공통 사이트 스타일. 페이지 뿌리에 가족 서체(`:where(html) { font-family: var(--dds-font-family-sans) }`)도 주어 맨 제목·문단이 브라우저 세리프로 남지 않는다. 명시도가 0이라 제품이 `html`·`:root`·`body`·`:lang()`에 둔 규칙이 이긴다.
 - `@devslab/site-kit/fonts.css` — 가족 서체(Geist·Geist Mono·Pretendard)를 토큰의 패밀리 이름으로 등록한 자체 호스팅 woff2. [가족 서체](#가족-서체) 참고
@@ -23,6 +24,56 @@ claim leaf가 검증된 사실 레지스트리를 참조하도록 강제한다. 
 `MarketingShell`은 아무것도 렌더하기 전에 `header`·`footer`를 한 번(메모) 읽는다. `header={{ … }}`는 게터로 컴파일되므로 셸이 prop마다 다시 읽으면 리터럴 안에서 즉시 만들어진 JSX(`actions` 앵커, 로고)가 읽을 때마다 다시 만들어져 하이드레이션 키를 소모하고 — 서버와 브라우저의 횟수가 다르다 — 클라이언트는 헤더를 템플릿에서 다시 만든다. 셸 밖에서 `SiteHeader`·`SiteFooter`를 직접 마운트하는 제품은 같은 방식으로 자기 props를 한 번만 읽어야 한다. 국기 스프라이트는 이유가 무엇이든 클라이언트에 빈 채로 도착하면 본문을 로드한다.
 
 헤더와 푸터는 `brand`(푸터는 `details`도)를 스스로 한 번만 읽는다. 그래서 셸 밖에서도 인라인으로 만든 로고·details 블록이 서버와 브라우저에서 각각 한 번씩만 만들어진다(D-029).
+
+## React·Next.js
+
+`@devslab/site-kit/react`는 React 18.3+/19 제품을 위한 같은 크롬이다(D-045): `LocaleMenu`(`variant="flag"` 또는 기본 select)·`SiteHeader`·`SiteFooter`·`ThemeToggle`·`MarketingShell`·`LegalLayout`·`StatusBanner`·`NotFoundLayout`·`ErrorLayout`·섹션 원시·`OssProductMark`·`ConsentSettingsButton`. `./solid`와 prop 이름이 같고(Solid의 `JSX.Element` 자리가 `ReactNode`) 클래스·마크업도 같다 — 같은 props로 둘을 렌더해 비교하는 테스트가 있다. Solid 제품처럼 `@devslab/site-kit/styles.css`(원시를 쓰면 `site-sections.css`도)를 import한다. `react`는 선택 피어이고, 이 진입점은 `@devslab/dds-react`에 의존하지 않는다.
+
+파일 첫 줄이 `"use client"`라 Next.js 서버 컴포넌트가 크롬을 렌더하면서 데이터와 서버에서 렌더한 children을 넘길 수 있다. 함수와 메서드 든 객체는 클라이언트 컴포넌트로 넘어가지 못하므로 서버 컴포넌트에서는:
+
+```tsx
+import { defineLocaleRegistry, localeHrefs } from "@devslab/site-kit";
+import { MarketingShell } from "@devslab/site-kit/react";
+
+const registry = defineLocaleRegistry({ only: ["ko", "en", "ja", "zh-TW"] });
+const state = { locale, hrefs: localeHrefs(registry, (code) => `/${code}`) }; // hrefForLocale 대신
+const locales = { LOCALES: registry.LOCALES };                             // 레지스트리 대신
+
+<MarketingShell
+  messages={messages}
+  header={{
+    brand: { name: "", href: `/${locale}`, label: "쿠루 홈", logo: <span className="site-brand__lockup"><Mark /><span>쿠루</span></span> },
+    navigation, locale: state, localeVariant: "flag", localeRegistry: locales, theme: {}, messages,
+  }}
+  footer={{ brand, links, copyright, locale: state, localeRegistry: locales, messages }}
+>{children}</MarketingShell>
+```
+
+클라이언트 컴포넌트에서는 Solid와 같은 형태(`hrefForLocale`, 레지스트리, `onLocaleChange`)도 된다. `.site-brand__lockup`은 마크와 워드마크를 한 중심선에 놓는다. 없으면 브랜드 링크가 인라인이라 텍스트가 기준선에 붙는다.
+
+국기 아트워크: 진입점은 `@devslab/site-kit/react/flag-bodies`를 import하고 package.json이 export 조건마다 답한다 — `react-server`·`edge-light`·`workerd`·`worker`·`node`는 본문, `browser`는 스텁. 서버가 스프라이트를 쓰고 하이드레이션은 그대로 넘겨받으며, 서버 HTML 없이 렌더할 때만 본문을 별도 청크로 가져온다. `scripts/check-react-client-bundle.mjs`가 브라우저 번들에 본문이 들어오지 않게 지킨다.
+
+`LocaleMenu`는 `SiteHeader`가 조립하는 바로 그 컴포넌트이고 혼자 쓸 수 있다 — 푸터에서, 또는 설정 페이지 같은 앱 화면에서. 문자열 하나면 된다:
+
+```tsx
+"use client";
+import { defineLocaleRegistry } from "@devslab/site-kit";
+import { LocaleMenu } from "@devslab/site-kit/react";
+
+const registry = defineLocaleRegistry({ only: ["ko", "en", "ja", "zh-TW"] });
+
+export function LanguageSetting({ locale, onChange }) {
+  return <LocaleMenu variant="flag" registry={registry} messages={{ localeLabel: "언어" }}
+    state={{ locale, hrefForLocale: (code) => `?lang=${code}` }}
+    onLocaleChange={(code) => onChange(code)} />;
+}
+```
+
+`onLocaleChange`가 없으면 각 항목은 브라우저가 따라가는 평범한 링크다. 국기 변형은 일부러 `<details>` 디스클로저다: 하이드레이션 전에도, JavaScript 없이도 서버 HTML만으로 열리고 `hreflang` 링크가 동작하며, Solid 메뉴와 같은 마크업을 쓴다(D-045).
+
+법률 링크: `SiteFooter`의 `links`는 admin.devslab.kr(정책 v3) 기반의 제품 약관·개인정보처리방침 페이지를 가리키고, 개인정보처리방침에 `emphasis: true`(D-029). 공용 v3 클라이언트와 `PolicyDocument` 렌더러는 다음 단계다(D-045).
+
+React 진입점에 아직 없는 것: `ConsentBanner`(포커스를 가두는 대화상자가 필요)와 `RequestAccessForm`.
 
 ## 헤더·푸터 옵션
 
