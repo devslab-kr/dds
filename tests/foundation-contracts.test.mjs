@@ -281,6 +281,22 @@ test("focus rings never leave a gap outside a bordered or filled control (D-047)
   assert.equal(buttons.length, 3);
   for (const rule of buttons) assert.equal(rule.offset, "var(--dds-focus-offset)", `${rule.selector} must sit flush`);
 
+  // Unfilled bordered controls paint their own border in the focus color while
+  // focused, so border + ring are one edge of one colour, not a pale line
+  // inside a dark ring. Filled buttons (primary, danger) are excluded.
+  for (const [file, selector] of [
+    ["button.css", ".dds-btn:not(.dds-btn--primary):not(.dds-btn--danger):focus-visible"],
+    ["iconbutton.css", ".dds-iconbtn:focus-visible"],
+    ["chip.css", ".dds-chip:focus-visible"],
+  ]) {
+    const css = (await read(`packages/dds-css/src/${file}`)).replace(/\/\*[\s\S]*?\*\//g, "");
+    const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => m[1].trim() === selector);
+    assert.ok(
+      blocks.some((m) => /border-color\s*:\s*var\(--dds-color-border-focus\)/.test(m[2])),
+      `${file}: ${selector} must set border-color: var(--dds-color-border-focus) (D-047)`,
+    );
+  }
+
   const foundation = await json("tokens/foundation.json");
   assert.deepEqual(foundation.focus.offset, { $value: 0, $type: "dimension" }, "focus.offset is the flush offset (0)");
 });

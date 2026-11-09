@@ -44,6 +44,11 @@
   border-color: var(--dds-color-bg-brand);
   color: var(--dds-color-text-brand);
 }
+/* Focus paints the chip's own border in the focus color, so border + ring are
+ * one solid edge (D-047). After the selected rule so it wins there too. */
+.dds-chip:focus-visible {
+  border-color: var(--dds-color-border-focus);
+}
 
 /* opacity is allowed for disabled only (spec §4.2) */
 .dds-chip[disabled] {

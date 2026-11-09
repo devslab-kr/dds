@@ -25,6 +25,12 @@
   `.dds-top-nav__trigger/__item`, `.dds-console-rail__item/__group-toggle`,
   달력 팝업 안 초점(`.dds-date-picker-content :focus-visible` — 맞닿은 칸과
   선택 칸의 면), site-kit `.site-locale-flag__trigger`.
+- **테두리도 초점색:** 면이 없는 테두리 컨트롤(버튼 secondary·ghost·변형 없음,
+  아이콘 버튼 전 변형, 칩 — 선택 칩 포함)은 초점 동안 자기 1px 테두리도
+  `color.border.focus`로 칠한다. 붙이기만 하면 연회색 테두리가 진한 링 안쪽에
+  가는 선으로 남아 가까이서 두 톤으로 읽혔다. 이제 테두리+링이 한 색의 3px
+  가장자리다. 면이 있는 primary·danger는 투명 테두리 밑으로 면이 보여 그대로
+  둔다. 강제 색상 모드는 바꾸지 않았다(테두리·링 모두 시스템 색).
 - **안쪽(-2px):** `.dds-input__clear` — 입력 테두리 3px 안쪽에 있어 바깥 링은
   어느 위치든 그 테두리 옆에 둘째 선을 만든다. 기존 안쪽 규칙(입력류 #122,
   탭·세그먼트·목록 행·표 행·크기 조절·데이터 그리드 셀·국기 메뉴 항목)은 그대로.

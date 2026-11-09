@@ -469,7 +469,9 @@ the docs.
   nav/rail items, calendar day cells, the flag-menu trigger — use
   `focus.offset` (0): the ring sits **flush** on the control's edge so border
   and ring read as one slightly thicker line. An outer 2px gap draws border,
-  gap, ring — a doubled line (D-047). Tabs, segments, list and table rows and
+  gap, ring — a doubled line (D-047). Unfilled buttons, icon buttons and
+  chips also paint their own border in the focus color while focused, so the
+  edge is one colour. Tabs, segments, list and table rows and
   the input clear button stay inset (-2px). Only checkbox, radio and switch
   (small glyphs — flush reads as a heavier box), the table sort label and the
   site footer/consent links (borderless inline text) keep a 2px gap.

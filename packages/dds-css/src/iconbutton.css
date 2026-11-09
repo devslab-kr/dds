@@ -53,6 +53,12 @@
 .dds-iconbtn--secondary {
   border-color: var(--dds-color-border-strong);
 }
+/* Every icon-button variant is unfilled, so focus paints the 1px border in
+ * the focus color too: border + ring become one solid edge (D-047). After
+ * --secondary so it wins at equal specificity. */
+.dds-iconbtn:focus-visible {
+  border-color: var(--dds-color-border-focus);
+}
 
 .dds-iconbtn--danger {
   color: var(--dds-color-status-danger);
