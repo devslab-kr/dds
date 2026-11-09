@@ -1,5 +1,16 @@
 # @devslab/site-kit
 
+## 0.32.0
+
+### Minor Changes
+
+- 9a95858: Vendor flags for Malaysia, Laos, Cambodia, Myanmar, the Philippines and Mongolia for product locales. A product registry names one with `flagCountry` (`my`, `la`, `kh`, `mm`, `ph`, `mn`); the family `LOCALES` list is unchanged.
+
+### Patch Changes
+
+- @devslab/dds-icons@0.32.0
+- @devslab/dds-solid@0.32.0
+
 ## 0.31.0
 
 ### Minor Changes
