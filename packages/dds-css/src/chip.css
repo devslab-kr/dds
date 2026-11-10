@@ -34,7 +34,8 @@
 }
 .dds-chip:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: var(--dds-space-2);
+  /* Flush on the chip's own border (D-047). */
+  outline-offset: var(--dds-focus-offset);
 }
 
 .dds-chip[aria-pressed="true"],
@@ -42,6 +43,11 @@
   background: var(--dds-color-bg-brand-subtle);
   border-color: var(--dds-color-bg-brand);
   color: var(--dds-color-text-brand);
+}
+/* Focus paints the chip's own border in the focus color, so border + ring are
+ * one solid edge (D-047). After the selected rule so it wins there too. */
+.dds-chip:focus-visible {
+  border-color: var(--dds-color-border-focus);
 }
 
 /* opacity is allowed for disabled only (spec §4.2) */

@@ -334,6 +334,10 @@ not the scale to the design.
 | `radius.xl` | 16 | bottom sheets, large cards |
 | `radius.full` | 9999 | pills, avatars, chips |
 
+Focus ring placement is one token, `focus.offset` (value 0,
+`--dds-focus-offset`): the `focus-visible` ring of a control with its own
+border or fill sits flush on that edge (§6, D-047).
+
 ### 3.5 Elevation
 
 Three levels only. Tokens define the web `box-shadow` and the RN iOS
@@ -461,8 +465,17 @@ the docs.
   ring (`color.border.focus`, 2px). Text, multiline, select, choice, number and
   date/range input rings use offset -2px, inside the existing border box.
   Invalid fields use -3px to leave their 1px error border visible.
-  Small controls retain their component-specific offset. Calendar popup focus
-  uses the same semantic focus color. Product themes may explicitly override
+  Controls with their own border or fill — buttons, icon buttons, chips,
+  nav/rail items, calendar day cells, the flag-menu trigger — use
+  `focus.offset` (0): the ring sits **flush** on the control's edge so border
+  and ring read as one slightly thicker line. An outer 2px gap draws border,
+  gap, ring — a doubled line (D-047). Unfilled buttons, icon buttons and
+  chips also paint their own border in the focus color while focused, so the
+  edge is one colour. Tabs, segments, list and table rows and
+  the input clear button stay inset (-2px). Only checkbox, radio and switch
+  (small glyphs — flush reads as a heavier box), the table sort label and the
+  site footer/consent links (borderless inline text) keep a 2px gap.
+  Calendar popup focus uses the same semantic focus color. Product themes may explicitly override
   the token; brand and error colors remain separate.
 - Icon-only buttons require `aria-label` (web) / `accessibilityLabel` (RN)
 - Never convey state by color alone (pair with icon or text)

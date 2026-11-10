@@ -115,7 +115,8 @@
 .site-locale-flag__trigger { list-style: none; display: inline-grid; place-items: center; min-inline-size: 44px; min-block-size: 44px; border-radius: var(--dds-radius-sm); cursor: pointer; }
 .site-locale-flag__trigger::-webkit-details-marker { display: none; }
 .site-locale-flag__trigger:hover { background: var(--dds-color-bg-subtle); }
-.site-locale-flag__trigger:focus-visible { outline: 2px solid var(--dds-color-border-focus); outline-offset: 2px; }
+/* Flush on the 44px trigger box, like .dds-btn (D-047). The footer language trigger and consent links below keep a 2px gap: they are inline text with no edge to double. */
+.site-locale-flag__trigger:focus-visible { outline: 2px solid var(--dds-color-border-focus); outline-offset: var(--dds-focus-offset); }
 /* The <symbol> sprite the flags <use>: zero-sized and clipped, never display:none, so its clip paths and gradients still resolve. */
 .site-flag-sprite { position: absolute; inline-size: 0; block-size: 0; overflow: hidden; }
 .site-locale-flag__svg { inline-size: 24px; block-size: 18px; border-radius: 2px; box-shadow: 0 0 0 1px var(--dds-color-border-default); }

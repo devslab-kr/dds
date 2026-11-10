@@ -225,6 +225,82 @@ test("preview pages break Korean between words; dds.css leaves that to each prod
   assert.doesNotMatch(bundleSources, /keep-all/, "dds.css must not change Korean line breaking for every consumer (D-030)");
 });
 
+// D-047: a focus ring drawn outside a control's own border or fill, with a
+// gap between them, reads as a second line around the control. Rings sit
+// flush (var(--dds-focus-offset)) or inside the box (a negative offset);
+// a positive offset is allowed only on the few selectors below, each with
+// the reason recorded in D-047. Adding a selector here is a design decision —
+// update D-047 with it.
+const FOCUS_GAP_ALLOWED = new Set([
+  ".dds-check__input:focus-visible", // 18px glyph box: flush reads as "heavier box"
+  ".dds-switch__input:focus-visible", // grey off track ≈ focus grey: flush merges
+  ".dds-table__sort:focus-visible", // borderless, zero-padding header label
+  ".site-footer__langs-trigger:focus-visible", // inline footer text
+  ".site-consent__link:focus-visible, .site-consent-trigger:focus-visible", // inline text links
+]);
+
+async function focusRules() {
+  const sources = [];
+  const cssDir = "packages/dds-css/src/";
+  for (const name of (await readdir(new URL(`../${cssDir}`, import.meta.url))).filter((n) => n.endsWith(".css")))
+    sources.push(`${cssDir}${name}`);
+  sources.push("packages/site-kit/styles.css", "packages/site-kit/site-sections.css",
+    "packages/dds-table-react/src/styles.css", "packages/dds-table-vue/styles.css");
+  const rules = [];
+  for (const file of sources) {
+    const css = (await read(file)).replace(/\/\*[\s\S]*?\*\//g, "");
+    // Innermost `selector { declarations }` blocks; @media wrappers fall away.
+    for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const selector = match[1].trim().replace(/\s+/g, " ");
+      if (!/:focus(?:-visible|-within)?\b|\[data-focus-visible\]/.test(selector)) continue;
+      const offset = match[2].match(/outline-offset\s*:\s*([^;]+)/);
+      if (offset) rules.push({ file, selector, offset: offset[1].trim() });
+    }
+  }
+  return rules;
+}
+
+test("focus rings never leave a gap outside a bordered or filled control (D-047)", async () => {
+  const rules = await focusRules();
+  assert.ok(rules.length > 20, "the focus-rule scan found too few rules to be reading the CSS");
+  const isFlush = (v) => v === "var(--dds-focus-offset)";
+  const isInset = (v) => /^-\d/.test(v) || /^calc\(var\(--dds-space-2\) \* -[\d.]+\)$/.test(v)
+    || /^calc\(-1 \* var\(--dds-space-2\)\)$/.test(v);
+  for (const { file, selector, offset } of rules) {
+    if (FOCUS_GAP_ALLOWED.has(selector)) {
+      assert.match(offset, /^(?:2px|var\(--dds-space-2\))$/, `${file}: ${selector} keeps the documented 2px gap`);
+      continue;
+    }
+    assert.ok(isFlush(offset) || isInset(offset),
+      `${file}: ${selector} uses outline-offset ${offset} — use var(--dds-focus-offset) (flush) or an inset offset; a gap doubles the line (D-047)`);
+  }
+  // Every allowed gap must still exist, so the list cannot rot into a blanket pass.
+  for (const selector of FOCUS_GAP_ALLOWED)
+    assert.ok(rules.some((rule) => rule.selector === selector), `${selector} is allow-listed but no longer found`);
+  const buttons = rules.filter((rule) => /\.dds-(?:btn|iconbtn|chip):focus-visible$/.test(rule.selector));
+  assert.equal(buttons.length, 3);
+  for (const rule of buttons) assert.equal(rule.offset, "var(--dds-focus-offset)", `${rule.selector} must sit flush`);
+
+  // Unfilled bordered controls paint their own border in the focus color while
+  // focused, so border + ring are one edge of one colour, not a pale line
+  // inside a dark ring. Filled buttons (primary, danger) are excluded.
+  for (const [file, selector] of [
+    ["button.css", ".dds-btn:not(.dds-btn--primary):not(.dds-btn--danger):focus-visible"],
+    ["iconbutton.css", ".dds-iconbtn:focus-visible"],
+    ["chip.css", ".dds-chip:focus-visible"],
+  ]) {
+    const css = (await read(`packages/dds-css/src/${file}`)).replace(/\/\*[\s\S]*?\*\//g, "");
+    const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => m[1].trim() === selector);
+    assert.ok(
+      blocks.some((m) => /border-color\s*:\s*var\(--dds-color-border-focus\)/.test(m[2])),
+      `${file}: ${selector} must set border-color: var(--dds-color-border-focus) (D-047)`,
+    );
+  }
+
+  const foundation = await json("tokens/foundation.json");
+  assert.deepEqual(foundation.focus.offset, { $value: 0, $type: "dimension" }, "focus.offset is the flush offset (0)");
+});
+
 test("buttons rendered as links carry no anchor underline", async () => {
   const button = await read("packages/dds-css/src/button.css");
   const base = button.slice(button.indexOf(".dds-btn {"), button.indexOf("}", button.indexOf(".dds-btn {")));

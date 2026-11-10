@@ -1,5 +1,5 @@
 {
-  "$description": "DDS non-color foundations — typography, spacing, radius, elevation, motion. Web uses px (rem-equivalent at 16px root); RN uses the same numbers as pt.",
+  "$description": "DDS non-color foundations — typography, spacing, radius, focus, elevation, motion. Web uses px (rem-equivalent at 16px root); RN uses the same numbers as pt.",
   "font": {
     "family": {
       "sans": {
@@ -42,6 +42,10 @@
     "lg": { "$value": 12, "$type": "dimension" },
     "xl": { "$value": 16, "$type": "dimension" },
     "full": { "$value": 9999, "$type": "dimension" }
+  },
+  "focus": {
+    "$description": "Focus-visible ring placement (D-047). The ring is color.border.focus at space.2; offset 0 draws it flush against the control's own edge so border and ring read as one line.",
+    "offset": { "$value": 0, "$type": "dimension" }
   },
   "elevation": {
     "1": {

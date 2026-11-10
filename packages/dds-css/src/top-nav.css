@@ -52,7 +52,8 @@
 .dds-top-nav__trigger:focus-visible,
 .dds-top-nav__item:focus-visible {
   outline: 2px solid var(--dds-color-border-focus);
-  outline-offset: 2px;
+  /* Flush on the hover/current fill (D-047). */
+  outline-offset: var(--dds-focus-offset);
 }
 .dds-top-nav__item[aria-current="page"] {
   color: var(--dds-color-text-brand);

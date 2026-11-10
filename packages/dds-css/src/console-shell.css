@@ -161,7 +161,9 @@
 }
 .dds-console-rail__item:focus-visible {
   outline: 2px solid var(--dds-color-border-focus);
-  outline-offset: 2px;
+  /* Flush on the item's hover/current fill (D-047); the rail's 12px
+   * inline padding keeps the ring clear of its scroll edge. */
+  outline-offset: var(--dds-focus-offset);
 }
 
 .dds-console-rail__badge {
@@ -389,7 +391,7 @@
 .dds-console-rail__group-toggle:hover { background: var(--dds-color-bg-subtle); }
 .dds-console-rail__group-toggle:focus-visible {
   outline: 2px solid var(--dds-color-border-focus);
-  outline-offset: 2px;
+  outline-offset: var(--dds-focus-offset);
 }
 .dds-console-rail__chevron {
   inline-size: .375rem;

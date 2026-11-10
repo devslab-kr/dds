@@ -37,7 +37,17 @@
 
 .dds-btn:focus-visible {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
-  outline-offset: var(--dds-space-2);
+  /* Flush (D-047): the ring sits on the control's own edge, so border/fill
+   * and ring read as one thicker line instead of border, gap, ring. */
+  outline-offset: var(--dds-focus-offset);
+}
+/* Unfilled buttons (secondary, ghost, no variant) also paint their own 1px
+ * border in the focus color, so border + ring are one solid edge of one
+ * colour, not a pale line inside a dark one (D-047). Primary and danger are
+ * filled: their transparent border shows the fill, which the ring already
+ * meets directly. */
+.dds-btn:not(.dds-btn--primary):not(.dds-btn--danger):focus-visible {
+  border-color: var(--dds-color-border-focus);
 }
 
 /* opacity is allowed for disabled only (spec §4.2) */

@@ -312,6 +312,7 @@ const tsExports = {
   typo: treeFrom(lightTokens, "typo"),
   space: treeFrom(lightTokens, "space"),
   radius: treeFrom(lightTokens, "radius"),
+  focus: treeFrom(lightTokens, "focus"),
   elevation: treeFrom(lightTokens, "elevation"),
   motion: treeFrom(lightTokens, "motion"),
 };
