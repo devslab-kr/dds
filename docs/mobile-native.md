@@ -137,6 +137,23 @@ setContent {
 }
 ```
 
+**Known limit — empty frames are not zero.** Measured by JeongsanNow after moving to
+0.1.0, on a dedicated emulator (Android 16, recorded at 30fps, logo pixels counted per
+frame). Not measured on a physical device.
+
+| Approach | Frames without the logo |
+| --- | --- |
+| `remove()` + `release()` at once in the exit listener (rule 9) | 2 runs in 5, one frame each: system logo → empty frame → the logo the app drew |
+| No listener, letting the system lift the splash itself | 2 to 5 frames in 4 runs of 9; in the rest the logo faded and came back. Not used |
+
+The likely cause is the hand-over copy showing one frame without its icon before the
+listener runs. The copy is opaque, so the logo in the window background (rule 10) did not
+cover it. Rule 9 is the better of the two but does not guarantee zero empty frames. The
+alternative is a splash with the background only, the app's overlay doing the drawing
+itself — there is no logo to hand over, so none can go missing; the logo then appears
+after the first frame. Letting `DdsSplashOverlay` do the drawing is to be considered for
+0.2.0 (backlog item 19).
+
 Where the two apps differed, and what was chosen:
 
 | Item | JeongsanNow | Qooroo | Chosen | Why |
@@ -449,7 +466,9 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 
 ## 11. Moving an existing app over
 
-1. Add the dependency.
+1. Add the dependency. `dds-compose` carries six font files (four Pretendard, two Geist
+   Mono, about 2.0 MB together). **Delete the app's own copies of those fonts** — two sets
+   make the package that much larger.
 2. Brand: write the main color in `res/values/dds_brand.xml` (skip it to use the default).
 3. Replace the app theme with `DdsTheme`.
 4. Replace hex in `res/values*` with `@color/dds_*` (splash, window background, logo).
@@ -458,7 +477,18 @@ in for now"; making them DDS rules is the owner's call. Once decided,
    Check them as in §2.8.
 6. Screen by screen, replace height, radius and spacing numbers with `DdsControl`,
    `DdsRadius`, `DdsSpace`. The primary button is `bgBrand` + `textOnBrand`.
-7. Add a "no hex and no `Color(0x…)` outside the brand file" check to the app
+7. **Fix the places that used Material3 color roles directly.** The roles now carry the DDS
+   mapping, and these four break right after the move (JeongsanNow found them in screenshots).
+
+   | Was written as | What shows after the move | Fix |
+   | --- | --- | --- |
+   | `colorScheme.surface` as a card face | the card disappears (`surface` is the page background) | a `bgElevated` face + a 1dp `borderDefault` edge |
+   | `surfaceContainer` as a pale chip or notice background | the background disappears in light; in dark `bgSubtle` is also the card color | give a neutral chip a 1dp edge |
+   | `surfaceVariant` as a face | the line color fills the face | `bgSubtle` |
+   | `primary` as a fill with `onPrimary` on it (button, FAB, large choice tile, progress inside a button) | the text color fills the face | `bgBrand` / `textOnBrand` |
+
+   The card, chip, notice and button components of 0.2.0 absorb these four.
+8. Add a "no hex and no `Color(0x…)` outside the brand file" check to the app
    (see `scripts/check-android-sources.mjs`).
 
 ## 12. Not in 0.1.0

@@ -285,6 +285,11 @@ D-048. 가이드 [`mobile-native.ko.md`](mobile-native.ko.md), 설계
       `DdsListRow`, `DdsNotice`(종류별 아이콘), `DdsBadge`, `DdsTopBar`·`DdsBottomBar`·`DdsNavRail`,
       진행 표시·자리 표시, `DdsPullRefresh`, `DdsEmptyState`, `DdsDialog`.
       캡처에서 나온 규칙 둘을 부품에 넣는다: 아래 탭 라벨은 한 줄 말줄임, 한 줄에 들어가지 않는 버튼 묶음은 세로로.
+- [ ] 0.2.0 스플래시: `DdsSplashOverlay`가 로고 그리기까지 맡는 선택지 검토 — 정산나우 실측에서 시스템이
+      넘겨주는 사본 때문에 로고 없는 프레임이 5회 중 2회 나왔다(가이드 §2.2 "알려진 한계").
+- [ ] 확인 필요: `DdsTheme(darkTheme = true)`만 강제했을 때(테스트·미리보기) 밤 값이 따로 있는 브랜드
+      토큰에 밝은 값이 섞인다는 정산나우 보고. `DdsBrand.fromResources`는 두 구성을 따로 읽게 썼으므로
+      기기에서 재현해 본다.
 - [ ] 0.2.0 아이콘: `dds-icons` SVG → Compose `ImageVector` 생성. 오류용 "원 안 X" 아이콘 추가(웹에도 나감).
 - [ ] **웹 규칙에 없어 정해야 하는 것 13가지** — 가이드 `mobile-native.ko.md` §10. 소유자가 DDS 규칙으로
       정하면 `tokens/native.json`이나 명세를 고친다(메인 색에서 나머지를 정하는 법, 터치 화면 높이,
