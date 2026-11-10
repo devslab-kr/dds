@@ -68,4 +68,5 @@
     <integer name="dds_motion_short">150</integer>
     <integer name="dds_motion_base">200</integer>
     <integer name="dds_motion_slow">300</integer>
+    <bool name="dds_light_system_bars">true</bool>
 </resources>

@@ -29,4 +29,5 @@
     <color name="dds_color_overlay_dim">#40000000</color>
     <color name="dds_color_overlay_hover_tint">#14FFFFFF</color>
     <color name="dds_color_overlay_pressed_tint">#14FFFFFF</color>
+    <bool name="dds_light_system_bars">false</bool>
 </resources>

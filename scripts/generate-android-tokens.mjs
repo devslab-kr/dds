@@ -239,6 +239,9 @@ export function renderAndroidTokens({ light, dark, sourceSha256 }) {
   const colorRes = (tokens) => tokens.map((t) => `<color name="dds_${snake(t.path)}">#${argb(t)}</color>`);
   const dimenRes = (tokens, depth, group) =>
     tokens.map((t) => `<dimen name="dds_${snake([group, ...t.path.slice(depth)])}">${dimension(t)}dp</dimen>`);
+  // Whether the page is light, for `android:windowLightStatusBar` /
+  // `windowLightNavigationBar` in a theme: dark bar icons on a light page.
+  const lightBars = (value) => `<bool name="dds_light_system_bars">${value}</bool>`;
   const valuesXml = xml([
     ...colorRes(lightColors),
     ...dimenRes(space, 1, "space"),
@@ -248,8 +251,9 @@ export function renderAndroidTokens({ light, dark, sourceSha256 }) {
     `<integer name="dds_motion_short">${millis(one("native", "motion", "duration", "short"))}</integer>`,
     `<integer name="dds_motion_base">${millis(one("motion", "duration", "base"))}</integer>`,
     `<integer name="dds_motion_slow">${millis(one("motion", "duration", "slow"))}</integer>`,
+    lightBars(true),
   ]);
-  const valuesNightXml = xml(colorRes(darkColors));
+  const valuesNightXml = xml([...colorRes(darkColors), lightBars(false)]);
 
   return new Map([
     [`${KOTLIN_DIR}/DdsColorTokens.kt`, colorTokensKt],
