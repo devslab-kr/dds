@@ -11,11 +11,13 @@ import org.junit.Test
 class ColorSchemeTest {
     private val light = ddsColors(dark = false, brand = DdsBrand.Default)
     private val dark = ddsColors(dark = true, brand = DdsBrand.Default)
+    private val lightScheme = ddsColorScheme(light, false, inverseTextBrand = dark.textBrand)
+    private val darkScheme = ddsColorScheme(dark, true, inverseTextBrand = light.textBrand)
 
     @Test
     fun primaryIsTheBrandTextColorNotTheBrandFill() {
-        assertEquals(Color(DdsLightColors.textBrand), ddsColorScheme(light, false).primary)
-        assertEquals(Color(DdsDarkColors.textBrand), ddsColorScheme(dark, true).primary)
+        assertEquals(Color(DdsLightColors.textBrand), lightScheme.primary)
+        assertEquals(Color(DdsDarkColors.textBrand), darkScheme.primary)
     }
 
     @Test
@@ -26,7 +28,7 @@ class ColorSchemeTest {
 
     @Test
     fun surfacesComeFromTheNeutralTokens() {
-        val scheme = ddsColorScheme(dark, true)
+        val scheme = darkScheme
         assertEquals(Color(DdsDarkColors.bgDefault), scheme.background)
         assertEquals(Color(DdsDarkColors.bgDefault), scheme.surface)
         assertEquals(Color(DdsDarkColors.bgElevated), scheme.surfaceContainer)
@@ -35,7 +37,7 @@ class ColorSchemeTest {
 
     @Test
     fun errorIsTheDangerPair() {
-        val scheme = ddsColorScheme(light, false)
+        val scheme = lightScheme
         assertEquals(Color(DdsLightColors.statusDanger), scheme.error)
         assertEquals(Color(DdsLightColors.statusDangerBg), scheme.errorContainer)
         assertEquals(Color(DdsLightColors.statusDanger), scheme.onErrorContainer)
@@ -44,7 +46,7 @@ class ColorSchemeTest {
     /** What a stock Material component would draw must stay readable in both themes. */
     @Test
     fun materialPairsReachTextContrast() {
-        for ((scheme, name) in listOf(ddsColorScheme(light, false) to "light", ddsColorScheme(dark, true) to "dark")) {
+        for ((scheme, name) in listOf(lightScheme to "light", darkScheme to "dark")) {
             val pairs = listOf(
                 "onPrimary/primary" to (scheme.onPrimary to scheme.primary),
                 "primary/surface" to (scheme.primary to scheme.surface),
@@ -53,6 +55,7 @@ class ColorSchemeTest {
                 "onPrimaryContainer/primaryContainer" to (scheme.onPrimaryContainer to scheme.primaryContainer),
                 "onError/error" to (scheme.onError to scheme.error),
                 "inverseOnSurface/inverseSurface" to (scheme.inverseOnSurface to scheme.inverseSurface),
+                "inversePrimary/inverseSurface" to (scheme.inversePrimary to scheme.inverseSurface),
             )
             for ((label, pair) in pairs) {
                 val ratio = contrastRatio(pair.first, pair.second)
@@ -96,11 +99,32 @@ class ColorSchemeTest {
     @Test
     fun textOnEveryNeutralSurfaceIsPrimaryText() {
         for ((c, isDark) in listOf(light to false, dark to true)) {
-            val scheme = ddsColorScheme(c, isDark)
+            val scheme = if (isDark) darkScheme else lightScheme
             for (surface in listOf(c.bgDefault, c.bgElevated, c.bgSubtle)) {
                 assertEquals(c.textPrimary, scheme.contentColorFor(surface))
             }
             assertEquals(c.textOnInverse, scheme.contentColorFor(c.bgInverse))
+        }
+    }
+
+    /**
+     * Every system color is the token of the same name, in the right theme. The
+     * mapping is written by hand, so a swapped line (dark reading a light token,
+     * muted reading secondary) would compile; this is what catches it.
+     */
+    @Test
+    fun everySystemColorIsTheTokenOfTheSameName() {
+        val brandSlice = setOf("bgBrand", "bgBrandHover", "bgBrandSubtle", "textOnBrand", "textBrand", "borderFocus")
+        for ((colors, tokens) in listOf(light to DdsLightColors::class.java, dark to DdsDarkColors::class.java)) {
+            var compared = 0
+            for (field in tokens.declaredFields) {
+                if (field.name == "INSTANCE" || field.name in brandSlice) continue
+                val getter = DdsColors::class.java.getDeclaredMethod("get" + field.name.replaceFirstChar { it.uppercase() } + "-0d7_KjU")
+                val actual = Color((getter.invoke(colors) as Long).toULong())
+                assertEquals(field.name, Color(field.getLong(null)), actual)
+                compared++
+            }
+            assertTrue(compared > 15)
         }
     }
 

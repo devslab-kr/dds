@@ -136,11 +136,19 @@ internal val LocalDdsTypography = staticCompositionLocalOf<DdsTypography> {
 public fun String.keepWords(): String {
     if (isEmpty()) return this
     val out = StringBuilder(length * 2)
-    for (i in indices) {
-        out.append(this[i])
-        if (i < lastIndex && !this[i].isWhitespace() && !this[i + 1].isWhitespace()) out.append(WORD_JOINER)
+    var i = 0
+    while (i < length) {
+        // Step by code point, so an emoji or a rare ideograph (a surrogate pair) is never split.
+        val codePoint = codePointAt(i)
+        val next = i + Character.charCount(codePoint)
+        out.appendCodePoint(codePoint)
+        if (next < length && !Character.isWhitespace(codePoint) && !Character.isWhitespace(codePointAt(next))) {
+            out.append(WORD_JOINER)
+        }
+        i = next
     }
     return out.toString()
 }
 
-private const val WORD_JOINER = '⁠'
+/** U+2060 WORD JOINER: invisible, zero width, forbids a line break on either side. */
+private const val WORD_JOINER: Char = 0x2060.toChar()

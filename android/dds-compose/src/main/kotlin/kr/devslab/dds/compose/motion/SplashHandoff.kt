@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -26,9 +29,11 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.delay
 import kr.devslab.dds.tokens.DdsMotionTokens
 
@@ -48,10 +53,12 @@ import kr.devslab.dds.tokens.DdsMotionTokens
  *     active = savedInstanceState == null,          // not after rotation
  *     reduced = isReducedMotion(this),
  *     createdAt = SystemClock.uptimeMillis(),
- *     drawMs = 800,                                 // your splash drawable's length
+ *     drawMs = 800,                                 // the length of your splash drawable
  * )
  * installSplashScreen().apply {
+ *     // Keep the system splash itself until the drawing is over …
  *     setKeepOnScreenCondition { handoff.keepOnScreen(SystemClock.uptimeMillis()) }
+ *     // … and drop its hand-over copy at once: that copy can show a frame without the mark.
  *     setOnExitAnimationListener { it.remove(); handoff.release() }
  * }
  * ```
@@ -91,8 +98,14 @@ public class DdsSplashHandoff(
     public var phase: Phase by mutableStateOf(if (active) Phase.Hold else Phase.Done)
         private set
 
+    /** False once the overlay has decided to fade in place: the destination then shows itself. */
+    internal var hidesLanding: Boolean by mutableStateOf(true)
+
     private var readyAt: Long? = null
-    private val targets = mutableStateMapOf<Int, Rect>()
+
+    // Each place records who claimed it, so a screen that leaves late cannot
+    // erase the claim of the screen that replaced it.
+    private val targets = mutableStateMapOf<Int, Pair<Any, Rect>>()
 
     /**
      * Answer for `SplashScreen.setKeepOnScreenCondition`: keep the system
@@ -100,11 +113,17 @@ public class DdsSplashHandoff(
      * [keepLimitMs] after the first frame was ready.
      *
      * @param now the same monotonic clock as `createdAt`
+     * @param firstScreenKnown false while the app does not yet know which
+     * screen comes first (it is still reading the session). The splash is then
+     * held — within the same limit — so the mark has a place to travel to
+     * instead of fading for lack of one
      */
-    public fun keepOnScreen(now: Long): Boolean {
+    public fun keepOnScreen(now: Long, firstScreenKnown: Boolean = true): Boolean {
         if (phase != Phase.Hold || reduced) return false
         val ready = readyAt ?: now.also { readyAt = it }
-        return now < minOf(createdAt + drawMs + holdMs, ready + keepLimitMs)
+        val limit = ready + keepLimitMs
+        if (!firstScreenKnown) return now < limit
+        return now < minOf(createdAt + drawMs + holdMs, limit)
     }
 
     /** The system splash is gone: start moving. Safe to call more than once. */
@@ -116,40 +135,41 @@ public class DdsSplashHandoff(
         phase = Phase.Done
     }
 
-    internal fun setTarget(priority: Int, bounds: Rect) {
-        targets[priority] = bounds
+    internal fun setTarget(priority: Int, claim: Any, bounds: Rect) {
+        targets[priority] = claim to bounds
     }
 
-    internal fun removeTarget(priority: Int) {
-        targets.remove(priority)
+    /** Removes the place only if [claim] still holds it. */
+    internal fun removeTarget(priority: Int, claim: Any) {
+        if (targets[priority]?.first === claim) targets.remove(priority)
     }
 
-    /** The destination on screen with the lowest priority number, if any. */
-    internal val landingPriority: Int? get() = targets.keys.minOrNull()
-    internal val landing: Rect? get() = landingPriority?.let { targets[it] }
+    /** The destination on screen with the highest priority, if any. */
+    internal val landingPriority: Int? get() = targets.keys.maxOrNull()
+    internal val landing: Rect? get() = landingPriority?.let { targets[it]?.second }
 }
 
 /** The handoff for this Activity, or null when there is none. Provide it above the first screen. */
-public val LocalDdsSplashHandoff: androidx.compose.runtime.ProvidableCompositionLocal<DdsSplashHandoff?> =
-    staticCompositionLocalOf { null }
+public val LocalDdsSplashHandoff: ProvidableCompositionLocal<DdsSplashHandoff?> = staticCompositionLocalOf { null }
 
 /**
  * Marks where the app mark lives on a screen, so the splash mark can travel
- * to it. Put it on the mark you would draw anyway; it stays invisible until
- * the travelling mark has landed on it.
+ * to it. Put it on the mark you would draw anyway; it stays invisible while
+ * the travelling mark is on its way, then shows in the same frame the
+ * traveller is removed.
  *
- * @param priority when more than one destination is on screen the lowest
- * number wins (0 = the signed-in top bar, 1 = the sign-in screen, …)
+ * @param priority when more than one destination is on screen the highest wins
  */
 public fun Modifier.ddsSplashTarget(priority: Int): Modifier = composed {
     val handoff = LocalDdsSplashHandoff.current ?: return@composed this
     if (handoff.phase == DdsSplashHandoff.Phase.Done) return@composed this
-    androidx.compose.runtime.DisposableEffect(handoff, priority) {
-        onDispose { handoff.removeTarget(priority) }
+    val claim = remember { Any() }
+    DisposableEffect(handoff, priority) {
+        onDispose { handoff.removeTarget(priority, claim) }
     }
     this
-        .onGloballyPositioned { handoff.setTarget(priority, it.boundsInRoot()) }
-        .graphicsLayer { alpha = if (handoff.landingPriority == priority) 0f else 1f }
+        .onGloballyPositioned { handoff.setTarget(priority, claim, it.boundsInRoot()) }
+        .graphicsLayer { alpha = if (handoff.hidesLanding && handoff.landingPriority == priority) 0f else 1f }
 }
 
 /**
@@ -164,7 +184,8 @@ public fun Modifier.ddsSplashTarget(priority: Int): Modifier = composed {
  * @param background the splash background; pass the same color the splash theme uses
  * @param markSize the size the system splash draws the mark at
  * @param mark draws the app mark at the size it is given; it must look exactly
- * like the splash drawable's final frame
+ * like the last frame of the splash drawable. Draw it from a path, not an image:
+ * it is scaled while it travels
  */
 @Composable
 public fun DdsSplashOverlay(
@@ -196,60 +217,67 @@ public fun DdsSplashOverlay(
         if (destination != null) {
             progress.animateTo(1f, tween(DdsMotion.Slow, easing = DdsMotion.Travel))
         } else {
+            // Nothing travels, so the mark at the destination shows through the lifting cover.
+            handoff.hidesLanding = false
             progress.animateTo(1f, tween(if (handoff.reduced) DdsMotion.Fast else DdsMotion.Short, easing = LinearEasing))
         }
         handoff.finish()
     }
 
-    Box(
-        modifier
-            .fillMaxSize()
-            .onSizeChanged { window = it }
-            .clearAndSetSemantics { },
-    ) {
-        val destination = flight
+    // The mark is placed by absolute offsets from the left edge of the window,
+    // so the overlay lays out left-to-right whatever the app's direction is.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Box(
-            Modifier
+            modifier
                 .fillMaxSize()
-                .graphicsLayer {
-                    val p = progress.value
-                    // In flight the cover lifts between 50ms and 250ms of the 300ms move,
-                    // so the mark is seen leaving before the screen shows through.
-                    alpha = if (destination != null) {
-                        1f - ((p * DdsMotion.Slow - COVER_DELAY_MS) / DdsMotion.Base).coerceIn(0f, 1f)
-                    } else {
-                        1f - p
-                    }
-                }
-                .background(background),
-        )
-        Box(
-            Modifier
-                .size(markSize)
-                .graphicsLayer {
-                    val p = progress.value
-                    val startX = (window.width - markPx) / 2f
-                    val startY = (window.height - markPx) / 2f
-                    transformOrigin = TransformOrigin(0f, 0f)
-                    if (destination != null) {
-                        val scale = destination.width / markPx
-                        translationX = startX + (destination.left - startX) * p
-                        translationY = startY + (destination.top - startY) * p
-                        scaleX = 1f + (scale - 1f) * p
-                        scaleY = scaleX
-                    } else {
-                        translationX = startX
-                        translationY = startY
-                        alpha = 1f - p
-                    }
-                },
+                .onSizeChanged { window = it }
+                .clearAndSetSemantics { },
         ) {
-            mark(markSize)
+            val destination = flight
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        val p = progress.value
+                        // In flight the cover starts lifting a little after the mark has set
+                        // off and is gone before it lands, so the mark is seen leaving first.
+                        alpha = if (destination != null) {
+                            1f - ((p * DdsMotion.Slow - COVER_DELAY) / DdsMotion.Base).coerceIn(0f, 1f)
+                        } else {
+                            1f - p
+                        }
+                    }
+                    .background(background),
+            )
+            Box(
+                Modifier
+                    .size(markSize)
+                    .graphicsLayer {
+                        val p = progress.value
+                        val startX = (window.width - markPx) / 2f
+                        val startY = (window.height - markPx) / 2f
+                        transformOrigin = TransformOrigin(0f, 0f)
+                        if (destination != null) {
+                            val scale = destination.width / markPx
+                            translationX = startX + (destination.left - startX) * p
+                            translationY = startY + (destination.top - startY) * p
+                            scaleX = 1f + (scale - 1f) * p
+                            scaleY = scaleX
+                        } else {
+                            translationX = startX
+                            translationY = startY
+                            alpha = 1f - p
+                        }
+                    },
+            ) {
+                mark(markSize)
+            }
         }
     }
 }
 
-// Both come from the motion scale: the cover's fade (Base) is centred in the
-// flight (Slow), and the safety net waits five flights past the hold limit.
-private const val COVER_DELAY_MS: Float = (DdsMotion.Slow - DdsMotion.Base) / 2f
+// Both come from the motion scale: the cover's fade (Base) sits in the middle
+// of the flight (Slow) in progress terms, and the safety net waits five flights
+// past the hold limit.
+private const val COVER_DELAY: Float = (DdsMotion.Slow - DdsMotion.Base) / 2f
 private const val SAFETY_MS: Long = 5L * DdsMotion.Slow

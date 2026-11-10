@@ -253,7 +253,13 @@ export function renderAndroidTokens({ light, dark, sourceSha256 }) {
     `<integer name="dds_motion_slow">${millis(one("motion", "duration", "slow"))}</integer>`,
     lightBars(true),
   ]);
-  const valuesNightXml = xml([...colorRes(darkColors), lightBars(false)]);
+  // Night carries only the colors that differ from light. A color that is the
+  // same in both themes (the brand fill) then has a single definition, so an app
+  // that redefines it once in its own res/values rebrands both themes. Were it
+  // repeated here, the library night value would win over the app in dark mode.
+  const lightArgb = new Map(lightColors.map((t) => [where(t), argb(t)]));
+  const nightOnly = darkColors.filter((t) => lightArgb.get(where(t)) !== argb(t));
+  const valuesNightXml = xml([...colorRes(nightOnly), lightBars(false)]);
 
   return new Map([
     [`${KOTLIN_DIR}/DdsColorTokens.kt`, colorTokensKt],

@@ -32,6 +32,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,7 +45,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kr.devslab.dds.compose.motion.DdsBusyBar
+import kr.devslab.dds.compose.motion.DdsLoadingRows
 import kr.devslab.dds.compose.motion.DdsMotion
+import kr.devslab.dds.compose.motion.DdsPullRefresh
 import kr.devslab.dds.compose.motion.ddsAppear
 import kr.devslab.dds.compose.motion.ddsScreenContent
 import kr.devslab.dds.compose.motion.rememberReducedMotion
@@ -282,33 +288,64 @@ fun ControlsPage() {
 @Composable
 fun MotionPage(onOpen: (Int) -> Unit) {
     val reduced = rememberReducedMotion()
-    PageBody {
-        Text(
-            if (reduced) "Animations are off: nothing slides or staggers." else "Tabs appear (${DdsMotion.Short}ms). Open a row: the content slides in (${DdsMotion.Slow}ms); the bars stay still.",
-            style = DdsTheme.typography.body2,
-            color = DdsTheme.colors.textSecondary,
-        )
-        Block("Staggered list") {
-            for (index in 0 until 8) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = DdsRow.min.dp)
-                        .ddsAppear(index)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable { onOpen(index) }
-                        .padding(horizontal = DdsSpace.s8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(Modifier.size(DdsSpace.s8.dp).clip(CircleShape).background(DdsTheme.colors.textBrand))
-                    Spacer(Modifier.width(DdsSpace.s12.dp))
-                    Text("Item ${index + 1}", Modifier.weight(1f), style = DdsTheme.typography.body1)
-                    Text("${minOf(index, DdsMotion.StaggerLimit) * DdsMotion.StaggerStep}ms", style = DdsTheme.typography.caption.copy(fontFamily = DdsMono), color = DdsTheme.colors.textMuted)
+    // Stand-in for a screen's own state: `busy` while work runs, `loaded` once the first answer is in.
+    var busy by remember { mutableStateOf(true) }
+    var loaded by remember { mutableStateOf(false) }
+    var pulling by remember { mutableStateOf(false) }
+    var runs by remember { mutableStateOf(0) }
+    LaunchedEffect(runs) {
+        busy = true
+        delay(FAKE_WORK_MS)
+        loaded = true
+        busy = false
+    }
+
+    // Pulling does what the Refresh button does. The pull indicator follows the real work.
+    DdsPullRefresh(busy = busy, onRefresh = { runs++ }, onPulling = { pulling = it }) {
+        PageBody {
+            Text(
+                if (reduced) "Animations are off: nothing slides or staggers." else "Tabs appear (${DdsMotion.Short}ms). Open a row: the content slides in (${DdsMotion.Slow}ms); the bars stay still.",
+                style = DdsTheme.typography.body2,
+                color = DdsTheme.colors.textSecondary,
+            )
+            OutlinedButton(
+                onClick = { runs++ },
+                enabled = !busy,
+                modifier = Modifier.heightIn(min = DdsControl.md.dp),
+                shape = MaterialTheme.shapes.small,
+            ) { Text("Refresh") }
+            Block("Staggered list") {
+                if (!loaded) {
+                    // A first load holds the place with still rows; no "empty" message shows before the answer.
+                    DdsLoadingRows(description = "Loading", rows = 3)
+                } else {
+                    for (index in 0 until 8) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = DdsRow.min.dp)
+                                .ddsAppear(index)
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable { onOpen(index) }
+                                .padding(horizontal = DdsSpace.s8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(Modifier.size(DdsSpace.s8.dp).clip(CircleShape).background(DdsTheme.colors.textBrand))
+                            Spacer(Modifier.width(DdsSpace.s12.dp))
+                            Text("Item ${index + 1}", Modifier.weight(1f), style = DdsTheme.typography.body1)
+                            Text("${minOf(index, DdsMotion.StaggerLimit) * DdsMotion.StaggerStep}ms", style = DdsTheme.typography.caption.copy(fontFamily = DdsMono), color = DdsTheme.colors.textMuted)
+                        }
+                    }
                 }
             }
         }
+        // Drawn over the content, so work starting or ending never pushes the page down;
+        // hidden while the pull indicator is already showing the same work.
+        DdsBusyBar(busy = busy && !pulling, modifier = Modifier.padding(horizontal = DdsScreen.gutter.dp))
     }
 }
+
+private const val FAKE_WORK_MS = 1_500L
 
 @Composable
 fun MotionDetail(index: Int) {

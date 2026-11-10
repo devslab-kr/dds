@@ -6,6 +6,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import kr.devslab.dds.tokens.DdsDarkColors
 import kr.devslab.dds.tokens.DdsLightColors
 
@@ -86,7 +87,7 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
             textBrand = brand.dark.textBrand,
             borderDefault = Color(DdsDarkColors.borderDefault),
             borderStrong = Color(DdsDarkColors.borderStrong),
-            borderFocus = brand.dark.borderFocus,
+            borderFocus = brand.dark.borderFocus.takeOrElse { Color(DdsDarkColors.borderFocus) },
             statusSuccess = Color(DdsDarkColors.statusSuccess),
             statusSuccessBg = Color(DdsDarkColors.statusSuccessBg),
             statusWarning = Color(DdsDarkColors.statusWarning),
@@ -117,7 +118,7 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
             textBrand = brand.light.textBrand,
             borderDefault = Color(DdsLightColors.borderDefault),
             borderStrong = Color(DdsLightColors.borderStrong),
-            borderFocus = brand.light.borderFocus,
+            borderFocus = brand.light.borderFocus.takeOrElse { Color(DdsLightColors.borderFocus) },
             statusSuccess = Color(DdsLightColors.statusSuccess),
             statusSuccessBg = Color(DdsLightColors.statusSuccessBg),
             statusWarning = Color(DdsLightColors.statusWarning),
@@ -141,10 +142,15 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
  * indicators, links) above 4.5:1 on the page. The filled brand face is
  * [DdsColors.bgBrand], used directly by DDS components.
  *
+ * `secondaryContainer` is the pale brand background because Material uses it for
+ * *selection* (the navigation bar pill, a selected chip). Material also uses it
+ * for progress and slider tracks, where it is too faint on a light page — pass
+ * `trackColor = DdsTheme.colors.borderDefault` there, as [kr.devslab.dds.compose.motion.DdsBusyBar] does.
+ *
  * `surfaceTint` is transparent: surfaces are told apart by a hairline, not by
  * a tonal wash of the brand color.
  */
-internal fun ddsColorScheme(c: DdsColors, dark: Boolean): ColorScheme {
+internal fun ddsColorScheme(c: DdsColors, dark: Boolean, inverseTextBrand: Color): ColorScheme {
     val onPrimary = bestOn(c.textBrand, listOf(c.textOnStatus, c.textPrimary, c.textOnInverse))
     val base = if (dark) darkColorScheme() else lightColorScheme()
     return base.copy(
@@ -152,7 +158,9 @@ internal fun ddsColorScheme(c: DdsColors, dark: Boolean): ColorScheme {
         onPrimary = onPrimary,
         primaryContainer = c.bgBrandSubtle,
         onPrimaryContainer = c.textBrand,
-        inversePrimary = c.bgBrand,
+        // Brand text on the inverse surface (a snackbar action): the inverse surface is
+        // the other theme's page, so the other theme's brand text is the one that reads on it.
+        inversePrimary = inverseTextBrand,
         secondary = c.textSecondary,
         onSecondary = c.bgDefault,
         secondaryContainer = c.bgBrandSubtle,

@@ -50,9 +50,44 @@ class BrandTest {
     }
 
     @Test
+    fun onBrandFollowsTheRuleInsteadOfBeingChosenByHand() {
+        // A mid cyan fill is brighter than it looks: dark text wins.
+        val bright = Color(red = 0x08, green = 0x91, blue = 0xB2)
+        assertEquals(Color(kr.devslab.dds.tokens.DdsLightColors.textOnBrand), onBrandFor(bright))
+        assertEquals(Color.White, onBrandFor(Color.Black))
+        assertTrue(contrastRatio(onBrandFor(bright), bright) >= DdsMinTextContrast)
+        // Leaving textOnBrand out applies the same rule.
+        val implied = DdsBrandColors(bgBrand = Color.Black, bgBrandHover = Color.Black, bgBrandSubtle = Color.White, textBrand = Color.Black)
+        assertEquals(Color.White, implied.textOnBrand)
+    }
+
+    @Test
+    fun anUnspecifiedFocusRingFallsBackToTheSystemRing() {
+        val product = DdsBrand.Default.light.copy(borderFocus = Color.Unspecified)
+        val colors = ddsColors(dark = false, brand = DdsBrand(product, DdsBrand.Default.dark))
+        assertEquals(ddsColors(dark = false, brand = DdsBrand.Default).borderFocus, colors.borderFocus)
+    }
+
+    @Test
+    fun brandTextMustReadOnThePageAndOnThePaleBackground() {
+        val faint = DdsBrand.Default.light.copy(textBrand = DdsBrand.Default.light.bgBrandHover)
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = faint, dark = DdsBrand.Default.dark)
+        }
+        assertTrue(error.message.orEmpty(), error.message.orEmpty().contains("textBrand on the page background"))
+    }
+
+    @Test
     fun keepWordsOnlyAllowsBreaksAtSpaces() {
-        val joiner = "⁠"
-        assertEquals("확${joiner}인 하${joiner}세${joiner}요", "확인 하세요".keepWords())
+        val j = 0x2060.toChar()
+        assertEquals("확${j}인 하${j}세${j}요", "확인 하세요".keepWords())
         assertEquals("", "".keepWords())
+    }
+
+    @Test
+    fun keepWordsNeverSplitsASurrogatePair() {
+        val j = 0x2060.toChar()
+        val emoji = String(Character.toChars(0x1F600))
+        assertEquals("확$j$emoji", "확$emoji".keepWords())
     }
 }

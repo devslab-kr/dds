@@ -60,16 +60,41 @@ class SplashHandoffTest {
     }
 
     @Test
-    fun theLowestPriorityNumberIsTheLanding() {
+    fun theHighestPriorityIsTheLanding() {
         val handoff = handoff()
         assertNull(handoff.landing)
-        val signIn = Rect(0f, 0f, 56f, 56f)
         val topBar = Rect(10f, 10f, 36f, 36f)
-        handoff.setTarget(1, signIn)
-        assertEquals(signIn, handoff.landing)
-        handoff.setTarget(0, topBar)
+        val signIn = Rect(0f, 0f, 56f, 56f)
+        handoff.setTarget(0, "top bar", topBar)
         assertEquals(topBar, handoff.landing)
-        handoff.removeTarget(0)
+        handoff.setTarget(1, "sign in", signIn)
         assertEquals(signIn, handoff.landing)
+        handoff.removeTarget(1, "sign in")
+        assertEquals(topBar, handoff.landing)
+    }
+
+    /** The bug this guards: the old screen is disposed after the new one has registered the same place. */
+    @Test
+    fun aScreenThatLeavesLateCannotEraseTheNextScreensPlace() {
+        val handoff = handoff()
+        val old = Any()
+        val new = Any()
+        handoff.setTarget(0, old, Rect(0f, 0f, 10f, 10f))
+        val place = Rect(5f, 5f, 31f, 31f)
+        handoff.setTarget(0, new, place)
+        handoff.removeTarget(0, old)
+        assertEquals(place, handoff.landing)
+        handoff.removeTarget(0, new)
+        assertNull(handoff.landing)
+    }
+
+    @Test
+    fun theSplashWaitsForTheFirstScreenButOnlyUpToTheLimit() {
+        val handoff = handoff()
+        // Drawing and pause end at 1_950, but the first screen is not known yet.
+        assertTrue(handoff.keepOnScreen(now = 1_000, firstScreenKnown = false))
+        assertTrue(handoff.keepOnScreen(now = 1_990, firstScreenKnown = false))
+        assertFalse(handoff.keepOnScreen(now = 1_990, firstScreenKnown = true))
+        assertFalse(handoff.keepOnScreen(now = 2_000, firstScreenKnown = false))
     }
 }

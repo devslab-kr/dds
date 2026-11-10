@@ -33,6 +33,18 @@ test("android colors resolve to the palette value the semantic files point at", 
   assert.match(files.get(`${resDir}/values-night/dds_tokens.xml`), new RegExp(`<color name="dds_color_bg_default">#FF${darkCanvas}</color>`));
 });
 
+test("night resources hold only what differs, so one app override rebrands both themes", async () => {
+  const light = await readJson("tokens/semantic.light.json");
+  const dark = await readJson("tokens/semantic.dark.json");
+  const night = generateAndroidTokens().get(`${resDir}/values-night/dds_tokens.xml`);
+  // The brand fill is the same token in both themes: it must not be repeated under night.
+  assert.equal(light.color.bg.brand.$value, dark.color.bg.brand.$value);
+  assert.doesNotMatch(night, /dds_color_bg_brand"/);
+  // A color that does change with the theme is there.
+  assert.notEqual(light.color.bg["brand-subtle"].$value, dark.color.bg["brand-subtle"].$value);
+  assert.match(night, /dds_color_bg_brand_subtle"/);
+});
+
 test("alpha colors move the alpha byte to the front (web #RRGGBBAA, Android AARRGGBB)", async () => {
   const light = await readJson("tokens/semantic.light.json");
   const dim = (await paletteHex(light.color.overlay.dim.$value)).slice(1).toUpperCase(); // RRGGBBAA
@@ -74,7 +86,8 @@ test("a token of an unknown $type is a build error, not a skipped token", async 
 
 test("committed Android token files match what the token files generate", async () => {
   for (const [path, content] of generateAndroidTokens()) {
-    const committed = await readFile(new URL(path, root), "utf8").catch(() => null);
+    // Same normalization as `--check`: a CRLF checkout is not a stale file.
+    const committed = await readFile(new URL(path, root), "utf8").then((text) => text.replaceAll("\r\n", "\n"), () => null);
     assert.equal(committed, content, `${path} is out of date — run: node scripts/generate-android-tokens.mjs`);
   }
 });
@@ -99,6 +112,20 @@ test("a hand-written color outside the generated files is reported with file and
     assert.equal(found.length, 2);
     assert.ok(found.some((v) => v.startsWith("android/dds-compose/src/main/kotlin/Typed.kt:2:")));
     assert.ok(found.some((v) => v.startsWith("android/dds-compose/src/main/kotlin/colors.xml:1:")));
+
+    // The ways around a naive check: short hex, a literal split over two lines, a bare ARGB integer.
+    await writeFile(join(dir, "dds-compose/src/main/kotlin/Typed.kt"), "val a = Color(\n    0xFF0E7490,\n)\nval b = 0xFF0891B2.toInt()\n");
+    await writeFile(join(dir, "dds-compose/src/main/kotlin/colors.xml"), '<color name="x">#0cf</color>\n<item name="y">#f0cf</item>\n');
+    const sneaky = checkAndroidSources(dir);
+    assert.deepEqual(
+      sneaky.map((v) => v.split(": ")[0]).sort(),
+      ["Typed.kt:1", "Typed.kt:2", "Typed.kt:4", "colors.xml:1", "colors.xml:2"].map((f) => `android/dds-compose/src/main/kotlin/${f}`),
+    );
+
+    // Prose may name a color: comments are not code.
+    await writeFile(join(dir, "dds-compose/src/main/kotlin/Typed.kt"), "// was Color(0xFF0E7490)\n/* #0891B2 */\nval ok = 1\n");
+    await writeFile(join(dir, "dds-compose/src/main/kotlin/colors.xml"), "<!-- #0891B2 -->\n<resources />\n");
+    assert.deepEqual(checkAndroidSources(dir), []);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

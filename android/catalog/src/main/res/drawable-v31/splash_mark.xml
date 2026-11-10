@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The animated splash mark (Android 12+). The rules it follows (docs/mobile-native.md, Splash):
+     1. The vector at rest is the FINISHED mark. A device with animations off, and the window
+        background, show this resting state.
+     2. The reveal starts from nothing. The wait before it is not startOffset: it is a first
+        animator whose from and to are both the empty state. That way the very first frame is
+        already empty and the finished mark never flashes before the drawing begins.
+     3. The wait is about 250ms, so the drawing does not run while the device is still opening
+        the window, and the reveal uses a curve that does not rush its first half.
+     4. The mark sits inside the middle third of the 288dp canvas, so a round mask never cuts it. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="288dp"
+            android:height="288dp"
+            android:viewportWidth="288"
+            android:viewportHeight="288">
+            <group>
+                <clip-path
+                    android:name="reveal"
+                    android:pathData="M96,96 L192,96 L192,192 L96,192 Z" />
+                <path
+                    android:fillColor="@color/dds_color_bg_brand"
+                    android:pathData="M116,96h56a20,20 0,0 1,20 20v56a20,20 0,0 1,-20 20h-56a20,20 0,0 1,-20 -20v-56a20,20 0,0 1,20 -20z" />
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="reveal">
+        <aapt:attr name="android:animation">
+            <set android:ordering="sequentially">
+                <objectAnimator
+                    android:duration="250"
+                    android:propertyName="pathData"
+                    android:valueFrom="M96,96 L192,96 L192,96 L96,96 Z"
+                    android:valueTo="M96,96 L192,96 L192,96 L96,96 Z"
+                    android:valueType="pathType" />
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
+                    android:propertyName="pathData"
+                    android:valueFrom="M96,96 L192,96 L192,96 L96,96 Z"
+                    android:valueTo="M96,96 L192,96 L192,192 L96,192 Z"
+                    android:valueType="pathType" />
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

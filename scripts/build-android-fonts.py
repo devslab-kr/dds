@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SOURCES = ROOT / "packages" / "site-kit" / "fonts"
 MODULE = ROOT / "android" / "dds-compose"
 OUT = MODULE / "src" / "main" / "res" / "font"
-LICENSES = MODULE / "licenses"
+LICENSES = MODULE / "src" / "main" / "resources" / "META-INF" / "licenses"
 
 
 def ks_x_1001_syllables() -> list[int]:

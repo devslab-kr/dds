@@ -8,10 +8,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -66,12 +71,15 @@ internal val LocalScreenEnter = compositionLocalOf<ScreenEnter?> { null }
  * flicker, not as a transition. For the same reason, remove the previous
  * screen at once (give the navigation host no transition of its own).
  *
- * [move] is read once, when the entry first appears.
+ * [move] is read once, when the entry first appears; after a rotation or a
+ * restore the screen does not arrive a second time.
  */
 @Composable
 public fun DdsScreenMotion(move: DdsMove, content: @Composable () -> Unit) {
-    val reduced = rememberReducedMotion()
-    val spec = remember { enterSpec(move, reduced) }
+    val context = LocalContext.current
+    // Saved, so a rotated or restored screen is simply there instead of arriving again.
+    var arrived by rememberSaveable { mutableStateOf(false) }
+    val spec = remember { enterSpec(if (arrived) DdsMove.None else move, isReducedMotion(context)) }
     val enter = remember {
         ScreenEnter(
             alpha = Animatable(if (spec.fadeMs == 0) 1f else 0f),
@@ -82,6 +90,7 @@ public fun DdsScreenMotion(move: DdsMove, content: @Composable () -> Unit) {
     LaunchedEffect(enter) {
         if (spec.fadeMs > 0) launch { enter.alpha.animateTo(1f, tween(spec.fadeMs, easing = LinearEasing)) }
         if (spec.slideMs > 0) launch { enter.slide.animateTo(1f, tween(spec.slideMs, easing = DdsMotion.Standard)) }
+        arrived = true
     }
     CompositionLocalProvider(LocalScreenEnter provides enter, content = content)
 }

@@ -18,9 +18,21 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED = ["dds-tokens/src/main/kotlin/", "dds-tokens/src/main/res/values/dds_tokens.xml", "dds-tokens/src/main/res/values-night/dds_tokens.xml"];
 const SKIP_DIRS = new Set(["build", ".gradle", ".kotlin", ".idea", "node_modules"]);
 const RULES = [
-  { name: "hex color literal", pattern: /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6})\b/ },
-  { name: "Color(0x…) literal", pattern: /\bColor\s*\(\s*0x/ },
+  { name: "hex color literal", pattern: /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6})\b/g },
+  // The short forms Android XML also accepts (#RGB, #ARGB), where a value can sit.
+  { name: "hex color literal", pattern: /(?<=[>"'])#(?:[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?=[<"'])/g, only: /\.xml$/ },
+  // \s spans newlines: `Color(` and `0x…` on separate lines is the same literal.
+  { name: "Color(0x…) literal", pattern: /\bColor\s*\(\s*0x/g },
+  { name: "ARGB integer literal", pattern: /\b0x[0-9a-fA-F]{8}\b(?:\.toInt\(\))?/g, only: /\.kts?$/ },
 ];
+
+/** Blank out comments (keeping every newline) so prose may mention a color and line numbers stay true. */
+function withoutComments(text, file) {
+  const blank = (match) => match.replace(/[^\n]/g, " ");
+  return /\.xml$/.test(file)
+    ? text.replace(/<!--[\s\S]*?-->/g, blank)
+    : text.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/\/\/[^\n]*/g, blank);
+}
 
 function* sourceFiles(dir) {
   for (const entry of readdirSync(dir)) {
@@ -39,13 +51,17 @@ export function checkAndroidSources(androidDir = join(root, "android")) {
   for (const file of sourceFiles(androidDir)) {
     const rel = relative(androidDir, file).split(sep).join("/");
     if (GENERATED.some((prefix) => rel.startsWith(prefix))) continue;
-    readFileSync(file, "utf8")
-      .split("\n")
-      .forEach((line, i) => {
-        for (const rule of RULES) {
-          if (rule.pattern.test(line)) violations.push(`android/${rel}:${i + 1}: ${rule.name} — use a generated token instead`);
-        }
-      });
+    const text = withoutComments(readFileSync(file, "utf8"), file);
+    const seen = new Set();
+    for (const rule of RULES) {
+      if (rule.only && !rule.only.test(file)) continue;
+      for (const match of text.matchAll(rule.pattern)) {
+        const line = text.slice(0, match.index).split("\n").length;
+        if (seen.has(line)) continue;
+        seen.add(line);
+        violations.push(`android/${rel}:${line}: ${rule.name} — use a generated token instead`);
+      }
+    }
   }
   return violations;
 }

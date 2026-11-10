@@ -3,7 +3,7 @@
     <!-- Colors come from dds-android-tokens resources, which carry their own
          values-night variants: one theme serves light and dark. -->
     <style name="Theme.Catalog" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/dds_color_bg_default</item>
+        <item name="android:windowBackground">@drawable/window_splash</item>
         <!-- The splash library applies this theme again when the splash leaves,
              which resets the bar icon colors — so they are set here too. -->
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -15,6 +15,7 @@
     <style name="Theme.Catalog.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/dds_color_bg_default</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_mark</item>
+        <item name="windowSplashScreenAnimationDuration">@integer/splash_draw_ms</item>
         <item name="postSplashScreenTheme">@style/Theme.Catalog</item>
     </style>
 </resources>

@@ -22,20 +22,25 @@ import kr.devslab.dds.tokens.DdsTouch
  * branch on [darkTheme].
  *
  * @param darkTheme defaults to the system setting
- * @param brand the product's six brand colors; defaults to DevsLab cyan
+ * @param brand the product brand slice. By default it is read from the
+ * `dds_color_*` brand resources, so an app that redefines those six colors in
+ * its own `res/values` rebrands XML and Compose together; with no override
+ * that is DevsLab cyan
  * @param largeText the app-offered large text mode: a stepped-up type scale
  * and a larger minimum touch target. It stacks with the system font scale.
  */
 @Composable
 public fun DdsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    brand: DdsBrand = DdsBrand.Default,
+    brand: DdsBrand = rememberDdsBrand(),
     largeText: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colors = remember(darkTheme, brand) { ddsColors(darkTheme, brand) }
     val typography = remember(largeText) { ddsTypography(largeText) }
-    val colorScheme = remember(colors, darkTheme) { ddsColorScheme(colors, darkTheme) }
+    val colorScheme = remember(colors, darkTheme, brand) {
+        ddsColorScheme(colors, darkTheme, inverseTextBrand = (if (darkTheme) brand.light else brand.dark).textBrand)
+    }
     val materialTypography = remember(typography) { materialTypography(typography) }
     val touch = (if (largeText) DdsTouch.large else DdsTouch.min).dp
 
