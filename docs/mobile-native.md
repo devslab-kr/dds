@@ -47,7 +47,7 @@ values `[spec §3.6]`.
 
 | Name | Value | Use |
 | --- | --- | --- |
-| `DdsMotion.Fast` | 100ms | leaving, press feedback, a screen's opacity on arrival |
+| `DdsMotion.Fast` | 100ms | leaving, press feedback |
 | `DdsMotion.Short` | 150ms | list items appearing, progress |
 | `DdsMotion.Base` | 200ms | going back, expand and collapse, dialogs |
 | `DdsMotion.Slow` | 300ms | a new screen, sheets, the logo travelling |
@@ -199,17 +199,25 @@ Checked by a unit test only: the test device showed the icon on every launch pat
 Code: `DdsScreenMotion(move)`, `Modifier.ddsScreenContent()`, `DdsMove`.
 
 18. **Only the content moves.** The top bar, the title and the bottom tabs neither move nor fade.
-19. **Remove the previous screen at once.** A whole screen fading in over the gap
-    it left reads as a flicker (fixed in JeongsanNow on 2026-11-08; Qooroo's whole-screen
-    fade of 200/150 is that same approach, and moves to this one).
-20. **Finish the opacity within 100ms.** A screen still faint while it slides looks empty.
+19. **Give the navigation host no transition of its own, and do not blank the screen that
+    is leaving.** A whole screen fading in over the gap the last one left reads as a flicker
+    (fixed in JeongsanNow on 2026-11-08; Qooroo's whole-screen fade of 200/150 is that same
+    approach, and moves to this one). But a host takes a few frames to swap entries: an entry
+    emptied in that time shows as a blank screen, bars and all, for 3 to 5 frames — in dark,
+    a white flash on every move (measured on a phone, 0.3.0; this was the "it flickers every
+    time I change menu"). Keep drawing the leaving entry until the host swaps it, and tell it
+    it is no longer current: `DdsScreenMotion(move, active = false)`, read as
+    `LocalDdsScreenActive.current` before starting a load or a subscription.
+20. **Nothing fades in.** Content is opaque from its first frame and only slides. A fade
+    from transparent, even 100ms, left the content area empty for about eight frames under a
+    top bar that was already there (measured on a phone at 60fps, 0.3.0).
 21. **When the account or workspace changes, switch at once with no movement** (`DdsMove.None`).
 22. A rotated or restored screen does not arrive a second time.
 
 | Move | Appear | Slide |
 | --- | --- | --- |
-| Forward (`Push`) | 100ms | 24dp from the trailing edge, 300ms |
-| Back (`Pop`) | 100ms | 24dp from the leading edge, 200ms |
+| Forward (`Push`) | at once | 24dp from the trailing edge, 300ms |
+| Back (`Pop`) | at once | 24dp from the leading edge, 200ms |
 | Tab (`Tab`) | at once | none — the previous tab is gone at once, so a fade would fade in over an empty page and read as a flicker on every tab press (seen on a device, 0.3.0) |
 | None (`None`) | at once | — |
 
@@ -546,6 +554,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 16 | Components the web has and Android does not yet | date and time pickers use Material3 defaults | §12 |
 | 17 | Back and leaving the app | back to the screen, then the previous tab; ask before leaving; two presses within 600ms ask | §2.3.1. JeongsanNow's behavior |
 | 18 | Motion on a tab switch | none | §2.3. A 150ms fade read as a flicker on a device |
+| 19 | Whether content fades in on push and pop | no — opaque from the first frame, slide only | §2.3, rule 20. The 100ms fade showed an empty content area on a device |
 
 **Where each item stands (2026-11-10).**
 
@@ -556,7 +565,8 @@ in for now"; making them DDS rules is the owner's call. Once decided,
   1, 2, 3, 6, 7, 8, 9, 12, 13, and 11 as "keep the Material3 default; no size change on a
   dialog". These are not confirmed rules until the owner says so.
 - **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components); 17 and 18
-  (0.3.0, from the owner's own words while using JeongsanNow on a phone — the numbers are proposals).
+  (0.3.0, from the owner's own words while using JeongsanNow on a phone — the numbers are proposals);
+  19 (0.4.0, measured by JeongsanNow on a phone).
 
 ## 11. Moving an existing app over
 
@@ -616,7 +626,7 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
 
 | Component | What it fixes | Web |
 | --- | --- | --- |
-| `DdsSearchField` | the one search field: magnifier in front, a clear button once something is typed, the keyboard's search key runs it; no label line, no message line | — |
+| `DdsSearchField` | the one search field: magnifier in front, a clear button once something is typed, the keyboard's search key runs it; an apply button at the end when `applyDescription` is given, dimmed on its own with `searchEnabled`; no label line, no message line | — |
 | `DdsSelectField` | the one field for choosing from a short list: the same box and lines as `DdsTextField`, opens a sheet, the chosen option carries a check | Select |
 | `DdsValueRow` | a name and its value on one line: name at the start, value at the end edge, tabular digits, a line under each row | — |
 | `DdsTabs` | views of one thing inside a page: brand underline and a heavier label | Tabs |

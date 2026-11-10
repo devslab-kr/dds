@@ -17,7 +17,7 @@ Minimum Android 8 (API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.3.0") // brings dds-android-tokens
+    implementation("kr.devslab:dds-compose:0.4.0") // brings dds-android-tokens
 }
 ```
 

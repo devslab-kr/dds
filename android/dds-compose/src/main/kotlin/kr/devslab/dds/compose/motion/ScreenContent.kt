@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -47,6 +48,11 @@ internal data class EnterSpec(val fadeMs: Int, val slideMs: Int, val shiftSign: 
 /**
  * Push comes from the trailing edge, pop from the leading edge, a tab is
  * simply there. With reduced motion nothing moves.
+ *
+ * Nothing fades. Content that starts transparent is an empty page for its
+ * first frames: on a phone a 100ms fade showed the top bar over a blank
+ * content area for about eight frames before the screen appeared. The content
+ * is opaque from its first frame and only slides.
  */
 internal fun enterSpec(move: DdsMove, reduced: Boolean): EnterSpec =
     if (reduced) {
@@ -54,8 +60,8 @@ internal fun enterSpec(move: DdsMove, reduced: Boolean): EnterSpec =
     } else {
         when (move) {
             DdsMove.None -> EnterSpec(0, 0, 0)
-            DdsMove.Push -> EnterSpec(DdsMotion.Fast, DdsMotion.Slow, 1)
-            DdsMove.Pop -> EnterSpec(DdsMotion.Fast, DdsMotion.Base, -1)
+            DdsMove.Push -> EnterSpec(0, DdsMotion.Slow, 1)
+            DdsMove.Pop -> EnterSpec(0, DdsMotion.Base, -1)
             DdsMove.Tab -> EnterSpec(0, 0, 0)
         }
     }
@@ -66,20 +72,34 @@ internal class ScreenEnter(val alpha: Animatable<Float, *>, val slide: Animatabl
 internal val LocalScreenEnter = compositionLocalOf<ScreenEnter?> { null }
 
 /**
+ * False for a screen that is on its way out: still drawn until the navigation
+ * host swaps it, but no longer the current one. Read it before starting work
+ * that belongs to the current screen only — a load, a subscription, a
+ * connection to a shared model. Set through [DdsScreenMotion]'s `active`.
+ */
+public val LocalDdsScreenActive: ProvidableCompositionLocal<Boolean> = compositionLocalOf { true }
+
+/**
  * Plays the arrival of one screen. Wrap each navigation entry in it and pass
  * how the person got there; mark the part that should move with
  * [ddsScreenContent].
  *
  * Only the content moves. The top bar, the title and the bottom tabs stay
- * still — a whole screen fading in over the gap the last one left reads as a
- * flicker, not as a transition. For the same reason, remove the previous
- * screen at once (give the navigation host no transition of its own).
+ * still, and the navigation host gets no transition of its own.
+ *
+ * Do not blank a screen that is leaving. A host takes a few frames to swap
+ * entries; an entry emptied in that time shows as a blank screen — bars and
+ * all — and in dark as a white flash. Keep drawing it and pass
+ * `active = false`, which children read from [LocalDdsScreenActive] to stop
+ * starting work.
  *
  * [move] is read once, when the entry first appears; after a rotation or a
  * restore the screen does not arrive a second time.
+ *
+ * @param active false once this entry is no longer the current one
  */
 @Composable
-public fun DdsScreenMotion(move: DdsMove, content: @Composable () -> Unit) {
+public fun DdsScreenMotion(move: DdsMove, active: Boolean = true, content: @Composable () -> Unit) {
     val context = LocalContext.current
     // Saved, so a rotated or restored screen is simply there instead of arriving again.
     var arrived by rememberSaveable { mutableStateOf(false) }
@@ -96,7 +116,7 @@ public fun DdsScreenMotion(move: DdsMove, content: @Composable () -> Unit) {
         if (spec.slideMs > 0) launch { enter.slide.animateTo(1f, tween(spec.slideMs, easing = DdsMotion.Standard)) }
         arrived = true
     }
-    CompositionLocalProvider(LocalScreenEnter provides enter, content = content)
+    CompositionLocalProvider(LocalScreenEnter provides enter, LocalDdsScreenActive provides active, content = content)
 }
 
 /**

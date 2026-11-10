@@ -16,8 +16,14 @@ class MotionTest {
 
     @Test
     fun pushComesFromTheTrailingEdgeAndPopFromTheLeading() {
-        assertEquals(EnterSpec(DdsMotion.Fast, DdsMotion.Slow, 1), enterSpec(DdsMove.Push, reduced = false))
-        assertEquals(EnterSpec(DdsMotion.Fast, DdsMotion.Base, -1), enterSpec(DdsMove.Pop, reduced = false))
+        assertEquals(EnterSpec(0, DdsMotion.Slow, 1), enterSpec(DdsMove.Push, reduced = false))
+        assertEquals(EnterSpec(0, DdsMotion.Base, -1), enterSpec(DdsMove.Pop, reduced = false))
+    }
+
+    @Test
+    fun noMoveStartsTransparent() {
+        // Content that fades in is an empty page for its first frames (seen on a phone).
+        for (move in DdsMove.entries) assertEquals(0, enterSpec(move, reduced = false).fadeMs)
     }
 
     @Test

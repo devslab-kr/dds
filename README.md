@@ -124,7 +124,7 @@ Priorities live in [`docs/backlog.md`](docs/backlog.md). Packages are created
 only when a consumer exists (spec §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 inventory (Core 6 ✅ 2026-08-13, +13 ✅ 2026-08-15) →
 AskLinq adoption → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → native Android values, theme and motion
-(0.3.0, 2026-11-11 — theme, motion, components, icons). RN and Ionic packages only when such a product exists.
+(0.4.0, 2026-11-11 — theme, motion, components, icons). RN and Ionic packages only when such a product exists.
 
 ## Input, choice and shared calendar additions
 
