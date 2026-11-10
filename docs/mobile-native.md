@@ -492,6 +492,18 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 15 | Gap between fields in a form | 16 (in the catalog; not a token) | the web form gap is the product's |
 | 16 | Components the web has and Android does not yet | bottom sheet, toast, in-page tabs, pickers, menu use Material3 defaults | §12 |
 
+**Where each item stands (2026-11-10).**
+
+- **Chosen by the owner:** 4 (a placeholder stays still), 5 (a card is set apart by its
+  edge only, no shadow), 10 (fix the token values themselves so the dark danger and info
+  colors clear 4.5:1 — a token change that reaches every product's dark screens, so it is
+  handled as its own change with a decision record and a web release; until it lands the
+  values in the table ship as they are).
+- **Recommended as "keep the value put in for now", shown to the owner, no objection yet:**
+  1, 2, 3, 6, 7, 8, 9, 12, 13, and 11 as "keep the Material3 default; no size change on a
+  dialog". These are not confirmed rules until the owner says so.
+- **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components).
+
 ## 11. Moving an existing app over
 
 1. Add the dependency. `dds-compose` carries six font files (four Pretendard, two Geist
