@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Colors come from dds-android-tokens resources, which carry their own
+         values-night variants: one theme serves light and dark. -->
+    <style name="Theme.Catalog" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/window_splash</item>
+        <!-- The splash library applies this theme again when the splash leaves,
+             which resets the bar icon colors — so they are set here too. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">@bool/dds_light_system_bars</item>
+        <!-- API 27+. On 26 the attribute is ignored and enableEdgeToEdge sets the bar in code. -->
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">@bool/dds_light_system_bars</item>
+    </style>
+
+    <style name="Theme.Catalog.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/dds_color_bg_default</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_mark</item>
+        <item name="windowSplashScreenAnimationDuration">@integer/splash_draw_ms</item>
+        <item name="postSplashScreenTheme">@style/Theme.Catalog</item>
+    </style>
+</resources>

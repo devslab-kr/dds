@@ -46,6 +46,7 @@
 | `@devslab/dds-tokens` | 토큰 JSON + 빌드 산출물 (아래 표) | 모든 곳 |
 | `@devslab/dds-css` | CSS 컴포넌트 레이어 (클래스 기반, 프레임워크 무관) | SSR 페이지, 바닐라 위젯, Vue, React, Ionic |
 | `@devslab/dds-native` | React Native 컴포넌트 | 모바일 앱 (RN 선택 시) |
+| `kr.devslab:dds-android-tokens` · `kr.devslab:dds-compose` (Maven) | 안드로이드 값(Kotlin 상수·XML 리소스)과 Compose 테마·모션 — [`mobile-native.ko.md`](mobile-native.ko.md) | 안드로이드 네이티브 앱 (D-048) |
 | `@devslab/dds-icons` | 아이콘 (SVG 단일 소스 → 플랫폼별 코드 생성) | 모든 곳 |
 | `@devslab/dds-vue` | Ark UI + 공통 CSS 기반 Vue 3 컴포넌트 | EDS Desktop 및 이후 Vue 소비자 |
 
@@ -62,6 +63,7 @@
 | Tailwind 프리셋 | v4 `@theme` CSS + v3 `preset.js` | Tailwind 쓰는 모든 프로젝트 |
 | TypeScript 상수 | `tokens.ts` | RN, 런타임에서 토큰이 필요한 코드 |
 | Ionic 테마 매핑 | `ionic.css` (`--ion-color-primary: var(--dds-color-bg-brand)` …) | Ionic 앱 (선택 시) |
+| 안드로이드 값 | Kotlin 상수 + `res/values` XML (`scripts/generate-android-tokens.mjs`, 생성물은 `android/dds-tokens`에 커밋) | 안드로이드 네이티브 앱 |
 
 ### 프레임워크 전략 — "코어는 CSS, 프레임워크는 소비자"
 
@@ -254,6 +256,9 @@
 한글 글리프가 없으므로 한글은 [Pretendard](https://github.com/orioncactus/pretendard)
 → 시스템 고딕 순으로 폴백한다 (스택: `Geist, Pretendard, system-ui, …`).
 숫자가 중요한 화면 (대시보드 통계) 은 tabular figures 를 켠다.
+
+안드로이드는 Pretendard 하나만 쓴다 — Compose 는 글꼴을 굵기로 고르므로 두
+글꼴을 한 묶음에 넣으면 첫 글꼴만 쓰인다 (D-048, [`mobile-native.ko.md`](mobile-native.ko.md) §3).
 
 **글꼴 파일.** 세 패밀리의 woff2 는 `@devslab/site-kit/fonts.css` 하나로
 나간다 (D-033). `@font-face` 이름이 토큰의 이름 (`Geist`·`Pretendard`·
@@ -463,6 +468,8 @@ Dialog, BottomSheet (native) / Modal (web), Toast, Tooltip (web), EmptyState.
 
 - **버저닝.** `dds-tokens` / `dds-web` / `dds-native` 는 같은 버전 트레인으로
   릴리스한다 (lockstep semver). 토큰 이름 변경·삭제 = breaking = major.
+  예외: 안드로이드 좌표 (`kr.devslab:dds-*`) 는 자기 버전을 쓰고 `android-v*`
+  태그로만 나간다 (D-048).
 - **변경 절차.** 제안 (이 문서 스타일의 짧은 RFC) → 리뷰 → 구현 + 스토리 +
   문서 → 릴리스. 파운데이션 (§3) 변경은 전 제품 영향이므로 결정 로그
   (decisions.md 형식) 에 기록한다.
@@ -480,6 +487,10 @@ Dialog, BottomSheet (native) / Modal (web), Toast, Tooltip (web), EmptyState.
 | **Phase 1** | 토큰 빌드 파이프라인 (CSS 변수 + Tailwind 프리셋) + `dds-css` Core 6종 (Button, TextField, Badge, Spinner, Dialog, Toast) → AskLinq 위젯·SSR 페이지에 적용 | 웹 UI 작업 재개 시 |
 | **Phase 2** | `dds-icons` + Composite 확충 + Storybook 공개 | Phase 1 안정화 후 |
 | **Phase 3** | 모바일 착수와 동시 — **RN 이면** `dds-native` 구현, **Ionic 이면** `dds-tokens` 의 Ionic 매핑 + `dds-css` 재사용 (신규 패키지 불필요) | 모바일 착수 시 |
+
+**2026-11-10 추가 (D-048).** 실제 모바일 소비자는 Kotlin·Jetpack Compose 였다.
+RN 도 Ionic 도 아닌 세 번째 길로 `android/` 에 값 생성과 Compose 테마·모션을
+두었다. 규칙은 [`mobile-native.ko.md`](mobile-native.ko.md).
 
 Phase 3 이전에 모바일 패키지를 만들지 않는다 — 소비자 없는 플랫폼 구현은
 썩는다. RN vs Ionic 선택은 모바일 착수 시점의 제품 요구 (네이티브 성능·제스처

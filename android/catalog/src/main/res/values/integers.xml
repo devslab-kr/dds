@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Length of the drawing in drawable-v31/splash_mark.xml: a 250ms wait, then a 300ms reveal.
+         One number for the theme and for DdsSplashHandoff(drawMs). -->
+    <integer name="splash_draw_ms">550</integer>
+</resources>

@@ -1,0 +1,75 @@
+# Android release — publishes kr.devslab:dds-android-tokens and
+# kr.devslab:dds-compose to Maven Central.
+#
+# Triggered by a hand-pushed `android-v<version>` tag, and by nothing else.
+# The web packages release through Changesets on every push to main
+# (release.yml) and tag themselves `@devslab/<name>@<version>`; the two flows
+# share no trigger and no version number (docs/decisions.md D-048).
+#
+# Same publishing plugin and the same five secrets as the DevsLab Java
+# libraries (ssrf-guard, api-log, easy-paging):
+#   MAVEN_CENTRAL_USERNAME, MAVEN_CENTRAL_PASSWORD,
+#   SIGNING_KEY, SIGNING_KEY_ID, SIGNING_KEY_PASSWORD
+# They must be available to this repository before the first tag is pushed.
+
+name: Release Android packages
+
+on:
+  push:
+    tags:
+      - "android-v[0-9]+.[0-9]+.[0-9]+"
+      - "android-v[0-9]+.[0-9]+.[0-9]+-*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Derive the version from the tag
+        id: ver
+        run: echo "version=${GITHUB_REF#refs/tags/android-v}" >> "$GITHUB_OUTPUT"
+
+      # Never publish values that do not match the token files at this commit.
+      - run: node --test tests/android-tokens.test.mjs
+      - run: node scripts/generate-android-tokens.mjs --check
+      - run: node scripts/generate-android-icons.mjs --check
+      - run: node scripts/check-android-sources.mjs
+
+      - name: Build and test
+        working-directory: android
+        run: ./gradlew testDebugUnitTest :dds-tokens:assembleRelease :dds-compose:assembleRelease --no-configuration-cache --stacktrace -PVERSION_NAME=${{ steps.ver.outputs.version }}
+
+      - name: Publish to Maven Central
+        working-directory: android
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          # SIGNING_KEY_ID is stored in its 16-character form; Gradle wants the last 8.
+          SIGNING_KEY_ID_RAW: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          export ORG_GRADLE_PROJECT_signingInMemoryKeyId="${SIGNING_KEY_ID_RAW: -8}"
+          ./gradlew publishAndReleaseToMavenCentral \
+            --no-configuration-cache \
+            --stacktrace \
+            -PVERSION_NAME=${{ steps.ver.outputs.version }}
+
+      - name: Create the GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: DDS Android ${{ steps.ver.outputs.version }}
+          generate_release_notes: true

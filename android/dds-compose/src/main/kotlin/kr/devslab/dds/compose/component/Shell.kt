@@ -1,0 +1,248 @@
+package kr.devslab.dds.compose.component
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import kr.devslab.dds.compose.icons.DdsIcon
+import kr.devslab.dds.compose.theme.DdsTheme
+import kr.devslab.dds.compose.theme.keepWords
+import kr.devslab.dds.tokens.DdsBar
+import kr.devslab.dds.tokens.DdsBorder
+import kr.devslab.dds.tokens.DdsScreen
+import kr.devslab.dds.tokens.DdsSpace
+
+/**
+ * The bar at the top of a screen. It shares the page background and is set
+ * apart by a hairline — no shadow, no tint. It does not move or fade when a
+ * screen changes; only the content below it does.
+ *
+ * @param leading drawn before the title: the app mark on a top-level screen,
+ * or a back [DdsIconButton] on a deeper one
+ * @param actions drawn at the end (icon buttons)
+ */
+@Composable
+public fun DdsTopBar(
+    title: String,
+    modifier: Modifier = Modifier,
+    leading: (@Composable () -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+) {
+    val colors = DdsTheme.colors
+    Column(modifier.fillMaxWidth().background(colors.bgDefault)) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .heightIn(min = DdsBar.top.dp)
+                .padding(horizontal = DdsScreen.gutter.dp),
+            horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CompositionLocalProvider(LocalContentColor provides colors.textPrimary) {
+                leading?.invoke()
+                Text(
+                    title,
+                    Modifier.weight(1f).semantics { heading() },
+                    style = DdsTheme.typography.title2,
+                    color = colors.textPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                actions()
+            }
+        }
+        DdsDivider()
+    }
+}
+
+/** One destination of the bottom tabs or the rail. The label is the app's. */
+@Immutable
+public class DdsNavItem(public val label: String, public val icon: ImageVector)
+
+/**
+ * Bottom tabs, for a window narrower than 600dp.
+ *
+ * The selected tab changes three things at once — the pale brand pill behind
+ * the icon, the brand color, and a heavier label — never the color alone. A
+ * label stays on one line and is cut with an ellipsis at large font sizes.
+ */
+@Composable
+public fun DdsBottomBar(
+    items: List<DdsNavItem>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = DdsTheme.colors
+    Column(modifier) {
+        DdsDivider()
+        NavigationBar(containerColor = colors.bgDefault, tonalElevation = 0.dp) {
+            items.forEachIndexed { index, item ->
+                val selected = index == selectedIndex
+                NavigationBarItem(
+                    selected = selected,
+                    onClick = { onSelect(index) },
+                    icon = { DdsIcon(item.icon, contentDescription = null) },
+                    label = { NavLabel(item.label, selected) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = colors.textBrand,
+                        selectedTextColor = colors.textBrand,
+                        indicatorColor = colors.bgBrandSubtle,
+                        unselectedIconColor = colors.textSecondary,
+                        unselectedTextColor = colors.textSecondary,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+/** The same destinations as a rail at the start edge, for a window 600dp wide or more. */
+@Composable
+public fun DdsNavRail(
+    items: List<DdsNavItem>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = DdsTheme.colors
+    Row(modifier.fillMaxHeight()) {
+        NavigationRail(containerColor = colors.bgDefault) {
+            items.forEachIndexed { index, item ->
+                val selected = index == selectedIndex
+                NavigationRailItem(
+                    selected = selected,
+                    onClick = { onSelect(index) },
+                    icon = { DdsIcon(item.icon, contentDescription = null) },
+                    label = { NavLabel(item.label, selected) },
+                    colors = NavigationRailItemDefaults.colors(
+                        selectedIconColor = colors.textBrand,
+                        selectedTextColor = colors.textBrand,
+                        indicatorColor = colors.bgBrandSubtle,
+                        unselectedIconColor = colors.textSecondary,
+                        unselectedTextColor = colors.textSecondary,
+                    ),
+                )
+            }
+        }
+        Box(Modifier.fillMaxHeight().width(DdsBorder.hairline.dp).background(colors.borderDefault))
+    }
+}
+
+@Composable
+private fun NavLabel(text: String, selected: Boolean) {
+    Text(
+        text,
+        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/**
+ * The frame of an app with top-level destinations: the top bar, and the
+ * destinations as bottom tabs (narrow window) or a rail (600dp and wider).
+ *
+ * The bars are fixed. Put [kr.devslab.dds.compose.motion.ddsScreenContent] on
+ * the content, so only the content moves when the screen changes.
+ *
+ * @param content the screen; apply the given padding to it
+ */
+@Composable
+public fun DdsScaffold(
+    topBar: @Composable () -> Unit,
+    navItems: List<DdsNavItem>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    BoxWithConstraints(modifier.fillMaxSize().background(DdsTheme.colors.bgDefault)) {
+        val wide = maxWidth >= DdsScreen.breakpoint.dp
+        Scaffold(
+            topBar = topBar,
+            bottomBar = { if (!wide && navItems.isNotEmpty()) DdsBottomBar(navItems, selectedIndex, onSelect) },
+            containerColor = DdsTheme.colors.bgDefault,
+            contentColor = DdsTheme.colors.textPrimary,
+        ) { padding ->
+            if (wide && navItems.isNotEmpty()) {
+                Row(Modifier.fillMaxSize().padding(padding)) {
+                    DdsNavRail(navItems, selectedIndex, onSelect)
+                    Box(Modifier.weight(1f).fillMaxHeight()) { content(PaddingValues()) }
+                }
+            } else {
+                content(padding)
+            }
+        }
+    }
+}
+
+/**
+ * A dialog that asks for a decision. Use it to confirm; offer choices and
+ * actions in a bottom sheet instead.
+ *
+ * @param confirm the action that goes ahead (a [DdsButton]; `Danger` when it destroys something)
+ * @param dismiss the action that backs out (a `Ghost` or `Secondary` [DdsButton]); it comes first for focus
+ * @param text one or two sentences, in plain words
+ */
+@Composable
+public fun DdsDialog(
+    title: String,
+    onDismissRequest: () -> Unit,
+    confirm: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    dismiss: (@Composable () -> Unit)? = null,
+    text: String? = null,
+) {
+    val colors = DdsTheme.colors
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = confirm,
+        modifier = modifier,
+        dismissButton = dismiss,
+        title = { Text(title.keepWords(), style = DdsTheme.typography.title2) },
+        text = if (text != null) ({ Text(text.keepWords(), style = DdsTheme.typography.body1) }) else null,
+        shape = MaterialTheme.shapes.medium,
+        containerColor = colors.bgElevated,
+        titleContentColor = colors.textPrimary,
+        textContentColor = colors.textSecondary,
+        tonalElevation = 0.dp,
+    )
+}

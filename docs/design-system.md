@@ -48,6 +48,7 @@ Three layers. The lower, the more platform-neutral.
 | `@devslab/dds-tokens` | Token JSON + build outputs (table below) | everywhere |
 | `@devslab/dds-css` | CSS component layer (class-based, framework-agnostic) | SSR pages, vanilla widget, Vue, React, Ionic |
 | `@devslab/dds-native` | React Native components | mobile apps (if RN is chosen) |
+| `kr.devslab:dds-android-tokens` · `kr.devslab:dds-compose` (Maven) | Android values (Kotlin constants, XML resources) and the Compose theme and motion — [`mobile-native.md`](mobile-native.md) | native Android apps (D-048) |
 | `@devslab/dds-icons` | Icons (single SVG source → per-platform codegen) | everywhere |
 | `@devslab/dds-vue` | Vue 3 adapters on Ark UI and shared CSS | EDS Desktop, future Vue consumers |
 
@@ -64,6 +65,7 @@ shape, so the token package emits all of them:
 | Tailwind preset | v4 `@theme` CSS + v3 `preset.js` | any project using Tailwind |
 | TypeScript constants | `tokens.ts` | RN, code needing tokens at runtime |
 | Ionic theme mapping | `ionic.css` (`--ion-color-primary: var(--dds-color-bg-brand)` …) | Ionic apps (if chosen) |
+| Android values | Kotlin constants + `res/values` XML (`scripts/generate-android-tokens.mjs`; output committed under `android/dds-tokens`) | native Android apps |
 
 ### Framework strategy — "the core is CSS; frameworks are consumers"
 
@@ -265,6 +267,9 @@ Hangul glyphs, so Korean falls back to
 [Pretendard](https://github.com/orioncactus/pretendard) → system gothic
 (stack: `Geist, Pretendard, system-ui, …`). Screens where numbers matter
 (dashboard stats) enable tabular figures.
+
+Android uses Pretendard alone — Compose picks a font by weight, so two families
+in one stack means only the first is ever used (D-048, [`mobile-native.md`](mobile-native.md) §3).
 
 **Font files.** The three families' woff2 ship as one stylesheet,
 `@devslab/site-kit/fonts.css` (D-033). Its `@font-face` names are the token's
@@ -488,6 +493,8 @@ the docs.
 - **Versioning.** `dds-tokens` / `dds-web` / `dds-native` release on one
   version train (lockstep semver). Renaming or removing a token = breaking =
   major.
+  Exception: the Android coordinates (`kr.devslab:dds-*`) carry their own version
+  and release only from an `android-v*` tag (D-048).
 - **Change process.** Proposal (a short RFC in the style of this doc) → review
   → implementation + stories + docs → release. Foundation changes (§3) affect
   every product, so they are recorded in a decision log (decisions.md format).
@@ -507,6 +514,11 @@ the docs.
 | **Phase 1** | Token build pipeline (CSS variables + Tailwind preset) + `dds-css` Core 6 (Button, TextField, Badge, Spinner, Dialog, Toast) → applied to the AskLinq widget & SSR pages | when web UI work resumes |
 | **Phase 2** | `dds-icons` + more Composites + public Storybook | after Phase 1 stabilizes |
 | **Phase 3** | Starts with mobile work — **if RN**, implement `dds-native`; **if Ionic**, the `dds-tokens` Ionic mapping + `dds-css` are reused (no new package) | when mobile work starts |
+
+**Added 2026-11-10 (D-048).** The mobile consumers that actually arrived were
+Kotlin and Jetpack Compose — neither RN nor Ionic. A third path now lives in
+`android/`: generated values and a Compose theme and motion layer. The rules
+are in [`mobile-native.md`](mobile-native.md).
 
 No mobile package before Phase 3 — platform implementations without a consumer
 rot. The RN-vs-Ionic choice is made from product needs at mobile kickoff

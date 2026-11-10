@@ -68,6 +68,7 @@ Use the `@devslab/*` npm packages above and remove any obsolete
 | [`packages/dds-vue/`](packages/dds-vue/) | `@devslab/dds-vue` — Native Vue 3 Button/Icon/Input/Ark DatePicker, grown from EDS consumption |
 | [`packages/dds-table-solid/`](packages/dds-table-solid/) | `@devslab/dds-table-solid` — existing SolidJS TanStack table |
 | [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS themed AG Grid Community React wrapper; native grid options and API remain available |
+| [`android/`](android/) | DDS for native Android (D-048) — `kr.devslab:dds-android-tokens` (Kotlin constants and XML resources generated from the tokens) and `kr.devslab:dds-compose` (Material3 theme and motion). Guide: [`docs/mobile-native.md`](docs/mobile-native.md). Versioned apart from the web packages and published to Maven Central |
 | [`preview/index.html`](preview/index.html) | Self-contained foundations & components preview — open in a browser (`components.html`, `icons.html` alongside) |
 | [`brand/index.html`](brand/index.html) | Brand identity guide: logo rules, Electric Cyan, motifs, voice & tone |
 
@@ -122,8 +123,8 @@ and manually pushed release tags are not required for the standard workflow.
 Priorities live in [`docs/backlog.md`](docs/backlog.md). Packages are created
 only when a consumer exists (spec §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 inventory (Core 6 ✅ 2026-08-13, +13 ✅ 2026-08-15) →
-AskLinq adoption → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → `dds-native` (RN) or an Ionic
-theme mapping, depending on how mobile goes.
+AskLinq adoption → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → native Android values, theme and motion
+(0.2.0, 2026-11-10 — theme, motion, components, icons). RN and Ionic packages only when such a product exists.
 
 ## Input, choice and shared calendar additions
 

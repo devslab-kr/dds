@@ -1,0 +1,64 @@
+# Android — verifies the generated token values and the Gradle modules.
+#
+# Runs only when something Android reads has changed: the Android project, the
+# token sources, or the generator. The drift check itself (tokens/*.json vs the
+# committed Kotlin/XML) also runs in the main CI through `pnpm run check`, so a
+# token change that forgets the Android files fails there too.
+
+name: Android
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - "tokens/**"
+      - "packages/dds-tokens/resolve.mjs"
+      - "packages/dds-tokens/package.json"
+      - "scripts/generate-android-tokens.mjs"
+      - "scripts/generate-android-icons.mjs"
+      - "packages/dds-icons/svg/**"
+      - "packages/dds-icons/direction-policy.json"
+      - "scripts/check-android-sources.mjs"
+      - "tests/android-tokens.test.mjs"
+      - ".github/workflows/android.yml"
+  pull_request:
+    paths:
+      - "android/**"
+      - "tokens/**"
+      - "packages/dds-tokens/resolve.mjs"
+      - "packages/dds-tokens/package.json"
+      - "scripts/generate-android-tokens.mjs"
+      - "scripts/generate-android-icons.mjs"
+      - "packages/dds-icons/svg/**"
+      - "packages/dds-icons/direction-policy.json"
+      - "scripts/check-android-sources.mjs"
+      - "tests/android-tokens.test.mjs"
+      - ".github/workflows/android.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # No install needed: the generator and its test use only Node built-ins.
+      - run: node --test tests/android-tokens.test.mjs
+      - run: node scripts/generate-android-tokens.mjs --check
+      - run: node scripts/generate-android-icons.mjs --check
+      - run: node scripts/check-android-sources.mjs
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Unit tests, lint and release build
+        working-directory: android
+        run: ./gradlew testDebugUnitTest :dds-tokens:lintRelease :dds-compose:lintRelease :dds-tokens:assembleRelease :dds-compose:assembleRelease :catalog:assembleDebug --stacktrace
