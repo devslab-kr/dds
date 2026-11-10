@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.maven.publish)
 }
 
 // Values only — no Compose. The splash theme is drawn from XML before Compose
@@ -27,4 +28,11 @@ kotlin {
 
 dependencies {
     testImplementation(libs.junit)
+}
+
+mavenPublishing {
+    coordinates(artifactId = "dds-android-tokens")
+    pom {
+        name.set("DDS Android Tokens")
+    }
 }

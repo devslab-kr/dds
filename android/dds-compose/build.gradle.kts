@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.maven.publish)
 }
 
 // Theme and motion on top of Material3. Every color, size and duration comes
@@ -43,4 +44,11 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
 
     testImplementation(libs.junit)
+}
+
+mavenPublishing {
+    coordinates(artifactId = "dds-compose")
+    pom {
+        name.set("DDS Compose")
+    }
 }
