@@ -19,3 +19,7 @@
 *.ttf binary
 *.otf binary
 *.pdf binary
+
+# Windows batch files need CRLF to run from cmd.exe.
+*.bat text eol=crlf
+*.jar binary

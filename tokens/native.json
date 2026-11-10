@@ -1,0 +1,72 @@
+{
+  "$description": "DDS native-only foundations — values a touch platform needs that the web has no use for (control heights, touch targets, list stagger, screen shift, bar heights). Read only by the Android generator (scripts/generate-android-tokens.mjs); web artifacts never see this file. Numbers are dp (text is sp).",
+  "native": {
+    "motion": {
+      "duration": {
+        "short": { "$value": "150ms", "$type": "duration" }
+      },
+      "easing": {
+        "$description": "travel: a slow start for something that was standing still (a logo leaving the splash), so it does not appear to jump.",
+        "travel": { "$value": [0.4, 0, 0.2, 1], "$type": "cubicBezier" }
+      },
+      "stagger": {
+        "$description": "List items appear step apart; only the first `limit` indexes are delayed so a long list does not trickle.",
+        "step": { "$value": "30ms", "$type": "duration" },
+        "limit": { "$value": 6, "$type": "number" }
+      },
+      "shift": { "$value": 24, "$type": "dimension" },
+      "splash": {
+        "$description": "hold: pause on the finished mark before it travels. keep-limit: longest the system splash may be held, measured from the first ready frame.",
+        "hold": { "$value": "150ms", "$type": "duration" },
+        "keep-limit": { "$value": "1000ms", "$type": "duration" }
+      }
+    },
+    "touch": {
+      "min": { "$value": 48, "$type": "dimension" },
+      "large": { "$value": 56, "$type": "dimension" }
+    },
+    "control": {
+      "$description": "Button heights (minimums). sm is the visible height; its touch area is still touch.min.",
+      "sm": { "$value": 40, "$type": "dimension" },
+      "md": { "$value": 48, "$type": "dimension" },
+      "lg": { "$value": 56, "$type": "dimension" }
+    },
+    "field": {
+      "height": { "$value": 56, "$type": "dimension" }
+    },
+    "row": {
+      "min": { "$value": 56, "$type": "dimension" },
+      "two-line": { "$value": 72, "$type": "dimension" }
+    },
+    "bar": {
+      "top": { "$value": 64, "$type": "dimension" },
+      "bottom": { "$value": 80, "$type": "dimension" }
+    },
+    "icon": {
+      "sm": { "$value": 20, "$type": "dimension" },
+      "md": { "$value": 24, "$type": "dimension" }
+    },
+    "border": {
+      "hairline": { "$value": 1, "$type": "dimension" },
+      "focus": { "$value": 2, "$type": "dimension" }
+    },
+    "screen": {
+      "$description": "gutter below the breakpoint width, gutter-wide at or above it; block-gap between stacked blocks.",
+      "gutter": { "$value": 16, "$type": "dimension" },
+      "gutter-wide": { "$value": 24, "$type": "dimension" },
+      "breakpoint": { "$value": 600, "$type": "dimension" },
+      "block-gap": { "$value": 24, "$type": "dimension" }
+    },
+    "large-text": {
+      "$description": "The app-offered large text mode: the same eight styles, stepped up. It stacks with the system font scale (values are sp).",
+      "display": { "$value": { "fontSize": 36, "lineHeight": 46, "fontWeight": 700 }, "$type": "typography" },
+      "title-1": { "$value": { "fontSize": 32, "lineHeight": 42, "fontWeight": 700 }, "$type": "typography" },
+      "title-2": { "$value": { "fontSize": 26, "lineHeight": 36, "fontWeight": 600 }, "$type": "typography" },
+      "title-3": { "$value": { "fontSize": 22, "lineHeight": 32, "fontWeight": 600 }, "$type": "typography" },
+      "body-1": { "$value": { "fontSize": 20, "lineHeight": 30, "fontWeight": 400 }, "$type": "typography" },
+      "body-2": { "$value": { "fontSize": 18, "lineHeight": 28, "fontWeight": 400 }, "$type": "typography" },
+      "label": { "$value": { "fontSize": 18, "lineHeight": 26, "fontWeight": 500 }, "$type": "typography" },
+      "caption": { "$value": { "fontSize": 16, "lineHeight": 24, "fontWeight": 400 }, "$type": "typography" }
+    }
+  }
+}
