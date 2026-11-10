@@ -310,6 +310,8 @@ fun PartsPage() {
                     DdsValueRow("공급가액", "1,121,818원")
                     DdsValueRow("부가세", "112,182원")
                     DdsValueRow("수수료", "-9,000원")
+                    // A long name must not push the value out, at any font size.
+                    DdsValueRow("예상 정산 완료 예정일 (영업일 기준)", "2026-11-30")
                     DdsValueRow("정산 금액", "1,225,000원", emphasized = true, divider = false)
                 }
             }

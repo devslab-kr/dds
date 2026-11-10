@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -52,10 +53,14 @@ public fun ddsBackAction(
  *
  * Going Home → List → Settings → List leaves the trail Home, Settings, List:
  * back then leads to Settings, then Home, and never bounces between two tabs.
+ *
+ * Call [visit] every time the person selects a tab — the back handler only
+ * updates the trail on back. [current] and [previous] are observable, so the
+ * trail can be the app's selected-tab state.
  */
 @Stable
 public class DdsTabTrail internal constructor(initial: List<Int>) {
-    private val visited = ArrayDeque(initial)
+    private val visited = mutableStateListOf<Int>().apply { addAll(initial) }
 
     /** The tab shown now, or null before the first [visit]. */
     public val current: Int? get() = visited.lastOrNull()
@@ -65,18 +70,21 @@ public class DdsTabTrail internal constructor(initial: List<Int>) {
 
     /** Record that [tab] is now shown. */
     public fun visit(tab: Int) {
+        if (visited.lastOrNull() == tab) return
         visited.remove(tab)
-        visited.addLast(tab)
+        visited.add(tab)
     }
 
     /** Leave the current tab; returns the tab now shown, or null if there was none before it. */
     public fun back(): Int? {
         if (visited.size < 2) return null
-        visited.removeLast()
+        visited.removeAt(visited.lastIndex)
         return visited.last()
     }
 
-    internal fun snapshot(): List<Int> = visited.toList()
+    // An ArrayList, not toList(): a snapshot list's own copy is not a type a Bundle can hold,
+    // and rememberSaveable refuses it when the screen is first composed.
+    internal fun snapshot(): List<Int> = ArrayList(visited)
 
     internal companion object {
         val Saver: Saver<DdsTabTrail, List<Int>> = Saver(save = { it.snapshot() }, restore = { DdsTabTrail(it) })
@@ -93,6 +101,9 @@ public fun rememberDdsTabTrail(startTab: Int = 0): DdsTabTrail =
  *
  * The exit question itself is the app's to show (a [kr.devslab.dds.compose.component.DdsDialog]
  * with its own words) — [onAskToExit] only says it is time to ask.
+ *
+ * The handler only moves the trail on back: the app calls `trail.visit(tab)`
+ * when the person selects a tab.
  *
  * @param enabled false where back must not be taken over: a lock screen, or
  * while a dialog or sheet is open (those close themselves on back)

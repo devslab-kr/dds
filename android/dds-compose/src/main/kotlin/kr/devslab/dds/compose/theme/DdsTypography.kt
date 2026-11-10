@@ -164,7 +164,11 @@ private const val WORD_JOINER: Char = 0x2060.toChar()
  * joined text and `onNodeWithText("…")` does not find it.
  *
  * ```
- * Text(label.keepWords(), Modifier.readAs(label))
+ * Text(label.keepWords(), Modifier.testTag("save").readAs(label))
  * ```
+ *
+ * Put it **last** in the chain: it replaces the semantics of everything after
+ * it on the same element (a `clickable`, a `testTag`, a `semantics { heading() }`
+ * written after it would be dropped).
  */
 public fun Modifier.readAs(original: String): Modifier = clearAndSetSemantics { text = AnnotatedString(original) }

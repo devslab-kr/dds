@@ -171,3 +171,18 @@ test("an icon the generator cannot render is a build error", () => {
   assert.throws(() => renderAndroidIcons([{ name: "x", svg: svg('<path d="M0 0"></path>').replace("1.6", "2") }, { name: "y", svg: svg('<path d="M0 0"></path>') }], policy), /stroke/);
   assert.throws(() => renderAndroidIcons([{ name: "x", svg: svg('<path d="M0 0"></path>') }], { mirrorInRtl: ["gone"] }), /gone/);
 });
+
+test("component text that keeps Korean words together is read as it was written", async () => {
+  // keepWords() puts an invisible joiner between letters. A component that draws
+  // it without readAs() hands the joined text to screen readers and to tests.
+  const dir = new URL("../android/dds-compose/src/main/kotlin/kr/devslab/dds/compose/component/", import.meta.url);
+  const { readdir } = await import("node:fs/promises");
+  for (const name of await readdir(dir)) {
+    const source = await readFile(new URL(name, dir), "utf8");
+    if (name === "WordsText.kt") {
+      assert.match(source, /\.keepWords\(\), modifier\.readAs\(text\)/);
+    } else {
+      assert.doesNotMatch(source, /\.keepWords\(\)/, `${name} draws keepWords() directly; use WordsText`);
+    }
+  }
+});

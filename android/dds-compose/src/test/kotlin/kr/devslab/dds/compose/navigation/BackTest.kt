@@ -3,6 +3,7 @@ package kr.devslab.dds.compose.navigation
 import kr.devslab.dds.tokens.DdsMotionTokens
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import androidx.compose.runtime.saveable.SaverScope
 import org.junit.Test
 
 class BackTest {
@@ -64,7 +65,10 @@ class BackTest {
     @Test
     fun theTrailSurvivesBeingSavedAndRestored() {
         val trail = DdsTabTrail(listOf(0)).apply { visit(3) }
-        val restored = DdsTabTrail(trail.snapshot())
+        val saved = with(DdsTabTrail.Saver) { SaverScope { true }.save(trail) }!!
+        // What is saved has to be a type a Bundle can hold; a snapshot list's own copy is not.
+        assertEquals(ArrayList::class.java, saved.javaClass)
+        val restored = DdsTabTrail.Saver.restore(saved)!!
         assertEquals(3, restored.current)
         assertEquals(0, restored.previous)
     }

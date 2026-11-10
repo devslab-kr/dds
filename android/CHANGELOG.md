@@ -18,7 +18,8 @@ From using JeongsanNow on a phone, and the components 0.2.0 left out.
 - **Fixed — text is read as written.** Component text drawn with `keepWords()` reached screen
   readers and tests with invisible joiners between the letters, so `onNodeWithText("저장")`
   did not match. Components now expose the original text; `Modifier.readAs()` does the same
-  for text an app draws itself.
+  for text an app draws itself. A test that matched a DDS label with `"…".keepWords()` now
+  matches the plain string.
 - `dds-compose` now brings `androidx.activity:activity-compose` (for the back handler).
 
 ## 0.2.1 — 2026-11-11

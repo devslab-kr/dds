@@ -48,7 +48,7 @@ values `[spec §3.6]`.
 | Name | Value | Use |
 | --- | --- | --- |
 | `DdsMotion.Fast` | 100ms | leaving, press feedback, a screen's opacity on arrival |
-| `DdsMotion.Short` | 150ms | switching tabs, list items appearing, progress |
+| `DdsMotion.Short` | 150ms | list items appearing, progress |
 | `DdsMotion.Base` | 200ms | going back, expand and collapse, dialogs |
 | `DdsMotion.Slow` | 300ms | a new screen, sheets, the logo travelling |
 | `DdsMotion.Standard` | (0.2, 0, 0, 1) | arriving, changes inside a screen |
@@ -229,16 +229,37 @@ key(entry) {
 On a phone, back is how people move. An app that closes when back is pressed on a second
 tab feels broken ("I went to another menu, pressed back, and the app just left").
 
-23. **Back goes back.** First to the screen before, then to the tab the person was on
-    before this one. Each tab is remembered once, so back never bounces between two tabs.
-24. **Leaving is never silent.** With nowhere left to go, or when back is pressed twice
-    within 600ms, ask ("Close the app?") and leave only on yes.
-25. **Do not take back over where input is blocked** (a lock screen), or while a dialog or
-    sheet is open — those close themselves.
-26. **Keep scroll state above the screen that is removed.** A screen wrapped in
-    `DdsScreenMotion` is taken out and drawn again; a `rememberScrollState()` inside it is
-    lost, and coming back lands at the top. Hold the scroll state per navigation entry,
-    outside the part that is removed, and pass it down.
+- **Back goes back.** First to the screen before, then to the tab the person was on
+  before this one. Each tab is remembered once, so back never bounces between two tabs.
+- **Leaving is never silent.** With nowhere left to go, or when back is pressed twice
+  within 600ms, ask ("Close the app?") and leave only on yes.
+- **Do not take back over where input is blocked** (a lock screen), or while a dialog or
+  sheet is open — those close themselves.
+- **Keep scroll state above the screen that is removed.** A screen wrapped in
+  `DdsScreenMotion` is taken out and drawn again; a `rememberScrollState()` inside it is
+  lost, and coming back lands at the top. Hold the scroll state per navigation entry,
+  outside the part that is removed, and pass it down.
+
+```kotlin
+val trail = rememberDdsTabTrail(startTab = 0)
+var asking by rememberSaveable { mutableStateOf(false) }
+DdsBackHandler(
+    trail = trail,
+    canPop = navController.previousBackStackEntry != null,
+    onPop = { navController.popBackStack() },
+    onTab = { tab -> showTab(tab) },               // the trail is already updated
+    onAskToExit = { asking = true },
+    enabled = !asking,
+)
+DdsScaffold(
+    selectedIndex = trail.current ?: 0,
+    onSelect = { tab -> trail.visit(tab); showTab(tab) },   // tell the trail on every tab press
+    …
+)
+```
+
+The handler only moves the trail on back. Without `trail.visit(tab)` on a tab press the
+trail has one entry and back always asks to leave.
 
 Code: `rememberDdsTabTrail()`, `DdsBackHandler(trail, canPop, onPop, onTab, onAskToExit)`,
 and the rule itself as one function, `ddsBackAction()`. The question is a `DdsDialog`
@@ -607,7 +628,9 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
   letters of a word. Up to 0.2.1 that joined text also reached screen readers and tests
   (`onNodeWithText("저장")` did not find a DDS label). The components now draw the joined
   text and expose the original. For text you draw yourself:
-  `Text(label.keepWords(), Modifier.readAs(label))`.
+  `Text(label.keepWords(), Modifier.readAs(label))` — `readAs` goes last in the chain; it
+  replaces the semantics of anything written after it. A test that matched a DDS label with
+  `"…".keepWords()` now matches the plain string.
 - **One search field and one select field in the whole app.** Two looks for the same job on
   two screens is the inconsistency people notice first.
 

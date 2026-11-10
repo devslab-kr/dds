@@ -45,7 +45,7 @@ Qooroo `docs/design/android/DESIGN.md` §5·§7·§9. 시간과 이징 중 100·
 | 이름 | 값 | 쓰임 |
 | --- | --- | --- |
 | `DdsMotion.Fast` | 100ms | 사라짐, 누름 반응, 화면이 나타나는 불투명도 |
-| `DdsMotion.Short` | 150ms | 탭 바꾸기, 목록 항목 등장, 진행 표시 |
+| `DdsMotion.Short` | 150ms | 목록 항목 등장, 진행 표시 |
 | `DdsMotion.Base` | 200ms | 뒤로 가기, 접기·펼치기, 다이얼로그 |
 | `DdsMotion.Slow` | 300ms | 새 화면, 시트, 로고 이동 |
 | `DdsMotion.Standard` | (0.2, 0, 0, 1) | 들어올 때, 화면 안 변화 |
@@ -219,15 +219,36 @@ key(entry) {
 폰에서 뒤로 가기는 이동 수단이다. 다른 탭으로 옮긴 뒤 뒤로를 눌렀는데 앱이 닫히면 고장으로
 읽힌다("메뉴 이동한 다음에 백버튼 누르면 그냥 나가버려").
 
-23. **뒤로는 뒤로 간다.** 먼저 이전 화면, 그다음 직전에 보던 탭. 탭은 한 번씩만 기억해서
-    두 탭 사이를 오가지 않는다.
-24. **말없이 종료하지 않는다.** 더 돌아갈 곳이 없거나 600ms 안에 뒤로를 두 번 누르면
-    "앱을 종료할까요?"를 묻고, 예일 때만 종료한다.
-25. **입력이 막힌 화면(잠금)에서는 뒤로를 가로채지 않는다.** 다이얼로그나 시트가 열려
-    있을 때도 그렇다 — 그것들은 스스로 닫힌다.
-26. **스크롤 상태는 걷히는 화면 바깥에 둔다.** `DdsScreenMotion`으로 감싼 화면은 걷혔다가
-    다시 그려진다. 그 안의 `rememberScrollState()`는 사라지고, 돌아오면 맨 위로 간다. 스크롤
-    상태를 내비게이션 항목 단위로, 걷히는 부분 바깥에서 잡아 내려 준다.
+- **뒤로는 뒤로 간다.** 먼저 이전 화면, 그다음 직전에 보던 탭. 탭은 한 번씩만 기억해서
+  두 탭 사이를 오가지 않는다.
+- **말없이 종료하지 않는다.** 더 돌아갈 곳이 없거나 600ms 안에 뒤로를 두 번 누르면
+  "앱을 종료할까요?"를 묻고, 예일 때만 종료한다.
+- **입력이 막힌 화면(잠금)에서는 뒤로를 가로채지 않는다.** 다이얼로그나 시트가 열려
+  있을 때도 그렇다 — 그것들은 스스로 닫힌다.
+- **스크롤 상태는 걷히는 화면 바깥에 둔다.** `DdsScreenMotion`으로 감싼 화면은 걷혔다가
+  다시 그려진다. 그 안의 `rememberScrollState()`는 사라지고, 돌아오면 맨 위로 간다. 스크롤
+  상태를 내비게이션 항목 단위로, 걷히는 부분 바깥에서 잡아 내려 준다.
+
+```kotlin
+val trail = rememberDdsTabTrail(startTab = 0)
+var asking by rememberSaveable { mutableStateOf(false) }
+DdsBackHandler(
+    trail = trail,
+    canPop = navController.previousBackStackEntry != null,
+    onPop = { navController.popBackStack() },
+    onTab = { tab -> showTab(tab) },               // trail은 이미 갱신돼 있다
+    onAskToExit = { asking = true },
+    enabled = !asking,
+)
+DdsScaffold(
+    selectedIndex = trail.current ?: 0,
+    onSelect = { tab -> trail.visit(tab); showTab(tab) },   // 탭을 누를 때마다 trail에 알린다
+    …
+)
+```
+
+처리기는 뒤로 갈 때만 trail을 움직인다. 탭을 누를 때 `trail.visit(tab)`을 부르지 않으면
+trail에는 항목이 하나뿐이라 뒤로가 항상 종료를 묻는다.
 
 코드: `rememberDdsTabTrail()`, `DdsBackHandler(trail, canPop, onPop, onTab, onAskToExit)`,
 규칙 자체는 함수 하나 `ddsBackAction()`. 질문은 앱의 문구를 넣은 `DdsDialog`다. 600ms는
@@ -591,7 +612,9 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 - **글은 쓴 그대로 읽힌다.** `keepWords()`는 단어의 글자 사이에 보이지 않는 연결 문자를
   넣는다. 0.2.1까지는 그 글이 화면 낭독기와 테스트에도 그대로 전달됐다
   (`onNodeWithText("저장")`이 DDS 라벨을 찾지 못했다). 이제 부품은 묶은 글을 그리고 원문을
-  알려 준다. 직접 그리는 글에는 `Text(label.keepWords(), Modifier.readAs(label))`.
+  알려 준다. 직접 그리는 글에는 `Text(label.keepWords(), Modifier.readAs(label))` — `readAs`는
+  수정자 사슬의 맨 뒤에 둔다. 뒤에 적은 것의 접근성 정보를 대체하기 때문이다. DDS 라벨을
+  `"…".keepWords()`로 찾던 테스트는 이제 원문으로 찾는다.
 - **검색칸 하나, 선택칸 하나를 앱 전체에서 쓴다.** 같은 일을 하는 칸이 화면마다 다르게
   생기면 가장 먼저 눈에 띄는 불일치가 된다.
 
