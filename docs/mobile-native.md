@@ -379,8 +379,8 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
 | `onSurface`, `onBackground` | `text.primary` | zinc.950 | zinc.50 |
 | `onSurfaceVariant`, `secondary` | `text.secondary` | zinc.600 | zinc.400 |
 | `outline` / `outlineVariant` | `border.strong` / `border.default` | zinc.300 / zinc.200 | zinc.700 / zinc.800 |
-| `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.400 / zinc.950 |
-| `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.400 |
+| `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.300 / zinc.950 |
+| `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.300 |
 | `inverseSurface` / `inverseOnSurface` | `bg.inverse` / `text.on-inverse` | zinc.900 / zinc.50 | zinc.50 / zinc.950 |
 | `scrim` | `overlay.dim` | black 25% | black 25% |
 | `surfaceTint` | transparent | — | — |
@@ -393,8 +393,8 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
   for progress and slider tracks, where it is too faint on a light page. Pass
   `trackColor = DdsTheme.colors.borderDefault` for a track (`DdsBusyBar` does).
 
-> Known defect: in dark, the danger (3.62:1) and info (4.07:1) pairs are below
-> 4.5:1. It is the token values; the web has the same. §10, item 10.
+> All four status pairs clear 4.5:1 in both themes since D-049 (Android 0.2.1): the dark
+> danger and info text moved one step lighter. A test holds the line.
 
 ## 4. Type `[spec §3.2]`
 
@@ -495,7 +495,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 7 | The large text mode scale and its 56 touch target | JeongsanNow's senior mode values | a feature the web does not have |
 | 8 | Bottom tab selection, and the line between bars and content | pill (`bg.brand-subtle`) + `text.brand` + weight 600; a 1dp line | web Tabs use an underline. Selection was reported as too weak |
 | 9 | The Material3 role mapping | §3.3 | the web has nothing to map to |
-| 10 | Dark status color contrast | the tokens as they are (danger 3.62:1, info 4.07:1) | below the 4.5:1 of spec §6. The web has the same values |
+| 10 | Dark status color contrast | **fixed in the tokens (D-049):** danger `red.300` (5.28:1), info `blue.300` (5.74:1) | was 3.62:1 and 4.07:1, below the 4.5:1 of spec §6, on the web too |
 | 11 | How dialogs and sheets appear | Material3 defaults | Qooroo's document scales a dialog 0.98→1. Whether that fits "size never changes" needs deciding |
 | 12 | How disabled looks | DDS components: opacity 0.45, the value in the web's `button.css`. Material3 components used directly keep their own 38% | the spec only says `opacity` is for disabled; the number lives in CSS, not in a token |
 | 13 | When haptic feedback is used | no rule | only Qooroo uses it |
@@ -507,9 +507,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 
 - **Chosen by the owner:** 4 (a placeholder stays still), 5 (a card is set apart by its
   edge only, no shadow), 10 (fix the token values themselves so the dark danger and info
-  colors clear 4.5:1 — a token change that reaches every product's dark screens, so it is
-  handled as its own change with a decision record and a web release; until it lands the
-  values in the table ship as they are).
+  colors clear 4.5:1 — done in D-049, for the web and Android together).
 - **Recommended as "keep the value put in for now", shown to the owner, no objection yet:**
   1, 2, 3, 6, 7, 8, 9, 12, 13, and 11 as "keep the Material3 default; no size change on a
   dialog". These are not confirmed rules until the owner says so.

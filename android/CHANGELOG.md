@@ -5,6 +5,12 @@
 `kr.devslab:dds-android-tokens` and `kr.devslab:dds-compose` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.2.1 — 2026-11-11
+
+- Dark theme: the danger and info colors are one step lighter (`red.300`, `blue.300`),
+  so error and notice text clears 4.5:1 on its own background (was 3.62:1 and 4.07:1).
+  The same token change as the web (D-049). Nothing else changes.
+
 ## 0.2.0 — 2026-11-10
 
 The first release on Maven Central.
@@ -33,8 +39,7 @@ The first release on Maven Central.
 
 **Known**
 
-- Dark status colors are below 4.5:1 (danger 3.62:1, info 4.07:1) — the same token
-  values as the web.
+- Dark status colors are below 4.5:1 (danger 3.62:1, info 4.07:1) — fixed in 0.2.1.
 - Not yet built: bottom sheet, toast, in-page tabs, pickers, menu. Use the Material3
   ones under `DdsTheme`.
 

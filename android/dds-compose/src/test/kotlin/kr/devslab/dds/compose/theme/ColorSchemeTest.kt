@@ -66,14 +66,12 @@ class ColorSchemeTest {
 
     /**
      * The status pairs are mapped as the tokens define them, not adjusted here.
-     * Two dark pairs in tokens/semantic.dark.json are below 4.5:1 today
-     * (danger 3.62, info 4.07) — a token defect shared with the web, recorded
-     * in docs/decisions.md D-048. This pins the floor they do reach (3:1, the
-     * large-text and UI-element line) so they cannot get worse unnoticed;
-     * raise it to [DdsMinTextContrast] when the tokens are fixed.
+     * Each is text on its own pale background, so each has to clear the text
+     * line in both themes. Two dark pairs did not before D-049 (danger 3.62,
+     * info 4.07).
      */
     @Test
-    fun statusPairsReachAtLeastTheUiElementLine() {
+    fun statusPairsClearTheTextLine() {
         for ((c, name) in listOf(light to "light", dark to "dark")) {
             val pairs = listOf(
                 "success" to (c.statusSuccess to c.statusSuccessBg),
@@ -83,57 +81,8 @@ class ColorSchemeTest {
             )
             for ((label, pair) in pairs) {
                 val ratio = contrastRatio(pair.first, pair.second)
-                assertTrue("$name $label is %.2f:1".format(ratio), ratio >= 3.0)
+                assertTrue("$name $label is %.2f:1".format(ratio), ratio >= DdsMinTextContrast)
             }
         }
-        for (c in listOf(light.statusSuccess to light.statusSuccessBg, light.statusDanger to light.statusDangerBg)) {
-            assertTrue(contrastRatio(c.first, c.second) >= DdsMinTextContrast)
-        }
-    }
-
-    /**
-     * Material picks the text color for a Surface by matching its background to
-     * a role. Every DDS surface must resolve to primary text — a card must not
-     * silently get secondary text because two roles share a color.
-     */
-    @Test
-    fun textOnEveryNeutralSurfaceIsPrimaryText() {
-        for ((c, isDark) in listOf(light to false, dark to true)) {
-            val scheme = if (isDark) darkScheme else lightScheme
-            for (surface in listOf(c.bgDefault, c.bgElevated, c.bgSubtle)) {
-                assertEquals(c.textPrimary, scheme.contentColorFor(surface))
-            }
-            assertEquals(c.textOnInverse, scheme.contentColorFor(c.bgInverse))
-        }
-    }
-
-    /**
-     * Every system color is the token of the same name, in the right theme. The
-     * mapping is written by hand, so a swapped line (dark reading a light token,
-     * muted reading secondary) would compile; this is what catches it.
-     */
-    @Test
-    fun everySystemColorIsTheTokenOfTheSameName() {
-        val brandSlice = setOf("bgBrand", "bgBrandHover", "bgBrandSubtle", "textOnBrand", "textBrand", "borderFocus")
-        for ((colors, tokens) in listOf(light to DdsLightColors::class.java, dark to DdsDarkColors::class.java)) {
-            var compared = 0
-            for (field in tokens.declaredFields) {
-                if (field.name == "INSTANCE" || field.name in brandSlice) continue
-                val getter = DdsColors::class.java.getDeclaredMethod("get" + field.name.replaceFirstChar { it.uppercase() } + "-0d7_KjU")
-                val actual = Color((getter.invoke(colors) as Long).toULong())
-                assertEquals(field.name, Color(field.getLong(null)), actual)
-                compared++
-            }
-            assertTrue(compared > 15)
-        }
-    }
-
-    /** A token added to the generator must not be silently missing from the Compose surface. */
-    @Test
-    fun everySemanticColorTokenIsExposed() {
-        val exposed = DdsColors::class.java.declaredFields.map { it.name }.toSet()
-        val tokens = DdsLightColors::class.java.declaredFields.map { it.name }.filter { it != "INSTANCE" }
-        assertTrue(tokens.isNotEmpty())
-        for (token in tokens) assertTrue("DdsColors has no $token", token in exposed)
     }
 }

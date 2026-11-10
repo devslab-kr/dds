@@ -56,9 +56,9 @@ object DdsDarkColors {
     const val statusSuccessBg: Long = 0xFF14532D
     const val statusWarning: Long = 0xFFFBBF24
     const val statusWarningBg: Long = 0xFF78350F
-    const val statusDanger: Long = 0xFFF87171
+    const val statusDanger: Long = 0xFFFCA5A5
     const val statusDangerBg: Long = 0xFF7F1D1D
-    const val statusInfo: Long = 0xFF60A5FA
+    const val statusInfo: Long = 0xFF93C5FD
     const val statusInfoBg: Long = 0xFF1E3A8A
     const val overlayDim: Long = 0x40000000
     const val overlayHoverTint: Long = 0x14FFFFFF

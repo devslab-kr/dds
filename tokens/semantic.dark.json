@@ -29,9 +29,9 @@
       "success-bg": { "$value": "{palette.green.900}", "$type": "color" },
       "warning": { "$value": "{palette.amber.400}", "$type": "color" },
       "warning-bg": { "$value": "{palette.amber.900}", "$type": "color" },
-      "danger": { "$value": "{palette.red.400}", "$type": "color" },
+      "danger": { "$value": "{palette.red.300}", "$type": "color" },
       "danger-bg": { "$value": "{palette.red.900}", "$type": "color" },
-      "info": { "$value": "{palette.blue.400}", "$type": "color" },
+      "info": { "$value": "{palette.blue.300}", "$type": "color" },
       "info-bg": { "$value": "{palette.blue.900}", "$type": "color" }
     },
     "overlay": {

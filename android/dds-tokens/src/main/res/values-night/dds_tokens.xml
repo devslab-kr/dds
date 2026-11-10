@@ -18,9 +18,9 @@
     <color name="dds_color_status_success_bg">#FF14532D</color>
     <color name="dds_color_status_warning">#FFFBBF24</color>
     <color name="dds_color_status_warning_bg">#FF78350F</color>
-    <color name="dds_color_status_danger">#FFF87171</color>
+    <color name="dds_color_status_danger">#FFFCA5A5</color>
     <color name="dds_color_status_danger_bg">#FF7F1D1D</color>
-    <color name="dds_color_status_info">#FF60A5FA</color>
+    <color name="dds_color_status_info">#FF93C5FD</color>
     <color name="dds_color_status_info_bg">#FF1E3A8A</color>
     <color name="dds_color_overlay_hover_tint">#14FFFFFF</color>
     <color name="dds_color_overlay_pressed_tint">#14FFFFFF</color>
