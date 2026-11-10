@@ -278,9 +278,9 @@ D-048. 가이드 [`mobile-native.ko.md`](mobile-native.ko.md), 설계
       디테일을 규칙 + 코드 + 확인 방법으로 담는다.
 - [x] 0.1.0 브랜드 덮어쓰기: 웹과 같은 여섯 토큰을 색 리소스로(XML·Compose 공통), 대비 검사.
 - [x] `catalog` 앱과 에뮬레이터 캡처 확인, 로컬 Maven 배포, CI·릴리스 워크플로.
-- [ ] **Maven Central 첫 배포는 0.2.0** — `android-v0.2.0` 태그. 조직 시크릿 다섯 개
-      (`MAVEN_CENTRAL_USERNAME`·`MAVEN_CENTRAL_PASSWORD`·`SIGNING_KEY`·`SIGNING_KEY_ID`·`SIGNING_KEY_PASSWORD`)
-      가 이 저장소에 열려 있어야 한다.
+- [x] **Maven Central 첫 배포 0.2.0** (2026-11-11) — `android-v0.2.0` 태그, 릴리스 워크플로 통과,
+      `kr.devslab:dds-android-tokens`·`kr.devslab:dds-compose` 0.2.0 확인. 조직 Maven 시크릿은 이 저장소에
+      열려 있다. 조직 프로필 README에 행 추가(devslab-kr/.github#38).
 - [x] 0.2.0 부품: `DdsButton`, `DdsIconButton`, `DdsTextField`, 선택 3종, `DdsCard`·`DdsSection`,
       `DdsListRow`, `DdsNotice`(종류별 아이콘), `DdsBadge`, `DdsTopBar`·`DdsBottomBar`·`DdsNavRail`,
       진행 표시·자리 표시, `DdsPullRefresh`, `DdsEmptyState`, `DdsDialog`.
