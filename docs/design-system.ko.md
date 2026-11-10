@@ -184,8 +184,8 @@
 | `color.border.focus` | `neutral-focus.light` (`#52606d`) | `neutral-focus.dark` (`#b0bbc4`) | 중립색 포커스 링 |
 | `color.status.success` / `.success-bg` | `green.700` / `green.50` | `green.400` / `green.900` | 성공 |
 | `color.status.warning` / `.warning-bg` | `amber.700` / `amber.50` | `amber.400` / `amber.900` | 경고 |
-| `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.400` / `red.900` | 위험·오류 |
-| `color.status.info` / `.info-bg` | `blue.700` / `blue.50` | `blue.400` / `blue.900` | 정보 |
+| `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.300` / `red.900` | 위험·오류 |
+| `color.status.info` / `.info-bg` | `blue.700` / `blue.50` | `blue.300` / `blue.900` | 정보 |
 
 > **on-brand 노트.** cyan 은 밝은 색상이라 흰 텍스트를 올리면 대비가
 > 2.3:1 로 WCAG AA 에 한참 못 미친다. 브랜드 면 위 텍스트는 흰색이 아니라

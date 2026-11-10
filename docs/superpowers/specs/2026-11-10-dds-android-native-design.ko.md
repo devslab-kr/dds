@@ -218,8 +218,8 @@ Material3 부품을 그대로 써도 대비가 통과하고, DDS 부품은 웹�
 | `onSurfaceVariant` | `text.secondary` | zinc.600 | zinc.400 |
 | `outline` | `border.strong` | zinc.300 | zinc.700 |
 | `outlineVariant` | `border.default` | zinc.200 | zinc.800 |
-| `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.400 / zinc.950 |
-| `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.400 |
+| `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.300 / zinc.950 |
+| `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.300 |
 | `inverseSurface` / `inverseOnSurface` | `bg.inverse` / `text.on-inverse` | zinc.900 / zinc.50 | zinc.50 / zinc.950 |
 | `scrim` | `overlay.dim` | 검정 25% | 검정 25% |
 | `surfaceTint` | 투명 | — | — |

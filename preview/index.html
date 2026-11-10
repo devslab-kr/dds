@@ -259,7 +259,7 @@
     --pbrand: #06b6d4; --pbrand-hover: #22d3ee; --pon-brand: #09090b; --pbrand-text: #22d3ee;
     --ptint: rgba(255, 255, 255, 0.08); --ppress: rgba(255, 255, 255, 0.12);
     --psuccess: #4ade80; --psuccess-bg: #14532d; --pwarning: #fbbf24; --pwarning-bg: #78350f;
-    --pdanger: #f87171; --pdanger-bg: #7f1d1d; --pinfo: #60a5fa; --pinfo-bg: #1e3a8a;
+    --pdanger: #fca5a5; --pdanger-bg: #7f1d1d; --pinfo: #93c5fd; --pinfo-bg: #1e3a8a;
     --poverlay: rgba(0, 0, 0, 0.55);
   }
   .prow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
@@ -721,8 +721,8 @@
     ["color.border.focus","#52606d","#b0bbc4","중립색 포커스 링"],
     ["color.status.success","#15803d","#4ade80","성공 (bg: green.50 / green.900)"],
     ["color.status.warning","#b45309","#fbbf24","경고 (bg: amber.50 / amber.900)"],
-    ["color.status.danger","#b91c1c","#f87171","위험·오류 (bg: red.50 / red.900)"],
-    ["color.status.info","#1d4ed8","#60a5fa","정보 (bg: blue.50 / blue.900)"],
+    ["color.status.danger","#b91c1c","#fca5a5","위험·오류 (bg: red.50 / red.900)"],
+    ["color.status.info","#1d4ed8","#93c5fd","정보 (bg: blue.50 / blue.900)"],
   ];
   document.getElementById("semRows").innerHTML = sem.map(([t,l,d,u]) => `
     <tr>

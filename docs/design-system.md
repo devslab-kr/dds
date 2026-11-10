@@ -192,8 +192,8 @@ toggle**; both mappings are first-class from day one.
 | `color.border.focus` | `neutral-focus.light` (`#52606d`) | `neutral-focus.dark` (`#b0bbc4`) | neutral focus ring |
 | `color.status.success` / `.success-bg` | `green.700` / `green.50` | `green.400` / `green.900` | success |
 | `color.status.warning` / `.warning-bg` | `amber.700` / `amber.50` | `amber.400` / `amber.900` | warning |
-| `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.400` / `red.900` | danger · errors |
-| `color.status.info` / `.info-bg` | `blue.700` / `blue.50` | `blue.400` / `blue.900` | info |
+| `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.300` / `red.900` | danger · errors |
+| `color.status.info` / `.info-bg` | `blue.700` / `blue.50` | `blue.300` / `blue.900` | info |
 
 > **The on-brand note.** Cyan is a light hue — white text on `cyan.500` has a
 > contrast of ~2.3:1, far below WCAG AA. Text on brand surfaces is therefore

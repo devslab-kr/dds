@@ -368,8 +368,8 @@ Material3의 `primary`는 채움 면과 글자색을 겸하는데 DDS는 둘을 
 | `onSurface`, `onBackground` | `text.primary` | zinc.950 | zinc.50 |
 | `onSurfaceVariant`, `secondary` | `text.secondary` | zinc.600 | zinc.400 |
 | `outline` / `outlineVariant` | `border.strong` / `border.default` | zinc.300 / zinc.200 | zinc.700 / zinc.800 |
-| `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.400 / zinc.950 |
-| `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.400 |
+| `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.300 / zinc.950 |
+| `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.300 |
 | `inverseSurface` / `inverseOnSurface` | `bg.inverse` / `text.on-inverse` | zinc.900 / zinc.50 | zinc.50 / zinc.950 |
 | `scrim` | `overlay.dim` | 검정 25% | 검정 25% |
 | `surfaceTint` | 투명 | — | — |
@@ -382,8 +382,8 @@ Material3의 `primary`는 채움 면과 글자색을 겸하는데 DDS는 둘을 
   밝은 화면에서는 너무 옅다. 트랙에는 `trackColor = DdsTheme.colors.borderDefault`를
   넘긴다(`DdsBusyBar`가 그렇게 한다).
 
-> 알려진 결함: 어두운 화면의 위험(3.62:1)과 정보(4.07:1) 쌍이 4.5:1에 못 미친다.
-> 토큰 값의 문제이고 웹도 같다. §10의 10번.
+> D-049(안드로이드 0.2.1)부터 상태색 네 쌍이 두 테마 모두에서 4.5:1을 넘는다. 어두운 화면의
+> 위험·정보 글자를 한 단계 밝혔고, 테스트가 이 선을 지킨다.
 
 ## 4. 글자 `[명세 §3.2]`
 
@@ -482,7 +482,7 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 | 7 | 큰 글자 모드의 글자 표와 터치 56 | 정산나우 시니어 모드 값 | 웹에는 없는 기능 |
 | 8 | 아래 탭의 선택 표시, 바와 내용의 구분 | 알약(`bg.brand-subtle`) + `text.brand` + 굵기 600, 1dp 선 | 웹 Tabs는 밑줄. 선택 표시가 약하다는 지적 |
 | 9 | Material3 역할 대응표 | §3.3 | 웹에는 대응할 것이 없다 |
-| 10 | 어두운 화면 상태색 대비 | 토큰 그대로(위험 3.62:1, 정보 4.07:1) | 명세 §6의 4.5:1에 못 미친다. 웹도 같은 값 |
+| 10 | 어두운 화면 상태색 대비 | **토큰에서 고쳤다(D-049):** 위험 `red.300`(5.28:1), 정보 `blue.300`(5.74:1) | 3.62:1과 4.07:1로 명세 §6의 4.5:1에 못 미쳤다. 웹도 같았다 |
 | 11 | 다이얼로그·시트가 나타나는 모션 | Material3 기본 | Qooroo 문서는 다이얼로그에 크기 0.98→1을 쓴다. "크기는 바꾸지 않는다"와 맞는지 정해야 한다 |
 | 12 | 비활성 표현 | DDS 부품은 불투명도 0.45(웹 `button.css`의 값). 직접 쓰는 Material3 부품은 자기 값 38% | 명세는 `opacity`를 비활성에만 쓴다고만 한다. 숫자는 토큰이 아니라 CSS에 있다 |
 | 13 | 진동 피드백을 언제 쓰는가 | 규칙 없음 | Qooroo만 쓴다 |
@@ -494,8 +494,7 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 
 - **소유자가 직접 고른 것:** 4번(자리 표시는 멈춰 있다), 5번(카드는 테두리만으로 구분하고
   그림자를 쓰지 않는다), 10번(어두운 화면의 위험·정보 색이 4.5:1을 넘도록 토큰 값 자체를
-  고친다 — 전 제품의 어두운 화면에 닿는 토큰 변경이라 결정 기록과 웹 릴리스를 갖춘 별도
-  변경으로 다룬다. 그 변경이 들어가기 전까지는 표의 값 그대로 나간다).
+  고친다 — D-049에서 웹과 안드로이드를 함께 고쳤다).
 - **"지금 값 그대로"로 추천해 소유자에게 보여 주었고 아직 이의가 없는 것:** 1, 2, 3, 6, 7, 8,
   9, 12, 13번, 그리고 11번은 "Material3 기본 유지, 다이얼로그에 크기 변화를 넣지 않는다".
   소유자가 확정하기 전까지는 확정된 규칙이 아니다.
