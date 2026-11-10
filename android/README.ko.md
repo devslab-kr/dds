@@ -8,7 +8,7 @@
 | 모듈 | 좌표 | 내용 |
 | --- | --- | --- |
 | `dds-tokens` | `kr.devslab:dds-android-tokens` | 값만. Kotlin 상수와 XML 리소스. Compose 의존 없음 |
-| `dds-compose` | `kr.devslab:dds-compose` | Material3 테마, 브랜드, 모션·불러오기 도우미. 부품은 0.2.0 |
+| `dds-compose` | `kr.devslab:dds-compose` | Material3 테마, 브랜드, 모션·불러오기 도우미, 부품, 아이콘 |
 | `catalog` | 배포하지 않음 | 모든 값과 도우미를 화면에 띄우는 확인용 앱 |
 
 최소 Android 8(API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00.
@@ -17,25 +17,23 @@
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.1.0") // dds-android-tokens를 함께 가져온다
+    implementation("kr.devslab:dds-compose:0.2.0") // dds-android-tokens를 함께 가져온다
 }
 ```
 
 ```kotlin
 setContent {
     DdsTheme {                       // 시스템의 밝은·어두운 설정을 따른다
-        Button(
-            onClick = { },
-            modifier = Modifier.heightIn(min = DdsControl.md.dp),
-            shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = DdsTheme.colors.bgBrand,
-                contentColor = DdsTheme.colors.textOnBrand,
-            ),
-        ) { Text("저장") }
+        DdsCard {
+            DdsTextField(name, { name = it }, label = "이름")
+            DdsButton("저장", onClick = { }, loading = saving)
+        }
     }
 }
 ```
+
+부품(버튼, 입력칸, 선택, 카드·목록 행, 안내, 바, 다이얼로그)과 생성된 아이콘은
+[가이드 §12](../docs/mobile-native.ko.md)에 있다.
 
 앱의 메인 색은 색 리소스로 덮어쓴다. XML과 Compose가 함께 바뀐다
 ([가이드 §3.1](../docs/mobile-native.ko.md)).
@@ -87,10 +85,10 @@ node scripts/generate-android-tokens.mjs
 
 ```bash
 adb -s <기기> shell am start -n kr.devslab.dds.catalog/.MainActivity \
-  --es theme dark --es page controls --ez large true
+  --es theme dark --es page parts --ez large true
 ```
 
-`page`는 `colors`, `type`, `controls`, `motion`. 부품이나 값을 바꾸면 밝은·어두운,
+`page`는 `colors`, `type`, `parts`, `motion`. 부품이나 값을 바꾸면 밝은·어두운,
 글자 배율 200%, 큰 글자 모드, "애니메이션 삭제"에서 직접 띄워 본다.
 
 ## 버전과 배포

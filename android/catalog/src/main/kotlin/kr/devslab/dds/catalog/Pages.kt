@@ -45,7 +45,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.PaddingValues
 import kotlinx.coroutines.delay
+import kr.devslab.dds.compose.component.DdsBadge
+import kr.devslab.dds.compose.component.DdsButton
+import kr.devslab.dds.compose.component.DdsButtonVariant
+import kr.devslab.dds.compose.component.DdsCard
+import kr.devslab.dds.compose.component.DdsCheckbox
+import kr.devslab.dds.compose.component.DdsChip
+import kr.devslab.dds.compose.component.DdsDialog
+import kr.devslab.dds.compose.component.DdsDivider
+import kr.devslab.dds.compose.component.DdsEmptyState
+import kr.devslab.dds.compose.component.DdsIconButton
+import kr.devslab.dds.compose.component.DdsListRow
+import kr.devslab.dds.compose.component.DdsNotice
+import kr.devslab.dds.compose.component.DdsRadio
+import kr.devslab.dds.compose.component.DdsSection
+import kr.devslab.dds.compose.component.DdsSize
+import kr.devslab.dds.compose.component.DdsSpinner
+import kr.devslab.dds.compose.component.DdsSwitch
+import kr.devslab.dds.compose.component.DdsTextField
+import kr.devslab.dds.compose.component.DdsTone
+import kr.devslab.dds.compose.icons.DdsIcon
+import kr.devslab.dds.compose.icons.DdsIcons
 import kr.devslab.dds.compose.motion.DdsBusyBar
 import kr.devslab.dds.compose.motion.DdsLoadingRows
 import kr.devslab.dds.compose.motion.DdsMotion
@@ -59,6 +81,7 @@ import kr.devslab.dds.compose.theme.contrastRatio
 import kr.devslab.dds.compose.theme.keepWords
 import kr.devslab.dds.tokens.DdsBorder
 import kr.devslab.dds.tokens.DdsControl
+import kr.devslab.dds.tokens.DdsIcon as DdsIconSize
 import kr.devslab.dds.tokens.DdsRow
 import kr.devslab.dds.tokens.DdsScreen
 import kr.devslab.dds.tokens.DdsSpace
@@ -80,15 +103,9 @@ private fun PageBody(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun Block(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp)) {
-        Text(title, style = DdsTheme.typography.title3)
-        // A card: elevated face, hairline edge, no shadow.
-        Surface(
-            color = DdsTheme.colors.bgElevated,
-            shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(DdsBorder.hairline.dp, DdsTheme.colors.borderDefault),
-        ) {
-            Column(Modifier.fillMaxWidth().padding(DdsSpace.s16.dp), verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), content = content)
+    DdsSection(title) {
+        DdsCard {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), content = content)
         }
     }
 }
@@ -205,79 +222,111 @@ fun TypePage() {
 }
 
 // ---------------------------------------------------------------------------
-// Controls — stock Material3 under DdsTheme, plus the filled brand face
+// Parts — every DDS component, in every state worth looking at
 // ---------------------------------------------------------------------------
 
 @Composable
-fun ControlsPage() {
-    val c = DdsTheme.colors
-    var text by rememberSaveable { mutableStateOf("") }
-    var checked by rememberSaveable { mutableStateOf(true) }
-    var on by rememberSaveable { mutableStateOf(true) }
-    val height = Modifier.heightIn(min = DdsControl.md.dp)
+fun PartsPage() {
+    var name by rememberSaveable { mutableStateOf("") }
+    var agreed by rememberSaveable { mutableStateOf(true) }
+    var notify by rememberSaveable { mutableStateOf(true) }
+    var channel by rememberSaveable { mutableStateOf(0) }
+    var filter by rememberSaveable { mutableStateOf(0) }
+    var asking by rememberSaveable { mutableStateOf(false) }
     PageBody {
-        Block("Buttons at control.md") {
+        DdsSection("Buttons", description = "One height (48). Loading keeps the size.") {
+            DdsCard {
+                Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        DdsButton("저장", onClick = {}, modifier = Modifier.weight(1f))
+                        DdsButton("취소", onClick = {}, modifier = Modifier.weight(1f), variant = DdsButtonVariant.Secondary)
+                        DdsButton("더 보기".keepWords(), onClick = {}, modifier = Modifier.weight(1f), variant = DdsButtonVariant.Ghost)
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        DdsButton("삭제", onClick = {}, modifier = Modifier.weight(1f), variant = DdsButtonVariant.Danger)
+                        DdsButton("비활성", onClick = {}, modifier = Modifier.weight(1f), enabled = false)
+                        DdsButton("저장", onClick = {}, modifier = Modifier.weight(1f), loading = true, loadingDescription = "Saving")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        DdsButton("내보내기", onClick = {}, variant = DdsButtonVariant.Secondary, leading = { DdsIcon(DdsIcons.Download, null, size = DdsIconSize.sm.dp) })
+                        DdsIconButton(DdsIcons.Search, contentDescription = "Search", onClick = {})
+                        DdsIconButton(DdsIcons.MoreHorizontal, contentDescription = "More", onClick = {})
+                    }
+                    // Small buttons keep to a row of their own: one row, one height.
+                    Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        DdsButton("작게", onClick = {}, size = DdsSize.Sm, variant = DdsButtonVariant.Secondary)
+                        DdsButton("작게", onClick = {}, size = DdsSize.Sm, variant = DdsButtonVariant.Ghost)
+                    }
+                    DdsButton("계약서 보내기", onClick = {}, modifier = Modifier.fillMaxWidth(), size = DdsSize.Lg)
+                }
+            }
+        }
+        DdsSection("Fields") {
+            DdsCard {
+                // 16 between fields: a message sits 4 from its own box, so it reads as that field's.
+                Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s16.dp)) {
+                    DdsTextField(name, { name = it }, label = "거래처 이름", placeholder = "예: 데브스랩", helper = "계약서에 그대로 들어갑니다")
+                    DdsTextField("010-0000", {}, label = "연락처", error = "전화번호 형식이 아닙니다")
+                    DdsTextField("수정할 수 없음", {}, label = "사업자 번호", enabled = false)
+                }
+            }
+        }
+        DdsSection("Choices") {
+            DdsCard {
+                DdsSwitch(notify, { notify = it }, label = "알림 받기", description = "서명이 끝나면 알려 드립니다")
+                DdsDivider()
+                DdsCheckbox(agreed, { agreed = it }, label = "약관에 동의합니다")
+                DdsDivider()
+                DdsRadio(channel == 0, { channel = 0 }, label = "문자로 보내기")
+                DdsRadio(channel == 1, { channel = 1 }, label = "카카오톡으로 보내기")
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s8.dp)) {
+                for ((index, text) in listOf("전체", "서명 대기", "확정").withIndex()) {
+                    DdsChip(text, selected = filter == index, onSelectedChange = { filter = index })
+                }
+            }
+        }
+        DdsSection("List") {
+            DdsCard(contentPadding = PaddingValues()) {
+                DdsListRow("데브스랩 주식회사", subtitle = "2026.11.10 · 1,234,000원", onClick = {}, trailing = { DdsBadge("서명 대기", tone = DdsTone.Warning) })
+                DdsDivider(Modifier.padding(horizontal = DdsSpace.s16.dp))
+                DdsListRow("아주 긴 이름을 가진 거래처는 한 줄에서 말줄임으로 끝납니다 주식회사", subtitle = "2026.11.09 · 980,000원", onClick = {}, trailing = { DdsBadge("확정", tone = DdsTone.Success) })
+                DdsDivider(Modifier.padding(horizontal = DdsSpace.s16.dp))
+                DdsListRow("설정", onClick = {}, leading = { DdsIcon(DdsIcons.Settings, null) }, trailing = { DdsIcon(DdsIcons.ChevronRight, null, size = DdsIconSize.sm.dp) })
+            }
+        }
+        DdsSection("Notices and badges", description = "Each meaning has its own icon.") {
+            DdsNotice("새 버전이 준비됐습니다.", tone = DdsTone.Info, iconDescription = "Notice")
+            DdsNotice("계약서를 보냈습니다.", tone = DdsTone.Success, iconDescription = "Done")
+            DdsNotice("서명 기한이 하루 남았습니다.", tone = DdsTone.Warning, iconDescription = "Warning")
+            DdsNotice("보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.", tone = DdsTone.Danger, iconDescription = "Error")
+            Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s8.dp), verticalAlignment = Alignment.CenterVertically) {
+                DdsBadge("초안")
+                DdsBadge("안내", tone = DdsTone.Info)
+                DdsBadge("확정", tone = DdsTone.Success)
+                DdsBadge("취소", tone = DdsTone.Danger)
+            }
+        }
+        DdsSection("Empty and dialog") {
+            DdsEmptyState(
+                title = "아직 계약이 없습니다",
+                description = "첫 계약서를 보내면 여기에 나타납니다.",
+                action = { DdsButton("계약서 보내기", onClick = { asking = true }) },
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
-                // The filled brand face: bg.brand with text.on-brand, in both themes.
-                Button(
-                    onClick = {},
-                    modifier = height.weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                    colors = ButtonDefaults.buttonColors(containerColor = c.bgBrand, contentColor = c.textOnBrand),
-                ) { Text("저장") }
-                OutlinedButton(onClick = {}, modifier = height.weight(1f), shape = MaterialTheme.shapes.small) { Text("취소") }
-                TextButton(onClick = {}, modifier = height.weight(1f), shape = MaterialTheme.shapes.small) { Text("더 보기".keepWords()) }
-            }
-            Button(
-                onClick = {},
-                modifier = Modifier.fillMaxWidth().heightIn(min = DdsControl.lg.dp),
-                shape = MaterialTheme.shapes.small,
-                colors = ButtonDefaults.buttonColors(containerColor = c.bgBrand, contentColor = c.textOnBrand),
-            ) { Text("계약서 보내기") }
-            Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp)) {
-                Button(
-                    onClick = {},
-                    modifier = height.weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                    colors = ButtonDefaults.buttonColors(containerColor = c.statusDanger, contentColor = c.textOnStatus),
-                ) { Text("삭제") }
-                Button(onClick = {}, enabled = false, modifier = height.weight(1f), shape = MaterialTheme.shapes.small) { Text("비활성") }
+                DdsSpinner(description = "Loading", color = DdsTheme.colors.textBrand)
+                Text("DdsSpinner", style = DdsTheme.typography.body2, color = DdsTheme.colors.textSecondary)
             }
         }
-        Block("Field") {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("거래처 이름") },
-                singleLine = true,
-                shape = MaterialTheme.shapes.small,
-            )
-            OutlinedTextField(
-                value = "010-0000",
-                onValueChange = {},
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("연락처") },
-                isError = true,
-                supportingText = { Text("전화번호 형식이 아닙니다") },
-                singleLine = true,
-                shape = MaterialTheme.shapes.small,
-            )
-        }
-        Block("Choice") {
-            Row(Modifier.fillMaxWidth().heightIn(min = DdsRow.min.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("알림 받기", Modifier.weight(1f), style = DdsTheme.typography.body1)
-                Switch(checked = on, onCheckedChange = { on = it })
-            }
-            HorizontalDivider(color = c.borderDefault)
-            Row(Modifier.fillMaxWidth().heightIn(min = DdsRow.min.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("약관에 동의합니다", Modifier.weight(1f), style = DdsTheme.typography.body1)
-                Checkbox(checked = checked, onCheckedChange = { checked = it })
-            }
-        }
-        Block("Progress") {
-            LinearProgressIndicator(progress = { 0.6f }, modifier = Modifier.fillMaxWidth(), trackColor = c.borderDefault)
-        }
+    }
+    if (asking) {
+        DdsDialog(
+            title = "계약서를 보낼까요?",
+            text = "보낸 뒤에는 내용을 바꿀 수 없습니다.",
+            onDismissRequest = { asking = false },
+            confirm = { DdsButton("보내기", onClick = { asking = false }) },
+            dismiss = { DdsButton("취소", onClick = { asking = false }, variant = DdsButtonVariant.Ghost) },
+        )
     }
 }
 
@@ -308,12 +357,13 @@ fun MotionPage(onOpen: (Int) -> Unit) {
                 style = DdsTheme.typography.body2,
                 color = DdsTheme.colors.textSecondary,
             )
-            OutlinedButton(
+            DdsButton(
+                "Refresh",
                 onClick = { runs++ },
                 enabled = !busy,
-                modifier = Modifier.heightIn(min = DdsControl.md.dp),
-                shape = MaterialTheme.shapes.small,
-            ) { Text("Refresh") }
+                variant = DdsButtonVariant.Secondary,
+                leading = { DdsIcon(DdsIcons.Refresh, null, size = DdsIconSize.sm.dp) },
+            )
             Block("Staggered list") {
                 if (!loaded) {
                     // A first load holds the place with still rows; no "empty" message shows before the answer.

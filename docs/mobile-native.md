@@ -151,8 +151,7 @@ listener runs. The copy is opaque, so the logo in the window background (rule 10
 cover it. Rule 9 is the better of the two but does not guarantee zero empty frames. The
 alternative is a splash with the background only, the app's overlay doing the drawing
 itself — there is no logo to hand over, so none can go missing; the logo then appears
-after the first frame. Letting `DdsSplashOverlay` do the drawing is to be considered for
-0.2.0 (backlog item 19).
+after the first frame. Not built: the physical-device result below did not call for it.
 
 Where the two apps differed, and what was chosen:
 
@@ -162,6 +161,27 @@ Where the two apps differed, and what was chosen:
 | What it waits for | the drawing to end | the first screen to be decided | the drawing + `firstScreenKnown` | both are needed; one limit |
 | Overshoot on the last piece | none | the square pops slightly past and back | not in the system | no overshoot. The splash drawable is the app's, so Qooroo may keep it inside its drawable |
 | Priority | highest wins | — | highest wins | as JeongsanNow |
+
+**Measured on a physical device (0.2.0).** Galaxy Z Fold (SM-F971N, Android 17, unfolded,
+dark, font scale 1.3), the catalog app, six cold starts recorded with `screenrecord` (about
+18 frames a second) and every frame read on a contact sheet: the logo is on screen in every
+frame from the moment it is drawn until it lands — zero frames without it. This is rule 9
+as written above. The emulator result in the table stands for the emulator only.
+
+**A splash with no icon.** Android draws a plain splash, with no icon, when the app is
+opened from somewhere other than the launcher (another app, a notification, `adb` without
+`--splashscreen-show-icon` on some versions). A mark that was never on screen must not
+appear from nowhere and fly, so ask the splash view and pass the answer on:
+
+```kotlin
+setOnExitAnimationListener { provider ->
+    val shown = splashShowedMark(provider.view)
+    provider.remove()
+    handoff.release(markShown = shown)   // false: the cover simply lifts
+}
+```
+
+Checked by a unit test only: the test device showed the icon on every launch path tried.
 
 ### 2.3 Screen transitions
 
@@ -389,7 +409,7 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
 | Value | Token | dp | Source |
 | --- | --- | --- | --- |
 | Spacing | `DdsSpace.s4 … s64` | 0 2 4 8 12 16 20 24 32 40 48 64 | `[spec §3.3]` |
-| Radius | `DdsRadius.sm / md / lg / xl` | 4 / 8 / 12 / 16 — tag / button, field / card / sheet, dialog | `[spec §3.4]` |
+| Radius | `DdsRadius.sm / md / lg / xl` | 4 / 8 / 12 / 16 — tag / button, field / card, dialog / sheet | `[spec §3.4]` |
 | Stroke | `DdsBorder.hairline / focus` | 1 / 2 | `[spec §6]` |
 | Button | `DdsControl.sm / md / lg` | 40 / **48** / 56 | §10, item 2 |
 | Text field | `DdsField.height` | 56 | §10, item 2 |
@@ -406,8 +426,13 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
 ## 6. Icons `[spec §3.7]`
 
 24 grid, 1.6 stroke, round caps, colored by the surrounding text. An icon-only
-button must have a description `[spec §6]`. Generating Compose vectors from the
-`dds-icons` SVGs is planned for 0.2.0.
+button must have a description `[spec §6]`.
+
+The Compose vectors are **generated** from the `dds-icons` SVGs
+(`node scripts/generate-android-icons.mjs`, drift-checked by `pnpm run check`), so
+the two platforms draw the same shapes: `DdsIcons.Search`, `DdsIcons.ArrowLeft`
+(mirrored in right-to-left layouts), … Draw one with `DdsIcon(icon, contentDescription)`;
+the size is `DdsIcon.md` (24) or `sm` (20) and the tint is the surrounding content color.
 
 ## 7. System bars (mobile only)
 
@@ -444,7 +469,7 @@ transparent, and their icons follow the theme **actually shown**. Use
 
 ## 10. What the web DDS rules do not cover
 
-The web spec has no rule for the items below. 0.1.0 ships them with "the value put
+The web spec has no rule for the items below. The Android packages ship them with "the value put
 in for now"; making them DDS rules is the owner's call. Once decided,
 `tokens/native.json` or the spec is updated.
 
@@ -461,8 +486,11 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 9 | The Material3 role mapping | §3.3 | the web has nothing to map to |
 | 10 | Dark status color contrast | the tokens as they are (danger 3.62:1, info 4.07:1) | below the 4.5:1 of spec §6. The web has the same values |
 | 11 | How dialogs and sheets appear | Material3 defaults | Qooroo's document scales a dialog 0.98→1. Whether that fits "size never changes" needs deciding |
-| 12 | How disabled looks | Material3 defaults (content at 38%) | the web only says `opacity` is for disabled |
+| 12 | How disabled looks | DDS components: opacity 0.45, the value in the web's `button.css`. Material3 components used directly keep their own 38% | the spec only says `opacity` is for disabled; the number lives in CSS, not in a token |
 | 13 | When haptic feedback is used | no rule | only Qooroo uses it |
+| 14 | Text size inside a field | `body1` (16) | a smaller size makes Android zoom nothing, but 16 matches the list rows beside it |
+| 15 | Gap between fields in a form | 16 (in the catalog; not a token) | the web form gap is the product's |
+| 16 | Components the web has and Android does not yet | bottom sheet, toast, in-page tabs, pickers, menu use Material3 defaults | §12 |
 
 ## 11. Moving an existing app over
 
@@ -487,13 +515,36 @@ in for now"; making them DDS rules is the owner's call. Once decided,
    | `surfaceVariant` as a face | the line color fills the face | `bgSubtle` |
    | `primary` as a fill with `onPrimary` on it (button, FAB, large choice tile, progress inside a button) | the text color fills the face | `bgBrand` / `textOnBrand` |
 
-   The card, chip, notice and button components of 0.2.0 absorb these four.
+   `DdsCard`, `DdsChip`, `DdsNotice` and `DdsButton` (§12) absorb these four.
 8. Add a "no hex and no `Color(0x…)` outside the brand file" check to the app
    (see `scripts/check-android-sources.mjs`).
 
-## 12. Not in 0.1.0
+## 12. Components (0.2.0)
 
-Components (`DdsButton`, `DdsTextField`, `DdsCard`, `DdsListRow`, `DdsNotice`,
-`DdsBadge`, `DdsTopBar`, `DdsBottomBar`, …) and icon generation come in 0.2.0.
-Until then use Material3 components under `DdsTheme`, with the Controls screen of
-the `android/catalog` app as the reference.
+Each component reads only generated values and carries the rules above, so a screen
+built from them needs no height, radius or color of its own. `android/catalog` shows
+all of them (the Parts tab); the web counterpart is named where there is one.
+
+| Component | What it fixes | Web |
+| --- | --- | --- |
+| `DdsButton` (`Primary` / `Secondary` / `Ghost` / `Danger`; `Sm` 40 / `Md` 48 / `Lg` 56), `DdsIconButton` | one height; `bg.brand` + `text.on-brand`; loading keeps the exact size and is not dimmed; disabled at 0.45; 2dp focus ring; an icon button requires a description and is 48 to touch | Button `[spec §4.2]` |
+| `DdsTextField` | label above (never a floating label), 56 high, a message line that is always reserved so an error does not move the form; the error is announced | Field, Input |
+| `DdsCheckbox`, `DdsRadio`, `DdsSwitch` | the whole row is the target (48 or more), state is announced | Checkbox, Radio, Switch |
+| `DdsCard`, `DdsSection`, `DdsDivider`, `DdsListRow` | `bg.elevated` + 1dp edge + radius 12, no shadow; a section title is a heading; a row is 56 or 72 | Card |
+| `DdsNotice`, `DdsBadge`, `DdsChip` | each meaning has its own icon and color pair; a badge repeats the state with a dot; a neutral one gets an edge | Alert, Badge, Tag |
+| `DdsEmptyState`, `DdsSpinner` | a dashed outline, a title, one sentence, at most one action | EmptyState, Spinner |
+| `DdsTopBar`, `DdsBottomBar`, `DdsNavRail`, `DdsScaffold` | bars are fixed and set apart by a 1dp line; tabs below 600dp, a rail from 600dp; selection changes pill, color and weight together | — (mobile only) |
+| `DdsDialog` | confirms a decision; radius 12, `bg.elevated` | Dialog |
+
+Rules that came out of reading the captures (light, dark, 200% font, large text, wide):
+
+- **One row, one height.** Do not put an `Sm` button beside an `Md` one.
+- **Text that may wrap breaks between words**, not inside a Korean word: the components
+  pass their text through `keepWords()`. Do the same for text you draw yourself.
+- **A list row's title may take two lines** at large font sizes; the supporting line may too.
+- **Fields are 16 apart.** A message sits 4 below its own box, so it reads as that field's.
+- Colors for a radio ring and a checked box come from `text.brand` and `bg.brand`: the
+  thin ring needs 3:1 against the page, which `bg.brand` does not reach on white.
+
+Not in 0.2.0: bottom sheet, snackbar/toast, tabs inside a page, date and time pickers,
+menus. Use the Material3 ones under `DdsTheme` until they are added.

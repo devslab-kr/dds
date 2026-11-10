@@ -12,23 +12,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -38,14 +25,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.compose.ui.graphics.vector.ImageVector
+import kr.devslab.dds.compose.component.DdsButton
+import kr.devslab.dds.compose.component.DdsButtonVariant
+import kr.devslab.dds.compose.component.DdsIconButton
+import kr.devslab.dds.compose.component.DdsNavItem
+import kr.devslab.dds.compose.component.DdsScaffold
+import kr.devslab.dds.compose.component.DdsSize
+import kr.devslab.dds.compose.component.DdsTopBar
+import kr.devslab.dds.compose.icons.DdsIcons
 import kr.devslab.dds.compose.motion.DdsMove
 import kr.devslab.dds.compose.motion.DdsScreenMotion
 import kr.devslab.dds.compose.motion.DdsSplashHandoff
@@ -53,20 +46,20 @@ import kr.devslab.dds.compose.motion.DdsSplashOverlay
 import kr.devslab.dds.compose.motion.LocalDdsSplashHandoff
 import kr.devslab.dds.compose.motion.ddsSplashTarget
 import kr.devslab.dds.compose.motion.isReducedMotion
+import kr.devslab.dds.compose.motion.splashShowedMark
 import kr.devslab.dds.compose.theme.DdsBrand
 import kr.devslab.dds.compose.theme.DdsBrandColors
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.compose.theme.rememberDdsBrand
 import kr.devslab.dds.tokens.DdsDarkColors
 import kr.devslab.dds.tokens.DdsLightColors
-import kr.devslab.dds.tokens.DdsRadius
 import kr.devslab.dds.tokens.DdsSpace
 import androidx.compose.ui.graphics.Color as ComposeColor
 import kr.devslab.dds.tokens.R as TokensR
 
 /**
  * Launch extras, so every state can be captured from adb without tapping:
- *   --es page colors|type|controls|motion     first page
+ *   --es page colors|type|parts|motion        first page
  *   --es theme light|dark                     pin the theme (default: system)
  *   --ez large true                           large text mode
  *   --es brand ink                            a product brand, to see every brand place change
@@ -84,11 +77,13 @@ class MainActivity : ComponentActivity() {
             setKeepOnScreenCondition { handoff.keepOnScreen(SystemClock.uptimeMillis()) }
             // … and drop the hand-over copy at once: it can show a frame without the mark.
             setOnExitAnimationListener { provider ->
+                // Opened from another app or a notification, the system splash has no icon.
+                val shown = splashShowedMark(provider.view)
                 provider.remove()
                 // Removing the splash re-applies the theme and with it the theme's bar
                 // icon colors; put back the ones for the theme actually shown.
                 applySystemBars()
-                handoff.release()
+                handoff.release(markShown = shown)
             }
         }
         super.onCreate(savedInstanceState)
@@ -175,83 +170,53 @@ fun CatalogMark(size: Dp, modifier: Modifier = Modifier) {
     Box(modifier.size(size).clip(RoundedCornerShape(corner)).background(DdsTheme.colors.bgBrand))
 }
 
-enum class Page(val title: String) {
-    Colors("Colors"),
-    Type("Type"),
-    Controls("Controls"),
-    Motion("Motion"),
+enum class Page(val title: String, val icon: ImageVector) {
+    Colors("Colors", DdsIcons.LayoutGrid),
+    Type("Type", DdsIcons.Doc),
+    Parts("Parts", DdsIcons.Tool),
+    Motion("Motion", DdsIcons.Refresh),
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) -> Unit) {
     var page by rememberSaveable { mutableStateOf(firstPage) }
     // The Motion page has a second level, to show push and pop.
     var detail by rememberSaveable { mutableStateOf<Int?>(null) }
     var move by remember { mutableStateOf(DdsMove.None) }
-
-    BackHandler(enabled = detail != null) {
+    val goBack = {
         move = DdsMove.Pop
         detail = null
     }
+    BackHandler(enabled = detail != null, onBack = goBack)
 
-    Scaffold(
+    DdsScaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+            DdsTopBar(
+                title = if (detail != null) "Item ${detail!! + 1}" else page.title,
+                leading = {
+                    if (detail != null) {
+                        DdsIconButton(DdsIcons.ArrowLeft, contentDescription = "Back", onClick = goBack)
+                    } else {
                         CatalogMark(DdsSpace.s24.dp, Modifier.ddsSplashTarget(priority = 0))
-                        Spacer(Modifier.width(DdsSpace.s12.dp))
-                        Text(if (detail != null) "Item ${detail!! + 1}" else page.title)
                     }
                 },
                 actions = {
-                    TextButton(onClick = { onLargeText(!largeText) }) {
-                        Text(if (largeText) "Aa large" else "Aa")
-                    }
+                    DdsButton(
+                        text = if (largeText) "Aa large" else "Aa",
+                        onClick = { onLargeText(!largeText) },
+                        variant = DdsButtonVariant.Ghost,
+                        size = DdsSize.Sm,
+                    )
                 },
             )
         },
-        bottomBar = {
-            // The bar shares the page background; a hairline, not a shadow or a tint, separates it.
-            Column {
-                HorizontalDivider(color = DdsTheme.colors.borderDefault)
-                NavigationBar(containerColor = DdsTheme.colors.bgDefault, tonalElevation = 0.dp) {
-                    for (item in Page.entries) {
-                        val selected = item == page
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                if (!selected || detail != null) {
-                                    move = DdsMove.Tab
-                                    detail = null
-                                    page = item
-                                }
-                            },
-                            icon = { TabGlyph(selected) },
-                            // Selection changes three things at once — the pill, the color and the
-                            // weight — never the color alone.
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = DdsTheme.colors.textBrand,
-                                selectedTextColor = DdsTheme.colors.textBrand,
-                                indicatorColor = DdsTheme.colors.bgBrandSubtle,
-                                unselectedIconColor = DdsTheme.colors.textSecondary,
-                                unselectedTextColor = DdsTheme.colors.textSecondary,
-                            ),
-                            label = {
-                                // One line, always: at large font scales a tab label is cut with an
-                                // ellipsis rather than broken in the middle of a word.
-                                Text(
-                                    item.title,
-                                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            },
-                        )
-                    }
-                }
+        navItems = Page.entries.map { DdsNavItem(it.title, it.icon) },
+        selectedIndex = page.ordinal,
+        onSelect = { index ->
+            if (index != page.ordinal || detail != null) {
+                move = DdsMove.Tab
+                detail = null
+                page = Page.entries[index]
             }
         },
     ) { padding ->
@@ -263,7 +228,7 @@ private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) 
                         page == Page.Motion && detail != null -> MotionDetail(detail!!)
                         page == Page.Colors -> ColorsPage()
                         page == Page.Type -> TypePage()
-                        page == Page.Controls -> ControlsPage()
+                        page == Page.Parts -> PartsPage()
                         else -> MotionPage(onOpen = {
                             move = DdsMove.Push
                             detail = it
@@ -273,15 +238,4 @@ private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) 
             }
         }
     }
-}
-
-/** A stand-in tab icon; a product uses its own icons. */
-@Composable
-private fun TabGlyph(selected: Boolean) {
-    Box(
-        Modifier
-            .size(DdsSpace.s20.dp)
-            .clip(RoundedCornerShape(DdsRadius.sm.dp))
-            .background(if (selected) DdsTheme.colors.textBrand else DdsTheme.colors.textSecondary),
-    )
 }

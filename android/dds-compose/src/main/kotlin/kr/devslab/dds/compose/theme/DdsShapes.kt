@@ -10,8 +10,8 @@ import kr.devslab.dds.tokens.DdsRadius
  *
  *   extraSmall  radius.sm   checkbox, tag
  *   small       radius.md   button, text field
- *   medium      radius.lg   card
- *   large       radius.xl   sheet, dialog
+ *   medium      radius.lg   card, dialog
+ *   large       radius.xl   sheet
  *   extraLarge  radius.xl   (DDS has nothing rounder short of a pill)
  */
 internal val DdsShapes: Shapes = Shapes(

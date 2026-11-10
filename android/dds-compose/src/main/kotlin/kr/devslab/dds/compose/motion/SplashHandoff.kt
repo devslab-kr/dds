@@ -1,5 +1,8 @@
 package kr.devslab.dds.compose.motion
 
+import android.os.Build
+import android.view.View
+import android.window.SplashScreenView
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -59,7 +62,11 @@ import kr.devslab.dds.tokens.DdsMotionTokens
  *     // Keep the system splash itself until the drawing is over …
  *     setKeepOnScreenCondition { handoff.keepOnScreen(SystemClock.uptimeMillis()) }
  *     // … and drop its hand-over copy at once: that copy can show a frame without the mark.
- *     setOnExitAnimationListener { it.remove(); handoff.release() }
+ *     setOnExitAnimationListener { provider ->
+ *         val shown = splashShowedMark(provider.view)   // no icon when not opened from the launcher
+ *         provider.remove()
+ *         handoff.release(markShown = shown)
+ *     }
  * }
  * ```
  *
@@ -126,9 +133,23 @@ public class DdsSplashHandoff(
         return now < minOf(createdAt + drawMs + holdMs, limit)
     }
 
-    /** The system splash is gone: start moving. Safe to call more than once. */
-    public fun release() {
-        if (phase == Phase.Hold) phase = Phase.Move
+    /** False when the system splash showed no mark: there is then nothing to carry across. */
+    internal var markShown: Boolean by mutableStateOf(true)
+
+    /**
+     * The system splash is gone: start moving. Safe to call more than once.
+     *
+     * @param markShown whether the system splash actually showed the mark. Android
+     * draws a plain splash with no icon when the app is opened from somewhere
+     * other than the launcher (another app, a notification). Pass
+     * [splashShowedMark] here; with false the cover simply lifts — a mark that was
+     * never on screen must not appear from nowhere and fly.
+     */
+    public fun release(markShown: Boolean = true) {
+        if (phase == Phase.Hold) {
+            this.markShown = markShown
+            phase = Phase.Move
+        }
     }
 
     internal fun finish() {
@@ -212,7 +233,7 @@ public fun DdsSplashOverlay(
     }
     LaunchedEffect(handoff.phase) {
         if (handoff.phase != DdsSplashHandoff.Phase.Move) return@LaunchedEffect
-        val destination = handoff.landing.takeIf { landingAllowed && !handoff.reduced }
+        val destination = handoff.landing.takeIf { landingAllowed && !handoff.reduced && handoff.markShown }
         flight = destination
         if (destination != null) {
             progress.animateTo(1f, tween(DdsMotion.Slow, easing = DdsMotion.Travel))
@@ -270,11 +291,33 @@ public fun DdsSplashOverlay(
                         }
                     },
             ) {
-                mark(markSize)
+                if (handoff.markShown) mark(markSize)
             }
         }
     }
 }
+
+/**
+ * Whether the system splash drew its icon. Use it in the exit listener:
+ *
+ * ```
+ * setOnExitAnimationListener { provider ->
+ *     val shown = splashShowedMark(provider.view)
+ *     provider.remove()
+ *     handoff.release(markShown = shown)
+ * }
+ * ```
+ *
+ * Before Android 12 the compat splash always shows the icon.
+ *
+ * @param splashView the splash view the system handed over (`SplashScreenViewProvider.view`)
+ */
+public fun splashShowedMark(splashView: View): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        (splashView as? SplashScreenView)?.iconView != null
+    } else {
+        true
+    }
 
 // Both come from the motion scale: the cover's fade (Base) sits in the middle
 // of the flight (Slow) in progress terms, and the safety net waits five flights

@@ -45,6 +45,7 @@ jobs:
       # Never publish values that do not match the token files at this commit.
       - run: node --test tests/android-tokens.test.mjs
       - run: node scripts/generate-android-tokens.mjs --check
+      - run: node scripts/generate-android-icons.mjs --check
       - run: node scripts/check-android-sources.mjs
 
       - name: Build and test

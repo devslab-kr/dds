@@ -16,6 +16,9 @@ on:
       - "packages/dds-tokens/resolve.mjs"
       - "packages/dds-tokens/package.json"
       - "scripts/generate-android-tokens.mjs"
+      - "scripts/generate-android-icons.mjs"
+      - "packages/dds-icons/svg/**"
+      - "packages/dds-icons/direction-policy.json"
       - "scripts/check-android-sources.mjs"
       - "tests/android-tokens.test.mjs"
       - ".github/workflows/android.yml"
@@ -26,6 +29,9 @@ on:
       - "packages/dds-tokens/resolve.mjs"
       - "packages/dds-tokens/package.json"
       - "scripts/generate-android-tokens.mjs"
+      - "scripts/generate-android-icons.mjs"
+      - "packages/dds-icons/svg/**"
+      - "packages/dds-icons/direction-policy.json"
       - "scripts/check-android-sources.mjs"
       - "tests/android-tokens.test.mjs"
       - ".github/workflows/android.yml"
@@ -46,6 +52,7 @@ jobs:
       # No install needed: the generator and its test use only Node built-ins.
       - run: node --test tests/android-tokens.test.mjs
       - run: node scripts/generate-android-tokens.mjs --check
+      - run: node scripts/generate-android-icons.mjs --check
       - run: node scripts/check-android-sources.mjs
       - uses: actions/setup-java@v5
         with:

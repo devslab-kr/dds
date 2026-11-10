@@ -8,7 +8,7 @@ repository root. The rules are in [`docs/mobile-native.md`](../docs/mobile-nativ
 | Module | Coordinate | Contents |
 | --- | --- | --- |
 | `dds-tokens` | `kr.devslab:dds-android-tokens` | Values only: Kotlin constants and XML resources. No Compose dependency |
-| `dds-compose` | `kr.devslab:dds-compose` | Material3 theme, brand, motion and loading helpers. Components in 0.2.0 |
+| `dds-compose` | `kr.devslab:dds-compose` | Material3 theme, brand, motion and loading helpers, components, icons |
 | `catalog` | not published | An app that puts every value and helper on screen, for checking |
 
 Minimum Android 8 (API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00.
@@ -17,25 +17,23 @@ Minimum Android 8 (API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.1.0") // brings dds-android-tokens
+    implementation("kr.devslab:dds-compose:0.2.0") // brings dds-android-tokens
 }
 ```
 
 ```kotlin
 setContent {
     DdsTheme {                       // follows the system light/dark setting
-        Button(
-            onClick = { },
-            modifier = Modifier.heightIn(min = DdsControl.md.dp),
-            shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = DdsTheme.colors.bgBrand,
-                contentColor = DdsTheme.colors.textOnBrand,
-            ),
-        ) { Text("Save") }
+        DdsCard {
+            DdsTextField(name, { name = it }, label = "Name")
+            DdsButton("Save", onClick = { }, loading = saving)
+        }
     }
 }
 ```
+
+The components (buttons, fields, choices, cards and list rows, notices, bars, dialog)
+and the generated icons are listed in [guide §12](../docs/mobile-native.md).
 
 An app overrides its main color with a color resource; XML and Compose change
 together ([guide §3.1](../docs/mobile-native.md)).
@@ -87,10 +85,10 @@ The catalog takes launch extras that pin a state:
 
 ```bash
 adb -s <device> shell am start -n kr.devslab.dds.catalog/.MainActivity \
-  --es theme dark --es page controls --ez large true
+  --es theme dark --es page parts --ez large true
 ```
 
-`page` is one of `colors`, `type`, `controls`, `motion`. After changing a value or
+`page` is one of `colors`, `type`, `parts`, `motion`. After changing a value or
 a helper, look at it in light and dark, at a 200% font scale, in large text mode,
 and with "Remove animations" on.
 

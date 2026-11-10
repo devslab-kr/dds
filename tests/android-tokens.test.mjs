@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { GENERATED_ICONS_HEADER, generateAndroidIcons, renderAndroidIcons } from "../scripts/generate-android-icons.mjs";
 import { GENERATED_HEADER, generateAndroidTokens, renderAndroidTokens } from "../scripts/generate-android-tokens.mjs";
 
 const root = new URL("../", import.meta.url);
@@ -129,4 +130,44 @@ test("a hand-written color outside the generated files is reported with file and
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+const svg = (body) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+
+test("android icons are generated from the web icon files and committed", async () => {
+  const { readdir } = await import("node:fs/promises");
+  const names = (await readdir(new URL("packages/dds-icons/svg/", root))).filter((f) => f.endsWith(".svg"));
+  for (const [path, content] of generateAndroidIcons()) {
+    assert.ok(content.includes(GENERATED_ICONS_HEADER));
+    // One vector per core SVG, none from the site- set (a subfolder).
+    assert.equal((content.match(/: ImageVector by lazy/g) ?? []).length, names.length);
+    const committed = await readFile(new URL(path, root), "utf8").then((text) => text.replaceAll("\r\n", "\n"), () => null);
+    assert.equal(committed, content, `${path} is out of date — run: node scripts/generate-android-icons.mjs`);
+  }
+});
+
+test("icon shapes become path data, and directional icons mirror", () => {
+  const out = renderAndroidIcons(
+    [
+      { name: "dot", svg: svg('<circle cx="12" cy="12" r="3"></circle>') },
+      { name: "box", svg: svg('<rect x="3" y="3" width="7" height="7" rx="1"></rect>') },
+      { name: "arrow-left", svg: svg('<path d="M19 12H5"></path>') },
+    ],
+    { mirrorInRtl: ["arrow-left"] },
+  );
+  // A circle of radius 3 at (12,12): starts at its left edge and goes round in two half arcs.
+  assert.ok(out.includes('ddsIcon("Dot", "M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z")'));
+  // A 7x7 box rounded by 1: top edge is 5 long, then four quarter arcs.
+  assert.ok(out.includes('"M4 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1z"'));
+  assert.ok(out.includes('ddsIcon("ArrowLeft", "M19 12H5", autoMirror = true)'));
+  assert.ok(out.includes("DDS_ICON_STROKE: Float = 1.6f"));
+});
+
+test("an icon the generator cannot render is a build error", () => {
+  const policy = { mirrorInRtl: [] };
+  assert.throws(() => renderAndroidIcons([{ name: "x", svg: svg('<line x1="0" y1="0" x2="1" y2="1"></line>') }], policy), /<line>/);
+  assert.throws(() => renderAndroidIcons([{ name: "x", svg: svg('<path d="M0 0" fill="red"></path>') }], policy), /fill/);
+  assert.throws(() => renderAndroidIcons([{ name: "x", svg: svg('<path d="M0 0"></path>').replace("1.6", "2") }, { name: "y", svg: svg('<path d="M0 0"></path>') }], policy), /stroke/);
+  assert.throws(() => renderAndroidIcons([{ name: "x", svg: svg('<path d="M0 0"></path>') }], { mirrorInRtl: ["gone"] }), /gone/);
 });

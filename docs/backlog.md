@@ -278,16 +278,19 @@ D-048. 가이드 [`mobile-native.ko.md`](mobile-native.ko.md), 설계
       디테일을 규칙 + 코드 + 확인 방법으로 담는다.
 - [x] 0.1.0 브랜드 덮어쓰기: 웹과 같은 여섯 토큰을 색 리소스로(XML·Compose 공통), 대비 검사.
 - [x] `catalog` 앱과 에뮬레이터 캡처 확인, 로컬 Maven 배포, CI·릴리스 워크플로.
-- [ ] **Maven Central 첫 배포** — 소유자 액션: 조직 시크릿 다섯 개
+- [ ] **Maven Central 첫 배포는 0.2.0** — `android-v0.2.0` 태그. 조직 시크릿 다섯 개
       (`MAVEN_CENTRAL_USERNAME`·`MAVEN_CENTRAL_PASSWORD`·`SIGNING_KEY`·`SIGNING_KEY_ID`·`SIGNING_KEY_PASSWORD`)
-      가 이 저장소에 열려 있는지 확인 후 `android-v0.1.0` 태그.
-- [ ] 0.2.0 부품: `DdsButton`, `DdsIconButton`, `DdsTextField`, 선택 3종, `DdsCard`·`DdsSection`,
+      가 이 저장소에 열려 있어야 한다.
+- [x] 0.2.0 부품: `DdsButton`, `DdsIconButton`, `DdsTextField`, 선택 3종, `DdsCard`·`DdsSection`,
       `DdsListRow`, `DdsNotice`(종류별 아이콘), `DdsBadge`, `DdsTopBar`·`DdsBottomBar`·`DdsNavRail`,
       진행 표시·자리 표시, `DdsPullRefresh`, `DdsEmptyState`, `DdsDialog`.
       캡처에서 나온 규칙 둘을 부품에 넣는다: 아래 탭 라벨은 한 줄 말줄임, 한 줄에 들어가지 않는 버튼 묶음은 세로로.
-- [ ] 0.2.0 스플래시: `DdsSplashOverlay`가 로고 그리기까지 맡는 선택지 검토 — 정산나우 실측에서 시스템이
-      넘겨주는 사본 때문에 로고 없는 프레임이 5회 중 2회 나왔다(가이드 §2.2 "알려진 한계").
-- [ ] 0.2.0 아이콘: `dds-icons` SVG → Compose `ImageVector` 생성. 오류용 "원 안 X" 아이콘 추가(웹에도 나감).
+- [x] 0.2.0 스플래시: 실물 기기(Android 17) 여섯 번 측정에서 로고 없는 프레임 0회 — 덮개가 그리기까지
+      맡는 안은 만들지 않았다. 아이콘 없는 스플래시(런처 밖 실행)에서는 로고를 날리지 않는다(`splashShowedMark`).
+- [x] 0.2.0 아이콘: `dds-icons` SVG → Compose `ImageVector` 생성, 어긋남 검사.
+- [ ] 오류용 "원 안 X" 아이콘(웹 `dds-icons`에 추가하면 안드로이드에도 생성된다) — 지금 위험 안내는 X 아이콘.
+- [ ] 아직 없는 부품: 아래 시트, 스낵바·토스트, 화면 안 탭, 날짜·시간 선택, 메뉴(가이드 §12).
+- [ ] 정산나우·Qooroo를 0.2.0 부품으로 옮기기(각 레포에서).
 - [ ] **웹 규칙에 없어 정해야 하는 것 13가지** — 가이드 `mobile-native.ko.md` §10. 소유자가 DDS 규칙으로
       정하면 `tokens/native.json`이나 명세를 고친다(메인 색에서 나머지를 정하는 법, 터치 화면 높이,
       정지 자리 표시, 카드 그림자, 큰 글자 표, 아래 탭 선택 표시 등).

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Colors come from dds-android-tokens resources, which carry their own
          values-night variants: one theme serves light and dark. -->
     <style name="Theme.Catalog" parent="android:Theme.Material.Light.NoActionBar">
@@ -9,7 +9,8 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">@bool/dds_light_system_bars</item>
-        <item name="android:windowLightNavigationBar">@bool/dds_light_system_bars</item>
+        <!-- API 27+. On 26 the attribute is ignored and enableEdgeToEdge sets the bar in code. -->
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">@bool/dds_light_system_bars</item>
     </style>
 
     <style name="Theme.Catalog.Splash" parent="Theme.SplashScreen">

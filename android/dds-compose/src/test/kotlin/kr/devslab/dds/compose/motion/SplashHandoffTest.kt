@@ -60,6 +60,18 @@ class SplashHandoffTest {
     }
 
     @Test
+    fun aSplashThatShowedNoMarkHasNothingToCarryAcross() {
+        val handoff = handoff()
+        assertTrue(handoff.markShown)
+        handoff.release(markShown = false)
+        assertEquals(Phase.Move, handoff.phase)
+        assertFalse(handoff.markShown)
+        // A later call cannot turn the mark back on.
+        handoff.release(markShown = true)
+        assertFalse(handoff.markShown)
+    }
+
+    @Test
     fun theHighestPriorityIsTheLanding() {
         val handoff = handoff()
         assertNull(handoff.landing)
