@@ -19,6 +19,10 @@
         "$description": "hold: pause on the finished mark before it travels. keep-limit: longest the system splash may be held, measured from the first ready frame.",
         "hold": { "$value": "150ms", "$type": "duration" },
         "keep-limit": { "$value": "1000ms", "$type": "duration" }
+      },
+      "back": {
+        "$description": "double-press: two presses of the system back closer together than this ask to leave the app instead of going back twice.",
+        "double-press": { "$value": "600ms", "$type": "duration" }
       }
     },
     "touch": {

@@ -6,5 +6,5 @@ object DdsTokensInfo {
     const val sourcePackage: String = "@devslab/dds-tokens"
     const val sourceRepository: String = "https://github.com/devslab-kr/dds"
     /** SHA-256 of the token files (tokens/ in the source repository) these values were generated from. */
-    const val sourceSha256: String = "0c38743d9ac5d0c71354096a0bf0adb083f718409b44d8ae12d7f0b5a1a1bf62"
+    const val sourceSha256: String = "4f0edaa2fb5568a0000691452d687ee688a8f5ce3e87bea8efd3b21b8fe4e0df"
 }

@@ -5,6 +5,21 @@
 `kr.devslab:dds-android-tokens`와 `kr.devslab:dds-compose`는 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 0.3.0 — 2026-11-11
+
+정산나우를 폰에서 써 보며 나온 것과 0.2.0에서 빠졌던 부품.
+
+- **새 부품:** `DdsSearchField`, `DdsSelectField`, `DdsValueRow`, `DdsTabs`, `DdsBottomSheet`,
+  `DdsMenu` / `DdsMenuItem`, `DdsToastHost`.
+- **뒤로 가기 규칙:** `DdsBackHandler`, `rememberDdsTabTrail`, `ddsBackAction` — 뒤로는 이전
+  화면, 그다음 직전 탭으로 간다. 앱 종료는 묻고, 600ms 안에 두 번 눌러도 묻는다.
+- **바뀜 — 탭 전환은 더 이상 흐려지며 나타나지 않는다.** `DdsMove.Tab`은 이제 "움직임 없음"이다.
+  비워진 화면 위의 150ms 페이드가 탭을 누를 때마다 깜빡임으로 읽혔다.
+- **고침 — 글은 쓴 그대로 읽힌다.** `keepWords()`로 그린 부품의 글이 글자 사이의 보이지 않는
+  연결 문자와 함께 화면 낭독기와 테스트에 전달되어 `onNodeWithText("저장")`이 맞지 않았다. 이제
+  부품은 원문을 알려 준다. 앱이 직접 그리는 글에는 `Modifier.readAs()`를 쓴다.
+- `dds-compose`가 `androidx.activity:activity-compose`를 함께 가져온다(뒤로 가기 처리용).
+
 ## 0.2.1 — 2026-11-11
 
 - 어두운 화면: 위험·정보 색을 한 단계 밝혔다(`red.300`, `blue.300`). 오류·안내 글자가 자기

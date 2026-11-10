@@ -213,6 +213,7 @@ export function renderAndroidTokens({ light, dark, sourceSha256 }) {
         `const val shift: Int = ${dimension(one("native", "motion", "shift"))}`,
         `const val splashHoldMs: Int = ${millis(one("native", "motion", "splash", "hold"))}`,
         `const val splashKeepLimitMs: Int = ${millis(one("native", "motion", "splash", "keep-limit"))}`,
+        `const val backDoublePressMs: Int = ${millis(one("native", "motion", "back", "double-press"))}`,
       ]),
     ].join("\n"),
   );

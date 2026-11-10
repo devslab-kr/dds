@@ -35,7 +35,11 @@ import kr.devslab.dds.compose.component.DdsButton
 import kr.devslab.dds.compose.component.DdsButtonVariant
 import kr.devslab.dds.compose.component.DdsIconButton
 import kr.devslab.dds.compose.component.DdsNavItem
+import kr.devslab.dds.compose.component.DdsDialog
 import kr.devslab.dds.compose.component.DdsScaffold
+import kr.devslab.dds.compose.navigation.DdsBackHandler
+import kr.devslab.dds.compose.navigation.rememberDdsTabTrail
+import androidx.activity.compose.LocalActivity
 import kr.devslab.dds.compose.component.DdsSize
 import kr.devslab.dds.compose.component.DdsTopBar
 import kr.devslab.dds.compose.icons.DdsIcons
@@ -187,7 +191,29 @@ private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) 
         move = DdsMove.Pop
         detail = null
     }
-    BackHandler(enabled = detail != null, onBack = goBack)
+    // Back goes back: the screen first, then the tab before; leaving the app is asked.
+    val trail = rememberDdsTabTrail(startTab = firstPage.ordinal)
+    var askingToExit by rememberSaveable { mutableStateOf(false) }
+    val activity = LocalActivity.current
+    DdsBackHandler(
+        trail = trail,
+        canPop = detail != null,
+        onPop = goBack,
+        onTab = { index ->
+            move = DdsMove.Tab
+            page = Page.entries[index]
+        },
+        onAskToExit = { askingToExit = true },
+        enabled = !askingToExit,
+    )
+    if (askingToExit) {
+        DdsDialog(
+            title = "앱을 종료할까요?",
+            onDismissRequest = { askingToExit = false },
+            confirm = { DdsButton("종료", onClick = { activity?.finish() }) },
+            dismiss = { DdsButton("취소", onClick = { askingToExit = false }, variant = DdsButtonVariant.Ghost) },
+        )
+    }
 
     DdsScaffold(
         topBar = {
@@ -217,6 +243,7 @@ private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) 
                 move = DdsMove.Tab
                 detail = null
                 page = Page.entries[index]
+                trail.visit(index)
             }
         },
     ) { padding ->

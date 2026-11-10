@@ -42,6 +42,7 @@ dependencies {
     api(libs.compose.animation)
     api(libs.compose.material3)
     implementation(libs.lifecycle.runtime.compose)
+    api(libs.activity.compose)
 
     testImplementation(libs.junit)
 }

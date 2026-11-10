@@ -210,7 +210,7 @@ Code: `DdsScreenMotion(move)`, `Modifier.ddsScreenContent()`, `DdsMove`.
 | --- | --- | --- |
 | Forward (`Push`) | 100ms | 24dp from the trailing edge, 300ms |
 | Back (`Pop`) | 100ms | 24dp from the leading edge, 200ms |
-| Tab (`Tab`) | 150ms | none |
+| Tab (`Tab`) | at once | none — the previous tab is gone at once, so a fade would fade in over an empty page and read as a flicker on every tab press (seen on a device, 0.3.0) |
 | None (`None`) | at once | — |
 
 ```kotlin
@@ -223,6 +223,27 @@ key(entry) {
     }
 }
 ```
+
+### 2.3.1 Back and leaving the app (0.3.0)
+
+On a phone, back is how people move. An app that closes when back is pressed on a second
+tab feels broken ("I went to another menu, pressed back, and the app just left").
+
+23. **Back goes back.** First to the screen before, then to the tab the person was on
+    before this one. Each tab is remembered once, so back never bounces between two tabs.
+24. **Leaving is never silent.** With nowhere left to go, or when back is pressed twice
+    within 600ms, ask ("Close the app?") and leave only on yes.
+25. **Do not take back over where input is blocked** (a lock screen), or while a dialog or
+    sheet is open — those close themselves.
+26. **Keep scroll state above the screen that is removed.** A screen wrapped in
+    `DdsScreenMotion` is taken out and drawn again; a `rememberScrollState()` inside it is
+    lost, and coming back lands at the top. Hold the scroll state per navigation entry,
+    outside the part that is removed, and pass it down.
+
+Code: `rememberDdsTabTrail()`, `DdsBackHandler(trail, canPop, onPop, onTab, onAskToExit)`,
+and the rule itself as one function, `ddsBackAction()`. The question is a `DdsDialog`
+with the app's own words. 600ms is `tokens/native.json` `motion.back.double-press`.
+
 
 ### 2.4 Lists and small movements
 
@@ -501,7 +522,9 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 13 | When haptic feedback is used | no rule | only Qooroo uses it |
 | 14 | Text size inside a field | `body1` (16) | a smaller size makes Android zoom nothing, but 16 matches the list rows beside it |
 | 15 | Gap between fields in a form | 16 (in the catalog; not a token) | the web form gap is the product's |
-| 16 | Components the web has and Android does not yet | bottom sheet, toast, in-page tabs, pickers, menu use Material3 defaults | §12 |
+| 16 | Components the web has and Android does not yet | date and time pickers use Material3 defaults | §12 |
+| 17 | Back and leaving the app | back to the screen, then the previous tab; ask before leaving; two presses within 600ms ask | §2.3.1. JeongsanNow's behavior |
+| 18 | Motion on a tab switch | none | §2.3. A 150ms fade read as a flicker on a device |
 
 **Where each item stands (2026-11-10).**
 
@@ -511,7 +534,8 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 - **Recommended as "keep the value put in for now", shown to the owner, no objection yet:**
   1, 2, 3, 6, 7, 8, 9, 12, 13, and 11 as "keep the Material3 default; no size change on a
   dialog". These are not confirmed rules until the owner says so.
-- **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components).
+- **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components); 17 and 18
+  (0.3.0, from the owner's own words while using JeongsanNow on a phone — the numbers are proposals).
 
 ## 11. Moving an existing app over
 
@@ -540,7 +564,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 8. Add a "no hex and no `Color(0x…)` outside the brand file" check to the app
    (see `scripts/check-android-sources.mjs`).
 
-## 12. Components (0.2.0)
+## 12. Components
 
 Each component reads only generated values and carries the rules above, so a screen
 built from them needs no height, radius or color of its own. `android/catalog` shows
@@ -567,5 +591,24 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
 - Colors for a radio ring and a checked box come from `text.brand` and `bg.brand`: the
   thin ring needs 3:1 against the page, which `bg.brand` does not reach on white.
 
-Not in 0.2.0: bottom sheet, snackbar/toast, tabs inside a page, date and time pickers,
-menus. Use the Material3 ones under `DdsTheme` until they are added.
+**Added in 0.3.0**
+
+| Component | What it fixes | Web |
+| --- | --- | --- |
+| `DdsSearchField` | the one search field: magnifier in front, a clear button once something is typed, the keyboard's search key runs it; no label line, no message line | — |
+| `DdsSelectField` | the one field for choosing from a short list: the same box and lines as `DdsTextField`, opens a sheet, the chosen option carries a check | Select |
+| `DdsValueRow` | a name and its value on one line: name at the start, value at the end edge, tabular digits, a line under each row | — |
+| `DdsTabs` | views of one thing inside a page: brand underline and a heavier label | Tabs |
+| `DdsBottomSheet` | choices and actions; closes on back, outside tap, drag; radius 16 on the top corners | Sheet |
+| `DdsMenu`, `DdsMenuItem` | a short menu anchored to its button; a destructive item in the danger color | Menu |
+| `DdsToastHost` | a short message that leaves by itself, on the inverse surface; never for something that must be read | Toast |
+
+- **Text is read as it was written.** `keepWords()` puts an invisible joiner between the
+  letters of a word. Up to 0.2.1 that joined text also reached screen readers and tests
+  (`onNodeWithText("저장")` did not find a DDS label). The components now draw the joined
+  text and expose the original. For text you draw yourself:
+  `Text(label.keepWords(), Modifier.readAs(label))`.
+- **One search field and one select field in the whole app.** Two looks for the same job on
+  two screens is the inconsistency people notice first.
+
+Not yet built: date and time pickers. Use the Material3 ones under `DdsTheme`.

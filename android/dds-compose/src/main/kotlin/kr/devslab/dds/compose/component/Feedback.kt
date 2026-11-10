@@ -46,7 +46,6 @@ import kr.devslab.dds.compose.icons.DdsIcon
 import kr.devslab.dds.compose.icons.DdsIcons
 import kr.devslab.dds.compose.motion.ddsAppear
 import kr.devslab.dds.compose.theme.DdsTheme
-import kr.devslab.dds.compose.theme.keepWords
 import kr.devslab.dds.tokens.DdsBorder
 import kr.devslab.dds.tokens.DdsControl
 import kr.devslab.dds.tokens.DdsIcon as DdsIconSize
@@ -118,7 +117,7 @@ public fun DdsNotice(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         DdsIcon(look.icon, contentDescription = iconDescription, size = DdsIconSize.sm.dp, tint = look.foreground)
-        Text(message.keepWords(), Modifier.weight(1f), style = DdsTheme.typography.body2, color = look.foreground)
+        WordsText(message, Modifier.weight(1f), style = DdsTheme.typography.body2, color = look.foreground)
         action?.invoke()
     }
 }
@@ -200,9 +199,9 @@ public fun DdsEmptyState(
         verticalArrangement = Arrangement.spacedBy(DdsSpace.s8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(title.keepWords(), style = DdsTheme.typography.title3, color = colors.textPrimary, textAlign = TextAlign.Center)
+        WordsText(title, style = DdsTheme.typography.title3, color = colors.textPrimary, textAlign = TextAlign.Center)
         if (description != null) {
-            Text(description.keepWords(), style = DdsTheme.typography.body2, color = colors.textSecondary, textAlign = TextAlign.Center)
+            WordsText(description, style = DdsTheme.typography.body2, color = colors.textSecondary, textAlign = TextAlign.Center)
         }
         if (action != null) {
             Box(Modifier.padding(top = DdsSpace.s8.dp)) { action() }

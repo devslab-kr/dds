@@ -21,7 +21,7 @@ import kr.devslab.dds.tokens.DdsMotionTokens
  * it is never decoration.
  *
  *   Fast   100ms  leaving, press feedback
- *   Short  150ms  switching tabs, list items appearing, progress
+ *   Short  150ms  list items appearing, progress
  *   Base   200ms  going back, expand and collapse, dialogs
  *   Slow   300ms  a new screen, sheets, the logo travelling
  *

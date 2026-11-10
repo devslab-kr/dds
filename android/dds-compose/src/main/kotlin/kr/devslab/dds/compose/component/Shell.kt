@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.icons.DdsIcon
 import kr.devslab.dds.compose.theme.DdsTheme
-import kr.devslab.dds.compose.theme.keepWords
 import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsBorder
 import kr.devslab.dds.tokens.DdsScreen
@@ -237,8 +236,8 @@ public fun DdsDialog(
         confirmButton = confirm,
         modifier = modifier,
         dismissButton = dismiss,
-        title = { Text(title.keepWords(), style = DdsTheme.typography.title2) },
-        text = if (text != null) ({ Text(text.keepWords(), style = DdsTheme.typography.body1) }) else null,
+        title = { WordsText(title, style = DdsTheme.typography.title2) },
+        text = if (text != null) ({ WordsText(text, style = DdsTheme.typography.body1) }) else null,
         shape = MaterialTheme.shapes.medium,
         containerColor = colors.bgElevated,
         titleContentColor = colors.textPrimary,

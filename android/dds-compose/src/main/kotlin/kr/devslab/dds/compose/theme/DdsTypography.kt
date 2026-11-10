@@ -1,5 +1,9 @@
 package kr.devslab.dds.compose.theme
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.Modifier
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -152,3 +156,15 @@ public fun String.keepWords(): String {
 
 /** U+2060 WORD JOINER: invisible, zero width, forbids a line break on either side. */
 private const val WORD_JOINER: Char = 0x2060.toChar()
+
+/**
+ * Gives a text drawn with [keepWords] its original words back for
+ * accessibility and tests. [keepWords] works by putting an invisible joiner
+ * between the letters of a word; without this a screen reader is handed the
+ * joined text and `onNodeWithText("…")` does not find it.
+ *
+ * ```
+ * Text(label.keepWords(), Modifier.readAs(label))
+ * ```
+ */
+public fun Modifier.readAs(original: String): Modifier = clearAndSetSemantics { text = AnnotatedString(original) }

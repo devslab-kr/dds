@@ -30,7 +30,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.theme.DdsTheme
-import kr.devslab.dds.compose.theme.keepWords
 import kr.devslab.dds.tokens.DdsBorder
 import kr.devslab.dds.tokens.DdsRow
 import kr.devslab.dds.tokens.DdsSpace
@@ -80,9 +79,9 @@ public fun DdsSection(
 ) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp)) {
-            Text(title.keepWords(), Modifier.semantics { heading() }, style = DdsTheme.typography.title3, color = DdsTheme.colors.textPrimary)
+            WordsText(title, Modifier.semantics { heading() }, style = DdsTheme.typography.title3, color = DdsTheme.colors.textPrimary)
             if (description != null) {
-                Text(description.keepWords(), style = DdsTheme.typography.body2, color = DdsTheme.colors.textSecondary)
+                WordsText(description, style = DdsTheme.typography.body2, color = DdsTheme.colors.textSecondary)
             }
         }
         content()
@@ -141,9 +140,9 @@ public fun DdsListRow(
         CompositionLocalProvider(LocalContentColor provides colors.textSecondary) {
             leading?.invoke()
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DdsSpace.s2.dp)) {
-                Text(title.keepWords(), style = DdsTheme.typography.body1, color = colors.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                WordsText(title, style = DdsTheme.typography.body1, color = colors.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 if (subtitle != null) {
-                    Text(subtitle.keepWords(), style = DdsTheme.typography.caption, color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    WordsText(subtitle, style = DdsTheme.typography.caption, color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
             trailing?.invoke()
