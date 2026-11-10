@@ -1,5 +1,13 @@
 # @devslab/dds-svelte
 
+## 0.32.2
+
+### Patch Changes
+
+- Updated dependencies [f5c4c49]
+  - @devslab/dds-tokens@0.32.2
+  - @devslab/dds-css@0.32.2
+
 ## 0.32.1
 
 ### Patch Changes
