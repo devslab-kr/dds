@@ -66,6 +66,7 @@ peer dependency, 사용 가능한 exports를 확인할 수 있다.
 | [`packages/dds-vue/`](packages/dds-vue/) | `@devslab/dds-vue` — EDS 실사용에서 옮긴 네이티브 Vue 3 Button·Icon·Input·Ark DatePicker |
 | [`packages/dds-table-solid/`](packages/dds-table-solid/) | `@devslab/dds-table-solid` — 기존 SolidJS TanStack 테이블 |
 | [`packages/dds-table-react/`](packages/dds-table-react/) | `@devslab/dds-table-react` — DDS 테마를 적용한 AG Grid Community React 래퍼. 네이티브 옵션·API를 그대로 사용 |
+| [`android/`](android/) | 안드로이드 네이티브용 DDS (D-048) — `kr.devslab:dds-android-tokens`(토큰에서 생성한 Kotlin 상수·XML 리소스)와 `kr.devslab:dds-compose`(Material3 테마·모션). 가이드는 [`docs/mobile-native.ko.md`](docs/mobile-native.ko.md). 웹 패키지와 버전이 다르고 Maven Central로 나간다 |
 | [`preview/index.html`](preview/index.html) | 파운데이션·컴포넌트 미리보기 (단일 파일, 브라우저에서 바로 열림 — `components.html`, `icons.html`도 함께) |
 | [`brand/index.html`](brand/index.html) | 브랜드 아이덴티티 가이드: 로고 규정, Electric Cyan, 모티프, 보이스 & 톤 |
 
@@ -118,8 +119,8 @@ Source-Available License 1.0을 따른다. compatibility canary는 비공개·�
 우선순위는 [`docs/backlog.md`](docs/backlog.md)에. 패키지는 소비자가 생길
 때만 만든다 (명세 §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 인벤토리 (Core 6종 ✅ 2026-08-13, +13종 ✅ 2026-08-15) →
-AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → 모바일 방향에 따라 `dds-native` (RN) 또는 Ionic
-테마 매핑.
+AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → 안드로이드 네이티브 값·테마·모션
+(0.1.0, 2026-11-10 — 부품은 0.2.0). RN·Ionic 패키지는 그 제품이 생길 때.
 
 ## 입력·선택·공유 달력 확장
 
