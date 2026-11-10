@@ -168,6 +168,17 @@ dark, font scale 1.3), the catalog app, six cold starts recorded with `screenrec
 frame from the moment it is drawn until it lands — zero frames without it. This is rule 9
 as written above. The emulator result in the table stands for the emulator only.
 
+JeongsanNow measured its own app on the same device (unfolded, dark, animation scale 1;
+a separate review package, removed afterwards): six `screenrecord` runs at 60 frames a
+second, counting logo-colored pixels in the middle of the screen per frame. All six ran
+the same way and no frame was without the logo at the hand-over. The one empty frame seen
+in 2 of 5 emulator runs did not appear. From the window opening to the first screen fully
+shown took about 1.35s (the two letters about 0.15s and 0.17s, the hold about 0.45s, then
+the move). Not measured: light, animations off, folded, arriving after sign-in.
+
+When counting only the middle of the screen, the count drops to zero as the logo moves out
+of that area. Count a zero as an empty frame only inside the hold.
+
 **A splash with no icon.** Android draws a plain splash, with no icon, when the app is
 opened from somewhere other than the launcher (another app, a notification, `adb` without
 `--splashscreen-show-icon` on some versions). A mark that was never on screen must not
