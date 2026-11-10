@@ -5,6 +5,23 @@
 `kr.devslab:dds-android-tokens` and `kr.devslab:dds-compose` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.3.0 — 2026-11-11
+
+From using JeongsanNow on a phone, and the components 0.2.0 left out.
+
+- **New components:** `DdsSearchField`, `DdsSelectField`, `DdsValueRow`, `DdsTabs`,
+  `DdsBottomSheet`, `DdsMenu` / `DdsMenuItem`, `DdsToastHost`.
+- **Back rule:** `DdsBackHandler`, `rememberDdsTabTrail`, `ddsBackAction` — back goes to the
+  screen before, then the tab before; leaving the app is asked, also on two presses within 600ms.
+- **Changed — a tab switch no longer fades.** `DdsMove.Tab` is now "no movement": the 150ms
+  fade over the emptied page read as a flicker on every tab press.
+- **Fixed — text is read as written.** Component text drawn with `keepWords()` reached screen
+  readers and tests with invisible joiners between the letters, so `onNodeWithText("저장")`
+  did not match. Components now expose the original text; `Modifier.readAs()` does the same
+  for text an app draws itself. A test that matched a DDS label with `"…".keepWords()` now
+  matches the plain string.
+- `dds-compose` now brings `androidx.activity:activity-compose` (for the back handler).
+
 ## 0.2.1 — 2026-11-11
 
 - Dark theme: the danger and info colors are one step lighter (`red.300`, `blue.300`),

@@ -45,7 +45,7 @@ Qooroo `docs/design/android/DESIGN.md` §5·§7·§9. 시간과 이징 중 100·
 | 이름 | 값 | 쓰임 |
 | --- | --- | --- |
 | `DdsMotion.Fast` | 100ms | 사라짐, 누름 반응, 화면이 나타나는 불투명도 |
-| `DdsMotion.Short` | 150ms | 탭 바꾸기, 목록 항목 등장, 진행 표시 |
+| `DdsMotion.Short` | 150ms | 목록 항목 등장, 진행 표시 |
 | `DdsMotion.Base` | 200ms | 뒤로 가기, 접기·펼치기, 다이얼로그 |
 | `DdsMotion.Slow` | 300ms | 새 화면, 시트, 로고 이동 |
 | `DdsMotion.Standard` | (0.2, 0, 0, 1) | 들어올 때, 화면 안 변화 |
@@ -200,7 +200,7 @@ setOnExitAnimationListener { provider ->
 | --- | --- | --- |
 | 앞으로(`Push`) | 100ms | 뒤쪽 가장자리에서 24dp, 300ms |
 | 뒤로(`Pop`) | 100ms | 앞쪽 가장자리에서 24dp, 200ms |
-| 탭(`Tab`) | 150ms | 없음 |
+| 탭(`Tab`) | 즉시 | 없음 — 이전 탭은 즉시 걷히므로, 흐리게 나타내면 빈 화면 위로 나타나 탭을 누를 때마다 깜빡임으로 읽힌다(실물 기기에서 확인, 0.3.0) |
 | 없음(`None`) | 즉시 | — |
 
 ```kotlin
@@ -213,6 +213,47 @@ key(entry) {
     }
 }
 ```
+
+### 2.3.1 뒤로 가기와 앱 종료 (0.3.0)
+
+폰에서 뒤로 가기는 이동 수단이다. 다른 탭으로 옮긴 뒤 뒤로를 눌렀는데 앱이 닫히면 고장으로
+읽힌다("메뉴 이동한 다음에 백버튼 누르면 그냥 나가버려").
+
+- **뒤로는 뒤로 간다.** 먼저 이전 화면, 그다음 직전에 보던 탭. 탭은 한 번씩만 기억해서
+  두 탭 사이를 오가지 않는다.
+- **말없이 종료하지 않는다.** 더 돌아갈 곳이 없거나 600ms 안에 뒤로를 두 번 누르면
+  "앱을 종료할까요?"를 묻고, 예일 때만 종료한다.
+- **입력이 막힌 화면(잠금)에서는 뒤로를 가로채지 않는다.** 다이얼로그나 시트가 열려
+  있을 때도 그렇다 — 그것들은 스스로 닫힌다.
+- **스크롤 상태는 걷히는 화면 바깥에 둔다.** `DdsScreenMotion`으로 감싼 화면은 걷혔다가
+  다시 그려진다. 그 안의 `rememberScrollState()`는 사라지고, 돌아오면 맨 위로 간다. 스크롤
+  상태를 내비게이션 항목 단위로, 걷히는 부분 바깥에서 잡아 내려 준다.
+
+```kotlin
+val trail = rememberDdsTabTrail(startTab = 0)
+var asking by rememberSaveable { mutableStateOf(false) }
+DdsBackHandler(
+    trail = trail,
+    canPop = navController.previousBackStackEntry != null,
+    onPop = { navController.popBackStack() },
+    onTab = { tab -> showTab(tab) },               // trail은 이미 갱신돼 있다
+    onAskToExit = { asking = true },
+    enabled = !asking,
+)
+DdsScaffold(
+    selectedIndex = trail.current ?: 0,
+    onSelect = { tab -> trail.visit(tab); showTab(tab) },   // 탭을 누를 때마다 trail에 알린다
+    …
+)
+```
+
+처리기는 뒤로 갈 때만 trail을 움직인다. 탭을 누를 때 `trail.visit(tab)`을 부르지 않으면
+trail에는 항목이 하나뿐이라 뒤로가 항상 종료를 묻는다.
+
+코드: `rememberDdsTabTrail()`, `DdsBackHandler(trail, canPop, onPop, onTab, onAskToExit)`,
+규칙 자체는 함수 하나 `ddsBackAction()`. 질문은 앱의 문구를 넣은 `DdsDialog`다. 600ms는
+`tokens/native.json`의 `motion.back.double-press`다.
+
 
 ### 2.4 목록과 작은 움직임
 
@@ -488,7 +529,9 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 | 13 | 진동 피드백을 언제 쓰는가 | 규칙 없음 | Qooroo만 쓴다 |
 | 14 | 입력칸 안 글자 크기 | `body1`(16) | 옆에 놓이는 목록 행과 같은 크기 |
 | 15 | 폼에서 입력칸 사이 간격 | 16(catalog에서 쓴 값, 토큰 아님) | 웹의 폼 간격은 제품이 정한다 |
-| 16 | 웹에는 있고 안드로이드에는 아직 없는 부품 | 아래 시트, 토스트, 화면 안 탭, 선택기, 메뉴는 Material3 기본 | §12 |
+| 16 | 웹에는 있고 안드로이드에는 아직 없는 부품 | 날짜·시간 선택은 Material3 기본 | §12 |
+| 17 | 뒤로 가기와 앱 종료 | 이전 화면 → 직전 탭 순으로 돌아가고, 종료는 묻는다. 600ms 안에 두 번 누르면 묻는다 | §2.3.1. 정산나우의 동작 |
+| 18 | 탭 전환의 움직임 | 없음 | §2.3. 150ms 페이드가 실물 기기에서 깜빡임으로 읽혔다 |
 
 **항목별 상태 (2026-11-10).**
 
@@ -498,7 +541,8 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 - **"지금 값 그대로"로 추천해 소유자에게 보여 주었고 아직 이의가 없는 것:** 1, 2, 3, 6, 7, 8,
   9, 12, 13번, 그리고 11번은 "Material3 기본 유지, 다이얼로그에 크기 변화를 넣지 않는다".
   소유자가 확정하기 전까지는 확정된 규칙이 아니다.
-- **아직 소유자에게 묻지 않은 것:** 14, 15, 16번(0.2.0 부품과 함께 추가).
+- **아직 소유자에게 묻지 않은 것:** 14, 15, 16번(0.2.0 부품과 함께 추가), 17·18번(0.3.0,
+  소유자가 정산나우를 폰에서 쓰며 한 말에서 나왔다 — 숫자는 제안값이다).
 
 ## 11. 기존 앱을 옮기는 순서
 
@@ -526,7 +570,7 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 8. 앱에 "브랜드 파일 밖에서는 hex와 `Color(0x…)`를 쓰지 않는다" 검사를 추가
    (`scripts/check-android-sources.mjs` 참고).
 
-## 12. 부품 (0.2.0)
+## 12. 부품
 
 부품은 생성된 값만 읽고 위 규칙을 품고 있다. 부품으로 짠 화면에는 높이·둥글기·색을 따로
 적을 일이 없다. `android/catalog`의 Parts 탭이 전부를 보여 준다. 웹에 대응하는 부품이
@@ -553,5 +597,25 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 - 라디오 고리는 `text.brand`, 체크된 상자는 `bg.brand`를 쓴다. 가는 고리는 바탕과 3:1이
   필요한데 `bg.brand`는 흰 바탕에서 거기에 못 미친다.
 
-0.2.0에 없는 것: 아래 시트, 스낵바·토스트, 화면 안 탭, 날짜·시간 선택, 메뉴. 추가될 때까지
-`DdsTheme` 아래에서 Material3 부품을 쓴다.
+**0.3.0에서 추가**
+
+| 부품 | 고정해 주는 것 | 웹 |
+| --- | --- | --- |
+| `DdsSearchField` | 검색칸은 하나: 앞에 돋보기, 입력하면 지우기 버튼, 키보드의 검색 키로 실행. 라벨 줄도 메시지 줄도 없다 | — |
+| `DdsSelectField` | 짧은 목록에서 고르는 칸은 하나: `DdsTextField`와 같은 상자와 줄, 시트가 열리고 고른 항목에 체크 | Select |
+| `DdsValueRow` | 이름과 값 한 줄: 이름은 앞, 값은 끝 가장자리, 숫자는 고정폭, 줄마다 구분선 | — |
+| `DdsTabs` | 화면 안에서 같은 것의 여러 보기: 브랜드 밑줄과 굵은 라벨 | Tabs |
+| `DdsBottomSheet` | 선택과 작업 메뉴. 뒤로, 바깥 탭, 끌어내리기로 닫힌다. 위쪽 모서리 둥글기 16 | Sheet |
+| `DdsMenu`, `DdsMenuItem` | 버튼에 붙어 열리는 짧은 메뉴. 지우는 항목은 위험색 | Menu |
+| `DdsToastHost` | 스스로 사라지는 짧은 알림, 반전 면. 꼭 읽어야 하는 것에는 쓰지 않는다 | Toast |
+
+- **글은 쓴 그대로 읽힌다.** `keepWords()`는 단어의 글자 사이에 보이지 않는 연결 문자를
+  넣는다. 0.2.1까지는 그 글이 화면 낭독기와 테스트에도 그대로 전달됐다
+  (`onNodeWithText("저장")`이 DDS 라벨을 찾지 못했다). 이제 부품은 묶은 글을 그리고 원문을
+  알려 준다. 직접 그리는 글에는 `Text(label.keepWords(), Modifier.readAs(label))` — `readAs`는
+  수정자 사슬의 맨 뒤에 둔다. 뒤에 적은 것의 접근성 정보를 대체하기 때문이다. DDS 라벨을
+  `"…".keepWords()`로 찾던 테스트는 이제 원문으로 찾는다.
+- **검색칸 하나, 선택칸 하나를 앱 전체에서 쓴다.** 같은 일을 하는 칸이 화면마다 다르게
+  생기면 가장 먼저 눈에 띄는 불일치가 된다.
+
+아직 없는 것: 날짜·시간 선택. `DdsTheme` 아래에서 Material3 부품을 쓴다.

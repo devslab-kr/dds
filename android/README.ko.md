@@ -17,7 +17,7 @@
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.2.1") // dds-android-tokens를 함께 가져온다
+    implementation("kr.devslab:dds-compose:0.3.0") // dds-android-tokens를 함께 가져온다
 }
 ```
 

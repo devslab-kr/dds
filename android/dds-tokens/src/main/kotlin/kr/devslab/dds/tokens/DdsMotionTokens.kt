@@ -19,4 +19,5 @@ object DdsMotionTokens {
     const val shift: Int = 24
     const val splashHoldMs: Int = 150
     const val splashKeepLimitMs: Int = 1000
+    const val backDoublePressMs: Int = 600
 }

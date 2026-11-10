@@ -21,8 +21,8 @@ class MotionTest {
     }
 
     @Test
-    fun aTabOnlyAppears() {
-        assertEquals(EnterSpec(DdsMotion.Short, 0, 0), enterSpec(DdsMove.Tab, reduced = false))
+    fun aTabDoesNotMove() {
+        assertEquals(EnterSpec(0, 0, 0), enterSpec(DdsMove.Tab, reduced = false))
     }
 
     @Test

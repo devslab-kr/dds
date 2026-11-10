@@ -34,7 +34,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.theme.DdsTheme
-import kr.devslab.dds.compose.theme.keepWords
 import kr.devslab.dds.tokens.DdsBorder
 import kr.devslab.dds.tokens.DdsField
 import kr.devslab.dds.tokens.DdsSpace
@@ -90,7 +89,7 @@ public fun DdsTextField(
     val textStyle = typography.body1.copy(color = colors.textPrimary)
 
     Column(modifier.alpha(if (enabled) 1f else DISABLED_ALPHA), verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp)) {
-        Text(label.keepWords(), style = typography.label, color = colors.textPrimary)
+        WordsText(label, style = typography.label, color = colors.textPrimary)
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
@@ -138,7 +137,7 @@ public fun DdsTextField(
         Box(Modifier.heightIn(min = line)) {
             val message = error ?: helper
             if (message != null) {
-                Text(message.keepWords(), style = typography.caption, color = if (isError) colors.statusDanger else colors.textSecondary)
+                WordsText(message, style = typography.caption, color = if (isError) colors.statusDanger else colors.textSecondary)
             }
         }
     }

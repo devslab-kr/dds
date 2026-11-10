@@ -50,7 +50,18 @@ import kotlinx.coroutines.delay
 import kr.devslab.dds.compose.component.DdsBadge
 import kr.devslab.dds.compose.component.DdsButton
 import kr.devslab.dds.compose.component.DdsButtonVariant
+import kr.devslab.dds.compose.component.DdsBottomSheet
 import kr.devslab.dds.compose.component.DdsCard
+import kr.devslab.dds.compose.component.DdsMenu
+import kr.devslab.dds.compose.component.DdsMenuItem
+import kr.devslab.dds.compose.component.DdsSearchField
+import kr.devslab.dds.compose.component.DdsSelectField
+import kr.devslab.dds.compose.component.DdsTabs
+import kr.devslab.dds.compose.component.DdsToastHost
+import kr.devslab.dds.compose.component.DdsValueRow
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import kr.devslab.dds.compose.component.DdsCheckbox
 import kr.devslab.dds.compose.component.DdsChip
 import kr.devslab.dds.compose.component.DdsDialog
@@ -216,7 +227,7 @@ fun TypePage() {
             Text("The second paragraph uses keepWords(): it breaks only at spaces.", style = t.caption, color = DdsTheme.colors.textSecondary)
         }
         Block("Mono") {
-            Text("kr.devslab:dds-compose 0.1.0", style = t.body2.copy(fontFamily = DdsMono))
+            Text("kr.devslab:dds-compose", style = t.body2.copy(fontFamily = DdsMono))
         }
     }
 }
@@ -233,6 +244,13 @@ fun PartsPage() {
     var channel by rememberSaveable { mutableStateOf(0) }
     var filter by rememberSaveable { mutableStateOf(0) }
     var asking by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var bank by rememberSaveable { mutableStateOf<Int?>(null) }
+    var view by rememberSaveable { mutableStateOf(0) }
+    var menu by remember { mutableStateOf(false) }
+    var sheet by rememberSaveable { mutableStateOf(false) }
+    val toasts = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     PageBody {
         DdsSection("Buttons", description = "One height (48). Loading keeps the size.") {
             DdsCard {
@@ -268,6 +286,48 @@ fun PartsPage() {
                     DdsTextField(name, { name = it }, label = "거래처 이름", placeholder = "예: 데브스랩", helper = "계약서에 그대로 들어갑니다")
                     DdsTextField("010-0000", {}, label = "연락처", error = "전화번호 형식이 아닙니다")
                     DdsTextField("수정할 수 없음", {}, label = "사업자 번호", enabled = false)
+                }
+            }
+        }
+        DdsSection("Search and select", description = "One search field and one select field, everywhere.") {
+            DdsCard {
+                Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s16.dp)) {
+                    DdsSearchField(query, { query = it }, label = "Search customers", clearDescription = "Clear", placeholder = "거래처 이름")
+                    DdsSelectField(
+                        label = "입금 은행",
+                        options = listOf("국민은행", "신한은행", "아주 긴 이름을 가진 은행은 한 줄에서 말줄임으로 끝납니다"),
+                        selectedIndex = bank,
+                        onSelect = { bank = it },
+                        placeholder = "선택",
+                        helper = "정산금이 들어갈 계좌의 은행",
+                    )
+                }
+            }
+        }
+        DdsSection("Values", description = "Name at the start, value at the end, digits tabular.") {
+            DdsCard {
+                Column {
+                    DdsValueRow("공급가액", "1,121,818원")
+                    DdsValueRow("부가세", "112,182원")
+                    DdsValueRow("수수료", "-9,000원")
+                    // A long name must not push the value out, at any font size.
+                    DdsValueRow("예상 정산 완료 예정일 (영업일 기준)", "2026-11-30")
+                    DdsValueRow("정산 금액", "1,225,000원", emphasized = true, divider = false)
+                }
+            }
+        }
+        DdsSection("Tabs, menu, sheet, toast") {
+            DdsTabs(listOf("전체", "서명 대기", "확정"), view, { view = it })
+            Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
+                DdsButton("시트 열기", onClick = { sheet = true }, variant = DdsButtonVariant.Secondary)
+                DdsButton("저장", onClick = { scope.launch { toasts.showSnackbar("저장했습니다") } }, variant = DdsButtonVariant.Secondary)
+                Box {
+                    DdsIconButton(DdsIcons.MoreHorizontal, contentDescription = "More", onClick = { menu = true })
+                    DdsMenu(menu, { menu = false }) {
+                        DdsMenuItem("수정", onClick = { menu = false }, icon = DdsIcons.Edit)
+                        DdsMenuItem("내보내기", onClick = { menu = false }, icon = DdsIcons.Download)
+                        DdsMenuItem("삭제", onClick = { menu = false }, icon = DdsIcons.Trash, danger = true)
+                    }
                 }
             }
         }
@@ -319,6 +379,15 @@ fun PartsPage() {
             }
         }
     }
+    // Toasts sit at the bottom of the screen, over the content — not inside the scrolling page.
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) { DdsToastHost(toasts) }
+    if (sheet) {
+        DdsBottomSheet(onDismissRequest = { sheet = false }, title = "계약서 보내기") {
+            DdsListRow("문자로 보내기", onClick = { sheet = false }, leading = { DdsIcon(DdsIcons.Chat, null) })
+            DdsListRow("메일로 보내기", onClick = { sheet = false }, leading = { DdsIcon(DdsIcons.Mail, null) })
+            DdsListRow("링크 복사", onClick = { sheet = false }, leading = { DdsIcon(DdsIcons.ExternalLink, null) })
+        }
+    }
     if (asking) {
         DdsDialog(
             title = "계약서를 보낼까요?",
@@ -353,7 +422,7 @@ fun MotionPage(onOpen: (Int) -> Unit) {
     DdsPullRefresh(busy = busy, onRefresh = { runs++ }, onPulling = { pulling = it }) {
         PageBody {
             Text(
-                if (reduced) "Animations are off: nothing slides or staggers." else "Tabs appear (${DdsMotion.Short}ms). Open a row: the content slides in (${DdsMotion.Slow}ms); the bars stay still.",
+                if (reduced) "Animations are off: nothing slides or staggers." else "A tab is simply there. Open a row: the content slides in (${DdsMotion.Slow}ms); the bars stay still.",
                 style = DdsTheme.typography.body2,
                 color = DdsTheme.colors.textSecondary,
             )

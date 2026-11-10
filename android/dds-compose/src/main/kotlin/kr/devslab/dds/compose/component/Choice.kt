@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.theme.DdsTheme
-import kr.devslab.dds.compose.theme.keepWords
 import kr.devslab.dds.tokens.DdsRow
 import kr.devslab.dds.tokens.DdsSpace
 import kr.devslab.dds.tokens.DdsTouch
@@ -56,8 +55,8 @@ private fun ChoiceRow(
     ) {
         if (controlFirst) control()
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DdsSpace.s2.dp)) {
-            Text(label.keepWords(), style = DdsTheme.typography.body1, color = colors.textPrimary)
-            if (description != null) Text(description.keepWords(), style = DdsTheme.typography.caption, color = colors.textSecondary)
+            WordsText(label, style = DdsTheme.typography.body1, color = colors.textPrimary)
+            if (description != null) WordsText(description, style = DdsTheme.typography.caption, color = colors.textSecondary)
         }
         if (!controlFirst) control()
     }

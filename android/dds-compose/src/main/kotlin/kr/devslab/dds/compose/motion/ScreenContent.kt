@@ -33,7 +33,11 @@ public enum class DdsMove {
     /** Back to the previous screen. */
     Pop,
 
-    /** Sideways to another tab. */
+    /**
+     * Sideways to another tab: no movement. The previous tab is removed at once,
+     * so content fading in would fade in over an empty page — on a device that
+     * reads as a flicker on every tab press, not as a transition.
+     */
     Tab,
 }
 
@@ -41,8 +45,8 @@ public enum class DdsMove {
 internal data class EnterSpec(val fadeMs: Int, val slideMs: Int, val shiftSign: Int)
 
 /**
- * Push comes from the trailing edge, pop from the leading edge, a tab only
- * appears. With reduced motion nothing moves.
+ * Push comes from the trailing edge, pop from the leading edge, a tab is
+ * simply there. With reduced motion nothing moves.
  */
 internal fun enterSpec(move: DdsMove, reduced: Boolean): EnterSpec =
     if (reduced) {
@@ -52,7 +56,7 @@ internal fun enterSpec(move: DdsMove, reduced: Boolean): EnterSpec =
             DdsMove.None -> EnterSpec(0, 0, 0)
             DdsMove.Push -> EnterSpec(DdsMotion.Fast, DdsMotion.Slow, 1)
             DdsMove.Pop -> EnterSpec(DdsMotion.Fast, DdsMotion.Base, -1)
-            DdsMove.Tab -> EnterSpec(DdsMotion.Short, 0, 0)
+            DdsMove.Tab -> EnterSpec(0, 0, 0)
         }
     }
 
