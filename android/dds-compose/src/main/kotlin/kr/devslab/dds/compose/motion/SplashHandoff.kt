@@ -200,7 +200,8 @@ public fun Modifier.ddsSplashTarget(priority: Int): Modifier = composed {
  *
  * With a destination on screen the mark travels to it in [DdsMotion.Slow]
  * while the cover fades. With none — or when [landingAllowed] is false (a
- * lock screen is up), or with reduced motion — mark and cover fade together.
+ * lock screen is up), or with reduced motion — mark and cover fade together,
+ * as one picture: a mark the screen draws in the same place keeps its color.
  *
  * @param background the splash background; pass the same color the splash theme uses
  * @param markSize the size the system splash draws the mark at
@@ -252,20 +253,22 @@ public fun DdsSplashOverlay(
             modifier
                 .fillMaxSize()
                 .onSizeChanged { window = it }
-                .clearAndSetSemantics { },
+                .clearAndSetSemantics { }
+                // With nowhere to travel to, cover and mark leave as one picture: this layer is
+                // put together first and then faded. Faded one by one, the cover would show
+                // through the mark half-way — a mark the screen draws in the same place would
+                // dip a quarter of the way toward the background and come back.
+                .graphicsLayer { alpha = if (flight == null) 1f - progress.value else 1f },
         ) {
             val destination = flight
             Box(
                 Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        val p = progress.value
                         // In flight the cover starts lifting a little after the mark has set
                         // off and is gone before it lands, so the mark is seen leaving first.
-                        alpha = if (destination != null) {
-                            1f - ((p * DdsMotion.Slow - COVER_DELAY) / DdsMotion.Base).coerceIn(0f, 1f)
-                        } else {
-                            1f - p
+                        if (destination != null) {
+                            alpha = 1f - ((progress.value * DdsMotion.Slow - COVER_DELAY) / DdsMotion.Base).coerceIn(0f, 1f)
                         }
                     }
                     .background(background),
@@ -287,7 +290,6 @@ public fun DdsSplashOverlay(
                         } else {
                             translationX = startX
                             translationY = startY
-                            alpha = 1f - p
                         }
                     },
             ) {

@@ -97,7 +97,8 @@ and with "Remove animations" on.
 `dds-compose/src/androidTest` reads what a screen reader is given (`ScreenReaderTest`) and
 measures what moves part-way through, with the clock held (`MotionOnDeviceTest`,
 `NavDisplayOnDeviceTest` inside Navigation 3 — a test-only dependency — and
-`RebuiltWindowTest`, which rebuilds the activity). It needs an
+`RebuiltWindowTest`, which rebuilds the activity; `SplashOverlayOnDeviceTest` for the
+splash cover as it lifts). It needs an
 emulator or a phone, so CI does not run it. Name the device — the task otherwise runs on every device
 that is connected:
 

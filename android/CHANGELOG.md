@@ -43,6 +43,12 @@ what a screen reader is given.
   still does not arrive again (`RebuiltWindowTest`).
 - **Colors ease instead of switching (100ms):** a chip being chosen, a button's pressed
   fill, a tab's label — as on the web — and the edge of a text, search or select field.
+- **The splash cover no longer dims the logo as it lifts.** With no destination to travel
+  to, cover and logo faded as two layers, so half-way the background showed through the
+  logo: a logo the first screen draws in the same place dipped a quarter of the way toward
+  the background color for 150ms and came back (seen on a phone in JeongsanNow). They now
+  lift as one picture. Nothing to change in the app. Checked on an emulator with the clock
+  held (`SplashOverlayOnDeviceTest`); not measured on a phone.
 - **`DdsSelectField`** shows two lines of what was chosen. **`DdsDialog`:** a long message scrolls.
 - **Choice rows** show the focus ring.
 

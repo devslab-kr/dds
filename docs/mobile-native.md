@@ -106,7 +106,10 @@ logo's shape and color are the app's; the system supplies the way to join them.
     registration records who made it, so a previous screen that is disposed late
     cannot erase the new screen's registration (a bug JeongsanNow actually hit; pinned by a test).
 14. **With no destination** (a lock screen) the splash lifts in 150ms without a move,
-    and the logo at the destination shows through the lifting cover.
+    and the logo at the destination shows through the lifting cover. Cover and logo lift
+    as one picture. Faded one by one, the cover shows through the logo half-way: a logo
+    the screen draws in the same place dips a quarter of the way toward the background
+    and comes back (seen on a phone in JeongsanNow; fixed in 0.5.0, `SplashOverlayOnDeviceTest`).
 15. **A recreated Activity does not replay it** (`active = savedInstanceState == null`).
     The cover lifts on its own after a safety interval.
 16. While the first screen is not known yet (the session is still being read),
