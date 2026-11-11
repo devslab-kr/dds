@@ -211,6 +211,13 @@ Code: `DdsScreenMotion(move)`, `Modifier.ddsScreenContent()`, `DdsMove`.
 20. **Nothing fades in.** Content is opaque from its first frame and only slides. A fade
     from transparent, even 100ms, left the content area empty for about eight frames under a
     top bar that was already there (measured on a phone at 60fps, 0.3.0).
+
+**Measured on a phone with 0.4.0.** JeongsanNow removed its own motion and used
+`DdsScreenMotion(move, active)` + `ddsScreenContent` (SM-F971N, Android 17, unfolded, dark;
+60fps, each frame compared with the one before). Five tab switches each changed in one
+frame, with no frame empty. Opening and closing two screens showed the content in the very
+frame it opened, then about 15 frames of small change (the slide), with no frame empty. The
+back rule passed on the same build. Not measured: light, folded, the other screens, TalkBack.
 21. **When the account or workspace changes, switch at once with no movement** (`DdsMove.None`).
 22. A rotated or restored screen does not arrive a second time.
 
@@ -641,6 +648,9 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
   `Text(label.keepWords(), Modifier.readAs(label))` — `readAs` goes last in the chain; it
   replaces the semantics of anything written after it. A test that matched a DDS label with
   `"…".keepWords()` now matches the plain string.
+- **Give the search field a `placeholder`.** Its `label` is only read aloud — nothing on
+  screen says what to type unless a placeholder does. In a test find it with
+  `hasContentDescription(label)`, not `hasText`.
 - **One search field and one select field in the whole app.** Two looks for the same job on
   two screens is the inconsistency people notice first.
 
