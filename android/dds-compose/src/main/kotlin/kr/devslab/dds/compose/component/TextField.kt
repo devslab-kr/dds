@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.compose.motion.colorChange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -84,11 +85,13 @@ public fun DdsTextField(
 
     // One edge at a time: the focus ring replaces the border instead of doubling it.
     val edgeWidth = if (focused) DdsBorder.focus.dp else DdsBorder.hairline.dp
-    val edgeColor = when {
-        isError -> colors.statusDanger
-        focused -> colors.borderFocus
-        else -> colors.borderControl
-    }
+    val edgeColor by colorChange(
+        when {
+            isError -> colors.statusDanger
+            focused -> colors.borderFocus
+            else -> colors.borderControl
+        },
+    )
     val textStyle = typography.body1.copy(color = colors.textPrimary)
 
     Column(modifier.alpha(if (enabled) 1f else DISABLED_ALPHA), verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp)) {

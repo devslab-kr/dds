@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.compose.motion.colorChange
 import kr.devslab.dds.compose.motion.DdsMotion
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.LayoutDirection
@@ -10,7 +11,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.RectangleShape
@@ -238,11 +238,7 @@ public fun DdsTabs(
 private fun TabCell(title: String, selected: Boolean, onClick: () -> Unit) {
     val colors = DdsTheme.colors
     val interaction = remember { MutableInteractionSource() }
-    val ink by animateColorAsState(
-        if (selected) colors.textBrand else colors.textSecondary,
-        tween(DdsMotion.Base, easing = DdsMotion.Standard),
-        label = "tab label",
-    )
+    val ink by colorChange(if (selected) colors.textBrand else colors.textSecondary)
     Box(
         Modifier
             .selectable(selected, interaction, ripple(), role = Role.Tab, onClick = onClick)

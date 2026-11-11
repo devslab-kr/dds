@@ -44,7 +44,7 @@ import kr.devslab.dds.compose.component.DdsSize
 import kr.devslab.dds.compose.component.DdsTopBar
 import kr.devslab.dds.compose.icons.DdsIcons
 import kr.devslab.dds.compose.motion.DdsMove
-import kr.devslab.dds.compose.motion.DdsScreenMotion
+import kr.devslab.dds.compose.motion.DdsScreenHost
 import kr.devslab.dds.compose.motion.DdsSplashHandoff
 import kr.devslab.dds.compose.motion.DdsSplashOverlay
 import kr.devslab.dds.compose.motion.LocalDdsSplashHandoff
@@ -247,21 +247,17 @@ private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) 
             }
         },
     ) { padding ->
-        // The previous screen is removed at once; only the new content arrives.
-        key(page, detail) {
-            DdsScreenMotion(move) {
-                Box(Modifier.padding(padding).fillMaxSize()) {
-                    when {
-                        page == Page.Motion && detail != null -> MotionDetail(detail!!)
-                        page == Page.Colors -> ColorsPage()
-                        page == Page.Type -> TypePage()
-                        page == Page.Parts -> PartsPage()
-                        else -> MotionPage(onOpen = {
-                            move = DdsMove.Push
-                            detail = it
-                        })
-                    }
-                }
+        // The screen before stays drawn underneath until the new one covers it.
+        DdsScreenHost(screen = page to detail, move = move, modifier = Modifier.padding(padding).fillMaxSize()) { (shownPage, shownDetail) ->
+            when {
+                shownPage == Page.Motion && shownDetail != null -> MotionDetail(shownDetail)
+                shownPage == Page.Colors -> ColorsPage()
+                shownPage == Page.Type -> TypePage()
+                shownPage == Page.Parts -> PartsPage()
+                else -> MotionPage(onOpen = {
+                    move = DdsMove.Push
+                    detail = it
+                })
             }
         }
     }

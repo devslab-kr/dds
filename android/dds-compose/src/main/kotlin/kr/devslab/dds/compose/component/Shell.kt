@@ -50,8 +50,10 @@ import kr.devslab.dds.tokens.DdsSpace
 
 /**
  * The bar at the top of a screen. It shares the page background and is set
- * apart by a hairline — no shadow, no tint. It does not move or fade when a
- * screen changes; only the content below it does.
+ * apart by a hairline — no shadow, no tint. It does not move when a screen
+ * changes; only the content below it slides. Where the host fades between two
+ * screens, a bar that is the same on both shows no change, and a title that
+ * differs fades to the new one.
  *
  * @param leading drawn before the title: the app mark on a top-level screen,
  * or a back [DdsIconButton] on a deeper one

@@ -424,7 +424,7 @@ fun MotionPage(onOpen: (Int) -> Unit) {
     DdsPullRefresh(busy = busy, onRefresh = { runs++ }, onPulling = { pulling = it }) {
         PageBody {
             Text(
-                if (reduced) "Animations are off: nothing slides or staggers." else "A tab is simply there. Open a row: the content slides in (${DdsMotion.Slow}ms); the bars stay still.",
+                if (reduced) "Animations are off: nothing slides or staggers." else "A tab appears over the one before (${DdsMotion.Short}ms). Open a row: it appears over this page as its content slides in (${DdsMotion.Slow}ms); the bars stay still.",
                 style = DdsTheme.typography.body2,
                 color = DdsTheme.colors.textSecondary,
             )

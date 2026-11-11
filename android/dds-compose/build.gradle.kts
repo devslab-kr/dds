@@ -53,6 +53,9 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4.accessibility)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
+    // The apps change screens with Navigation 3; the screen change is measured inside it.
+    androidTestImplementation(libs.navigation3.runtime)
+    androidTestImplementation(libs.navigation3.ui)
     debugImplementation(libs.compose.ui.test.manifest)
 }
 

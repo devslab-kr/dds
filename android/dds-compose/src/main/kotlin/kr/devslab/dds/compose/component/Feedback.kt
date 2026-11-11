@@ -1,5 +1,8 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.compose.motion.clear
+import kr.devslab.dds.compose.motion.colorChange
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.font.FontWeight
 import kr.devslab.dds.compose.R
 import androidx.compose.ui.res.stringResource
@@ -180,20 +183,24 @@ public fun DdsChip(
 ) {
     val colors = DdsTheme.colors
     val interaction = remember { MutableInteractionSource() }
+    // Being chosen eases in (100ms): the fill, the edge and the label together.
+    val fill by colorChange(if (selected) colors.bgBrandSubtle else colors.bgBrandSubtle.clear())
+    val edge by colorChange(if (selected) colors.bgBrand else colors.borderStrong)
+    val ink by colorChange(if (selected) colors.textBrand else colors.textPrimary)
     Box(
         modifier
             .minimumInteractiveComponentSize()
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .defaultMinSize(minHeight = (DdsControl.sm - DdsSpace.s4).dp)
             .clip(CircleShape)
-            .background(if (selected) colors.bgBrandSubtle else Color.Transparent)
-            .border(BorderStroke(DdsBorder.hairline.dp, if (selected) colors.bgBrand else colors.borderStrong), CircleShape)
+            .background(fill)
+            .border(BorderStroke(DdsBorder.hairline.dp, edge), CircleShape)
             .ddsFocusRing(interaction, CircleShape)
             .toggleable(selected, interaction, ripple(), enabled, Role.Checkbox, onSelectedChange)
             .padding(horizontal = DdsSpace.s12.dp, vertical = DdsSpace.s4.dp),
         contentAlignment = Alignment.Center,
     ) {
-        WeightStableLabel(text, heavy = selected, style = DdsTheme.typography.label, color = if (selected) colors.textBrand else colors.textPrimary)
+        WeightStableLabel(text, heavy = selected, style = DdsTheme.typography.label, color = ink)
     }
 }
 

@@ -23,9 +23,26 @@ what a screen reader is given.
   `placeholder = null` to keep the box empty). Clearing it now focuses the field.
 - **`DdsChip`, `DdsTabs`:** the selected one is heavier as well as colored; its width does
   not change. Tabs still share the width, and now scroll when a label does not fit its share
-  instead of cutting it. The underline still slides to the chosen tab and the label
-  color still fades (200ms). The row is now DDS's own rather than Material's scrollable tab
+  instead of cutting it. The underline still slides to the chosen tab (200ms). The row is now DDS's own rather than Material's scrollable tab
   row, which never settles under a parent that asks for intrinsic sizes.
+- **Screens and tabs fade again — `ddsScreenChange(move, reduced)`.** A change of screen is
+  now always two screens, one over the other, so no frame is empty: going forward the new
+  screen appears over the one before (100ms) while its content slides, a bottom tab appears
+  over the one before (150ms), going back the screen left fades away over the one returned
+  to (100ms). 0.3.0 and 0.4.0 had taken these fades out because they faded in over nothing.
+  In Navigation 3 put it in `NavDisplay`'s three transition specs, in place of
+  `EnterTransition.None togetherWith ExitTransition.None`, and keep each entry in
+  `DdsScreenMotion`; an app that changes screens itself uses the new `DdsScreenHost(screen,
+  move)`. Each screen has to cover what is under it: do not empty a screen while it is
+  leaving (use `DdsMove.None` for a move away from one that must be). Checked on an emulator
+  with the clock held: inside Navigation 3 1.1.2 (`NavDisplayOnDeviceTest`) and in
+  `DdsScreenHost` (`MotionOnDeviceTest`); **not yet recorded frame by frame on a phone.**
+- **Going back slides again in Navigation 3.** A screen returned to came back without
+  moving: it got its saved state back and counted as already arrived (found in Qooroo).
+  Nothing to change in the app. The screen a window is rebuilt around (rotation, restore)
+  still does not arrive again (`RebuiltWindowTest`).
+- **Colors ease instead of switching (100ms):** a chip being chosen, a button's pressed
+  fill, a tab's label — as on the web — and the edge of a text, search or select field.
 - **`DdsSelectField`** shows two lines of what was chosen. **`DdsDialog`:** a long message scrolls.
 - **Choice rows** show the focus ring.
 

@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.compose.motion.colorChange
 import kr.devslab.dds.tokens.DdsTouch
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.layout.size
@@ -85,6 +86,7 @@ public fun DdsSearchField(
     val colors = DdsTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
+    val searchEdge by colorChange(if (focused) colors.borderFocus else colors.borderControl)
     val shape = MaterialTheme.shapes.small
     val textStyle = DdsTheme.typography.body1.copy(color = colors.textPrimary)
     val field = remember { FocusRequester() }
@@ -108,11 +110,7 @@ public fun DdsSearchField(
                     .defaultMinSize(minHeight = DdsField.height.dp)
                     .clip(shape)
                     .background(colors.bgDefault)
-                    .border(
-                        if (focused) DdsBorder.focus.dp else DdsBorder.hairline.dp,
-                        if (focused) colors.borderFocus else colors.borderControl,
-                        shape,
-                    )
+                    .border(if (focused) DdsBorder.focus.dp else DdsBorder.hairline.dp, searchEdge, shape)
                     // The clear button is 48 to touch; 4 around it keeps the field at 56.
                     .padding(start = DdsSpace.s12.dp, end = DdsSpace.s4.dp),
                 horizontalArrangement = Arrangement.spacedBy(DdsSpace.s8.dp),
@@ -185,6 +183,7 @@ public fun DdsSelectField(
     enabled: Boolean = true,
 ) {
     val colors = DdsTheme.colors
+    val selectEdge by colorChange(if (error != null) colors.statusDanger else colors.borderControl)
     val typography = DdsTheme.typography
     val shape = MaterialTheme.shapes.small
     val interaction = remember { MutableInteractionSource() }
@@ -200,7 +199,7 @@ public fun DdsSelectField(
                 .defaultMinSize(minHeight = DdsField.height.dp)
                 .clip(shape)
                 .background(if (enabled) colors.bgDefault else colors.bgSubtle)
-                .border(DdsBorder.hairline.dp, if (error != null) colors.statusDanger else colors.borderControl, shape)
+                .border(DdsBorder.hairline.dp, selectEdge, shape)
                 .ddsFocusRing(interaction, shape)
                 .clickable(interaction, ripple(), enabled, role = Role.DropdownList) { open = true }
                 .semantics {
