@@ -1,5 +1,10 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.tokens.DdsTouch
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -55,6 +60,8 @@ import kr.devslab.dds.tokens.DdsSpace
  * list, not a form field. Use the same field on every screen that searches.
  *
  * @param label what is searched, for a screen reader ("Search customers")
+ * @param placeholder shown in the empty field; the [label] unless given — a field with
+ * nothing in it must still say what goes there
  * @param clearDescription what the clear button does, for a screen reader ("Clear")
  * @param onSearch called with the text when the keyboard's search key is pressed, or the apply button
  * @param applyDescription shows an apply button at the end and names it for a screen reader
@@ -69,7 +76,7 @@ public fun DdsSearchField(
     label: String,
     clearDescription: String,
     modifier: Modifier = Modifier,
-    placeholder: String? = null,
+    placeholder: String? = label,
     enabled: Boolean = true,
     onSearch: (String) -> Unit = {},
     applyDescription: String? = null,
@@ -80,11 +87,13 @@ public fun DdsSearchField(
     val focused by interaction.collectIsFocusedAsState()
     val shape = MaterialTheme.shapes.small
     val textStyle = DdsTheme.typography.body1.copy(color = colors.textPrimary)
+    val field = remember { FocusRequester() }
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
+            .focusRequester(field)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .semantics { contentDescription = label },
         enabled = enabled,
@@ -117,15 +126,22 @@ public fun DdsSearchField(
                     }
                     innerTextField()
                 }
-                // The slot stays, so the text does not jump when the button appears.
-                Box(Modifier.alpha(if (value.isEmpty()) 0f else 1f)) {
-                    DdsIconButton(
-                        DdsIcons.Close,
-                        contentDescription = clearDescription,
-                        onClick = { onValueChange("") },
-                        enabled = enabled && value.isNotEmpty(),
-                        tint = colors.textSecondary,
-                    )
+                // The slot stays, so the text does not jump when the button appears. The button
+                // itself is only there when there is something to clear: an invisible button is
+                // still a stop for a screen reader and for the keyboard.
+                Box(Modifier.size(DdsTouch.min.dp)) {
+                    if (value.isNotEmpty()) {
+                        DdsIconButton(
+                            DdsIcons.Close,
+                            contentDescription = clearDescription,
+                            onClick = {
+                                onValueChange("")
+                                field.requestFocus() // the button is about to go; keep the person in the field
+                            },
+                            enabled = enabled,
+                            tint = colors.textSecondary,
+                        )
+                    }
                 }
                 if (applyDescription != null) {
                     DdsIconButton(
@@ -170,7 +186,8 @@ public fun DdsSelectField(
     val chosen = selectedIndex?.let(options::getOrNull)
 
     Column(modifier.alpha(if (enabled) 1f else DISABLED_ALPHA), verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp)) {
-        WordsText(label, style = typography.label, color = colors.textPrimary)
+        // Seen, not read: the box below carries the label, so it is said once.
+        WordsText(label, Modifier.clearAndSetSemantics { }, style = typography.label, color = colors.textPrimary)
         Row(
             Modifier
                 .fillMaxWidth()
@@ -182,7 +199,8 @@ public fun DdsSelectField(
                 .clickable(interaction, ripple(), enabled, role = Role.DropdownList) { open = true }
                 .semantics {
                     contentDescription = label
-                    if (chosen != null) stateDescription = chosen
+                    // What is in the box, also when it is only the placeholder ("Select").
+                    (chosen ?: placeholder)?.let { stateDescription = it }
                     if (error != null) error(error)
                 }
                 .padding(DdsSpace.s12.dp),
@@ -194,18 +212,12 @@ public fun DdsSelectField(
                 Modifier.weight(1f),
                 style = typography.body1,
                 color = if (chosen != null) colors.textPrimary else colors.textMuted,
-                maxLines = 1,
+                maxLines = 2, // a chosen value cut to a few letters at large sizes tells nothing
                 overflow = TextOverflow.Ellipsis,
             )
             DdsIcon(DdsIcons.ChevronDown, contentDescription = null, tint = colors.textSecondary)
         }
-        val line = with(LocalDensity.current) { typography.caption.lineHeight.toDp() }
-        Box(Modifier.heightIn(min = line)) {
-            val message = error ?: helper
-            if (message != null) {
-                WordsText(message, style = typography.caption, color = if (error != null) colors.statusDanger else colors.textSecondary)
-            }
-        }
+        FieldMessage(helper = helper, error = error)
     }
 
     if (open) {

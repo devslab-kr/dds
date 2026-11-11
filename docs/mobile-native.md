@@ -518,6 +518,47 @@ transparent, and their icons follow the theme **actually shown**. Use
 - Focus is a 2dp `border.focus` ring.
 - Nothing clips at a 200% system font scale. Where one line is fixed (bottom tab labels) use an ellipsis.
 
+### 8.1 What a screen reader hears (0.5.0)
+
+Someone who cannot see the screen moves through it one stop at a time and hears a name, a
+role and a state at each. The components are built so that what is heard is what is on
+screen, once. `ScreenReaderTest` holds each line below on a device.
+
+| Component | What is heard |
+| --- | --- |
+| `DdsTextField` | one stop: what was typed, "edit box", the label, and the error when there is one. The error is spoken the moment it appears |
+| `DdsSelectField` | one stop: the label, "drop-down list", and what is in the box — also when that is only the placeholder |
+| `DdsSearchField` | the label; the placeholder is the label unless another is given. The clear button exists only when there is something to clear, and clearing leaves the person in the field |
+| `DdsNotice` | one stop: the kind ("Error", "Notice", "Done", "Warning" in the device language, or the app's word) and the message. Spoken when it appears or changes; an error interrupts |
+| `DdsButton` | while loading: "Loading". It stays focusable and ignores presses, instead of becoming "disabled" under the person's finger |
+| `DdsListRow` | a row that can be pressed says "button". A row that only shows something is read as one thing with what is at its end |
+| `DdsValueRow` | the name and the value together |
+| `DdsBusyBar` | "Loading", when it appears |
+| `DdsPullRefresh` | a "Refresh" action in the screen reader's actions menu, for someone who cannot pull |
+| `ddsScreenContent(paneTitle)` | the screen's name when the screen changes |
+| `DdsBottomSheet` | its handle is named ("Close sheet") |
+
+- **The words come from the device language** when the app passes none (`res/values*/dds_a11y.xml`:
+  English and Korean). Pass your own to override; a product in another language must.
+- **An app still has to name what only it knows:** every icon-only button, every search
+  field, and the title of each screen.
+- **Not built by the components:** an initial focus inside a sheet, a guaranteed order of
+  top bar, content and bottom bar for keyboard users, and the splash cover hiding what is
+  under it for the second it is up.
+- **Checked how:** the device tests read the tree a screen reader walks (17 tests, 12 of
+  which fail on 0.4.0). TalkBack was started on the emulator and focused the screen title,
+  but what it speaks was not captured. **Listening with TalkBack on a phone is still to do.**
+
+Low vision, at 200% font with large text:
+
+- Tabs inside a page are as wide as their labels and scroll; a label is not cut to a letter.
+- A select field shows two lines of what was chosen; a dialog's message scrolls.
+- A selected chip is heavier as well as colored.
+- Still open (the same values as the web, so not changed here): `border.strong` as the
+  outline of an unchecked box or an empty field is about 1.5:1 on a light page where 3:1 is
+  asked for; placeholder text is about 4.1:1 in dark; the focus ring on a filled button is
+  seen against the fill. Bottom tab labels are one line with an ellipsis.
+
 ## 9. What has to differ on mobile
 
 | Item | Web | Android | Why |
@@ -648,9 +689,9 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
   `Text(label.keepWords(), Modifier.readAs(label))` — `readAs` goes last in the chain; it
   replaces the semantics of anything written after it. A test that matched a DDS label with
   `"…".keepWords()` now matches the plain string.
-- **Give the search field a `placeholder`.** Its `label` is only read aloud — nothing on
-  screen says what to type unless a placeholder does. In a test find it with
-  `hasContentDescription(label)`, not `hasText`.
+- **A search field shows its `label` as the placeholder** unless another is given (0.5.0;
+  before that the label was only read aloud and an empty field said nothing on screen). In a
+  test find it with `hasContentDescription(label)`.
 - **One search field and one select field in the whole app.** Two looks for the same job on
   two screens is the inconsistency people notice first.
 

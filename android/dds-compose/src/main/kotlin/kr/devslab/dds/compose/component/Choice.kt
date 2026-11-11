@@ -82,6 +82,7 @@ public fun DdsCheckbox(
         label, description, enabled,
         modifier
             .clip(MaterialTheme.shapes.small)
+            .ddsFocusRing(interaction, MaterialTheme.shapes.small)
             .toggleable(checked, interaction, ripple(), enabled, Role.Checkbox, onCheckedChange),
         controlFirst = true,
     ) {
@@ -116,6 +117,7 @@ public fun DdsRadio(
         label, description, enabled,
         modifier
             .clip(MaterialTheme.shapes.small)
+            .ddsFocusRing(interaction, MaterialTheme.shapes.small)
             .selectable(selected, interaction, ripple(), enabled, Role.RadioButton, onClick),
         controlFirst = true,
     ) {
@@ -149,6 +151,7 @@ public fun DdsSwitch(
         label, description, enabled,
         modifier
             .clip(MaterialTheme.shapes.small)
+            .ddsFocusRing(interaction, MaterialTheme.shapes.small)
             .toggleable(checked, interaction, ripple(), enabled, Role.Switch, onCheckedChange),
         controlFirst = false,
     ) {

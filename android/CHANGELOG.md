@@ -5,6 +5,36 @@
 `kr.devslab:dds-android-tokens` and `kr.devslab:dds-compose` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.5.0 — 2026-11-11
+
+For people who use a screen reader, a keyboard, or large text. An audit of the components
+found these; device tests (`ScreenReaderTest`, 17) now hold them.
+
+- **`DdsTextField`, `DdsSelectField`:** the label and the error were each read twice, and an
+  error that appeared was not spoken. A field is one stop now and its error is announced.
+  A select field also says what is in the box when nothing is chosen.
+- **`DdsNotice`:** says what kind it is ("Error", "Notice", …) even when the app passed no
+  icon description, as one stop with its message, and is announced when it appears.
+  `iconDescription = ""` turns the word off.
+- **`DdsButton`:** a loading button says "Loading", keeps focus and ignores presses, instead
+  of becoming disabled.
+- **`DdsListRow`:** a row that can be pressed says it is a button; a row that only shows
+  something is read as one thing.
+- **`DdsSearchField`:** the clear button is not in the tree while there is nothing to clear;
+  clearing keeps focus in the field; `placeholder` defaults to `label`.
+- **`DdsBusyBar(description)`, `DdsPullRefresh(refreshDescription)`:** the bar has a name;
+  refresh is offered as an action to someone who cannot pull.
+- **`ddsScreenContent(paneTitle)`:** a screen can say its name when it appears.
+- **`DdsBottomSheet`:** the handle has a name. **`DdsDialog`:** a long message scrolls.
+- **`DdsTabs`:** each tab is as wide as its label and the row scrolls — labels are no longer
+  cut at large sizes. (Tabs no longer share the width equally.)
+- **`DdsChip`:** a selected chip is heavier as well as colored. **Choice rows** show the
+  focus ring.
+- New strings `dds_a11y_*` (English, Korean) for the words above.
+
+Tests that looked for a text field by its label **as a separate text** now find the field
+itself; a select field is found by content description.
+
 ## 0.4.0 — 2026-11-11
 
 From JeongsanNow running 0.3.0 on a phone, recorded frame by frame.

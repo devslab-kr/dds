@@ -1,5 +1,7 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.compose.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -99,7 +101,8 @@ internal fun Modifier.ddsFocusRing(interactionSource: MutableInteractionSource, 
  * it, and taps are ignored. A loading button is not dimmed
  * @param leading drawn before the content (an icon)
  * @param trailing drawn after the content
- * @param loadingDescription what a screen reader says while [loading]; the app supplies it in its own language
+ * @param loadingDescription what a screen reader says while [loading]; "Loading" in the
+ * device language when null
  */
 @Composable
 public fun DdsButton(
@@ -119,6 +122,7 @@ public fun DdsButton(
     val pressed by interaction.collectIsPressedAsState()
     val shape = MaterialTheme.shapes.small
     val filled = variant == DdsButtonVariant.Primary || variant == DdsButtonVariant.Danger
+    val loadingWord = loadingDescription ?: stringResource(R.string.dds_a11y_loading)
 
     val container: Color = when (variant) {
         DdsButtonVariant.Primary -> if (pressed) colors.bgBrandHover else colors.bgBrand
@@ -162,12 +166,14 @@ public fun DdsButton(
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(color = contentColor),
-                enabled = enabled && !loading,
+                // Still enabled while loading: a disabled button drops keyboard focus the moment
+                // it is pressed, and a screen reader would say only "disabled". Taps do nothing.
+                enabled = enabled,
                 role = Role.Button,
-                onClick = onClick,
+                onClick = { if (!loading) onClick() },
             )
             .semantics {
-                if (loading && loadingDescription != null) stateDescription = loadingDescription
+                if (loading) stateDescription = loadingWord
             }
             .padding(horizontal = horizontal, vertical = DdsSpace.s8.dp),
         contentAlignment = Alignment.Center,

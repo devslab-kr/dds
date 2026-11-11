@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dds_a11y_tone_info">안내</string>
+    <string name="dds_a11y_tone_success">완료</string>
+    <string name="dds_a11y_tone_warning">주의</string>
+    <string name="dds_a11y_tone_danger">오류</string>
+    <string name="dds_a11y_loading">불러오는 중</string>
+    <string name="dds_a11y_refresh">새로고침</string>
+    <string name="dds_a11y_sheet_handle">시트 닫기</string>
+</resources>

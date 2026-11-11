@@ -1,5 +1,8 @@
 package kr.devslab.dds.compose.component
 
+import androidx.compose.ui.text.font.FontWeight
+import kr.devslab.dds.compose.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -90,8 +93,12 @@ private fun toneLook(tone: DdsTone): ToneLook {
  * color is never the only signal. A screen reader announces the message when
  * it appears; a new message fades in again.
  *
- * @param iconDescription what the icon means, for a screen reader ("Error",
- * "Notice"); the app supplies it in its own language
+ * A screen reader hears the notice as one thing — what kind it is, then the
+ * message — and hears it when the message appears or changes.
+ *
+ * @param iconDescription what the icon means, for a screen reader. When null, the
+ * word for the [tone] in the device language ("Error", "Notice", "Done",
+ * "Warning"); pass an empty string only when the message itself says what kind it is
  */
 @Composable
 public fun DdsNotice(
@@ -103,6 +110,7 @@ public fun DdsNotice(
 ) {
     val look = toneLook(tone)
     val shape = MaterialTheme.shapes.small
+    val toneWord = (iconDescription ?: toneWord(tone)).takeIf { it.isNotEmpty() }
     Row(
         modifier
             .fillMaxWidth()
@@ -111,15 +119,26 @@ public fun DdsNotice(
             .background(look.background)
             // The neutral background is the card color in dark: an edge keeps it a separate thing.
             .then(if (tone == DdsTone.Neutral) Modifier.border(BorderStroke(DdsBorder.hairline.dp, DdsTheme.colors.borderDefault), shape) else Modifier)
-            .semantics { liveRegion = if (tone == DdsTone.Danger) LiveRegionMode.Assertive else LiveRegionMode.Polite }
+            // One node: the kind and the message are read together, and the node that
+            // changes is the node that is announced.
+            .semantics(mergeDescendants = true) { liveRegion = if (tone == DdsTone.Danger) LiveRegionMode.Assertive else LiveRegionMode.Polite }
             .padding(DdsSpace.s12.dp),
         horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DdsIcon(look.icon, contentDescription = iconDescription, size = DdsIconSize.sm.dp, tint = look.foreground)
+        DdsIcon(look.icon, contentDescription = toneWord, size = DdsIconSize.sm.dp, tint = look.foreground)
         WordsText(message, Modifier.weight(1f), style = DdsTheme.typography.body2, color = look.foreground)
         action?.invoke()
     }
+}
+
+@Composable
+private fun toneWord(tone: DdsTone): String = when (tone) {
+    DdsTone.Info -> stringResource(R.string.dds_a11y_tone_info)
+    DdsTone.Success -> stringResource(R.string.dds_a11y_tone_success)
+    DdsTone.Warning -> stringResource(R.string.dds_a11y_tone_warning)
+    DdsTone.Danger -> stringResource(R.string.dds_a11y_tone_danger)
+    DdsTone.Neutral -> ""
 }
 
 /**
@@ -148,7 +167,8 @@ private const val DOT = 6
 
 /**
  * A choice that can be on or off: a pill with an outline, filled with the pale
- * brand color when selected. The state is announced, not only colored.
+ * brand color when selected. The state is announced, and shown by a heavier
+ * label as well as by the color.
  */
 @Composable
 public fun DdsChip(
@@ -173,7 +193,13 @@ public fun DdsChip(
             .padding(horizontal = DdsSpace.s12.dp, vertical = DdsSpace.s4.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = DdsTheme.typography.label, color = if (selected) colors.textBrand else colors.textPrimary, maxLines = 1)
+        Text(
+            text,
+            style = DdsTheme.typography.label,
+            fontWeight = if (selected) FontWeight.SemiBold else null,
+            color = if (selected) colors.textBrand else colors.textPrimary,
+            maxLines = 1,
+        )
     }
 }
 

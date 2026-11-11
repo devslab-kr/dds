@@ -1,5 +1,7 @@
 package kr.devslab.dds.compose.motion
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -122,13 +124,17 @@ public fun DdsScreenMotion(move: DdsMove, active: Boolean = true, content: @Comp
 /**
  * Marks the content area of a screen as the part that arrives (see
  * [DdsScreenMotion]). Put it on the scrolling body, not on the scaffold.
- * Outside a [DdsScreenMotion] it does nothing.
+ *
+ * @param paneTitle the name of the screen. A change of screen is something seen;
+ * with a title a screen reader says where the person now is. Pass the same words
+ * as the top bar's title
  */
-public fun Modifier.ddsScreenContent(): Modifier = composed {
-    val enter = LocalScreenEnter.current ?: return@composed this
+public fun Modifier.ddsScreenContent(paneTitle: String? = null): Modifier = composed {
+    val named = if (paneTitle != null) semantics { this.paneTitle = paneTitle } else this
+    val enter = LocalScreenEnter.current ?: return@composed named
     val shiftPx = with(LocalDensity.current) { DdsMotion.Shift.toPx() }
     val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1 else 1
-    graphicsLayer {
+    named.graphicsLayer {
         alpha = enter.alpha.value
         translationX = (1f - enter.slide.value) * shiftPx * enter.shiftSign * direction
     }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Words a screen reader says when the app passed none. An app overrides any of
+     them by passing its own, or by defining the same name in its own resources. -->
+<resources>
+    <string name="dds_a11y_tone_info">Notice</string>
+    <string name="dds_a11y_tone_success">Done</string>
+    <string name="dds_a11y_tone_warning">Warning</string>
+    <string name="dds_a11y_tone_danger">Error</string>
+    <string name="dds_a11y_loading">Loading</string>
+    <string name="dds_a11y_refresh">Refresh</string>
+    <string name="dds_a11y_sheet_handle">Close sheet</string>
+</resources>

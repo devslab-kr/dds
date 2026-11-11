@@ -1,5 +1,8 @@
 package kr.devslab.dds.compose.component
 
+import androidx.compose.ui.semantics.contentDescription
+import kr.devslab.dds.compose.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -55,6 +58,7 @@ public fun DdsBottomSheet(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = DdsTheme.colors
+    val handleWord = stringResource(R.string.dds_a11y_sheet_handle)
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
@@ -70,7 +74,10 @@ public fun DdsBottomSheet(
                     .padding(vertical = DdsSpace.s12.dp)
                     .size(width = DdsSpace.s32.dp, height = DdsSpace.s4.dp)
                     .clip(CircleShape)
-                    .background(colors.borderStrong),
+                    .background(colors.borderStrong)
+                    // The sheet puts its close action on the handle; without a name it is an
+                    // unlabelled stop.
+                    .semantics { contentDescription = handleWord },
             )
         },
     ) {

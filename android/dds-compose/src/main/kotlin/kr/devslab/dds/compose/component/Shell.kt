@@ -1,5 +1,7 @@
 package kr.devslab.dds.compose.component
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -237,7 +239,10 @@ public fun DdsDialog(
         modifier = modifier,
         dismissButton = dismiss,
         title = { WordsText(title, style = DdsTheme.typography.title2) },
-        text = if (text != null) ({ WordsText(text, style = DdsTheme.typography.body1) }) else null,
+        text = if (text != null) ({
+            // A long message at a large font size can be taller than the dialog: it scrolls.
+            WordsText(text, Modifier.verticalScroll(rememberScrollState()), style = DdsTheme.typography.body1)
+        }) else null,
         shape = MaterialTheme.shapes.medium,
         containerColor = colors.bgElevated,
         titleContentColor = colors.textPrimary,

@@ -3,7 +3,7 @@ package kr.devslab.dds.compose.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBorder
@@ -114,6 +113,9 @@ internal fun valueRowWidths(total: Int, gap: Int, nameWants: Int, valueWants: In
  * The chosen tab has an underline in the brand color and a heavier label, as
  * the web Tabs do; a line under the row separates it from the content.
  *
+ * Each tab is as wide as its label and the row scrolls when they do not fit,
+ * so a label is never cut to a letter at large font sizes.
+ *
  * A [selectedIndex] outside [titles] (the list shrank while the screen kept
  * its choice) selects the nearest tab instead of failing.
  */
@@ -127,9 +129,10 @@ public fun DdsTabs(
     val colors = DdsTheme.colors
     if (titles.isEmpty()) return
     val shown = selectedIndex.coerceIn(0, titles.lastIndex)
-    SecondaryTabRow(
+    SecondaryScrollableTabRow(
         selectedTabIndex = shown,
         modifier = modifier,
+        edgePadding = 0.dp,
         containerColor = colors.bgDefault,
         contentColor = colors.textPrimary,
         indicator = {
@@ -154,7 +157,6 @@ public fun DdsTabs(
                         style = DdsTheme.typography.label,
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                     )
                 },
             )

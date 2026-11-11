@@ -1,5 +1,10 @@
 package kr.devslab.dds.compose.motion
 
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
+import kr.devslab.dds.compose.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -49,9 +54,13 @@ import kr.devslab.dds.tokens.DdsSpace
  *
  * Do not show it while a pull-to-refresh indicator is already showing the
  * same work (see [DdsPullRefresh]'s `onPulling`).
+ *
+ * @param description what a screen reader says when the bar appears; "Loading" in the
+ * device language when null
  */
 @Composable
-public fun DdsBusyBar(busy: Boolean, modifier: Modifier = Modifier) {
+public fun DdsBusyBar(busy: Boolean, modifier: Modifier = Modifier, description: String? = null) {
+    val word = description ?: stringResource(R.string.dds_a11y_loading)
     AnimatedVisibility(
         visible = busy,
         modifier = modifier.fillMaxWidth(),
@@ -59,7 +68,10 @@ public fun DdsBusyBar(busy: Boolean, modifier: Modifier = Modifier) {
         exit = fadeOut(tween(DdsMotion.Fast, easing = DdsMotion.Exit)),
     ) {
         LinearProgressIndicator(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics {
+                contentDescription = word
+                liveRegion = LiveRegionMode.Polite
+            },
             color = DdsTheme.colors.textBrand,
             trackColor = DdsTheme.colors.borderDefault,
         )
@@ -123,6 +135,8 @@ private const val DETAIL_FRACTION = 0.3f
  * @param allowed false while a pull should be ignored (a menu is open, the screen is blocked)
  * @param onPulling told while the pull indicator is showing, so the screen can
  * hide its [DdsBusyBar] and not show the same work twice
+ * @param refreshDescription the name of the refresh action offered to a screen reader,
+ * which cannot pull; "Refresh" in the device language when null
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,6 +146,7 @@ public fun DdsPullRefresh(
     modifier: Modifier = Modifier,
     allowed: Boolean = true,
     onPulling: (Boolean) -> Unit = {},
+    refreshDescription: String? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     if (onRefresh == null) {
@@ -151,15 +166,20 @@ public fun DdsPullRefresh(
         }
     }
     val state = rememberPullToRefreshState()
+    val refreshWord = refreshDescription ?: stringResource(R.string.dds_a11y_refresh)
+    val refresh = {
+        if (!busy && allowed) {
+            pulled = true
+            onRefresh()
+        }
+    }
     PullToRefreshBox(
         isRefreshing = pulled,
-        onRefresh = {
-            if (!busy && allowed) {
-                pulled = true
-                onRefresh()
-            }
+        onRefresh = refresh,
+        // A pull is a drag. Someone who cannot drag gets the same thing as a named action.
+        modifier = modifier.fillMaxSize().semantics {
+            customActions = listOf(CustomAccessibilityAction(refreshWord) { refresh(); true })
         },
-        modifier = modifier.fillMaxSize(),
         state = state,
         contentAlignment = Alignment.TopCenter,
         indicator = {
