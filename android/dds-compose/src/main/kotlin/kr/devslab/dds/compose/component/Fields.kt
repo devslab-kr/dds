@@ -56,7 +56,11 @@ import kr.devslab.dds.tokens.DdsSpace
  *
  * @param label what is searched, for a screen reader ("Search customers")
  * @param clearDescription what the clear button does, for a screen reader ("Clear")
- * @param onSearch called with the text when the keyboard's search key is pressed
+ * @param onSearch called with the text when the keyboard's search key is pressed, or the apply button
+ * @param applyDescription shows an apply button at the end and names it for a screen reader
+ * ("Search"); null for a field that searches as you type
+ * @param searchEnabled false while a search cannot be run (nothing changed, one is running):
+ * the apply button is dimmed, typing and clearing still work
  */
 @Composable
 public fun DdsSearchField(
@@ -68,6 +72,8 @@ public fun DdsSearchField(
     placeholder: String? = null,
     enabled: Boolean = true,
     onSearch: (String) -> Unit = {},
+    applyDescription: String? = null,
+    searchEnabled: Boolean = true,
 ) {
     val colors = DdsTheme.colors
     val interaction = remember { MutableInteractionSource() }
@@ -84,7 +90,7 @@ public fun DdsSearchField(
         enabled = enabled,
         textStyle = textStyle,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { onSearch(value) }),
+        keyboardActions = KeyboardActions(onSearch = { if (searchEnabled) onSearch(value) }),
         singleLine = true,
         interactionSource = interaction,
         cursorBrush = SolidColor(colors.textBrand),
@@ -119,6 +125,15 @@ public fun DdsSearchField(
                         onClick = { onValueChange("") },
                         enabled = enabled && value.isNotEmpty(),
                         tint = colors.textSecondary,
+                    )
+                }
+                if (applyDescription != null) {
+                    DdsIconButton(
+                        DdsIcons.ArrowRight,
+                        contentDescription = applyDescription,
+                        onClick = { onSearch(value) },
+                        enabled = enabled && searchEnabled,
+                        tint = colors.textBrand,
                     )
                 }
             }

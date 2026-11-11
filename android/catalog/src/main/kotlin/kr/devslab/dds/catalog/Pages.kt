@@ -293,6 +293,8 @@ fun PartsPage() {
             DdsCard {
                 Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s16.dp)) {
                     DdsSearchField(query, { query = it }, label = "Search customers", clearDescription = "Clear", placeholder = "거래처 이름")
+                    // With an apply button; it is dimmed on its own while there is nothing to search.
+                    DdsSearchField(query, { query = it }, label = "Search contracts", clearDescription = "Clear", placeholder = "계약서 번호", applyDescription = "Search", searchEnabled = query.isNotBlank())
                     DdsSelectField(
                         label = "입금 은행",
                         options = listOf("국민은행", "신한은행", "아주 긴 이름을 가진 은행은 한 줄에서 말줄임으로 끝납니다"),

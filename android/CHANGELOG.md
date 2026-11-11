@@ -5,6 +5,21 @@
 `kr.devslab:dds-android-tokens` and `kr.devslab:dds-compose` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.4.0 — 2026-11-11
+
+From JeongsanNow running 0.3.0 on a phone, recorded frame by frame.
+
+- **Changed — push and pop no longer fade in.** Content is opaque from its first frame and
+  only slides (24dp). The 100ms fade left the content area empty for about eight frames
+  under a top bar that was already there.
+- **New — `DdsScreenMotion(move, active)` and `LocalDdsScreenActive`.** Keep drawing a
+  screen that is leaving and tell it it is no longer current, instead of blanking it: a
+  navigation host takes a few frames to swap entries, and an emptied entry showed as a blank
+  screen (a white flash in dark) on every move. The guide said to remove the previous screen
+  at once; rule 19 is corrected.
+- **New — `DdsSearchField(applyDescription, searchEnabled)`:** an apply button at the end
+  that can be dimmed on its own.
+
 ## 0.3.0 — 2026-11-11
 
 From using JeongsanNow on a phone, and the components 0.2.0 left out.
