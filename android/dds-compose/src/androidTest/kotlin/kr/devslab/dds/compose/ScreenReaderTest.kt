@@ -12,9 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsMatcher.Companion.expectValue
 import androidx.compose.ui.test.SemanticsMatcher.Companion.keyIsDefined
@@ -34,6 +32,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import kr.devslab.dds.compose.component.DdsBottomSheet
 import kr.devslab.dds.compose.component.DdsButton
 import kr.devslab.dds.compose.component.DdsCheckbox
 import kr.devslab.dds.compose.component.DdsChip
@@ -46,7 +45,6 @@ import kr.devslab.dds.compose.component.DdsTextField
 import kr.devslab.dds.compose.component.DdsTone
 import kr.devslab.dds.compose.component.DdsValueRow
 import kr.devslab.dds.compose.motion.DdsBusyBar
-import kr.devslab.dds.compose.motion.DdsPullRefresh
 import kr.devslab.dds.compose.motion.ddsScreenContent
 import kr.devslab.dds.compose.theme.DdsTheme
 import org.junit.Assert.assertEquals
@@ -162,6 +160,17 @@ class ScreenReaderTest {
     }
 
     @Test
+    fun aSearchFieldKeepsItsNameOnceSomethingIsTyped() {
+        show { DdsSearchField("데브", {}, label = "거래처 검색", clearDescription = "지우기") }
+        // The name is text of the field, not a description that could replace what was typed.
+        rule.onNode(hasSetTextAction())
+            .assert(hasText("거래처 검색"))
+            .assert(hasText("데브"))
+            .assert(keyNotDefined(SemanticsProperties.ContentDescription))
+    }
+
+
+    @Test
     fun clearingASearchLeavesThePersonInTheField() {
         show {
             var query by remember { mutableStateOf("데브") }
@@ -232,15 +241,9 @@ class ScreenReaderTest {
     }
 
     @Test
-    fun refreshCanBeDoneWithoutPulling() {
-        var refreshed by mutableIntStateOf(0)
-        show { DdsPullRefresh(busy = false, onRefresh = { refreshed++ }) { Text("목록") } }
-        val refresh = word(R.string.dds_a11y_refresh)
-        val node = rule.onNode(keyIsDefined(SemanticsActions.CustomActions)).fetchSemanticsNode()
-        val action = node.config.getOrNull(SemanticsActions.CustomActions).orEmpty().single { it.label == refresh }
-        rule.runOnUiThread { action.action() }
-        rule.waitForIdle()
-        assertEquals(1, refreshed)
+    fun aSheetHandleHasAName() {
+        show { DdsBottomSheet(onDismissRequest = {}, title = "보내기") { Text("문자로 보내기") } }
+        rule.onNodeWithContentDescription(word(R.string.dds_a11y_sheet_handle)).assertExists()
     }
 
     @Test
@@ -249,6 +252,4 @@ class ScreenReaderTest {
         rule.onNode(expectValue(SemanticsProperties.PaneTitle, "설정")).assertExists()
     }
 
-    private infix fun SemanticsMatcher.and(other: SemanticsMatcher): SemanticsMatcher =
-        SemanticsMatcher("(${description}) && (${other.description})") { matches(it) && other.matches(it) }
 }

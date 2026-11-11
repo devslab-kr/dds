@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.component
 
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -113,8 +114,9 @@ internal fun valueRowWidths(total: Int, gap: Int, nameWants: Int, valueWants: In
  * The chosen tab has an underline in the brand color and a heavier label, as
  * the web Tabs do; a line under the row separates it from the content.
  *
- * Each tab is as wide as its label and the row scrolls when they do not fit,
- * so a label is never cut to a letter at large font sizes.
+ * The tabs share the width while their labels fit. A label wider than its
+ * share makes its tab wider and the row scroll, so a label is never cut to a
+ * letter at large font sizes.
  *
  * A [selectedIndex] outside [titles] (the list shrank while the screen kept
  * its choice) selects the nearest tab instead of failing.
@@ -129,37 +131,39 @@ public fun DdsTabs(
     val colors = DdsTheme.colors
     if (titles.isEmpty()) return
     val shown = selectedIndex.coerceIn(0, titles.lastIndex)
-    SecondaryScrollableTabRow(
-        selectedTabIndex = shown,
-        modifier = modifier,
-        edgePadding = 0.dp,
-        containerColor = colors.bgDefault,
-        contentColor = colors.textPrimary,
-        indicator = {
-            TabRowDefaults.SecondaryIndicator(
-                Modifier.tabIndicatorOffset(shown),
-                height = DdsBorder.focus.dp,
-                color = colors.textBrand,
-            )
-        },
-        divider = { DdsDivider() },
-    ) {
-        titles.forEachIndexed { index, title ->
-            val selected = index == shown
-            Tab(
-                selected = selected,
-                onClick = { onSelect(index) },
-                selectedContentColor = colors.textBrand,
-                unselectedContentColor = colors.textSecondary,
-                text = {
-                    Text(
-                        title,
-                        style = DdsTheme.typography.label,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                        maxLines = 1,
+    Column(modifier) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            SecondaryScrollableTabRow(
+                selectedTabIndex = shown,
+                modifier = Modifier.fillMaxWidth(),
+                edgePadding = 0.dp,
+                // An equal share each, as long as the labels fit in it: the row fills the width
+                // as before. A label wider than its share makes its tab wider and the row scroll.
+                minTabWidth = maxWidth / titles.size,
+                containerColor = colors.bgDefault,
+                contentColor = colors.textPrimary,
+                indicator = {
+                    TabRowDefaults.SecondaryIndicator(
+                        Modifier.tabIndicatorOffset(shown),
+                        height = DdsBorder.focus.dp,
+                        color = colors.textBrand,
                     )
                 },
-            )
+                divider = {},
+            ) {
+                titles.forEachIndexed { index, title ->
+                    val selected = index == shown
+                    Tab(
+                        selected = selected,
+                        onClick = { onSelect(index) },
+                        selectedContentColor = colors.textBrand,
+                        unselectedContentColor = colors.textSecondary,
+                        text = { WeightStableLabel(title, heavy = selected, style = DdsTheme.typography.label, lightWeight = FontWeight.Normal) },
+                    )
+                }
+            }
         }
+        // Outside the row, so the line runs the full width even when the tabs do not.
+        DdsDivider()
     }
 }

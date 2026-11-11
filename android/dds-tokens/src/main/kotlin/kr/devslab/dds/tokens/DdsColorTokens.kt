@@ -19,6 +19,7 @@ object DdsLightColors {
     const val textBrand: Long = 0xFF0E7490
     const val borderDefault: Long = 0xFFE4E4E7
     const val borderStrong: Long = 0xFFD4D4D8
+    const val borderControl: Long = 0xFF8E8E97
     const val borderFocus: Long = 0xFF52606D
     const val statusSuccess: Long = 0xFF15803D
     const val statusSuccessBg: Long = 0xFFF0FDF4
@@ -44,13 +45,14 @@ object DdsDarkColors {
     const val bgInverse: Long = 0xFFFAFAFA
     const val textPrimary: Long = 0xFFFAFAFA
     const val textSecondary: Long = 0xFFA1A1AA
-    const val textMuted: Long = 0xFF71717A
+    const val textMuted: Long = 0xFF8E8E97
     const val textOnBrand: Long = 0xFF09090B
     const val textOnStatus: Long = 0xFF09090B
     const val textOnInverse: Long = 0xFF09090B
     const val textBrand: Long = 0xFF22D3EE
     const val borderDefault: Long = 0xFF27272A
     const val borderStrong: Long = 0xFF3F3F46
+    const val borderControl: Long = 0xFF696972
     const val borderFocus: Long = 0xFFB0BBC4
     const val statusSuccess: Long = 0xFF4ADE80
     const val statusSuccessBg: Long = 0xFF14532D

@@ -17,6 +17,7 @@
     <color name="dds_color_text_brand">#FF0E7490</color>
     <color name="dds_color_border_default">#FFE4E4E7</color>
     <color name="dds_color_border_strong">#FFD4D4D8</color>
+    <color name="dds_color_border_control">#FF8E8E97</color>
     <color name="dds_color_border_focus">#FF52606D</color>
     <color name="dds_color_status_success">#FF15803D</color>
     <color name="dds_color_status_success_bg">#FFF0FDF4</color>

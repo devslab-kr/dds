@@ -412,7 +412,7 @@ How the other five values follow from a main color is not a rule on the web eith
 
 - Page background `bg.default`, group background `bg.subtle`, cards, sheets and dialogs `bg.elevated`.
 - Text `text.primary` / `text.secondary` / `text.muted` (disabled, placeholders).
-- Lines `border.default` (card edges, dividers), `border.strong` (text fields).
+- Lines `border.default` (card edges, dividers), `border.strong` (emphasized lines, labelled buttons), `border.control` (the edge of a text field, a checkbox, a radio: 3:1, D-050).
 - **The primary button is a `bg.brand` face with `text.on-brand` text — the same color in light and dark.**
 - Brand text, links and selection use `text.brand`; a pale emphasis background is `bg.brand-subtle`.
 - Press and hover tints are alpha only. `opacity` is for disabled only.
@@ -435,7 +435,7 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
 | `surfaceVariant` | `border.default` | zinc.200 | zinc.800 |
 | `onSurface`, `onBackground` | `text.primary` | zinc.950 | zinc.50 |
 | `onSurfaceVariant`, `secondary` | `text.secondary` | zinc.600 | zinc.400 |
-| `outline` / `outlineVariant` | `border.strong` / `border.default` | zinc.300 / zinc.200 | zinc.700 / zinc.800 |
+| `outline` / `outlineVariant` | `border.control` / `border.default` | zinc.450 / zinc.200 | zinc.550 / zinc.800 |
 | `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.300 / zinc.950 |
 | `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.300 |
 | `inverseSurface` / `inverseOnSurface` | `bg.inverse` / `text.on-inverse` | zinc.900 / zinc.50 | zinc.50 / zinc.950 |
@@ -521,43 +521,51 @@ transparent, and their icons follow the theme **actually shown**. Use
 ### 8.1 What a screen reader hears (0.5.0)
 
 Someone who cannot see the screen moves through it one stop at a time and hears a name, a
-role and a state at each. The components are built so that what is heard is what is on
-screen, once. `ScreenReaderTest` holds each line below on a device.
+role and a state at each. The components are built so that what is heard matches what is
+on screen. `ScreenReaderTest` holds the rows below on a device, by reading the tree a
+screen reader walks.
 
 | Component | What is heard |
 | --- | --- |
-| `DdsTextField` | one stop: what was typed, "edit box", the label, and the error when there is one. The error is spoken the moment it appears |
+| `DdsTextField` | one stop: what was typed, "edit box", the label, and that there is an error. The message under the field is a stop of its own, so that it can be spoken the moment it appears — the error is therefore heard on the field and again on its line, as on the platform's own text fields |
 | `DdsSelectField` | one stop: the label, "drop-down list", and what is in the box — also when that is only the placeholder |
-| `DdsSearchField` | the label; the placeholder is the label unless another is given. The clear button exists only when there is something to clear, and clearing leaves the person in the field |
+| `DdsSearchField` | one stop: what was typed and the label (as text of the field, not a description, which can be read in place of what was typed). The clear button exists only when there is something to clear, and clearing leaves the person in the field |
 | `DdsNotice` | one stop: the kind ("Error", "Notice", "Done", "Warning" in the device language, or the app's word) and the message. Spoken when it appears or changes; an error interrupts |
-| `DdsButton` | while loading: "Loading". It stays focusable and ignores presses, instead of becoming "disabled" under the person's finger |
+| `DdsButton` | while loading: "Loading". It stays focusable and ignores presses, and does not look pressed |
 | `DdsListRow` | a row that can be pressed says "button". A row that only shows something is read as one thing with what is at its end |
 | `DdsValueRow` | the name and the value together |
 | `DdsBusyBar` | "Loading", when it appears |
-| `DdsPullRefresh` | a "Refresh" action in the screen reader's actions menu, for someone who cannot pull |
 | `ddsScreenContent(paneTitle)` | the screen's name when the screen changes |
-| `DdsBottomSheet` | its handle is named ("Close sheet") |
+| `DdsBottomSheet` | its handle is named ("Drag handle"); the area outside is the platform's "Close sheet" |
 
 - **The words come from the device language** when the app passes none (`res/values*/dds_a11y.xml`:
   English and Korean). Pass your own to override; a product in another language must.
 - **An app still has to name what only it knows:** every icon-only button, every search
   field, and the title of each screen.
+- **Pull to refresh has no screen-reader equivalent here.** An action on the pull container
+  would sit on something a screen reader never stops on. Keep a visible refresh button on
+  any screen that can be pulled.
 - **Not built by the components:** an initial focus inside a sheet, a guaranteed order of
   top bar, content and bottom bar for keyboard users, and the splash cover hiding what is
   under it for the second it is up.
-- **Checked how:** the device tests read the tree a screen reader walks (17 tests, 12 of
-  which fail on 0.4.0). TalkBack was started on the emulator and focused the screen title,
-  but what it speaks was not captured. **Listening with TalkBack on a phone is still to do.**
+- **Checked how:** 18 device tests; with the changed files put back to 0.4.0, 12 of the
+  first 17 fail. They read what is handed to a screen reader, not whether it reaches it —
+  one review finding (a refresh action nobody could reach) passed its test for exactly that
+  reason. TalkBack was started on the emulator and focused the screen title, but what it
+  speaks was not captured. **Listening with TalkBack on a phone is still to do.**
 
 Low vision, at 200% font with large text:
 
-- Tabs inside a page are as wide as their labels and scroll; a label is not cut to a letter.
+- **A control's edge is 3:1 against its surface** (`border.control`, D-050): an empty field,
+  an unchecked box and an unselected radio are found by their edge alone. Placeholder text
+  is 4.5:1 in dark as well as light. Card edges, dividers and labelled buttons keep the
+  paler lines.
+- Tabs inside a page share the width while their labels fit; a label wider than its share
+  makes the row scroll instead of being cut to a letter.
 - A select field shows two lines of what was chosen; a dialog's message scrolls.
-- A selected chip is heavier as well as colored.
-- Still open (the same values as the web, so not changed here): `border.strong` as the
-  outline of an unchecked box or an empty field is about 1.5:1 on a light page where 3:1 is
-  asked for; placeholder text is about 4.1:1 in dark; the focus ring on a filled button is
-  seen against the fill. Bottom tab labels are one line with an ellipsis.
+- A selected chip or tab is heavier as well as colored, without changing width.
+- Still open: the focus ring on a filled button is seen against the fill; bottom tab labels
+  are one line with an ellipsis; a long trailing value in a list row can squeeze its title.
 
 ## 9. What has to differ on mobile
 
@@ -677,7 +685,7 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
 | `DdsSearchField` | the one search field: magnifier in front, a clear button once something is typed, the keyboard's search key runs it; an apply button at the end when `applyDescription` is given, dimmed on its own with `searchEnabled`; no label line, no message line | — |
 | `DdsSelectField` | the one field for choosing from a short list: the same box and lines as `DdsTextField`, opens a sheet, the chosen option carries a check | Select |
 | `DdsValueRow` | a name and its value on one line: name at the start, value at the end edge, tabular digits, a line under each row | — |
-| `DdsTabs` | views of one thing inside a page: brand underline and a heavier label | Tabs |
+| `DdsTabs` | views of one thing inside a page: brand underline and a heavier label; the tabs share the width, and scroll when a label does not fit its share | Tabs |
 | `DdsBottomSheet` | choices and actions; closes on back, outside tap, drag; radius 16 on the top corners | Sheet |
 | `DdsMenu`, `DdsMenuItem` | a short menu anchored to its button; a destructive item in the danger color | Menu |
 | `DdsToastHost` | a short message that leaves by itself, on the inverse surface; never for something that must be read | Toast |
@@ -691,7 +699,8 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
   `"…".keepWords()` now matches the plain string.
 - **A search field shows its `label` as the placeholder** unless another is given (0.5.0;
   before that the label was only read aloud and an empty field said nothing on screen). In a
-  test find it with `hasContentDescription(label)`.
+  test find it with `hasSetTextAction() and hasText(label)` — it no longer has a content
+  description.
 - **One search field and one select field in the whole app.** Two looks for the same job on
   two screens is the inconsistency people notice first.
 

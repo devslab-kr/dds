@@ -76,7 +76,8 @@ public fun DdsBottomSheet(
                     .clip(CircleShape)
                     .background(colors.borderStrong)
                     // The sheet puts its close action on the handle; without a name it is an
-                    // unlabelled stop.
+                    // unlabelled stop. Not "Close sheet": the area outside the sheet already
+                    // has that name, and two stops must not sound the same.
                     .semantics { contentDescription = handleWord },
             )
         },

@@ -7,33 +7,53 @@ separate from the web packages (D-048). Releases are cut by an `android-v<versio
 
 ## 0.5.0 — 2026-11-11
 
-For people who use a screen reader, a keyboard, or large text. An audit of the components
-found these; device tests (`ScreenReaderTest`, 17) now hold them.
+For people who use a screen reader, a keyboard or large text, and for eyes that are not
+young. An audit of the components found these; device tests (`ScreenReaderTest`, 18) hold
+what a screen reader is given.
 
-- **`DdsTextField`, `DdsSelectField`:** the label and the error were each read twice, and an
-  error that appeared was not spoken. A field is one stop now and its error is announced.
-  A select field also says what is in the box when nothing is chosen.
+**Seen by everyone**
+
+- **A control's edge is darker.** New `borderControl` (`@color/dds_color_border_control`):
+  3.25:1 on a light page, 3.26:1 on a dark card, where `borderStrong` was about 1.5:1. Text
+  fields, the search and select fields, unchecked boxes and unselected radios use it, and
+  Material's `outline` role maps to it. Card edges, dividers and labelled buttons keep the
+  paler lines. The same token change as the web (D-050).
+- **Placeholder text in dark is lighter** (`textMuted` in dark: 4.1:1 → 6.0:1).
+- **`DdsSearchField`** shows its `label` as the placeholder when none is given (pass
+  `placeholder = null` to keep the box empty). Clearing it now focuses the field.
+- **`DdsChip`, `DdsTabs`:** the selected one is heavier as well as colored; its width does
+  not change. Tabs still share the width, and now scroll when a label does not fit its share
+  instead of cutting it.
+- **`DdsSelectField`** shows two lines of what was chosen. **`DdsDialog`:** a long message scrolls.
+- **Choice rows** show the focus ring.
+
+**Heard with a screen reader**
+
+- **`DdsTextField`:** the label is part of the field and no longer a stop of its own. An
+  error is spoken the moment it appears (it is heard on the field and on its line).
+- **`DdsSelectField`:** the label is said once; what is in the box is said even when it is
+  the placeholder.
+- **`DdsSearchField`:** its name is text of the field, not a content description; the clear
+  button is only there when there is something to clear.
 - **`DdsNotice`:** says what kind it is ("Error", "Notice", …) even when the app passed no
   icon description, as one stop with its message, and is announced when it appears.
   `iconDescription = ""` turns the word off.
-- **`DdsButton`:** a loading button says "Loading", keeps focus and ignores presses, instead
-  of becoming disabled.
+- **`DdsButton`:** a loading button says "Loading", keeps focus, ignores presses and does not
+  look pressed.
 - **`DdsListRow`:** a row that can be pressed says it is a button; a row that only shows
   something is read as one thing.
-- **`DdsSearchField`:** the clear button is not in the tree while there is nothing to clear;
-  clearing keeps focus in the field; `placeholder` defaults to `label`.
-- **`DdsBusyBar(description)`, `DdsPullRefresh(refreshDescription)`:** the bar has a name;
-  refresh is offered as an action to someone who cannot pull.
-- **`ddsScreenContent(paneTitle)`:** a screen can say its name when it appears.
-- **`DdsBottomSheet`:** the handle has a name. **`DdsDialog`:** a long message scrolls.
-- **`DdsTabs`:** each tab is as wide as its label and the row scrolls — labels are no longer
-  cut at large sizes. (Tabs no longer share the width equally.)
-- **`DdsChip`:** a selected chip is heavier as well as colored. **Choice rows** show the
-  focus ring.
+- **`DdsBusyBar(description)`** has a name. **`ddsScreenContent(paneTitle)`:** a screen can
+  say its name when it appears. **`DdsBottomSheet`:** the handle has a name.
 - New strings `dds_a11y_*` (English, Korean) for the words above.
 
-Tests that looked for a text field by its label **as a separate text** now find the field
-itself; a select field is found by content description.
+**If you have tests**
+
+- `DdsTextField` and `DdsSearchField` no longer have a content description:
+  `onNodeWithContentDescription(label)` finds nothing. Use `hasSetTextAction() and hasText(label)`.
+- `DdsSelectField` is found by content description; its visible label is not a node.
+
+**Not done:** pull to refresh has no screen-reader equivalent — keep a visible refresh
+button. Nobody has listened with TalkBack yet.
 
 ## 0.4.0 — 2026-11-11
 

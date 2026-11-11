@@ -85,4 +85,27 @@ class ColorSchemeTest {
             }
         }
     }
+
+    /**
+     * An empty field or an unchecked box is found by its edge alone, so the edge
+     * needs 3:1 against whatever it sits on (D-050). The emphasized line does
+     * not reach that — which is why controls have an edge color of their own.
+     */
+    @Test
+    fun aControlEdgeIsThreeToOneOnEverySurfaceItSitsOn() {
+        for ((c, name) in listOf(light to "light", dark to "dark")) {
+            for ((surface, label) in listOf(c.bgDefault to "page", c.bgSubtle to "section", c.bgElevated to "card")) {
+                val edge = contrastRatio(c.borderControl, surface)
+                assertTrue("$name borderControl on $label is %.2f:1".format(edge), edge >= 3.0)
+                val hint = contrastRatio(c.textMuted, surface)
+                assertTrue("$name textMuted on $label is %.2f:1".format(hint), hint >= DdsMinTextContrast)
+            }
+            assertTrue("$name borderStrong should be too pale to mark a control", contrastRatio(c.borderStrong, c.bgDefault) < 3.0)
+        }
+    }
+
+    @Test
+    fun materialOutlinedControlsGetTheControlEdge() {
+        assertEquals(light.borderControl, ddsColorScheme(light, dark = false, inverseTextBrand = dark.textBrand).outline)
+    }
 }

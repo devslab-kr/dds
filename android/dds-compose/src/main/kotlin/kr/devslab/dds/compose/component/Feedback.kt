@@ -193,13 +193,7 @@ public fun DdsChip(
             .padding(horizontal = DdsSpace.s12.dp, vertical = DdsSpace.s4.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text,
-            style = DdsTheme.typography.label,
-            fontWeight = if (selected) FontWeight.SemiBold else null,
-            color = if (selected) colors.textBrand else colors.textPrimary,
-            maxLines = 1,
-        )
+        WeightStableLabel(text, heavy = selected, style = DdsTheme.typography.label, color = if (selected) colors.textBrand else colors.textPrimary)
     }
 }
 

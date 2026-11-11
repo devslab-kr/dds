@@ -94,8 +94,7 @@ public fun DdsSearchField(
         modifier = modifier
             .fillMaxWidth()
             .focusRequester(field)
-            .alpha(if (enabled) 1f else DISABLED_ALPHA)
-            .semantics { contentDescription = label },
+            .alpha(if (enabled) 1f else DISABLED_ALPHA),
         enabled = enabled,
         textStyle = textStyle,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -111,7 +110,7 @@ public fun DdsSearchField(
                     .background(colors.bgDefault)
                     .border(
                         if (focused) DdsBorder.focus.dp else DdsBorder.hairline.dp,
-                        if (focused) colors.borderFocus else colors.borderStrong,
+                        if (focused) colors.borderFocus else colors.borderControl,
                         shape,
                     )
                     // The clear button is 48 to touch; 4 around it keeps the field at 56.
@@ -121,6 +120,13 @@ public fun DdsSearchField(
             ) {
                 DdsIcon(DdsIcons.Search, contentDescription = null, tint = colors.textSecondary)
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    // The field's name is text inside it — a description on an edit box can be read
+                    // in place of what was typed. It is seen as the placeholder while the field is
+                    // empty, and kept unseen otherwise.
+                    val labelIsShown = value.isEmpty() && placeholder == label
+                    if (!labelIsShown) {
+                        Text(label, Modifier.alpha(0f), style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                     if (value.isEmpty() && placeholder != null) {
                         Text(placeholder, style = textStyle, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
@@ -194,7 +200,7 @@ public fun DdsSelectField(
                 .defaultMinSize(minHeight = DdsField.height.dp)
                 .clip(shape)
                 .background(if (enabled) colors.bgDefault else colors.bgSubtle)
-                .border(DdsBorder.hairline.dp, if (error != null) colors.statusDanger else colors.borderStrong, shape)
+                .border(DdsBorder.hairline.dp, if (error != null) colors.statusDanger else colors.borderControl, shape)
                 .ddsFocusRing(interaction, shape)
                 .clickable(interaction, ripple(), enabled, role = Role.DropdownList) { open = true }
                 .semantics {

@@ -7,6 +7,5 @@
     <string name="dds_a11y_tone_warning">Warning</string>
     <string name="dds_a11y_tone_danger">Error</string>
     <string name="dds_a11y_loading">Loading</string>
-    <string name="dds_a11y_refresh">Refresh</string>
-    <string name="dds_a11y_sheet_handle">Close sheet</string>
+    <string name="dds_a11y_sheet_handle">Drag handle</string>
 </resources>

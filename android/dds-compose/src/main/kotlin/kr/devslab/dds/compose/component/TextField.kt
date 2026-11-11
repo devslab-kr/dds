@@ -87,7 +87,7 @@ public fun DdsTextField(
     val edgeColor = when {
         isError -> colors.statusDanger
         focused -> colors.borderFocus
-        else -> colors.borderStrong
+        else -> colors.borderControl
     }
     val textStyle = typography.body1.copy(color = colors.textPrimary)
 

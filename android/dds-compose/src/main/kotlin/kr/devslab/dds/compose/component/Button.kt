@@ -119,7 +119,9 @@ public fun DdsButton(
 ) {
     val colors = DdsTheme.colors
     val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
+    val isPressed by interaction.collectIsPressedAsState()
+    // A loading button still takes focus, but a press does nothing — so it must not look pressed.
+    val pressed = isPressed && !loading
     val shape = MaterialTheme.shapes.small
     val filled = variant == DdsButtonVariant.Primary || variant == DdsButtonVariant.Danger
     val loadingWord = loadingDescription ?: stringResource(R.string.dds_a11y_loading)
@@ -165,7 +167,7 @@ public fun DdsButton(
             .ddsFocusRing(interaction, shape)
             .clickable(
                 interactionSource = interaction,
-                indication = ripple(color = contentColor),
+                indication = if (loading) null else ripple(color = contentColor),
                 // Still enabled while loading: a disabled button drops keyboard focus the moment
                 // it is pressed, and a screen reader would say only "disabled". Taps do nothing.
                 enabled = enabled,

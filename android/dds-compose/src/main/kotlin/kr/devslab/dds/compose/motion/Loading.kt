@@ -1,7 +1,5 @@
 package kr.devslab.dds.compose.motion
 
-import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import kr.devslab.dds.compose.R
 import androidx.compose.ui.res.stringResource
@@ -135,8 +133,10 @@ private const val DETAIL_FRACTION = 0.3f
  * @param allowed false while a pull should be ignored (a menu is open, the screen is blocked)
  * @param onPulling told while the pull indicator is showing, so the screen can
  * hide its [DdsBusyBar] and not show the same work twice
- * @param refreshDescription the name of the refresh action offered to a screen reader,
- * which cannot pull; "Refresh" in the device language when null
+ *
+ * A pull is a drag, and a screen reader cannot be given the same thing here: an
+ * action on this container would sit on something it never stops on. The
+ * screen's own refresh button is how someone who cannot pull refreshes.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,7 +146,6 @@ public fun DdsPullRefresh(
     modifier: Modifier = Modifier,
     allowed: Boolean = true,
     onPulling: (Boolean) -> Unit = {},
-    refreshDescription: String? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     if (onRefresh == null) {
@@ -166,20 +165,15 @@ public fun DdsPullRefresh(
         }
     }
     val state = rememberPullToRefreshState()
-    val refreshWord = refreshDescription ?: stringResource(R.string.dds_a11y_refresh)
-    val refresh = {
-        if (!busy && allowed) {
-            pulled = true
-            onRefresh()
-        }
-    }
     PullToRefreshBox(
         isRefreshing = pulled,
-        onRefresh = refresh,
-        // A pull is a drag. Someone who cannot drag gets the same thing as a named action.
-        modifier = modifier.fillMaxSize().semantics {
-            customActions = listOf(CustomAccessibilityAction(refreshWord) { refresh(); true })
+        onRefresh = {
+            if (!busy && allowed) {
+                pulled = true
+                onRefresh()
+            }
         },
+        modifier = modifier.fillMaxSize(),
         state = state,
         contentAlignment = Alignment.TopCenter,
         indicator = {

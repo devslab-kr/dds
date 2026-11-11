@@ -5,6 +5,5 @@
     <string name="dds_a11y_tone_warning">주의</string>
     <string name="dds_a11y_tone_danger">오류</string>
     <string name="dds_a11y_loading">불러오는 중</string>
-    <string name="dds_a11y_refresh">새로고침</string>
-    <string name="dds_a11y_sheet_handle">시트 닫기</string>
+    <string name="dds_a11y_sheet_handle">시트 손잡이</string>
 </resources>
