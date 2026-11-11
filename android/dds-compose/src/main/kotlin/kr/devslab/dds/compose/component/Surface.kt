@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.component
 
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -128,9 +129,11 @@ public fun DdsListRow(
                 if (onClick != null) {
                     Modifier
                         .ddsFocusRing(interaction, MaterialTheme.shapes.small)
-                        .clickable(interaction, ripple(), enabled, onClick = onClick)
+                        .clickable(interaction, ripple(), enabled, role = Role.Button, onClick = onClick)
                 } else {
-                    Modifier
+                    // A row that only shows something is still one thing: its title, its
+                    // second line and what is at its end are read together.
+                    Modifier.semantics(mergeDescendants = true) {}
                 },
             )
             .padding(horizontal = DdsSpace.s16.dp, vertical = DdsSpace.s12.dp),

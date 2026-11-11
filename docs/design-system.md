@@ -137,7 +137,9 @@ filled brand face**, whatever the hue.
 | 200 | `#a5f3fc` | `#e4e4e7` |
 | 300 | `#67e8f9` | `#d4d4d8` |
 | 400 | `#22d3ee` | `#a1a1aa` |
+| 450 | — | `#8e8e97` |
 | 500 | `#06b6d4` | `#71717a` |
+| 550 | — | `#696972` |
 | 600 | `#0891b2` | `#52525b` |
 | 700 | `#0e7490` | `#3f3f46` |
 | 800 | `#155e75` | `#27272a` |
@@ -182,18 +184,28 @@ toggle**; both mappings are first-class from day one.
 | `color.bg.inverse` | `zinc.900` | `zinc.50` | surfaces that invert against the page (tooltip bubble) |
 | `color.text.primary` | `zinc.950` | `zinc.50` | body & headings |
 | `color.text.secondary` | `zinc.600` | `zinc.400` | supporting copy |
-| `color.text.muted` | `zinc.500` | `zinc.500` | disabled, placeholders |
+| `color.text.muted` | `zinc.500` | `zinc.450` | disabled, placeholders |
 | `color.text.on-brand` | `zinc.950` | `zinc.950` | **text on brand surfaces (note below)** |
 | `color.text.on-status` | `white` | `zinc.950` | text on filled status surfaces (danger buttons) |
 | `color.text.on-inverse` | `zinc.50` | `zinc.950` | text on `bg.inverse` |
 | `color.text.brand` | `cyan.700` | `cyan.400` | brand text & links |
 | `color.border.default` | `zinc.200` | `zinc.800` | default borders |
-| `color.border.strong` | `zinc.300` | `zinc.700` | emphasized borders (inputs) |
+| `color.border.strong` | `zinc.300` | `zinc.700` | emphasized borders and dividers |
+| `color.border.control` | `zinc.450` (`#8e8e97`) | `zinc.550` (`#696972`) | **the edge of a form control (note below)** |
 | `color.border.focus` | `neutral-focus.light` (`#52606d`) | `neutral-focus.dark` (`#b0bbc4`) | neutral focus ring |
 | `color.status.success` / `.success-bg` | `green.700` / `green.50` | `green.400` / `green.900` | success |
 | `color.status.warning` / `.warning-bg` | `amber.700` / `amber.50` | `amber.400` / `amber.900` | warning |
 | `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.300` / `red.900` | danger · errors |
 | `color.status.info` / `.info-bg` | `blue.700` / `blue.50` | `blue.300` / `blue.900` | info |
+
+> **The control-edge note.** An empty text field, an unchecked box or an unselected
+> radio is found by its edge alone, so that edge needs 3:1 against the surface it sits on
+> (WCAG 1.4.11). `border.strong` is about 1.5:1 and cannot do that job;
+> `border.control` is 3.25:1 on a light page and 3.26:1 on a dark card. Use
+> `border.control` for the resting edge of a control a person types into or ticks;
+> keep `border.default` and `border.strong` for card edges, dividers and buttons that
+> carry a label (D-050). Contrast sensitivity falls with age: this is the default, not
+> a high-contrast mode.
 
 > **The on-brand note.** Cyan is a light hue — white text on `cyan.500` has a
 > contrast of ~2.3:1, far below WCAG AA. Text on brand surfaces is therefore

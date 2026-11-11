@@ -1,5 +1,9 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.compose.motion.clear
+import kr.devslab.dds.compose.motion.colorChange
+import kr.devslab.dds.compose.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -99,7 +103,8 @@ internal fun Modifier.ddsFocusRing(interactionSource: MutableInteractionSource, 
  * it, and taps are ignored. A loading button is not dimmed
  * @param leading drawn before the content (an icon)
  * @param trailing drawn after the content
- * @param loadingDescription what a screen reader says while [loading]; the app supplies it in its own language
+ * @param loadingDescription what a screen reader says while [loading]; "Loading" in the
+ * device language when null
  */
 @Composable
 public fun DdsButton(
@@ -116,15 +121,21 @@ public fun DdsButton(
 ) {
     val colors = DdsTheme.colors
     val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
+    val isPressed by interaction.collectIsPressedAsState()
+    // A loading button still takes focus, but a press does nothing — so it must not look pressed.
+    val pressed = isPressed && !loading
     val shape = MaterialTheme.shapes.small
     val filled = variant == DdsButtonVariant.Primary || variant == DdsButtonVariant.Danger
+    val loadingWord = loadingDescription ?: stringResource(R.string.dds_a11y_loading)
 
-    val container: Color = when (variant) {
-        DdsButtonVariant.Primary -> if (pressed) colors.bgBrandHover else colors.bgBrand
-        DdsButtonVariant.Danger -> if (pressed) colors.overlayPressedTint.compositeOver(colors.statusDanger) else colors.statusDanger
-        else -> if (pressed) colors.overlayPressedTint else Color.Transparent
-    }
+    // The fill eases to its pressed color and back (100ms) rather than switching.
+    val container: Color by colorChange(
+        when (variant) {
+            DdsButtonVariant.Primary -> if (pressed) colors.bgBrandHover else colors.bgBrand
+            DdsButtonVariant.Danger -> if (pressed) colors.overlayPressedTint.compositeOver(colors.statusDanger) else colors.statusDanger
+            else -> if (pressed) colors.overlayPressedTint else colors.overlayPressedTint.clear()
+        },
+    )
     val contentColor: Color = when (variant) {
         DdsButtonVariant.Primary -> colors.textOnBrand
         DdsButtonVariant.Danger -> colors.textOnStatus
@@ -161,13 +172,15 @@ public fun DdsButton(
             .ddsFocusRing(interaction, shape)
             .clickable(
                 interactionSource = interaction,
-                indication = ripple(color = contentColor),
-                enabled = enabled && !loading,
+                indication = if (loading) null else ripple(color = contentColor),
+                // Still enabled while loading: a disabled button drops keyboard focus the moment
+                // it is pressed, and a screen reader would say only "disabled". Taps do nothing.
+                enabled = enabled,
                 role = Role.Button,
-                onClick = onClick,
+                onClick = { if (!loading) onClick() },
             )
             .semantics {
-                if (loading && loadingDescription != null) stateDescription = loadingDescription
+                if (loading) stateDescription = loadingWord
             }
             .padding(horizontal = horizontal, vertical = DdsSpace.s8.dp),
         contentAlignment = Alignment.Center,

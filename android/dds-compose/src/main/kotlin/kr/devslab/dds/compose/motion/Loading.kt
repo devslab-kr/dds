@@ -1,5 +1,8 @@
 package kr.devslab.dds.compose.motion
 
+import androidx.compose.ui.semantics.semantics
+import kr.devslab.dds.compose.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -49,9 +52,13 @@ import kr.devslab.dds.tokens.DdsSpace
  *
  * Do not show it while a pull-to-refresh indicator is already showing the
  * same work (see [DdsPullRefresh]'s `onPulling`).
+ *
+ * @param description what a screen reader says when the bar appears; "Loading" in the
+ * device language when null
  */
 @Composable
-public fun DdsBusyBar(busy: Boolean, modifier: Modifier = Modifier) {
+public fun DdsBusyBar(busy: Boolean, modifier: Modifier = Modifier, description: String? = null) {
+    val word = description ?: stringResource(R.string.dds_a11y_loading)
     AnimatedVisibility(
         visible = busy,
         modifier = modifier.fillMaxWidth(),
@@ -59,7 +66,10 @@ public fun DdsBusyBar(busy: Boolean, modifier: Modifier = Modifier) {
         exit = fadeOut(tween(DdsMotion.Fast, easing = DdsMotion.Exit)),
     ) {
         LinearProgressIndicator(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics {
+                contentDescription = word
+                liveRegion = LiveRegionMode.Polite
+            },
             color = DdsTheme.colors.textBrand,
             trackColor = DdsTheme.colors.borderDefault,
         )
@@ -123,6 +133,10 @@ private const val DETAIL_FRACTION = 0.3f
  * @param allowed false while a pull should be ignored (a menu is open, the screen is blocked)
  * @param onPulling told while the pull indicator is showing, so the screen can
  * hide its [DdsBusyBar] and not show the same work twice
+ *
+ * A pull is a drag, and a screen reader cannot be given the same thing here: an
+ * action on this container would sit on something it never stops on. The
+ * screen's own refresh button is how someone who cannot pull refreshes.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

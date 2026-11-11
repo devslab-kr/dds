@@ -13,7 +13,7 @@
     "text": {
       "primary": { "$value": "{palette.zinc.50}", "$type": "color" },
       "secondary": { "$value": "{palette.zinc.400}", "$type": "color" },
-      "muted": { "$value": "{palette.zinc.500}", "$type": "color" },
+      "muted": { "$value": "{palette.zinc.450}", "$type": "color" },
       "on-brand": { "$value": "{palette.zinc.950}", "$type": "color" },
       "on-status": { "$value": "{palette.zinc.950}", "$type": "color" },
       "on-inverse": { "$value": "{palette.zinc.950}", "$type": "color" },
@@ -22,6 +22,7 @@
     "border": {
       "default": { "$value": "{palette.zinc.800}", "$type": "color" },
       "strong": { "$value": "{palette.zinc.700}", "$type": "color" },
+      "control": { "$value": "{palette.zinc.550}", "$type": "color" },
       "focus": { "$value": "{palette.neutral-focus.dark}", "$type": "color" }
     },
     "status": {

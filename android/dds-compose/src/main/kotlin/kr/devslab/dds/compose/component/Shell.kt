@@ -1,5 +1,7 @@
 package kr.devslab.dds.compose.component
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,8 +50,10 @@ import kr.devslab.dds.tokens.DdsSpace
 
 /**
  * The bar at the top of a screen. It shares the page background and is set
- * apart by a hairline — no shadow, no tint. It does not move or fade when a
- * screen changes; only the content below it does.
+ * apart by a hairline — no shadow, no tint. It does not move when a screen
+ * changes; only the content below it slides. Where the host fades between two
+ * screens, a bar that is the same on both shows no change, and a title that
+ * differs fades to the new one.
  *
  * @param leading drawn before the title: the app mark on a top-level screen,
  * or a back [DdsIconButton] on a deeper one
@@ -237,7 +241,10 @@ public fun DdsDialog(
         modifier = modifier,
         dismissButton = dismiss,
         title = { WordsText(title, style = DdsTheme.typography.title2) },
-        text = if (text != null) ({ WordsText(text, style = DdsTheme.typography.body1) }) else null,
+        text = if (text != null) ({
+            // A long message at a large font size can be taller than the dialog: it scrolls.
+            WordsText(text, Modifier.verticalScroll(rememberScrollState()), style = DdsTheme.typography.body1)
+        }) else null,
         shape = MaterialTheme.shapes.medium,
         containerColor = colors.bgElevated,
         titleContentColor = colors.textPrimary,

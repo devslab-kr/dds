@@ -40,7 +40,7 @@
   inline-size: 100%;
   min-inline-size: 0;
   block-size: var(--dds-space-40);
-  border: 1px solid var(--dds-color-border-strong);
+  border: 1px solid var(--dds-color-border-control, var(--dds-color-border-strong));
   border-radius: var(--dds-radius-md);
   background: var(--dds-color-bg-default);
   overflow: hidden;

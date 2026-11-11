@@ -8,11 +8,13 @@
     <color name="dds_color_bg_inverse">#FFFAFAFA</color>
     <color name="dds_color_text_primary">#FFFAFAFA</color>
     <color name="dds_color_text_secondary">#FFA1A1AA</color>
+    <color name="dds_color_text_muted">#FF8E8E97</color>
     <color name="dds_color_text_on_status">#FF09090B</color>
     <color name="dds_color_text_on_inverse">#FF09090B</color>
     <color name="dds_color_text_brand">#FF22D3EE</color>
     <color name="dds_color_border_default">#FF27272A</color>
     <color name="dds_color_border_strong">#FF3F3F46</color>
+    <color name="dds_color_border_control">#FF696972</color>
     <color name="dds_color_border_focus">#FFB0BBC4</color>
     <color name="dds_color_status_success">#FF4ADE80</color>
     <color name="dds_color_status_success_bg">#FF14532D</color>

@@ -14,6 +14,9 @@ android {
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
+        // Device tests read what a screen reader is given (src/androidTest). They need an
+        // emulator or a phone, so CI does not run them: ./gradlew :dds-compose:connectedDebugAndroidTest
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -45,6 +48,15 @@ dependencies {
     api(libs.activity.compose)
 
     testImplementation(libs.junit)
+
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.compose.ui.test.junit4.accessibility)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    // The apps change screens with Navigation 3; the screen change is measured inside it.
+    androidTestImplementation(libs.navigation3.runtime)
+    androidTestImplementation(libs.navigation3.ui)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
 
 mavenPublishing {

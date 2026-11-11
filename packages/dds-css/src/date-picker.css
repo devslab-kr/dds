@@ -18,7 +18,7 @@
 .dds-date-picker-footer {display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--dds-space-12);margin-top:var(--dds-space-12);padding-top:var(--dds-space-12);border-top:calc(var(--dds-space-2) / 2) solid var(--dds-color-border-default);}
 
 /* Text box shared by DatePicker, MonthPicker and the DateRangePicker pair: same var(--dds-space-40) DDS input look. */
-.dds-date-picker-control > input,.dds-date-range-box {box-sizing:border-box;flex:1;min-inline-size:0;block-size:var(--dds-space-40);border:calc(var(--dds-space-2) / 2) solid var(--dds-color-border-strong);border-radius:var(--dds-radius-md);background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);font-family:inherit;font-size:var(--dds-typo-body-2-font-size);font-variant-numeric:tabular-nums;}
+.dds-date-picker-control > input,.dds-date-range-box {box-sizing:border-box;flex:1;min-inline-size:0;block-size:var(--dds-space-40);border:calc(var(--dds-space-2) / 2) solid var(--dds-color-border-control, var(--dds-color-border-strong));border-radius:var(--dds-radius-md);background:var(--dds-color-bg-default);color:var(--dds-color-text-primary);font-family:inherit;font-size:var(--dds-typo-body-2-font-size);font-variant-numeric:tabular-nums;}
 .dds-date-picker-control > input {padding-inline:var(--dds-space-12);}
 .dds-date-picker-control > input:focus-visible,.dds-date-range-box:focus-within {outline:var(--dds-space-2) solid var(--dds-color-border-focus);outline-offset:calc(var(--dds-space-2) * -1);}
 .dds-date-picker-control > input[aria-invalid="true"],.dds-date-range-box[data-invalid] {border-color:var(--dds-color-status-danger);}

@@ -49,8 +49,14 @@ public class DdsColors internal constructor(
     public val textBrand: Color,
     /** Card edges and dividers. */
     public val borderDefault: Color,
-    /** Control edges (text fields, outlined buttons). */
+    /** Emphasized edges and dividers; the outline of a button that carries a label. */
     public val borderStrong: Color,
+    /**
+     * The resting edge of a control a person types into or ticks (text field,
+     * checkbox, radio). It is 3:1 against the surface, because the edge is all
+     * that shows where an empty control is.
+     */
+    public val borderControl: Color,
     /** Focus ring. */
     public val borderFocus: Color,
     public val statusSuccess: Color,
@@ -87,6 +93,7 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
             textBrand = brand.dark.textBrand,
             borderDefault = Color(DdsDarkColors.borderDefault),
             borderStrong = Color(DdsDarkColors.borderStrong),
+            borderControl = Color(DdsDarkColors.borderControl),
             borderFocus = brand.dark.borderFocus.takeOrElse { Color(DdsDarkColors.borderFocus) },
             statusSuccess = Color(DdsDarkColors.statusSuccess),
             statusSuccessBg = Color(DdsDarkColors.statusSuccessBg),
@@ -118,6 +125,7 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
             textBrand = brand.light.textBrand,
             borderDefault = Color(DdsLightColors.borderDefault),
             borderStrong = Color(DdsLightColors.borderStrong),
+            borderControl = Color(DdsLightColors.borderControl),
             borderFocus = brand.light.borderFocus.takeOrElse { Color(DdsLightColors.borderFocus) },
             statusSuccess = Color(DdsLightColors.statusSuccess),
             statusSuccessBg = Color(DdsLightColors.statusSuccessBg),
@@ -187,7 +195,7 @@ internal fun ddsColorScheme(c: DdsColors, dark: Boolean, inverseTextBrand: Color
         onError = c.textOnStatus,
         errorContainer = c.statusDangerBg,
         onErrorContainer = c.statusDanger,
-        outline = c.borderStrong,
+        outline = c.borderControl,
         outlineVariant = c.borderDefault,
         scrim = c.overlayDim,
         surfaceBright = c.bgDefault,

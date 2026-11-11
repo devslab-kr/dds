@@ -59,6 +59,9 @@ values `[spec §3.6]`.
 
 - These four durations are all there are. No number in screen code.
 - **Nothing overshoots or springs. Pressing never changes size or position.** Press feedback is the ripple.
+- **A color that changes because something was chosen, pressed or focused eases over `Fast`**
+  — a chip, a button's pressed color, a field's edge, a tab's label (0.5.0). It is the web's
+  `motion.duration.fast`, 100ms; the web eases the chip, the button and the tab, not a field's edge. It is never a reason to wait: the tap has already happened.
 - Haptic feedback stays on under reduced motion (Qooroo).
 
 ### 2.2 Splash
@@ -103,7 +106,10 @@ logo's shape and color are the app's; the system supplies the way to join them.
     registration records who made it, so a previous screen that is disposed late
     cannot erase the new screen's registration (a bug JeongsanNow actually hit; pinned by a test).
 14. **With no destination** (a lock screen) the splash lifts in 150ms without a move,
-    and the logo at the destination shows through the lifting cover.
+    and the logo at the destination shows through the lifting cover. Cover and logo lift
+    as one picture. Faded one by one, the cover shows through the logo half-way: a logo
+    the screen draws in the same place dips a quarter of the way toward the background
+    and comes back (seen on a phone in JeongsanNow; fixed in 0.5.0, `SplashOverlayOnDeviceTest`).
 15. **A recreated Activity does not replay it** (`active = savedInstanceState == null`).
     The cover lifts on its own after a safety interval.
 16. While the first screen is not known yet (the session is still being read),
@@ -196,21 +202,68 @@ Checked by a unit test only: the test device showed the icon on every launch pat
 
 ### 2.3 Screen transitions
 
-Code: `DdsScreenMotion(move)`, `Modifier.ddsScreenContent()`, `DdsMove`.
+Code: `ddsScreenChange(move, reduced)` for Navigation 3's `NavDisplay`, `DdsScreenMotion(move)`,
+`Modifier.ddsScreenContent()`, `DdsMove`. For an app that changes screens itself:
+`DdsScreenHost(screen, move) { … }`.
 
-18. **Only the content moves.** The top bar, the title and the bottom tabs neither move nor fade.
-19. **Give the navigation host no transition of its own, and do not blank the screen that
-    is leaving.** A whole screen fading in over the gap the last one left reads as a flicker
-    (fixed in JeongsanNow on 2026-11-08; Qooroo's whole-screen fade of 200/150 is that same
-    approach, and moves to this one). But a host takes a few frames to swap entries: an entry
-    emptied in that time shows as a blank screen, bars and all, for 3 to 5 frames — in dark,
-    a white flash on every move (measured on a phone, 0.3.0; this was the "it flickers every
-    time I change menu"). Keep drawing the leaving entry until the host swaps it, and tell it
-    it is no longer current: `DdsScreenMotion(move, active = false)`, read as
-    `LocalDdsScreenActive.current` before starting a load or a subscription.
-20. **Nothing fades in.** Content is opaque from its first frame and only slides. A fade
-    from transparent, even 100ms, left the content area empty for about eight frames under a
-    top bar that was already there (measured on a phone at 60fps, 0.3.0).
+18. **A change of screen is always two screens, one over the other — never one screen over
+    nothing** (0.5.0). Going forward or to another tab, the screen before stays where it is,
+    fully drawn, while the new one appears over it. Going back it is the other way round:
+    the screen being left fades away over the one returned to, which is already there
+    underneath (that is how the host stacks them). Either way every frame is a mix of the
+    two and none is empty — which is what lets a screen fade at all.
+19. **Only the content slides.** The top bar, the title and the bottom tabs do not move. A
+    bar that is the same on both screens does not visibly change during the fade — the same
+    pixels are drawn over themselves; a title that differs fades to the new one.
+20. **Never fade a screen in over nothing.** Three faults seen on phones were this one
+    fault — the screen before was already gone. A whole screen fading in over the gap the
+    last one left reads as a flicker (fixed in JeongsanNow on 2026-11-08; Qooroo's
+    whole-screen fade of 200/150 was that same approach). An entry emptied while the host
+    swaps shows as a blank screen, bars and all, for 3 to 5 frames — in dark, a white flash
+    on every move (0.3.0; this was the "it flickers every time I change menu"). And content
+    that starts transparent, even for 100ms, left the content area empty for about eight
+    frames under a top bar that was already there (60fps, 0.3.0). 0.3.0 and 0.4.0 answered
+    by taking the fades out; 0.5.0 keeps both screens instead, and the fades are back.
+20a. **Each screen covers what is under it for as long as it is on screen.** Give every
+    screen a background (a scaffold does). Do not empty a screen while it is leaving — an
+    emptied screen is see-through, and the change is a fade over nothing again. Keep drawing
+    it and tell it it is no longer current: `DdsScreenMotion(move, active = false)`, read as
+    `LocalDdsScreenActive.current` before starting a load or a subscription. Where a screen
+    has to be emptied the moment it leaves, make that move `DdsMove.None`.
+20b. **Where the host cannot be given a change, nothing fades.** `DdsScreenMotion(move)`
+    alone still slides the content, opaque from its first frame.
+
+**Checked for 0.5.0** on an emulator with the clock held, frame by frame. Inside Navigation
+3's `NavDisplay` (1.1.2, the version both apps use), wired as below (`NavDisplayOnDeviceTest`,
+five tests): going forward, going back and changing tab between a red and a blue screen,
+every frame was red and blue only — never the background behind them — and several were a
+mix; the content slid in from the trailing side going forward and from the leading side
+going back. The same in `DdsScreenHost` (`MotionOnDeviceTest`), where going forward the
+screen before was also told it was leaving, could not be read by a screen reader, and left
+the composition once covered, and going back the screen being left — on top while it fades —
+did not take a tap. A screen whose activity was rebuilt around it did not arrive again, and
+one come back to after that still did (`RebuiltWindowTest`, a real recreate). In the catalog, with animations slowed ten times,
+the half-way frames were captured and looked at.
+
+**Measured on a phone with 0.5.0.** JeongsanNow put `ddsScreenChange` in its three
+`NavDisplay` specs (SM-F971N, Android 17, folded 475×751dp, dark, text at 130%; recorded at
+60fps while a test stepped the clock one frame at a time, each frame compared with the one
+before). Five tab changes, two opens and two backs: in no frame on the way was less of the
+body drawn than in the screens on either side, and nothing flashed. A tab changed over
+about 150ms (nine or ten frames), where 0.4.0 changed in one. Opening, the new screen
+appeared over the one before for about 100ms while its content slid in from the trailing
+edge; going back, the content of the screen returned to slid in from the leading edge.
+With the destination taken off a screen that draws the logo, the logo kept its brightness
+through the nine frames of the cover lifting (rule 14); 0.4.0 lost about a quarter. A test
+on the clock that advances by itself finishes a change within one real frame, so a
+recording of it shows nothing: step the clock. Not measured: the back swipe (the phone uses
+three buttons), folding and rotating frame by frame, the unfolded layout with a rail, light.
+
+**Going back slides again in Navigation 3** (0.5.0). In 0.2.0–0.4.0 it did not: Navigation
+3 gives a screen on the back stack its saved state back when the person returns to it, and
+the screen read that as "already arrived" (found in Qooroo). Now the window decides: one
+that has already shown a screen is one the person is moving about in, so a screen shown in
+it arrives; the first screen a window shows after being rebuilt is simply there.
 
 **Measured on a phone with 0.4.0.** JeongsanNow removed its own motion and used
 `DdsScreenMotion(move, active)` + `ddsScreenContent` (SM-F971N, Android 17, unfolded, dark;
@@ -221,23 +274,58 @@ back rule passed on the same build. Not measured: light, folded, the other scree
 21. **When the account or workspace changes, switch at once with no movement** (`DdsMove.None`).
 22. A rotated or restored screen does not arrive a second time.
 
-| Move | Appear | Slide |
+| Move | The two screens | Content slides |
 | --- | --- | --- |
-| Forward (`Push`) | at once | 24dp from the trailing edge, 300ms |
-| Back (`Pop`) | at once | 24dp from the leading edge, 200ms |
-| Tab (`Tab`) | at once | none — the previous tab is gone at once, so a fade would fade in over an empty page and read as a flicker on every tab press (seen on a device, 0.3.0) |
+| Forward (`Push`) | the new one appears over the one before, 100ms | 24dp from the trailing edge, 300ms |
+| Back (`Pop`) | the one left fades away over the one returned to, 100ms | 24dp from the leading edge, 200ms |
+| Tab (`Tab`) | the new one appears over the one before, 150ms | no |
 | None (`None`) | at once | — |
 
+With reduced motion every change is at once.
+
+In Navigation 3 — give the host the change, and keep each entry in `DdsScreenMotion`:
+
 ```kotlin
-// Give the navigation host no transition of its own (None).
-key(entry) {
-    DdsScreenMotion(move) {                       // how the person got here
-        Scaffold(topBar = { … }, bottomBar = { … }) { padding ->
-            Column(Modifier.padding(padding).ddsScreenContent()) { … }   // the part that moves
+val reduced = rememberReducedMotion()
+NavDisplay(
+    backStack = backStack,
+    transitionSpec = { ddsScreenChange(move, reduced) },                  // Push, or Tab
+    popTransitionSpec = { ddsScreenChange(DdsMove.Pop, reduced) },
+    predictivePopTransitionSpec = { ddsScreenChange(DdsMove.Pop, reduced) },
+    entryProvider = entryProvider {
+        entry<Home> {
+            DdsScreenMotion(move) {                                       // slides the content
+                Scaffold(topBar = { … }, bottomBar = { … }) { padding ->
+                    Column(Modifier.padding(padding).ddsScreenContent()) { … }
+                }
+            }
         }
+    },
+)
+```
+
+In an app that changes screens itself, `DdsScreenHost` does both:
+
+```kotlin
+DdsScreenHost(screen = entry, move = move) { shown ->
+    Scaffold(topBar = { … }, bottomBar = { … }) { padding ->
+        Column(Modifier.padding(padding).ddsScreenContent()) { … }
     }
 }
 ```
+
+- `ddsScreenChange` is called inside the transition spec, as above. `move` is how the
+  person got to the new screen; a change of tab is `DdsMove.Tab`.
+- In `DdsScreenHost`, `screen` is compared with `==`; every screen is drawn on `background`
+  (the page color by default); the screen that is leaving cannot be touched, a screen reader
+  does not see it, and `LocalDdsScreenActive.current` is false in it. Do not also wrap the
+  content in `DdsScreenMotion`. In `NavDisplay` a leaving screen is the host's: it is still
+  live for the 100ms it fades on the way back, so read `LocalDdsScreenActive` there too.
+- A menu that should not change with the screen (a rail, a fixed list) goes outside the
+  host, so the change applies only to what is inside. Content sliding in is kept inside its
+  own area and does not draw over a menu beside it.
+- A back swipe shows the screen underneath before the app records the move. A screen that
+  is come back to therefore never plays "forward": it comes back from the leading edge.
 
 ### 2.3.1 Back and leaving the app (0.3.0)
 
@@ -250,8 +338,10 @@ tab feels broken ("I went to another menu, pressed back, and the app just left")
   within 600ms, ask ("Close the app?") and leave only on yes.
 - **Do not take back over where input is blocked** (a lock screen), or while a dialog or
   sheet is open — those close themselves.
-- **Keep scroll state above the screen that is removed.** A screen wrapped in
-  `DdsScreenMotion` is taken out and drawn again; a `rememberScrollState()` inside it is
+- **Keep scroll state above the screen that is removed.** A screen still on Navigation 3's
+  back stack gets its saved state back, scroll included. A screen in `DdsScreenHost`, or a
+  Navigation 3 entry that is off the back stack (a tab that was replaced), is taken out and
+  drawn again; a `rememberScrollState()` inside it is
   lost, and coming back lands at the top. Hold the scroll state per navigation entry,
   outside the part that is removed, and pass it down.
 
@@ -412,7 +502,7 @@ How the other five values follow from a main color is not a rule on the web eith
 
 - Page background `bg.default`, group background `bg.subtle`, cards, sheets and dialogs `bg.elevated`.
 - Text `text.primary` / `text.secondary` / `text.muted` (disabled, placeholders).
-- Lines `border.default` (card edges, dividers), `border.strong` (text fields).
+- Lines `border.default` (card edges, dividers), `border.strong` (emphasized lines, labelled buttons), `border.control` (the edge of a text field, a checkbox, a radio: 3:1, D-050).
 - **The primary button is a `bg.brand` face with `text.on-brand` text — the same color in light and dark.**
 - Brand text, links and selection use `text.brand`; a pale emphasis background is `bg.brand-subtle`.
 - Press and hover tints are alpha only. `opacity` is for disabled only.
@@ -435,7 +525,7 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
 | `surfaceVariant` | `border.default` | zinc.200 | zinc.800 |
 | `onSurface`, `onBackground` | `text.primary` | zinc.950 | zinc.50 |
 | `onSurfaceVariant`, `secondary` | `text.secondary` | zinc.600 | zinc.400 |
-| `outline` / `outlineVariant` | `border.strong` / `border.default` | zinc.300 / zinc.200 | zinc.700 / zinc.800 |
+| `outline` / `outlineVariant` | `border.control` / `border.default` | zinc.450 / zinc.200 | zinc.550 / zinc.800 |
 | `error` / `onError` | `status.danger` / `text.on-status` | red.700 / white | red.300 / zinc.950 |
 | `errorContainer` / `onErrorContainer` | `status.danger-bg` / `status.danger` | red.50 / red.700 | red.900 / red.300 |
 | `inverseSurface` / `inverseOnSurface` | `bg.inverse` / `text.on-inverse` | zinc.900 / zinc.50 | zinc.50 / zinc.950 |
@@ -518,13 +608,62 @@ transparent, and their icons follow the theme **actually shown**. Use
 - Focus is a 2dp `border.focus` ring.
 - Nothing clips at a 200% system font scale. Where one line is fixed (bottom tab labels) use an ellipsis.
 
+### 8.1 What a screen reader hears (0.5.0)
+
+Someone who cannot see the screen moves through it one stop at a time and hears a name, a
+role and a state at each. The components are built so that what is heard matches what is
+on screen. `ScreenReaderTest` holds the rows below on a device, by reading the tree a
+screen reader walks.
+
+| Component | What is heard |
+| --- | --- |
+| `DdsTextField` | one stop: what was typed, "edit box", the label, and that there is an error. The message under the field is a stop of its own, so that it can be spoken the moment it appears — the error is therefore heard on the field and again on its line, as on the platform's own text fields |
+| `DdsSelectField` | one stop: the label, "drop-down list", and what is in the box — also when that is only the placeholder |
+| `DdsSearchField` | one stop: what was typed and the label (as text of the field, not a description, which can be read in place of what was typed). The clear button exists only when there is something to clear, and clearing leaves the person in the field |
+| `DdsNotice` | one stop: the kind ("Error", "Notice", "Done", "Warning" in the device language, or the app's word) and the message. Spoken when it appears or changes; an error interrupts |
+| `DdsButton` | while loading: "Loading". It stays focusable and ignores presses, and does not look pressed |
+| `DdsListRow` | a row that can be pressed says "button". A row that only shows something is read as one thing with what is at its end |
+| `DdsValueRow` | the name and the value together |
+| `DdsBusyBar` | "Loading", when it appears |
+| `ddsScreenContent(paneTitle)` | the screen's name when the screen changes |
+| `DdsBottomSheet` | its handle is named ("Drag handle"); the area outside is the platform's "Close sheet" |
+
+- **The words come from the device language** when the app passes none (`res/values*/dds_a11y.xml`:
+  English and Korean). Pass your own to override; a product in another language must.
+- **An app still has to name what only it knows:** every icon-only button, every search
+  field, and the title of each screen.
+- **Pull to refresh has no screen-reader equivalent here.** An action on the pull container
+  would sit on something a screen reader never stops on. Keep a visible refresh button on
+  any screen that can be pulled.
+- **Not built by the components:** an initial focus inside a sheet, a guaranteed order of
+  top bar, content and bottom bar for keyboard users, and the splash cover hiding what is
+  under it for the second it is up.
+- **Checked how:** 22 device tests; with the changed files put back to 0.4.0, 12 of the
+  first 17 fail. They read what is handed to a screen reader, not whether it reaches it —
+  one review finding (a refresh action nobody could reach) passed its test for exactly that
+  reason. TalkBack was started on the emulator and focused the screen title, but what it
+  speaks was not captured. **Listening with TalkBack on a phone is still to do.**
+
+Low vision, at 200% font with large text:
+
+- **A control's edge is 3:1 against its surface** (`border.control`, D-050): an empty field,
+  an unchecked box and an unselected radio are found by their edge alone. Placeholder text
+  is 4.5:1 in dark as well as light. Card edges, dividers and labelled buttons keep the
+  paler lines.
+- Tabs inside a page share the width while their labels fit; a label wider than its share
+  makes the row scroll instead of being cut to a letter.
+- A select field shows two lines of what was chosen; a dialog's message scrolls.
+- A selected chip or tab is heavier as well as colored, without changing width.
+- Still open: the focus ring on a filled button is seen against the fill; bottom tab labels
+  are one line with an ellipsis; a long trailing value in a list row can squeeze its title.
+
 ## 9. What has to differ on mobile
 
 | Item | Web | Android | Why |
 | --- | --- | --- | --- |
 | Touch target | 44 (mobile) | 48 | Android's accessibility line and Material3's default. It clears 44 |
 | Hover | yes | none; `brand-hover` is the pressed color | touch screens |
-| Press feedback | color change | ripple | platform convention |
+| Press feedback | color change | ripple, and the color eases (100ms) | platform convention |
 | Typeface | Latin Geist + Korean Pretendard | Pretendard | Compose picks a font by weight; two families at one weight means only the first is used |
 | Rare Korean syllables | all Pretendard | syllables outside KS X 1001 use the system font | the font files are cut to about 0.5 MB per weight |
 | Color roles | CSS variables | the Material3 role mapping (§3.3) | Material components read color by role |
@@ -560,8 +699,8 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 15 | Gap between fields in a form | 16 (in the catalog; not a token) | the web form gap is the product's |
 | 16 | Components the web has and Android does not yet | date and time pickers use Material3 defaults | §12 |
 | 17 | Back and leaving the app | back to the screen, then the previous tab; ask before leaving; two presses within 600ms ask | §2.3.1. JeongsanNow's behavior |
-| 18 | Motion on a tab switch | none | §2.3. A 150ms fade read as a flicker on a device |
-| 19 | Whether content fades in on push and pop | no — opaque from the first frame, slide only | §2.3, rule 20. The 100ms fade showed an empty content area on a device |
+| 18 | Motion on a tab switch | the new tab appears over the one before, 150ms; nothing slides (0.5.0, D-051). Nothing with `DdsScreenMotion` alone | §2.3. Over an emptied page the same fade read as a flicker on a device (0.3.0) |
+| 19 | Whether a screen fades on push and pop | the content: no, opaque from the first frame, it only slides. The screen: yes, 100ms over the screen before, or the one returned to (0.5.0, D-051) | §2.3, rules 18 and 20. Fading in over nothing showed an empty content area on a device (0.3.0) |
 
 **Where each item stands (2026-11-10).**
 
@@ -571,9 +710,11 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 - **Recommended as "keep the value put in for now", shown to the owner, no objection yet:**
   1, 2, 3, 6, 7, 8, 9, 12, 13, and 11 as "keep the Material3 default; no size change on a
   dialog". These are not confirmed rules until the owner says so.
-- **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components); 17 and 18
-  (0.3.0, from the owner's own words while using JeongsanNow on a phone — the numbers are proposals);
-  19 (0.4.0, measured by JeongsanNow on a phone).
+- **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components); 17 (0.3.0,
+  from the owner's own words while using JeongsanNow on a phone — the numbers are proposals).
+- **Changed on the owner's word (2026-11-11, D-051):** 18 and 19. 0.3.0 and 0.4.0 had taken
+  these fades out; the owner did not want movement to keep disappearing, so they are back,
+  done the way that leaves no empty frame. The durations are the 0.2.0 ones.
 
 ## 11. Moving an existing app over
 
@@ -583,7 +724,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 2. Brand: write the main color in `res/values/dds_brand.xml` (skip it to use the default).
 3. Replace the app theme with `DdsTheme`.
 4. Replace hex in `res/values*` with `@color/dds_*` (splash, window background, logo).
-5. Replace motion constants and helpers with `DdsMotion`, `DdsScreenMotion`,
+5. Replace motion constants and helpers with `DdsMotion`, `ddsScreenChange` and `DdsScreenMotion` (or `DdsScreenHost`),
    `ddsAppear`, `DdsSplashHandoff`, `DdsBusyBar`, `DdsLoadingRows`, `DdsPullRefresh`.
    Check them as in §2.8.
 6. Screen by screen, replace height, radius and spacing numbers with `DdsControl`,
@@ -636,7 +777,7 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
 | `DdsSearchField` | the one search field: magnifier in front, a clear button once something is typed, the keyboard's search key runs it; an apply button at the end when `applyDescription` is given, dimmed on its own with `searchEnabled`; no label line, no message line | — |
 | `DdsSelectField` | the one field for choosing from a short list: the same box and lines as `DdsTextField`, opens a sheet, the chosen option carries a check | Select |
 | `DdsValueRow` | a name and its value on one line: name at the start, value at the end edge, tabular digits, a line under each row | — |
-| `DdsTabs` | views of one thing inside a page: brand underline and a heavier label | Tabs |
+| `DdsTabs` | views of one thing inside a page: a brand underline that slides to the chosen tab, and a heavier label; the tabs share the width, and scroll when a label does not fit its share | Tabs |
 | `DdsBottomSheet` | choices and actions; closes on back, outside tap, drag; radius 16 on the top corners | Sheet |
 | `DdsMenu`, `DdsMenuItem` | a short menu anchored to its button; a destructive item in the danger color | Menu |
 | `DdsToastHost` | a short message that leaves by itself, on the inverse surface; never for something that must be read | Toast |
@@ -648,9 +789,10 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
   `Text(label.keepWords(), Modifier.readAs(label))` — `readAs` goes last in the chain; it
   replaces the semantics of anything written after it. A test that matched a DDS label with
   `"…".keepWords()` now matches the plain string.
-- **Give the search field a `placeholder`.** Its `label` is only read aloud — nothing on
-  screen says what to type unless a placeholder does. In a test find it with
-  `hasContentDescription(label)`, not `hasText`.
+- **A search field shows its `label` as the placeholder** unless another is given (0.5.0;
+  before that the label was only read aloud and an empty field said nothing on screen). In a
+  test find it with `hasSetTextAction() and hasText(label)` — it no longer has a content
+  description.
 - **One search field and one select field in the whole app.** Two looks for the same job on
   two screens is the inconsistency people notice first.
 

@@ -364,3 +364,52 @@ test("status text clears 4.5:1 on its own background in both themes (D-049)", as
     }
   }
 });
+
+test("a form control's edge is 3:1 against its surface, and placeholder text is 4.5:1 (D-050)", async () => {
+  const palette = JSON.parse(await read("tokens/palette.json"));
+  const hex = (reference) => {
+    if (!reference.startsWith("{")) return reference;
+    let node = palette;
+    for (const segment of reference.slice(1, -1).split(".")) node = node[segment];
+    return node.$value;
+  };
+  const luminance = (value) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(value.slice(i, i + 2), 16) / 255)
+      .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a, b) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  for (const theme of ["light", "dark"]) {
+    const { bg, border, text } = JSON.parse(await read(`tokens/semantic.${theme}.json`)).color;
+    // Controls sit on the page, on a quiet section and on a card or sheet.
+    for (const surface of ["default", "subtle", "elevated"]) {
+      const on = hex(bg[surface].$value);
+      const edge = contrast(hex(border.control.$value), on);
+      assert.ok(edge >= 3, `${theme} border.control on bg.${surface} is ${edge.toFixed(2)}:1`);
+      const hint = contrast(hex(text.muted.$value), on);
+      assert.ok(hint >= 4.5, `${theme} text.muted on bg.${surface} is ${hint.toFixed(2)}:1`);
+    }
+    // Why border.control exists: the emphasized line is far too pale to mark a control.
+    const pale = contrast(hex(border.strong.$value), hex(bg.default.$value));
+    assert.ok(pale < 3, `${theme} border.strong is ${pale.toFixed(2)}:1 — if it reached 3:1 border.control would be redundant`);
+  }
+});
+
+test("form controls draw their resting edge in border.control, not border.strong (D-050)", async () => {
+  for (const name of ["checkbox-radio", "choice", "date-picker", "input", "number-input", "select", "textarea", "textfield"]) {
+    const css = await read(`packages/dds-css/src/${name}.css`);
+    // border.strong may appear only as the fallback for a token sheet older than this
+    // token: without it, upgrading dds-css alone would leave every control with no edge.
+    const fallback = "var(--dds-color-border-control, var(--dds-color-border-strong))";
+    assert.ok(css.includes(fallback), `${name}.css must fall back to border.strong`);
+    assert.doesNotMatch(css.replaceAll(fallback, ""), /--dds-color-border-(control|strong)/, `${name}.css draws an edge outside the fallback pair`);
+  }
+  // The segmented track is a control edge too. Its file also uses border.strong for other
+  // things, so only the track rule and the bare variable are checked.
+  const segmented = await read("packages/dds-css/src/segmented-control.css");
+  assert.match(segmented, /\.dds-segmented__track\s*\{[^}]*border:\s*1px solid var\(--dds-color-border-control, var\(--dds-color-border-strong\)\)/);
+  assert.doesNotMatch(segmented, /var\(--dds-color-border-control\)/);
+});

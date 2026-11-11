@@ -130,7 +130,9 @@
 | 200 | `#a5f3fc` | `#e4e4e7` |
 | 300 | `#67e8f9` | `#d4d4d8` |
 | 400 | `#22d3ee` | `#a1a1aa` |
+| 450 | — | `#8e8e97` |
 | 500 | `#06b6d4` | `#71717a` |
+| 550 | — | `#696972` |
 | 600 | `#0891b2` | `#52525b` |
 | 700 | `#0e7490` | `#3f3f46` |
 | 800 | `#155e75` | `#27272a` |
@@ -174,18 +176,27 @@
 | `color.bg.inverse` | `zinc.900` | `zinc.50` | 페이지와 반전되는 면 (툴팁 버블) |
 | `color.text.primary` | `zinc.950` | `zinc.50` | 본문·제목 |
 | `color.text.secondary` | `zinc.600` | `zinc.400` | 보조 설명 |
-| `color.text.muted` | `zinc.500` | `zinc.500` | 비활성·플레이스홀더 |
+| `color.text.muted` | `zinc.500` | `zinc.450` | 비활성·플레이스홀더 |
 | `color.text.on-brand` | `zinc.950` | `zinc.950` | **브랜드 면 위 텍스트 (아래 노트)** |
 | `color.text.on-status` | `white` | `zinc.950` | 상태색 채움 면 위 텍스트 (danger 버튼 등) |
 | `color.text.on-inverse` | `zinc.50` | `zinc.950` | `bg.inverse` 면 위 텍스트 |
 | `color.text.brand` | `cyan.700` | `cyan.400` | 브랜드 텍스트·링크 |
 | `color.border.default` | `zinc.200` | `zinc.800` | 기본 보더 |
-| `color.border.strong` | `zinc.300` | `zinc.700` | 입력 필드 등 강조 보더 |
+| `color.border.strong` | `zinc.300` | `zinc.700` | 강조 보더·구분선 |
+| `color.border.control` | `zinc.450` (`#8e8e97`) | `zinc.550` (`#696972`) | **입력 컨트롤의 테두리 (아래 노트)** |
 | `color.border.focus` | `neutral-focus.light` (`#52606d`) | `neutral-focus.dark` (`#b0bbc4`) | 중립색 포커스 링 |
 | `color.status.success` / `.success-bg` | `green.700` / `green.50` | `green.400` / `green.900` | 성공 |
 | `color.status.warning` / `.warning-bg` | `amber.700` / `amber.50` | `amber.400` / `amber.900` | 경고 |
 | `color.status.danger` / `.danger-bg` | `red.700` / `red.50` | `red.300` / `red.900` | 위험·오류 |
 | `color.status.info` / `.info-bg` | `blue.700` / `blue.50` | `blue.300` / `blue.900` | 정보 |
+
+> **컨트롤 테두리 노트.** 빈 입력칸, 체크 안 된 상자, 선택 안 된 라디오는 테두리만으로
+> 어디 있는지 알아본다. 그래서 그 테두리는 놓인 면과 3:1이 필요하다(WCAG 1.4.11).
+> `border.strong`은 약 1.5:1이라 그 일을 못 한다. `border.control`은 밝은 화면에서
+> 3.25:1, 어두운 카드 위에서 3.26:1이다. 글을 넣거나 체크하는 컨트롤의 평상시 테두리에는
+> `border.control`을 쓰고, 카드 테두리·구분선·라벨이 있는 버튼에는 `border.default`와
+> `border.strong`을 그대로 쓴다(D-050). 대비 감도는 나이가 들수록 떨어진다. 이것은
+> 고대비 모드가 아니라 기본값이다.
 
 > **on-brand 노트.** cyan 은 밝은 색상이라 흰 텍스트를 올리면 대비가
 > 2.3:1 로 WCAG AA 에 한참 못 미친다. 브랜드 면 위 텍스트는 흰색이 아니라

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- A screen that sets its own content, so a test can rebuild the activity around it. -->
+        <activity android:name="kr.devslab.dds.compose.ArrivingScreenActivity" android:exported="false" />
+    </application>
+</manifest>

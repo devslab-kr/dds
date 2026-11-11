@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.component
 
+import kr.devslab.dds.compose.motion.colorChange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,8 +29,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -46,7 +48,9 @@ import kr.devslab.dds.tokens.DdsSpace
  * a helper or an error can appear there without pushing the screen down.
  *
  * An error is never shown by the border color alone — pass the message in
- * [error]; it is also what a screen reader announces.
+ * [error]. A screen reader hears the field as one thing (what was typed, that
+ * it is an edit box, its label, and the error when there is one), and hears
+ * the error spoken the moment it appears.
  *
  * @param label the name of the field, shown above it and read by a screen reader
  * @param helper a hint under the field, shown when there is no [error]
@@ -81,24 +85,22 @@ public fun DdsTextField(
 
     // One edge at a time: the focus ring replaces the border instead of doubling it.
     val edgeWidth = if (focused) DdsBorder.focus.dp else DdsBorder.hairline.dp
-    val edgeColor = when {
-        isError -> colors.statusDanger
-        focused -> colors.borderFocus
-        else -> colors.borderStrong
-    }
+    val edgeColor by colorChange(
+        when {
+            isError -> colors.statusDanger
+            focused -> colors.borderFocus
+            else -> colors.borderControl
+        },
+    )
     val textStyle = typography.body1.copy(color = colors.textPrimary)
 
     Column(modifier.alpha(if (enabled) 1f else DISABLED_ALPHA), verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp)) {
-        WordsText(label, style = typography.label, color = colors.textPrimary)
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics {
-                    contentDescription = label
-                    if (error != null) error(error)
-                },
+                .semantics { if (error != null) error(error) },
             enabled = enabled,
             readOnly = readOnly,
             textStyle = textStyle,
@@ -108,37 +110,57 @@ public fun DdsTextField(
             visualTransformation = visualTransformation,
             interactionSource = interaction,
             cursorBrush = SolidColor(colors.textBrand),
+            // The label is drawn inside the field's own decoration, above the box. On screen
+            // nothing changes; to a screen reader the label is part of the field, not a
+            // separate stop that says the same words again.
             decorationBox = { innerTextField ->
-                Row(
-                    Modifier
-                        .defaultMinSize(minHeight = DdsField.height.dp)
-                        .clip(shape)
-                        .background(if (enabled) colors.bgDefault else colors.bgSubtle)
-                        .border(edgeWidth, edgeColor, shape)
-                        .padding(horizontal = DdsSpace.s12.dp, vertical = DdsSpace.s12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(DdsSpace.s8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    CompositionLocalProvider(LocalContentColor provides colors.textSecondary) {
-                        leading?.invoke()
-                        Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                            if (value.isEmpty() && placeholder != null) {
-                                Text(placeholder, style = textStyle, color = colors.textMuted, maxLines = 1)
+                Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp)) {
+                    WordsText(label, style = typography.label, color = colors.textPrimary)
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = DdsField.height.dp)
+                            .clip(shape)
+                            .background(if (enabled) colors.bgDefault else colors.bgSubtle)
+                            .border(edgeWidth, edgeColor, shape)
+                            .padding(horizontal = DdsSpace.s12.dp, vertical = DdsSpace.s12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(DdsSpace.s8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CompositionLocalProvider(LocalContentColor provides colors.textSecondary) {
+                            leading?.invoke()
+                            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                                if (value.isEmpty() && placeholder != null) {
+                                    Text(placeholder, style = textStyle, color = colors.textMuted, maxLines = 1)
+                                }
+                                innerTextField()
                             }
-                            innerTextField()
+                            trailing?.invoke()
                         }
-                        trailing?.invoke()
                     }
                 }
             },
         )
-        // The line is kept even when empty, so a message appearing does not move what is below.
-        val line = with(LocalDensity.current) { typography.caption.lineHeight.toDp() }
-        Box(Modifier.heightIn(min = line)) {
-            val message = error ?: helper
-            if (message != null) {
-                WordsText(message, style = typography.caption, color = if (isError) colors.statusDanger else colors.textSecondary)
-            }
-        }
+        FieldMessage(helper = helper, error = error)
+    }
+}
+
+/**
+ * The line under a field. It is always there — empty when there is nothing to
+ * say — so a message appearing does not move what is below, and so an error is
+ * a change to something a screen reader already knows about, which it speaks.
+ */
+@Composable
+internal fun FieldMessage(helper: String?, error: String?) {
+    val colors = DdsTheme.colors
+    val typography = DdsTheme.typography
+    val line = with(LocalDensity.current) { typography.caption.lineHeight.toDp() }
+    Box(Modifier.heightIn(min = line)) {
+        WordsText(
+            error ?: helper.orEmpty(),
+            if (error != null) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier,
+            style = typography.caption,
+            color = if (error != null) colors.statusDanger else colors.textSecondary,
+        )
     }
 }

@@ -22,6 +22,7 @@
     "border": {
       "default": { "$value": "{palette.zinc.200}", "$type": "color" },
       "strong": { "$value": "{palette.zinc.300}", "$type": "color" },
+      "control": { "$value": "{palette.zinc.450}", "$type": "color" },
       "focus": { "$value": "{palette.neutral-focus.light}", "$type": "color" }
     },
     "status": {

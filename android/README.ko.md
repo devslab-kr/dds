@@ -17,7 +17,7 @@
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.4.0") // dds-android-tokens를 함께 가져온다
+    implementation("kr.devslab:dds-compose:0.5.0") // dds-android-tokens를 함께 가져온다
 }
 ```
 
@@ -90,6 +90,18 @@ adb -s <기기> shell am start -n kr.devslab.dds.catalog/.MainActivity \
 
 `page`는 `colors`, `type`, `parts`, `motion`. 부품이나 값을 바꾸면 밝은·어두운,
 글자 배율 200%, 큰 글자 모드, "애니메이션 삭제"에서 직접 띄워 본다.
+
+## 기기 테스트
+
+`dds-compose/src/androidTest`는 화면 낭독기에 전달되는 것을 읽고(`ScreenReaderTest`), 시계를 멈춘 채
+움직임의 중간 지점을 잰다(`MotionOnDeviceTest`, Navigation 3 안에서 재는 `NavDisplayOnDeviceTest` —
+Navigation 3은 테스트에만 쓰는 의존성이다 — 액티비티를 다시 만드는 `RebuiltWindowTest`,
+그리고 걷히는 스플래시 덮개를 재는 `SplashOverlayOnDeviceTest`). 에뮬레이터나 폰이 필요해서
+CI는 돌리지 않는다. 기기를 지정한다 — 지정하지 않으면 연결된 모든 기기에서 돈다.
+
+```
+ANDROID_SERIAL=<기기> ./gradlew :dds-compose:connectedDebugAndroidTest
+```
 
 ## 버전과 배포
 

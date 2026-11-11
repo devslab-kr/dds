@@ -28,7 +28,7 @@
       --bg-subtle: #18181b;
       --text: #fafafa;
       --text-2: #a1a1aa;
-      --muted: #71717a;
+      --muted: #8e8e97;
       --border: #27272a;
       --border-strong: #3f3f46;
       --brand: #06b6d4;
@@ -47,7 +47,7 @@
     --bg-subtle: #18181b;
     --text: #fafafa;
     --text-2: #a1a1aa;
-    --muted: #71717a;
+    --muted: #8e8e97;
     --border: #27272a;
     --border-strong: #3f3f46;
     --brand: #06b6d4;
@@ -245,7 +245,7 @@
   .panel--light {
     --pfocus: #52606d;
     --pbg: #ffffff; --pbg-subtle: #fafafa; --ptext: #09090b; --ptext-2: #52525b;
-    --pmuted: #71717a; --pborder: #e4e4e7; --pborder-strong: #d4d4d8;
+    --pmuted: #71717a; --pborder: #e4e4e7; --pborder-strong: #d4d4d8; --pborder-control: #8e8e97;
     --pbrand: #06b6d4; --pbrand-hover: #22d3ee; --pon-brand: #09090b; --pbrand-text: #0e7490;
     --ptint: rgba(0, 0, 0, 0.05); --ppress: rgba(0, 0, 0, 0.08);
     --psuccess: #15803d; --psuccess-bg: #f0fdf4; --pwarning: #b45309; --pwarning-bg: #fffbeb;
@@ -255,7 +255,7 @@
   .panel--dark {
     --pfocus: #b0bbc4;
     --pbg: #09090b; --pbg-subtle: #18181b; --ptext: #fafafa; --ptext-2: #a1a1aa;
-    --pmuted: #71717a; --pborder: #27272a; --pborder-strong: #3f3f46;
+    --pmuted: #8e8e97; --pborder: #27272a; --pborder-strong: #3f3f46; --pborder-control: #696972;
     --pbrand: #06b6d4; --pbrand-hover: #22d3ee; --pon-brand: #09090b; --pbrand-text: #22d3ee;
     --ptint: rgba(255, 255, 255, 0.08); --ppress: rgba(255, 255, 255, 0.12);
     --psuccess: #4ade80; --psuccess-bg: #14532d; --pwarning: #fbbf24; --pwarning-bg: #78350f;
@@ -307,7 +307,7 @@
   .field input {
     font: 400 14px/20px inherit; font-family: inherit;
     background: var(--pbg); color: var(--ptext);
-    border: 1px solid var(--pborder-strong); border-radius: 8px;
+    border: 1px solid var(--pborder-control); border-radius: 8px;
     height: 40px; padding: 0 12px;
   }
   .field input::placeholder { color: var(--pmuted); }
@@ -657,8 +657,8 @@
       50:"#ecfeff",100:"#cffafe",200:"#a5f3fc",300:"#67e8f9",400:"#22d3ee",
       500:"#06b6d4",600:"#0891b2",700:"#0e7490",800:"#155e75",900:"#164e63" } },
     { name: "zinc", label: "뉴트럴", steps: {
-      50:"#fafafa",100:"#f4f4f5",200:"#e4e4e7",300:"#d4d4d8",400:"#a1a1aa",
-      500:"#71717a",600:"#52525b",700:"#3f3f46",800:"#27272a",900:"#18181b",950:"#09090b" } },
+      50:"#fafafa",100:"#f4f4f5",200:"#e4e4e7",300:"#d4d4d8",400:"#a1a1aa",450:"#8e8e97",
+      500:"#71717a",550:"#696972",600:"#52525b",700:"#3f3f46",800:"#27272a",900:"#18181b",950:"#09090b" } },
   ];
   const brandEl = document.getElementById("brandScales");
   scales.forEach(s => {
@@ -711,13 +711,14 @@
     ["color.bg.inverse","#18181b","#fafafa","페이지와 반전되는 면 (툴팁)"],
     ["color.text.primary","#09090b","#fafafa","본문·제목"],
     ["color.text.secondary","#52525b","#a1a1aa","보조 설명"],
-    ["color.text.muted","#71717a","#71717a","비활성·플레이스홀더"],
+    ["color.text.muted","#71717a","#8e8e97","비활성·플레이스홀더"],
     ["color.text.on-brand","#09090b","#09090b","브랜드 면 위 텍스트"],
     ["color.text.on-status","#ffffff","#09090b","상태색 채움 면 위 텍스트 (danger 버튼)"],
     ["color.text.on-inverse","#fafafa","#09090b","bg.inverse 면 위 텍스트"],
     ["color.text.brand","#0e7490","#22d3ee","브랜드 텍스트·링크"],
     ["color.border.default","#e4e4e7","#27272a","기본 보더"],
-    ["color.border.strong","#d4d4d8","#3f3f46","입력 필드 보더"],
+    ["color.border.strong","#d4d4d8","#3f3f46","강조 보더·구분선"],
+    ["color.border.control","#8e8e97","#696972","입력 컨트롤의 테두리 (바탕 대비 3:1)"],
     ["color.border.focus","#52606d","#b0bbc4","중립색 포커스 링"],
     ["color.status.success","#15803d","#4ade80","성공 (bg: green.50 / green.900)"],
     ["color.status.warning","#b45309","#fbbf24","경고 (bg: amber.50 / amber.900)"],

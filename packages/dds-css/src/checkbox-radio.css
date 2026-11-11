@@ -28,7 +28,7 @@
   padding: 0;
   width: 18px;
   height: 18px;
-  border: 1px solid var(--dds-color-border-strong);
+  border: 1px solid var(--dds-color-border-control, var(--dds-color-border-strong));
   border-radius: var(--dds-radius-sm);
   background: var(--dds-color-bg-default);
   cursor: inherit;

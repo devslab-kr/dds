@@ -82,6 +82,7 @@ public fun DdsCheckbox(
         label, description, enabled,
         modifier
             .clip(MaterialTheme.shapes.small)
+            .ddsFocusRing(interaction, MaterialTheme.shapes.small)
             .toggleable(checked, interaction, ripple(), enabled, Role.Checkbox, onCheckedChange),
         controlFirst = true,
     ) {
@@ -92,9 +93,9 @@ public fun DdsCheckbox(
             colors = CheckboxDefaults.colors(
                 checkedColor = colors.bgBrand,
                 checkmarkColor = colors.textOnBrand,
-                uncheckedColor = colors.borderStrong,
+                uncheckedColor = colors.borderControl,
                 disabledCheckedColor = colors.bgBrand,
-                disabledUncheckedColor = colors.borderStrong,
+                disabledUncheckedColor = colors.borderControl,
             ),
         )
     }
@@ -116,6 +117,7 @@ public fun DdsRadio(
         label, description, enabled,
         modifier
             .clip(MaterialTheme.shapes.small)
+            .ddsFocusRing(interaction, MaterialTheme.shapes.small)
             .selectable(selected, interaction, ripple(), enabled, Role.RadioButton, onClick),
         controlFirst = true,
     ) {
@@ -125,9 +127,9 @@ public fun DdsRadio(
             enabled = enabled,
             colors = RadioButtonDefaults.colors(
                 selectedColor = colors.textBrand,
-                unselectedColor = colors.borderStrong,
+                unselectedColor = colors.borderControl,
                 disabledSelectedColor = colors.textBrand,
-                disabledUnselectedColor = colors.borderStrong,
+                disabledUnselectedColor = colors.borderControl,
             ),
         )
     }
@@ -149,6 +151,7 @@ public fun DdsSwitch(
         label, description, enabled,
         modifier
             .clip(MaterialTheme.shapes.small)
+            .ddsFocusRing(interaction, MaterialTheme.shapes.small)
             .toggleable(checked, interaction, ripple(), enabled, Role.Switch, onCheckedChange),
         controlFirst = false,
     ) {

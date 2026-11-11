@@ -17,7 +17,7 @@ Minimum Android 8 (API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.4.0") // brings dds-android-tokens
+    implementation("kr.devslab:dds-compose:0.5.0") // brings dds-android-tokens
 }
 ```
 
@@ -91,6 +91,20 @@ adb -s <device> shell am start -n kr.devslab.dds.catalog/.MainActivity \
 `page` is one of `colors`, `type`, `parts`, `motion`. After changing a value or
 a helper, look at it in light and dark, at a 200% font scale, in large text mode,
 and with "Remove animations" on.
+
+## Device tests
+
+`dds-compose/src/androidTest` reads what a screen reader is given (`ScreenReaderTest`) and
+measures what moves part-way through, with the clock held (`MotionOnDeviceTest`,
+`NavDisplayOnDeviceTest` inside Navigation 3 — a test-only dependency — and
+`RebuiltWindowTest`, which rebuilds the activity; `SplashOverlayOnDeviceTest` for the
+splash cover as it lifts). It needs an
+emulator or a phone, so CI does not run it. Name the device — the task otherwise runs on every device
+that is connected:
+
+```
+ANDROID_SERIAL=<device> ./gradlew :dds-compose:connectedDebugAndroidTest
+```
 
 ## Versions and releases
 
