@@ -12,7 +12,11 @@ segmented control's frame use it; card edges, dividers and labelled buttons
 keep `border.default` / `border.strong`, whose values are unchanged.
 
 Dark theme: `color.text.muted` moves from `zinc.500` to `zinc.450`, so
-placeholder text clears 4.5:1 (4.1:1 → 6.0:1 on the page).
+placeholder text clears 4.5:1 (4.1:1 → 6.1:1 on the page).
+
+Upgrade `@devslab/dds-tokens` together with `@devslab/dds-css`. With an older token
+sheet the controls fall back to `border.strong` — the old, paler edge — rather than
+losing their edge.
 
 If you draw your own input borders with `--dds-color-border-strong`, switch
 them to `--dds-color-border-control` (D-050).

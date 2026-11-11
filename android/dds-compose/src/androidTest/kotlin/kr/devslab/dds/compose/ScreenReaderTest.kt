@@ -1,14 +1,24 @@
 package kr.devslab.dds.compose
 
+import kr.devslab.dds.tokens.DdsTouch
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.Box
+import org.junit.Assert.assertTrue
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -229,6 +239,60 @@ class ScreenReaderTest {
         show { DdsTabs(listOf("전체", "서명 대기", "확정"), selectedIndex = 7, onSelect = {}) }
         rule.onNodeWithText("서명 대기").assertExists()
         rule.onNodeWithText("확정").assert(expectValue(SemanticsProperties.Selected, true)) // the nearest tab
+    }
+
+    @Test
+    fun threeShortTabsShareTheWidthEqually() {
+        show { Box(Modifier.width(360.dp)) { DdsTabs(listOf("전체", "대기", "확정"), selectedIndex = 0, onSelect = {}) } }
+        val widths = listOf("전체", "대기", "확정").map { rule.onNodeWithText(it).fetchSemanticsNode().boundsInRoot.width }
+        val third = with(rule.density) { 360.dp.toPx() } / 3
+        for (w in widths) assertEquals(third, w, 2f)
+    }
+
+    @Test
+    fun tabsCanSitUnderAParentThatAsksForIntrinsicSizes() {
+        // A layout that composes against its constraints throws here; 0.4.0's tabs did not.
+        show {
+            Row(Modifier.width(360.dp).height(IntrinsicSize.Min)) {
+                Box(Modifier.weight(1f)) { DdsTabs(listOf("전체", "확정"), selectedIndex = 1, onSelect = {}) }
+            }
+        }
+        rule.onNodeWithText("확정").assertExists()
+    }
+
+    @Test
+    fun aLongTabLabelIsKeptWholeInsteadOfBeingCut() {
+        val long = "서명을 기다리는 계약서 전체 목록"
+        show { Box(Modifier.width(240.dp)) { DdsTabs(listOf("전체", long, "확정"), selectedIndex = 0, onSelect = {}) } }
+        val share = with(rule.density) { 240.dp.toPx() } / 3
+        assertTrue(rule.onNodeWithText(long).fetchSemanticsNode().boundsInRoot.width > share)
+    }
+
+    /** Where the tab underline starts, in px: the first painted pixel on the row's last line. */
+    private fun underlineStart(rowHeightPx: Int): Int {
+        val pixels = rule.onRoot().captureToImage().toPixelMap()
+        val y = rowHeightPx - 1
+        val paper = pixels[pixels.width - 1, y / 2] // the row's own background, clear of any label
+        return (0 until pixels.width).firstOrNull { pixels[it, y] != paper } ?: -1
+    }
+
+    @Test
+    fun theUnderlineTravelsToTheChosenTabInsteadOfJumping() {
+        var chosen by mutableIntStateOf(0)
+        show { Box(Modifier.width(360.dp)) { DdsTabs(listOf("전체", "대기", "확정"), chosen, { chosen = it }) } }
+        val row = with(rule.density) { DdsTouch.min.dp.roundToPx() }
+        val third = with(rule.density) { 360.dp.roundToPx() } / 3
+        assertEquals(0, underlineStart(row))
+
+        rule.mainClock.autoAdvance = false
+        chosen = 2
+        rule.mainClock.advanceTimeBy(100) // half of the 200ms it takes
+        val midway = underlineStart(row)
+        assertTrue("on its way at 100ms, but was at $midway", midway > 0 && midway < 2 * third)
+
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        assertEquals(2 * third, underlineStart(row))
     }
 
     // --- loading and moving -------------------------------------------------------

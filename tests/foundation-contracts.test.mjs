@@ -401,7 +401,15 @@ test("a form control's edge is 3:1 against its surface, and placeholder text is 
 test("form controls draw their resting edge in border.control, not border.strong (D-050)", async () => {
   for (const name of ["checkbox-radio", "choice", "date-picker", "input", "number-input", "select", "textarea", "textfield"]) {
     const css = await read(`packages/dds-css/src/${name}.css`);
-    assert.match(css, /--dds-color-border-control/, `${name}.css`);
-    assert.doesNotMatch(css, /--dds-color-border-strong/, `${name}.css still uses border.strong for an edge`);
+    // border.strong may appear only as the fallback for a token sheet older than this
+    // token: without it, upgrading dds-css alone would leave every control with no edge.
+    const fallback = "var(--dds-color-border-control, var(--dds-color-border-strong))";
+    assert.ok(css.includes(fallback), `${name}.css must fall back to border.strong`);
+    assert.doesNotMatch(css.replaceAll(fallback, ""), /--dds-color-border-(control|strong)/, `${name}.css draws an edge outside the fallback pair`);
   }
+  // The segmented track is a control edge too. Its file also uses border.strong for other
+  // things, so only the track rule and the bare variable are checked.
+  const segmented = await read("packages/dds-css/src/segmented-control.css");
+  assert.match(segmented, /\.dds-segmented__track\s*\{[^}]*border:\s*1px solid var\(--dds-color-border-control, var\(--dds-color-border-strong\)\)/);
+  assert.doesNotMatch(segmented, /var\(--dds-color-border-control\)/);
 });

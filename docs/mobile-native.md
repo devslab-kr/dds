@@ -548,7 +548,7 @@ screen reader walks.
 - **Not built by the components:** an initial focus inside a sheet, a guaranteed order of
   top bar, content and bottom bar for keyboard users, and the splash cover hiding what is
   under it for the second it is up.
-- **Checked how:** 18 device tests; with the changed files put back to 0.4.0, 12 of the
+- **Checked how:** 22 device tests; with the changed files put back to 0.4.0, 12 of the
   first 17 fail. They read what is handed to a screen reader, not whether it reaches it —
   one review finding (a refresh action nobody could reach) passed its test for exactly that
   reason. TalkBack was started on the emulator and focused the screen title, but what it

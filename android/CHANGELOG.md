@@ -8,7 +8,7 @@ separate from the web packages (D-048). Releases are cut by an `android-v<versio
 ## 0.5.0 — 2026-11-11
 
 For people who use a screen reader, a keyboard or large text, and for eyes that are not
-young. An audit of the components found these; device tests (`ScreenReaderTest`, 18) hold
+young. An audit of the components found these; device tests (`ScreenReaderTest`, 22) hold
 what a screen reader is given.
 
 **Seen by everyone**
@@ -18,12 +18,14 @@ what a screen reader is given.
   fields, the search and select fields, unchecked boxes and unselected radios use it, and
   Material's `outline` role maps to it. Card edges, dividers and labelled buttons keep the
   paler lines. The same token change as the web (D-050).
-- **Placeholder text in dark is lighter** (`textMuted` in dark: 4.1:1 → 6.0:1).
+- **Placeholder text in dark is lighter** (`textMuted` in dark: 4.1:1 → 6.1:1).
 - **`DdsSearchField`** shows its `label` as the placeholder when none is given (pass
   `placeholder = null` to keep the box empty). Clearing it now focuses the field.
 - **`DdsChip`, `DdsTabs`:** the selected one is heavier as well as colored; its width does
   not change. Tabs still share the width, and now scroll when a label does not fit its share
-  instead of cutting it.
+  instead of cutting it. The underline still slides to the chosen tab and the label
+  color still fades (200ms). The row is now DDS's own rather than Material's scrollable tab
+  row, which never settles under a parent that asks for intrinsic sizes.
 - **`DdsSelectField`** shows two lines of what was chosen. **`DdsDialog`:** a long message scrolls.
 - **Choice rows** show the focus ring.
 

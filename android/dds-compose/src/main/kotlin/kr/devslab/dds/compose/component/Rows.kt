@@ -1,12 +1,36 @@
 package kr.devslab.dds.compose.component
 
-import androidx.compose.foundation.layout.BoxWithConstraints
+import kr.devslab.dds.compose.motion.DdsMotion
+import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.ripple
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.horizontalScroll
+import kr.devslab.dds.tokens.DdsTouch
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.SecondaryScrollableTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -131,39 +155,102 @@ public fun DdsTabs(
     val colors = DdsTheme.colors
     if (titles.isEmpty()) return
     val shown = selectedIndex.coerceIn(0, titles.lastIndex)
-    Column(modifier) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            SecondaryScrollableTabRow(
-                selectedTabIndex = shown,
-                modifier = Modifier.fillMaxWidth(),
-                edgePadding = 0.dp,
-                // An equal share each, as long as the labels fit in it: the row fills the width
-                // as before. A label wider than its share makes its tab wider and the row scroll.
-                minTabWidth = maxWidth / titles.size,
-                containerColor = colors.bgDefault,
-                contentColor = colors.textPrimary,
-                indicator = {
-                    TabRowDefaults.SecondaryIndicator(
-                        Modifier.tabIndicatorOffset(shown),
-                        height = DdsBorder.focus.dp,
-                        color = colors.textBrand,
-                    )
-                },
-                divider = {},
-            ) {
+    val scroll = rememberScrollState()
+    // Where each tab starts and ends, in px from the start edge. Written when the row is
+    // placed; read when it is drawn and when the choice changes, never while it is measured.
+    var spans by remember { mutableStateOf<List<IntRange>>(emptyList()) }
+    val span = spans.getOrNull(shown)
+    // The two ends of the underline. It is one line for the whole row, so choosing another
+    // tab slides it there, growing or shrinking to the new tab's width on the way.
+    val lineStart = remember { Animatable(0f) }
+    val lineEnd = remember { Animatable(0f) }
+    var lineFor by remember { mutableIntStateOf(-1) } // the tab the line last went to; -1 before the first layout
+    val underline = colors.textBrand
+    LaunchedEffect(span, shown) {
+        span ?: return@LaunchedEffect
+        val start = span.first.toFloat()
+        val end = (span.last + 1).toFloat()
+        if (lineFor == shown || lineFor == -1) {
+            // The same tab in a new place (first layout, rotation, font size): no travel.
+            lineStart.snapTo(start)
+            lineEnd.snapTo(end)
+        } else {
+            val slide = tween<Float>(DdsMotion.Base, easing = DdsMotion.Standard)
+            launch { lineStart.animateTo(start, slide) }
+            launch { lineEnd.animateTo(end, slide) }
+        }
+        lineFor = shown
+        val middle = (span.first + span.last + 1) / 2
+        scroll.animateScrollTo((middle - scroll.viewportSize / 2).coerceIn(0, scroll.maxValue))
+    }
+    Column(modifier.background(colors.bgDefault)) {
+        // The row is laid out here rather than by Material's scrollable tab row: that one
+        // never settles under a parent that asks for intrinsic sizes.
+        Layout(
+            content = {
                 titles.forEachIndexed { index, title ->
-                    val selected = index == shown
-                    Tab(
-                        selected = selected,
-                        onClick = { onSelect(index) },
-                        selectedContentColor = colors.textBrand,
-                        unselectedContentColor = colors.textSecondary,
-                        text = { WeightStableLabel(title, heavy = selected, style = DdsTheme.typography.label, lightWeight = FontWeight.Normal) },
-                    )
+                    TabCell(title, selected = index == shown, onClick = { onSelect(index) })
                 }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(scroll)
+                .selectableGroup()
+                .drawWithContent {
+                    drawContent()
+                    // Before the line has been sent anywhere, it is drawn where the chosen tab
+                    // is — so the first frame already has it.
+                    val known = lineFor != -1
+                    val from = if (known) lineStart.value else span?.first?.toFloat() ?: return@drawWithContent
+                    val to = if (known) lineEnd.value else (span!!.last + 1).toFloat()
+                    val thick = DdsBorder.focus.dp.toPx()
+                    val left = if (layoutDirection == LayoutDirection.Rtl) size.width - to else from
+                    drawRect(underline, Offset(left, size.height - thick), Size(to - from, thick))
+                },
+        ) { measurables, constraints ->
+            // Inside a horizontal scroll the least width is the width on screen. An equal
+            // share of it each, as long as the label fits: the row fills the width. A label
+            // wider than its share makes its tab wider and the row scroll.
+            val share = maxOf(constraints.minWidth / measurables.size, DdsTouch.min.dp.roundToPx())
+            val height = measurables.maxOf { it.maxIntrinsicHeight(Constraints.Infinity) }
+            val cells = measurables.map { it.measure(Constraints(minWidth = share, minHeight = height)) }
+            val total = cells.sumOf { it.width }
+            layout(maxOf(total, constraints.minWidth), height) {
+                // Recorded here, not while measuring: this block runs only for a real layout,
+                // while the measuring above also answers intrinsic-size questions with
+                // stand-in sizes that must not be remembered.
+                val placed = ArrayList<IntRange>(cells.size)
+                var edge = 0
+                for (cell in cells) {
+                    placed += edge until edge + cell.width
+                    cell.placeRelative(edge, 0)
+                    edge += cell.width
+                }
+                spans = placed // an equal list changes nothing, so this settles
             }
         }
         // Outside the row, so the line runs the full width even when the tabs do not.
         DdsDivider()
+    }
+}
+
+@Composable
+private fun TabCell(title: String, selected: Boolean, onClick: () -> Unit) {
+    val colors = DdsTheme.colors
+    val interaction = remember { MutableInteractionSource() }
+    val ink by animateColorAsState(
+        if (selected) colors.textBrand else colors.textSecondary,
+        tween(DdsMotion.Base, easing = DdsMotion.Standard),
+        label = "tab label",
+    )
+    Box(
+        Modifier
+            .selectable(selected, interaction, ripple(), role = Role.Tab, onClick = onClick)
+            .ddsFocusRing(interaction, RectangleShape)
+            .heightIn(min = DdsTouch.min.dp)
+            .padding(horizontal = DdsSpace.s16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        WeightStableLabel(title, heavy = selected, style = DdsTheme.typography.label, lightWeight = FontWeight.Normal, color = ink)
     }
 }
