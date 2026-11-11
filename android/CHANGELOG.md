@@ -5,7 +5,7 @@
 `kr.devslab:dds-android-tokens` and `kr.devslab:dds-compose` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
-## 0.5.0 — 2026-11-11
+## 0.5.0 — 2026-11-12
 
 For people who use a screen reader, a keyboard or large text, and for eyes that are not
 young. An audit of the components found these; device tests (`ScreenReaderTest`, 22) hold
@@ -36,11 +36,16 @@ what a screen reader is given.
   move)`. Each screen has to cover what is under it: do not empty a screen while it is
   leaving (use `DdsMove.None` for a move away from one that must be). Checked on an emulator
   with the clock held: inside Navigation 3 1.1.2 (`NavDisplayOnDeviceTest`) and in
-  `DdsScreenHost` (`MotionOnDeviceTest`); **not yet recorded frame by frame on a phone.**
+  `DdsScreenHost` (`MotionOnDeviceTest`). Recorded frame by frame on a phone in JeongsanNow
+  (SM-F971N, Android 17, folded, dark): five tab changes, two opens and two backs, with no
+  frame on the way emptier than the screens on either side; a tab changes over about 150ms.
+  **Not measured on a phone:** the back swipe (predictive back), folding and rotating frame
+  by frame, the unfolded layout with a rail, light.
 - **Going back slides again in Navigation 3.** A screen returned to came back without
   moving: it got its saved state back and counted as already arrived (found in Qooroo).
   Nothing to change in the app. The screen a window is rebuilt around (rotation, restore)
-  still does not arrive again (`RebuiltWindowTest`).
+  still does not arrive again (`RebuiltWindowTest`). Seen on the phone as well: the content
+  comes in from the leading edge.
 - **Colors ease instead of switching (100ms):** a chip being chosen, a button's pressed
   fill, a tab's label — as on the web — and the edge of a text, search or select field.
 - **The splash cover no longer dims the logo as it lifts.** With no destination to travel
@@ -48,7 +53,8 @@ what a screen reader is given.
   logo: a logo the first screen draws in the same place dipped a quarter of the way toward
   the background color for 150ms and came back (seen on a phone in JeongsanNow). They now
   lift as one picture. Nothing to change in the app. Checked on an emulator with the clock
-  held (`SplashOverlayOnDeviceTest`); not measured on a phone.
+  held (`SplashOverlayOnDeviceTest`), and on the phone in JeongsanNow, where the logo kept
+  its brightness through the nine frames of the lift.
 - **`DdsSelectField`** shows two lines of what was chosen. **`DdsDialog`:** a long message scrolls.
 - **Choice rows** show the focus ring.
 
@@ -76,6 +82,10 @@ what a screen reader is given.
 - `DdsTextField` and `DdsSearchField` no longer have a content description:
   `onNodeWithContentDescription(label)` finds nothing. Use `hasSetTextAction() and hasText(label)`.
 - `DdsSelectField` is found by content description; its visible label is not a node.
+- Once `ddsScreenChange` is in, a tab fades in over 150ms. A test that compares pixels just
+  after a tab change ("the first two frames show the new tab fully drawn") fails. Assert
+  that no frame on the way is emptier than the two screens and that the end is fully drawn.
+  (JeongsanNow had one such test, and two that found the search field by description.)
 
 **Not done:** pull to refresh has no screen-reader equivalent — keep a visible refresh
 button. Nobody has listened with TalkBack yet.

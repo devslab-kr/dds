@@ -243,8 +243,21 @@ screen before was also told it was leaving, could not be read by a screen reader
 the composition once covered, and going back the screen being left — on top while it fades —
 did not take a tap. A screen whose activity was rebuilt around it did not arrive again, and
 one come back to after that still did (`RebuiltWindowTest`, a real recreate). In the catalog, with animations slowed ten times,
-the half-way frames were captured and looked at. **Not measured: a phone.** The
-frame-by-frame recording that found the faults above has not been repeated for 0.5.0.
+the half-way frames were captured and looked at.
+
+**Measured on a phone with 0.5.0.** JeongsanNow put `ddsScreenChange` in its three
+`NavDisplay` specs (SM-F971N, Android 17, folded 475×751dp, dark, text at 130%; recorded at
+60fps while a test stepped the clock one frame at a time, each frame compared with the one
+before). Five tab changes, two opens and two backs: in no frame on the way was less of the
+body drawn than in the screens on either side, and nothing flashed. A tab changed over
+about 150ms (nine or ten frames), where 0.4.0 changed in one. Opening, the new screen
+appeared over the one before for about 100ms while its content slid in from the trailing
+edge; going back, the content of the screen returned to slid in from the leading edge.
+With the destination taken off a screen that draws the logo, the logo kept its brightness
+through the nine frames of the cover lifting (rule 14); 0.4.0 lost about a quarter. A test
+on the clock that advances by itself finishes a change within one real frame, so a
+recording of it shows nothing: step the clock. Not measured: the back swipe (the phone uses
+three buttons), folding and rotating frame by frame, the unfolded layout with a rail, light.
 
 **Going back slides again in Navigation 3** (0.5.0). In 0.2.0–0.4.0 it did not: Navigation
 3 gives a screen on the back stack its saved state back when the person returns to it, and
