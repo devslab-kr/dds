@@ -35,6 +35,19 @@ import kr.devslab.dds.compose.motion.DdsScreenHost
 import kr.devslab.dds.compose.motion.LocalDdsScreenActive
 import kr.devslab.dds.compose.motion.ddsScreenContent
 import kr.devslab.dds.compose.theme.DdsTheme
+import androidx.compose.ui.test.DeviceConfigurationOverride
+import androidx.compose.ui.test.ForcedSize
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.unit.DpSize
+import kotlin.math.abs
+import kr.devslab.dds.compose.component.DdsNavItem
+import kr.devslab.dds.compose.component.DdsScaffold
+import kr.devslab.dds.compose.component.DdsTopBar
+import kr.devslab.dds.compose.icons.DdsIcons
+import kr.devslab.dds.compose.layout.DdsAppFrame
+import kr.devslab.dds.compose.layout.DdsBodyColumn
+import kr.devslab.dds.compose.layout.DdsTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -321,5 +334,137 @@ class MotionOnDeviceTest {
         assertNotEquals("chosen looks different", before, after)
         assertNotEquals("part-way at 50ms, not still unchosen", before, midway)
         assertFalse("part-way at 50ms, not already chosen", midway == after)
+    }
+
+    // ---- the app frame through a change of screen ----
+
+    private val twoTabs = listOf("홈", "거래처").map { DdsNavItem(it, DdsIcons.Doc) }
+
+    /**
+     * An app frame (tagged `frame`) in a window forced to [size], around a host whose screens are a top bar
+     * over a plain color (tagged `fill a`, `fill b`). Screen "a" is a top-level one: it asks for the bottom tabs.
+     */
+    private fun framedHost(size: DpSize, screen: () -> String, move: () -> DdsMove) {
+        rule.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                DdsTheme {
+                    DdsAppFrame(twoTabs, 0, {}, Modifier.testTag("frame")) {
+                        DdsScreenHost(screen(), move()) { shown ->
+                            DdsScaffold(topBar = { DdsTopBar("화면 $shown") }, bottomTabs = shown == "a") { padding ->
+                                Box(Modifier.fillMaxSize().padding(padding).background(if (shown == "a") red else blue).testTag("fill $shown")) {
+                                    DdsBodyColumn { Text("word $shown") }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** Where the node tagged [tag] is, in pixels of the root. */
+    private fun place(tag: String) = rule.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+
+    /**
+     * [now] is [base] with [over] part-way over it, or one of the two: nothing else shows through.
+     * Returns how far over it is, from 0 to 1.
+     */
+    private fun assertIsOneOverTheOther(message: String, base: Color, over: Color, now: Color): Float {
+        val step = floatArrayOf(over.red - base.red, over.green - base.green, over.blue - base.blue)
+        val moved = floatArrayOf(now.red - base.red, now.green - base.green, now.blue - base.blue)
+        // How far along, read from the channel that changes most.
+        val widest = step.indices.maxByOrNull { abs(step[it]) }!!
+        val along = if (abs(step[widest]) < 0.02f) 0f else moved[widest] / step[widest]
+        assertTrue("$message: $now is not between $base and $over", along in -0.04f..1.04f)
+        for (channel in step.indices) {
+            assertEquals("$message: $now is not $base with $over over it", along * step[channel], moved[channel], 0.05f)
+        }
+        return along
+    }
+
+    @Test
+    fun theRailDoesNotChangeWhileTheScreenBesideItChanges() {
+        var screen by mutableStateOf("a")
+        var move by mutableStateOf(DdsMove.None)
+        framedHost(DpSize(933.dp, 704.dp), { screen }, { move })
+        fun rail() = rule.onNodeWithTag(DdsTestTags.Rail)
+        fun fill(): Color {
+            val pixels = rule.onNodeWithTag("frame").captureToImage().toPixelMap()
+            // Three quarters across and down: the screen's color, clear of the rail, the top bar and the words.
+            return pixels[pixels.width * 3 / 4, pixels.height * 3 / 4]
+        }
+        val before = rail().fetchSemanticsNode()
+        val pixelsBefore = rail().captureToImage().toPixelMap()
+        assertEquals(red, fill())
+
+        rule.mainClock.autoAdvance = false
+        move = DdsMove.Push
+        screen = "b"
+        var mixed = 0
+        repeat(12) { frame ->
+            rule.mainClock.advanceTimeByFrame()
+            val now = rail().fetchSemanticsNode()
+            // The same rail, not another one drawn by the screen that is arriving.
+            assertEquals("frame $frame: the rail is the one that was there before the change", before.id, now.id)
+            assertEquals("frame $frame: the rail has moved", before.boundsInRoot, now.boundsInRoot)
+            val pixels = rail().captureToImage().toPixelMap()
+            assertEquals("frame $frame: the rail's size in pixels", pixelsBefore.width to pixelsBefore.height, pixels.width to pixels.height)
+            val changed = pixelsBefore.buffer.indices.count { pixelsBefore.buffer[it] != pixels.buffer[it] }
+            assertEquals("frame $frame: pixels of the rail that changed", 0, changed)
+            val along = assertIsOneOverTheOther("frame $frame beside the rail", red, blue, fill())
+            if (along > 0.1f && along < 0.9f) mixed++
+        }
+        assertTrue("the screen beside the rail was part-way through its change for several frames, was for $mixed", mixed >= 2)
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        assertEquals(blue, fill())
+        assertEquals("after the change it is still the same rail", before.id, rail().fetchSemanticsNode().id)
+    }
+
+    @Test
+    fun openingAScreenOverATabCoversTheBottomTabsWithNoFrameEmpty() {
+        var screen by mutableStateOf("a")
+        var move by mutableStateOf(DdsMove.None)
+        framedHost(DpSize(475.dp, 751.dp), { screen }, { move })
+        rule.onNodeWithTag(DdsTestTags.BottomTabs).assertIsDisplayed()
+        val frame = place("frame")
+        val tabs = place(DdsTestTags.BottomTabs)
+        val content = place("fill a")
+        assertEquals("the tab screen's color ends where the tabs begin", tabs.top, content.bottom, 1f)
+        // One line of pixels down the screen's start edge, clear of the words and of the tabs' icons: from under
+        // the top bar, down the tab screen's color, across the tabs' top line and 40dp into the tab row.
+        val x = 4
+        val top = (content.top - frame.top).toInt() + 2
+        val tabsTop = (tabs.top - frame.top).toInt()
+        val bottom = tabsTop + (40 * frame.width / 475f).toInt() // 40dp of this forced window
+        fun line(): List<Color> {
+            val pixels = rule.onNodeWithTag("frame").captureToImage().toPixelMap()
+            return (top until bottom).map { pixels[x, it] }
+        }
+        val before = line()
+        assertEquals("the line starts in the tab screen's color", red, before.first())
+        assertTrue("the line ends in the tab row, which is not the tab screen's color", before.last() != red)
+
+        rule.mainClock.autoAdvance = false
+        move = DdsMove.Push
+        screen = "b"
+        var mixed = 0
+        repeat(12) { step ->
+            rule.mainClock.advanceTimeByFrame()
+            val now = line()
+            var partWay = false
+            for (y in now.indices) {
+                val what = if (top + y < tabsTop) "the tab screen" else "the bottom tabs"
+                val along = assertIsOneOverTheOther("frame $step, ${top + y}px down, over $what", before[y], blue, now[y])
+                if (along > 0.1f && along < 0.9f) partWay = true
+            }
+            if (partWay) mixed++
+        }
+        assertTrue("the new screen was part-way over the tabs for several frames, was for $mixed", mixed >= 2)
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        val after = line()
+        for (y in after.indices) assertEquals("at the end, ${top + y}px down is the new screen", blue, after[y])
+        rule.onAllNodesWithTag(DdsTestTags.BottomTabs).assertCountEquals(0)
     }
 }

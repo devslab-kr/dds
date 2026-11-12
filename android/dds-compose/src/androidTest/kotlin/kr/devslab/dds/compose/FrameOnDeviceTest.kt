@@ -90,6 +90,15 @@ import kr.devslab.dds.compose.component.DdsPaneList
 import kr.devslab.dds.compose.layout.DdsCenteredColumn
 import kr.devslab.dds.compose.layout.DdsCenteredTitle
 import kr.devslab.dds.tokens.DdsControl
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
+import kr.devslab.dds.compose.layout.ddsBody
+import kr.devslab.dds.compose.testing.DdsFrameCheck
+import kr.devslab.dds.compose.testing.DdsScreenKind
+import kr.devslab.dds.compose.theme.DdsBrand
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -1055,4 +1064,212 @@ class FrameOnDeviceTest {
         pane { repeat(30) { DdsPaneItem("항목 ${it + 1}", selected = it == 0, onClick = {}) } }
         rule.onNodeWithText("항목 30").performScrollTo().assertIsDisplayed()
     }
+
+    // ---- a whole sample app, walked with the check apps use ----
+
+    /** The screens of the sample app, and what kind each one is. */
+    private enum class Stop(val kind: DdsScreenKind, val title: String) {
+        Home(DdsScreenKind.TopLevel, "홈"),
+        Customers(DdsScreenKind.TopLevel, "거래처"),
+        Order(DdsScreenKind.Inner, "주문 상세"),
+
+        /** The sales area's list as a screen of its own: what a window too narrow to pin it shows. */
+        SalesList(DdsScreenKind.Inner, "매출"),
+        Sales(DdsScreenKind.Listed, "매출 현황"),
+        Receivables(DdsScreenKind.Listed, "미수금"),
+        Scanner(DdsScreenKind.WholeWindow, "스캔"),
+        Gate(DdsScreenKind.WholeWindow, "시작"),
+    }
+
+    private val salesArea = setOf(Stop.SalesList, Stop.Sales, Stop.Receivables)
+
+    /** A product's page: warm paper instead of the system's white, written the way an app writes it in code. */
+    private val paper = Color(red = 0.98f, green = 0.96f, blue = 0.91f)
+
+    /** That product's brand: the default brand on its own page. Every contrast pair still passes, so it declares no exception. */
+    private val paperBrand = DdsBrand(light = DdsBrand.Default.light.copy(bgDefault = paper), dark = DdsBrand.Default.dark)
+
+    @Composable
+    private fun SalesRows(stop: Stop, go: (Stop) -> Unit) {
+        DdsPaneList {
+            DdsPaneItem(Stop.Sales.title, selected = stop == Stop.Sales, onClick = { go(Stop.Sales) })
+            DdsPaneItem(Stop.Receivables.title, selected = stop == Stop.Receivables, onClick = { go(Stop.Receivables) })
+        }
+    }
+
+    /**
+     * A small app built the way the guide says: two tabs, a screen opened from one, an area with a list
+     * (pinned beside its screens on a wide window, a screen of its own otherwise), a screen that takes the
+     * whole window, and a gate with one thing to do.
+     */
+    @Composable
+    private fun SampleApp(stop: Stop, move: DdsMove, go: (Stop) -> Unit) {
+        DdsAppFrame(
+            navItems = items(Stop.Home.title, Stop.Customers.title),
+            selectedIndex = if (stop == Stop.Customers) 1 else 0,
+            onSelect = { go(if (it == 1) Stop.Customers else Stop.Home) },
+            modifier = Modifier.testTag("frame"),
+            navigation = stop != Stop.Scanner && stop != Stop.Gate,
+            list = if (stop in salesArea) ({
+                DdsScaffold(topBar = { DdsTopBar(Stop.SalesList.title) }) { padding ->
+                    Box(Modifier.padding(padding)) { SalesRows(stop, go) }
+                }
+            }) else null,
+        ) {
+            DdsScreenHost(stop, move) { shown ->
+                when (shown) {
+                    Stop.Home, Stop.Customers -> DdsScaffold(
+                        topBar = { DdsTopBar(shown.title, Modifier.testTag("bar"), leading = { Box(Modifier.size(DdsIcon.md.dp)) }) },
+                        bottomTabs = true,
+                    ) { padding -> Box(Modifier.fillMaxSize().padding(padding).testTag("page")) { DdsBodyColumn { Text("${shown.title} 본문") } } }
+
+                    // A screen that lays its own body out: the list fills the body column.
+                    Stop.SalesList -> DdsScaffold(topBar = { DdsTopBar(shown.title, onBack = { go(Stop.Home) }) }) { padding ->
+                        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+                            Box(Modifier.ddsBody().fillMaxWidth()) { SalesRows(stop, go) }
+                        }
+                    }
+
+                    Stop.Gate -> DdsCenteredColumn {
+                        DdsCenteredTitle("정산을\n시작합니다", description = "거래처와 주문을 한곳에서 봅니다")
+                    }
+
+                    else -> DdsScaffold(
+                        topBar = {
+                            // Beside its pinned list a screen of the area has nowhere to go back to.
+                            val back: (() -> Unit)? = if (shown.kind == DdsScreenKind.Listed && ddsFrame().listPinned) null else ({ go(Stop.Home) })
+                            DdsTopBar(shown.title, Modifier.testTag("bar"), onBack = back) { DdsIconButton(DdsIcons.Search, "검색", {}) }
+                        },
+                    ) { padding -> Box(Modifier.fillMaxSize().padding(padding).testTag("page")) { DdsBodyColumn { Text("${shown.title} 본문") } } }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun everyScreenOfTheSampleAppKeepsTheFrame() {
+        var size by mutableStateOf(phone)
+        var stop by mutableStateOf(Stop.Home)
+        var move by mutableStateOf(DdsMove.None)
+        var brand by mutableStateOf(DdsBrand.Default)
+        rule.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                DdsTheme(darkTheme = false, brand = brand) { SampleApp(stop, move) { stop = it } }
+            }
+        }
+        val check = DdsFrameCheck(rule)
+        fun open(next: Stop) {
+            move = when {
+                next.kind == DdsScreenKind.TopLevel && stop.kind == DdsScreenKind.TopLevel -> DdsMove.Tab
+                next.kind == DdsScreenKind.TopLevel -> DdsMove.Pop
+                else -> DdsMove.Push
+            }
+            stop = next
+            rule.waitForIdle()
+        }
+        val medium = DpSize(704.dp, 933.dp)
+        for (window in listOf(phone, medium, wide)) {
+            size = window
+            rule.waitForIdle()
+            for (next in Stop.entries) {
+                // On a wide window the list is pinned beside its screens; it is never a screen of its own there.
+                if (next == Stop.SalesList && window == wide) continue
+                open(next)
+                check.look("${next.name} at ${window.width.value.toInt()}dp", next.kind)
+            }
+            open(Stop.Home)
+        }
+        assertEquals("every screen at every width was looked at", 3 * Stop.entries.size - 1, check.readings.size)
+
+        // The same app under a product's own page color: the lines are the same, and the frame shows the page.
+        brand = paperBrand
+        fun pixel(pixels: androidx.compose.ui.graphics.PixelMap, x: Float, y: Float) = pixels[x.toInt(), y.toInt()].toArgb()
+        val paperInk = paper.toArgb() // what a screen holds of it: eight bits a channel
+        fun px(tag: String) = rule.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        open(Stop.Sales) // still on the wide window: the rail, the pinned list and two top bars
+        check.look("Sales on a product's page", Stop.Sales.kind)
+        val dp = px(DdsTestTags.Rail).width / DdsBar.rail // pixels to a dp in this forced window
+        var pixels = rule.onRoot().captureToImage().toPixelMap()
+        val rail = px(DdsTestTags.Rail)
+        val list = px(DdsTestTags.ListPane)
+        val bar = px("bar")
+        val page = px("page")
+        assertEquals("the rail's background, under its items", paperInk, pixel(pixels, rail.center.x, rail.bottom - 24 * dp))
+        assertEquals("the pinned list's background, under its rows", paperInk, pixel(pixels, list.center.x, list.bottom - 24 * dp))
+        assertEquals("the pinned list's own top bar, at its end", paperInk, pixel(pixels, list.right - 4 * dp, bar.center.y))
+        assertEquals("the screen's top bar, at its start", paperInk, pixel(pixels, bar.left + 4 * dp, bar.center.y))
+        assertEquals("the screen under its body", paperInk, pixel(pixels, page.right - 8 * dp, page.bottom - 24 * dp))
+
+        size = phone
+        open(Stop.Home)
+        check.look("Home on a product's page", Stop.Home.kind)
+        pixels = rule.onRoot().captureToImage().toPixelMap()
+        val tabs = px(DdsTestTags.BottomTabs)
+        assertEquals("the bottom tabs' background, at their start", paperInk, pixel(pixels, tabs.left + 2 * dp, tabs.center.y))
+        assertEquals("the top bar on a phone, at its end", paperInk, pixel(pixels, px("bar").right - 4 * dp, px("bar").center.y))
+
+        // Two screens of a kind, at one window width, start on the same line and are the same width.
+        check.assertSameLines()
+    }
+
+    // ---- twice the font ----
+
+    private fun assertNoTextInTheFrameIsCut(size: DpSize) {
+        val title = "거래처별 매출과 미수금 관리 현황"
+        rule.setContent {
+            // The font scale goes outside: its override puts the device's density back, the forced size keeps the scale.
+            DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(2f)) {
+                DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                    DdsTheme {
+                        DdsAppFrame(
+                            navItems = items("홈", short),
+                            selectedIndex = 0,
+                            onSelect = {},
+                            barTitles = listOf(title, "목록"),
+                            list = { DdsScaffold(topBar = { DdsTopBar("목록") }) { padding -> Text("목록의 줄", Modifier.padding(padding)) } },
+                        ) {
+                            DdsScaffold(
+                                topBar = { DdsTopBar(title, onBack = {}) { DdsIconButton(DdsIcons.Search, "검색", {}) } },
+                                bottomTabs = true,
+                            ) { padding ->
+                                Box(Modifier.fillMaxSize().padding(padding)) {
+                                    DdsBodyColumn {
+                                        Text("한 줄", Modifier.testTag("one-line"))
+                                        Text("거래처별 매출과 미수금 현황을 한눈에 보는 월간 종합 보고서입니다. 줄이 넘어가면 다음 줄로 이어집니다.")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        val line = bounds("one-line").let { it.bottom - it.top }
+        assertTrue("the font is twice its size at $size: a line of body text is $line", line > 36.dp)
+        val texts = rule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.GetTextLayoutResult), useUnmergedTree = true)
+        val nodes = texts.fetchSemanticsNodes()
+        val words = nodes.map { node -> node.config.getOrNull(SemanticsProperties.Text)?.joinToString { it.text }.orEmpty() }
+        // The tabs' or the rail's two labels, the screen's title, the two lines of the body (and on a wide window the list's two).
+        assertTrue("the frame's texts were found at $size: $words", words.containsAll(listOf("홈", short, title, "한 줄")))
+        for (index in nodes.indices) {
+            val layout = layoutOf(texts[index])
+            // Cut is a line ending in an ellipsis, lines left out, or lines taller than the room they were given.
+            // (hasVisualOverflow is no use here: in a forced window it is true by a fraction of a pixel for text that is whole.)
+            val ellipsis = (0 until layout.lineCount).any { layout.isLineEllipsized(it) }
+            val short = layout.multiParagraph.height > layout.size.height + 1f
+            assertFalse(
+                "\"${words[index]}\" is cut at $size: ${layout.lineCount} line(s), ellipsis=$ellipsis, lines left out=${layout.multiParagraph.didExceedMaxLines}, " +
+                    "text ${layout.multiParagraph.height}px tall in ${layout.size.height}px",
+                ellipsis || layout.multiParagraph.didExceedMaxLines || short,
+            )
+        }
+        // On a phone the title does not fit one line at this size: it is whole because the bar gave it a second one.
+        if (size == phone) assertEquals("the title's lines on a phone", 2, layoutOf(rule.onNodeWithText(title, useUnmergedTree = true)).lineCount)
+    }
+
+    @Test
+    fun atTwiceTheFontNothingInTheFrameIsCut() = assertNoTextInTheFrameIsCut(phone)
+
+    @Test
+    fun atTwiceTheFontNothingInTheFrameIsCutOnAWideWindow() = assertNoTextInTheFrameIsCut(wide)
 }
