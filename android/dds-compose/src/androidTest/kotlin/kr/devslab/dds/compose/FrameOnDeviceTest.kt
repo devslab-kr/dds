@@ -5,6 +5,9 @@ import androidx.core.graphics.Insets
 import androidx.core.view.WindowInsetsCompat
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,6 +37,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
@@ -48,6 +52,12 @@ import kr.devslab.dds.compose.component.DdsNavRail
 import kr.devslab.dds.compose.component.DdsScaffold
 import kr.devslab.dds.compose.icons.DdsIcons
 import kr.devslab.dds.compose.layout.DdsAppFrame
+import kr.devslab.dds.compose.layout.DdsBodyColumn
+import kr.devslab.dds.compose.layout.ddsBodyLines
+import kr.devslab.dds.compose.motion.DdsMove
+import kr.devslab.dds.compose.motion.DdsScreenHost
+import kr.devslab.dds.compose.motion.isReducedMotion
+import androidx.test.platform.app.InstrumentationRegistry
 import kr.devslab.dds.compose.layout.DdsFrame
 import kr.devslab.dds.compose.layout.DdsTestTags
 import kr.devslab.dds.compose.layout.DdsWindowWidth
@@ -60,6 +70,7 @@ import kr.devslab.dds.tokens.DdsScreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeFalse
 import org.junit.Rule
 import org.junit.Test
 
@@ -161,18 +172,28 @@ class FrameOnDeviceTest {
         topLevel: Boolean = true,
         destinations: List<DdsNavItem> = four,
         override: @Composable (@Composable () -> Unit) -> Unit = { it() },
+        body: @Composable (PaddingValues) -> Unit = { padding ->
+            seen = ddsFrame()
+            Box(Modifier.fillMaxSize().padding(padding).testTag("screen-body")) { Text("화면") }
+        },
     ) {
         rule.setContent {
             DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
                 override {
-                    DdsTheme { FrameUnderTest(navigation, list, topLevel, destinations) }
+                    DdsTheme { FrameUnderTest(navigation, list, topLevel, destinations, body) }
                 }
             }
         }
     }
 
     @Composable
-    private fun FrameUnderTest(navigation: Boolean, list: Boolean, topLevel: Boolean, destinations: List<DdsNavItem>) {
+    private fun FrameUnderTest(
+        navigation: Boolean,
+        list: Boolean,
+        topLevel: Boolean,
+        destinations: List<DdsNavItem>,
+        body: @Composable (PaddingValues) -> Unit,
+    ) {
         DdsAppFrame(
             navItems = destinations,
             selectedIndex = 0,
@@ -181,10 +202,7 @@ class FrameOnDeviceTest {
             navigation = navigation,
             list = if (list) ({ Box(Modifier.fillMaxSize().testTag("list-body")) { Text("목록") } }) else null,
         ) {
-            DdsScaffold(topBar = {}, bottomTabs = topLevel) { padding ->
-                seen = ddsFrame()
-                Box(Modifier.fillMaxSize().padding(padding).testTag("screen-body")) { Text("화면") }
-            }
+            DdsScaffold(topBar = {}, bottomTabs = topLevel, content = body)
         }
     }
 
@@ -396,5 +414,134 @@ class FrameOnDeviceTest {
         val list = bounds(DdsTestTags.ListPane)
         assertNear("the list starts at the start cutout", cutout, list.left)
         assertNear("the content ends at the end cutout", bounds("frame").right - cutout, bounds("screen-body").right)
+    }
+
+    // ---- the body column: one start line for every screen ----
+
+    /** Where the area the frame leaves for the screen starts, and how wide it is, from what the frame drew. */
+    private fun area(list: Boolean): Pair<Dp, Dp> {
+        val root = bounds("frame")
+        val hairline = DdsBorder.hairline.dp
+        val left = when {
+            list -> bounds(DdsTestTags.ListPane).right + hairline
+            rule.onAllNodesWithTag(DdsTestTags.Rail).fetchSemanticsNodes().isNotEmpty() -> bounds(DdsTestTags.Rail).right + hairline
+            else -> 0.dp
+        }
+        return left to (root.right - left)
+    }
+
+    private val bodyScreen: @Composable (PaddingValues) -> Unit = { padding ->
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            DdsBodyColumn { Text("본문", Modifier.testTag("body-text")) }
+        }
+    }
+
+    private fun assertBodyIsCentered(size: DpSize, list: Boolean) {
+        frame(size, list = list, body = bodyScreen)
+        val (areaLeft, areaWidth) = area(list)
+        val body = bounds(DdsTestTags.Body)
+        val width = minOf(DdsScreen.bodyMax.dp, areaWidth)
+        assertNear("body width at $size list=$list", width, body.right - body.left)
+        assertNear("body left at $size list=$list", areaLeft + (areaWidth - width) / 2, body.left)
+    }
+
+    @Test
+    fun theBodyIsOneColumnInTheMiddleOfWhatTheFrameLeaves() {
+        assertBodyIsCentered(DpSize(933.dp, 704.dp), list = false)
+        val body = bounds(DdsTestTags.Body)
+        assertNear("on a wide window without a list the body is a full reading column", DdsScreen.bodyMax.dp, body.right - body.left)
+    }
+
+    @Test
+    fun theBodyFillsWhatTheListLeavesOnAWideWindow() = assertBodyIsCentered(DpSize(933.dp, 704.dp), list = true)
+
+    @Test
+    fun theBodyFillsAMediumWindowBesideTheRail() = assertBodyIsCentered(DpSize(704.dp, 933.dp), list = false)
+
+    @Test
+    fun theBodyFillsAPhone() {
+        assertBodyIsCentered(DpSize(475.dp, 751.dp), list = false)
+        val body = bounds(DdsTestTags.Body)
+        assertNear("left", 0.dp, body.left)
+        assertNear("width", 475.dp, body.right - body.left)
+    }
+
+    private fun assertTextStartsOnTheGutter(size: DpSize, list: Boolean) {
+        frame(size, list = list, body = bodyScreen)
+        val gutter = if (size.width < DdsScreen.breakpoint.dp) DdsScreen.gutter.dp else DdsScreen.gutterWide.dp
+        assertNear("the text starts the gutter in from the body at $size", bounds(DdsTestTags.Body).left + gutter, bounds("body-text").left)
+    }
+
+    @Test
+    fun theTextInTheBodyStartsOnTheGutter() = assertTextStartsOnTheGutter(DpSize(475.dp, 751.dp), list = false)
+
+    @Test
+    fun theTextInTheBodyStartsOnTheWideGutterOnAMediumWindow() = assertTextStartsOnTheGutter(DpSize(704.dp, 933.dp), list = false)
+
+    @Test
+    fun theTextInTheBodyStartsOnTheWideGutterOnAWideWindow() = assertTextStartsOnTheGutter(DpSize(933.dp, 704.dp), list = false)
+
+    @Test
+    fun theTextInTheBodyStartsOnTheWideGutterBesideAList() = assertTextStartsOnTheGutter(DpSize(933.dp, 704.dp), list = true)
+
+    private fun assertABarOnTheBodysLinesLinesUpWithTheText(size: DpSize, list: Boolean) {
+        frame(size, list = list, body = { padding ->
+            Box(Modifier.fillMaxSize().padding(padding)) {
+                DdsBodyColumn { Text("본문", Modifier.fillMaxWidth().testTag("body-text")) }
+                Box(Modifier.align(Alignment.BottomCenter)) {
+                    Box(Modifier.ddsBodyLines().height(8.dp).testTag("bar"))
+                }
+            }
+        })
+        val text = bounds("body-text")
+        val bar = bounds("bar")
+        assertNear("bar left at $size list=$list", text.left, bar.left)
+        assertNear("bar right at $size list=$list", text.right, bar.right)
+    }
+
+    @Test
+    fun aBarOnTheBodysLinesStartsWhereTheBodyTextStarts() {
+        assertABarOnTheBodysLinesLinesUpWithTheText(DpSize(933.dp, 704.dp), list = false)
+    }
+
+    @Test
+    fun aBarOnTheBodysLinesLinesUpOnAPhone() = assertABarOnTheBodysLinesLinesUpWithTheText(DpSize(475.dp, 751.dp), list = false)
+
+    @Test
+    fun aBarOnTheBodysLinesLinesUpBesideAList() = assertABarOnTheBodysLinesLinesUpWithTheText(DpSize(933.dp, 704.dp), list = true)
+
+    @Test
+    fun theBodyColumnScrollsWhenItsContentIsTaller() {
+        frame(DpSize(475.dp, 751.dp), body = { padding ->
+            Box(Modifier.fillMaxSize().padding(padding)) {
+                DdsBodyColumn { repeat(40) { Text("줄 $it", Modifier.height(48.dp).testTag("row-$it")) } }
+            }
+        })
+        rule.onNodeWithTag("row-39").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun theBodySlidesWhenTheScreenArrives() {
+        assumeFalse("animations are turned off on this device", isReducedMotion(InstrumentationRegistry.getInstrumentation().targetContext))
+        var screen by mutableStateOf("a")
+        var move by mutableStateOf(DdsMove.None)
+        rule.setContent {
+            DdsTheme {
+                DdsScreenHost(screen, move) { shown ->
+                    DdsBodyColumn { Text("본문 $shown", Modifier.testTag("text-$shown")) }
+                }
+            }
+        }
+        fun left(shown: String) = rule.onNodeWithTag("text-$shown", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.left
+        rule.mainClock.autoAdvance = false
+        move = DdsMove.Push
+        screen = "b"
+        rule.mainClock.advanceTimeByFrame()
+        rule.mainClock.advanceTimeByFrame()
+        val arriving = left("b")
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        val settled = left("b")
+        assertTrue("the body starts to the trailing side of where it settles: $arriving vs $settled", arriving > settled + 1f)
     }
 }
