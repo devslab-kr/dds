@@ -60,6 +60,8 @@ import kr.devslab.dds.compose.component.DdsMenuItem
 import kr.devslab.dds.compose.component.DdsNotice
 import kr.devslab.dds.compose.component.DdsPaneItem
 import kr.devslab.dds.compose.component.DdsPaneList
+import kr.devslab.dds.compose.layout.DdsBodyColumn
+import kr.devslab.dds.compose.layout.DdsCenteredColumn
 import kr.devslab.dds.compose.layout.DdsCenteredTitle
 import kr.devslab.dds.compose.component.DdsSearchField
 import kr.devslab.dds.compose.component.DdsSelectField
@@ -383,6 +385,29 @@ class ScreenReaderTest {
     fun aScreenCanSayItsName() {
         show { Box(Modifier.ddsScreenContent(paneTitle = "설정")) { Text("내용") } }
         rule.onNode(expectValue(SemanticsProperties.PaneTitle, "설정")).assertExists()
+    }
+
+    @Test
+    fun aBodyColumnSaysTheNameOfItsScreen() {
+        show { DdsBodyColumn(paneTitle = "거래처") { Text("내용") } }
+        rule.onNode(expectValue(SemanticsProperties.PaneTitle, "거래처")).assertExists()
+    }
+
+    @Test
+    fun aCenteredColumnSaysTheNameOfItsScreen() {
+        show { DdsCenteredColumn(paneTitle = "로그인") { Text("내용") } }
+        rule.onNode(expectValue(SemanticsProperties.PaneTitle, "로그인")).assertExists()
+    }
+
+    @Test
+    fun aColumnGivenNoNameGivesTheScreenNone() {
+        show {
+            Column {
+                DdsBodyColumn(Modifier.height(100.dp)) { Text("내용") }
+                DdsCenteredColumn(Modifier.height(100.dp)) { Text("가운데") }
+            }
+        }
+        rule.onAllNodes(keyIsDefined(SemanticsProperties.PaneTitle)).assertCountEquals(0)
     }
 
     // --- the screen frame ----------------------------------------------------------

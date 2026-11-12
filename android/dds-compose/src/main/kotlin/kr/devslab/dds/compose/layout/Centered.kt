@@ -46,7 +46,10 @@ import kr.devslab.dds.tokens.DdsSpace
  *
  * The room the block is centered in is what the status bar, the navigation bar and the keyboard
  * leave of the area: on an edge-to-edge window the block does not start under the status bar, and
- * a field in it stays above the keyboard. The sides are the frame's ([DdsAppFrame] keeps the
+ * a field in it stays above the keyboard. Insets something above has already marked used are not
+ * taken again: inside [kr.devslab.dds.compose.component.DdsScaffold]'s padding the status bar
+ * (under the top bar) and the navigation bar are already covered, and only the keyboard's height
+ * beyond the navigation bar is left to take. The sides are the frame's ([DdsAppFrame] keeps the
  * screens clear of a cutout there). The tag [DdsTestTags.CenteredArea] is on that room, inside the
  * bars and the keyboard; [DdsTestTags.Centered] is on the block.
  *
@@ -59,12 +62,15 @@ import kr.devslab.dds.tokens.DdsSpace
  *
  * @param modifier applied to the area the block is centered in, which fills what it is given
  * @param max the widest the block gets; [DdsScreen.centeredMax] by default
+ * @param paneTitle the name of the screen, which a screen reader says when the screen arrives;
+ * pass the same words as the top bar's title, if there is one (see [ddsScreenContent])
  * @param content the pieces of the block, top to bottom
  */
 @Composable
 public fun DdsCenteredColumn(
     modifier: Modifier = Modifier,
     max: Dp = DdsScreen.centeredMax.dp,
+    paneTitle: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val gutter = ddsFrame().width.gutter
@@ -74,7 +80,7 @@ public fun DdsCenteredColumn(
             // The page, behind the whole area and still while the block slides: the screen covers
             // what is under it on every frame of a change, with or without a host that paints.
             .background(DdsTheme.colors.bgDefault)
-            .ddsScreenContent()
+            .ddsScreenContent(paneTitle)
             // The bars above and below, and the keyboard: the block is centered in what they leave.
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
             .testTag(DdsTestTags.CenteredArea),

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -331,6 +332,12 @@ public fun DdsScaffold(
  * The frame keeps the screen clear of a display cutout at the sides and marks those insets as
  * used, so this does not add them again.
  *
+ * The system insets the given padding already covers are marked used for [content]: the status
+ * bar (the top bar's height holds it) and the navigation bar (the bottom tabs' height, or the
+ * padding's bottom). So something inside that pads for insets, such as
+ * [kr.devslab.dds.compose.layout.DdsCenteredColumn] or an `imePadding()`, does not pad them a
+ * second time; the keyboard's height beyond the navigation bar is still left to it.
+ *
  * @param content the body of the screen; apply the given padding to it
  */
 @Composable
@@ -348,8 +355,10 @@ public fun DdsScaffold(
         bottomBar = { if (showTabs && nav != null) DdsBottomBar(nav.items, nav.selectedIndex, nav.onSelect) },
         containerColor = DdsTheme.colors.bgDefault,
         contentColor = DdsTheme.colors.textPrimary,
-        content = content,
-    )
+    ) { padding ->
+        // What the padding keeps the content clear of is marked used, so it is not kept clear of twice.
+        Box(Modifier.consumeWindowInsets(padding)) { content(padding) }
+    }
 }
 
 /**

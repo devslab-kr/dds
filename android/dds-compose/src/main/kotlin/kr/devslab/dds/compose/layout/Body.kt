@@ -56,7 +56,7 @@ public object DdsBodyDefaults {
  * The column every screen's content goes in. It is centered in the area the frame leaves for
  * the screen, no wider than [max], so on a wide window the text keeps one reading line and on a
  * phone it fills the width. It scrolls, and it slides in when the screen arrives (it applies
- * [ddsScreenContent] itself; do not add it again).
+ * [ddsScreenContent] itself, with [paneTitle]; do not add it again).
  *
  * The text starts [contentPadding] in from the column's edge, which is the window gutter. Items
  * that sit outside the column but should line up with its text use [ddsBodyLines].
@@ -65,6 +65,8 @@ public object DdsBodyDefaults {
  * @param max the widest the column gets; [DdsScreen.bodyMax] by default
  * @param spacing the gap between the blocks; [DdsScreen.blockGap] by default
  * @param contentPadding the space between the column's edge and what is in it
+ * @param paneTitle the name of the screen, which a screen reader says when the screen arrives;
+ * pass the same words as the top bar's title (see [ddsScreenContent])
  */
 @Composable
 public fun DdsBodyColumn(
@@ -73,9 +75,10 @@ public fun DdsBodyColumn(
     max: Dp = DdsScreen.bodyMax.dp,
     spacing: Dp = DdsScreen.blockGap.dp,
     contentPadding: PaddingValues = DdsBodyDefaults.contentPadding(),
+    paneTitle: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Box(modifier.fillMaxSize().ddsScreenContent(), contentAlignment = Alignment.TopCenter) {
+    Box(modifier.fillMaxSize().ddsScreenContent(paneTitle), contentAlignment = Alignment.TopCenter) {
         Column(
             Modifier
                 .ddsBody(max)

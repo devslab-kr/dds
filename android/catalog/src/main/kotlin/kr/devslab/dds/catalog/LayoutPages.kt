@@ -31,6 +31,7 @@ import kr.devslab.dds.compose.layout.DdsCenteredTitle
 import kr.devslab.dds.compose.layout.ddsBody
 import kr.devslab.dds.compose.layout.ddsFrame
 import kr.devslab.dds.compose.layout.gutter
+import kr.devslab.dds.compose.motion.ddsScreenContent
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsScreen
@@ -66,11 +67,12 @@ fun LayoutPinnedList(selected: LayoutDemo?, onChoose: (LayoutDemo) -> Unit) {
 
 /**
  * The list as a screen, on a window too narrow to pin it: the Layout tab itself. It lays its own
- * body out, so the rows stand on the same lines as a body column's text.
+ * body out, so the rows stand on the same lines as a body column's text, and it slides in and says
+ * its name as a body column does.
  */
 @Composable
 fun LayoutListBody(onChoose: (LayoutDemo) -> Unit) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+    Box(Modifier.fillMaxSize().ddsScreenContent(paneTitle = Page.Layout.title), contentAlignment = Alignment.TopCenter) {
         Box(Modifier.ddsBody().fillMaxWidth()) { LayoutRows(selected = null, onChoose = onChoose) }
     }
 }
@@ -83,7 +85,7 @@ fun LayoutListBody(onChoose: (LayoutDemo) -> Unit) {
 fun LayoutDemoScreen(demo: LayoutDemo, onBack: (() -> Unit)?) {
     when (demo) {
         LayoutDemo.Body -> DdsScaffold(topBar = { DdsTopBar(demo.title, onBack = onBack) }) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding)) { BodyDemo() }
+            Box(Modifier.fillMaxSize().padding(padding)) { BodyDemo(demo.title) }
         }
         LayoutDemo.Bar -> DdsScaffold(
             topBar = {
@@ -93,11 +95,11 @@ fun LayoutDemoScreen(demo: LayoutDemo, onBack: (() -> Unit)?) {
                 }
             },
         ) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding)) { BarDemo(withArrow = onBack != null) }
+            Box(Modifier.fillMaxSize().padding(padding)) { BarDemo(demo.title, withArrow = onBack != null) }
         }
-        LayoutDemo.Centered -> CenteredDemo(onBack)
+        LayoutDemo.Centered -> CenteredDemo(demo.title, onBack)
         LayoutDemo.WholeWindow -> DdsScaffold(topBar = { DdsTopBar(demo.title, onBack = onBack) }) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding)) { WholeWindowDemo() }
+            Box(Modifier.fillMaxSize().padding(padding)) { WholeWindowDemo(demo.title) }
         }
     }
 }
@@ -123,8 +125,8 @@ private fun Note(text: String) {
 }
 
 @Composable
-private fun BodyDemo() {
-    DdsBodyColumn {
+private fun BodyDemo(title: String) {
+    DdsBodyColumn(paneTitle = title) {
         Note(
             "One column per screen, no wider than ${DdsScreen.bodyMax}dp with its gutters, in the middle of what the " +
                 "rail and the pinned list leave. Every screen of a window starts on the same line.",
@@ -146,9 +148,9 @@ private fun BodyDemo() {
 }
 
 @Composable
-private fun BarDemo(withArrow: Boolean) {
+private fun BarDemo(title: String, withArrow: Boolean) {
     val gutter = ddsFrame().width.gutter.value.toInt()
-    DdsBodyColumn {
+    DdsBodyColumn(paneTitle = title) {
         Note("The top bar stands on the body's lines. Its content is as wide as the body and sits in the same place.")
         DdsCard {
             Column {
@@ -171,9 +173,9 @@ private fun BarDemo(withArrow: Boolean) {
 }
 
 @Composable
-private fun CenteredDemo(onBack: (() -> Unit)?) {
+private fun CenteredDemo(title: String, onBack: (() -> Unit)?) {
     var number by rememberSaveable { mutableStateOf("") }
-    DdsCenteredColumn {
+    DdsCenteredColumn(paneTitle = title) {
         DdsCenteredTitle("정산을\n시작합니다", description = "사업자 번호를 넣으면 거래처와 주문을 한곳에서 봅니다.")
         DdsTextField(number, { number = it }, label = "사업자 번호", modifier = Modifier.fillMaxWidth(), placeholder = "000-00-00000")
         DdsButton("시작하기", onClick = {}, modifier = Modifier.fillMaxWidth())
@@ -184,8 +186,8 @@ private fun CenteredDemo(onBack: (() -> Unit)?) {
 }
 
 @Composable
-private fun WholeWindowDemo() {
-    DdsBodyColumn {
+private fun WholeWindowDemo(title: String) {
+    DdsBodyColumn(paneTitle = title) {
         Note(
             "The menus are off here (navigation = false): no rail, no pinned list, no bottom tabs. An app turns them " +
                 "off before sign-in and on a screen with one task, such as writing or scanning.",

@@ -1370,6 +1370,43 @@ class FrameOnDeviceTest {
     }
 
     @Test
+    fun inAScaffoldUnderATopBarTheBlockIsCenteredInTheRoomTheBarsLeave() {
+        val top = 24.dp
+        val bottom = 48.dp
+        rule.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(phone)) {
+                val insets = with(LocalDensity.current) {
+                    WindowInsetsCompat.Builder()
+                        .setInsets(WindowInsetsCompat.Type.statusBars(), Insets.of(0, top.roundToPx(), 0, 0))
+                        .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.of(0, 0, 0, bottom.roundToPx()))
+                        .build()
+                }
+                DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(insets)) {
+                    DdsTheme {
+                        DdsAppFrame(four, 0, {}, Modifier.testTag("frame"), navigation = false) {
+                            DdsScaffold(topBar = { DdsTopBar("로그인", Modifier.testTag("bar")) }) { padding ->
+                                Box(Modifier.fillMaxSize().padding(padding)) {
+                                    DdsCenteredColumn { Text("한 가지 일", Modifier.fillMaxWidth()) }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        val frame = bounds("frame")
+        val bar = bounds("bar")
+        val area = bounds(DdsTestTags.CenteredArea)
+        val block = bounds(DdsTestTags.Centered)
+        assertTrue("the bar is under the status bar: $bar", bar.bottom > frame.top + top)
+        // The scaffold already keeps its content clear of the status bar (the top bar's height holds it) and of the
+        // navigation bar: the block takes neither a second time.
+        assertNear("the room starts under the bar, not a status bar lower", bar.bottom, area.top)
+        assertNear("and ends above the navigation bar, not a navigation bar higher", frame.bottom - bottom, area.bottom)
+        assertEquals("the block is in the middle of that room", ((bar.bottom + frame.bottom - bottom) / 2).value, ((block.top + block.bottom) / 2).value, 1f)
+    }
+
+    @Test
     fun theOneBlockSlidesWhenTheScreenArrives() {
         assumeFalse("animations are turned off on this device", isReducedMotion(InstrumentationRegistry.getInstrumentation().targetContext))
         var screen by mutableStateOf("a")
