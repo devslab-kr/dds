@@ -6,6 +6,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.theme.DdsTheme
+import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsScreen
 import kr.devslab.dds.tokens.DdsSpace
 import kr.devslab.dds.tokens.DdsTouch
@@ -37,6 +38,19 @@ public fun ddsBarNeedsTwoLines(
     reserve: (title: String) -> Dp = { 0.dp },
     columnMax: Dp = DdsScreen.bodyMax.dp,
 ): Boolean = barNeedsTwoLines(ddsFrame().width.gutter, areaWidth, titles, actions, reserve, columnMax)
+
+/**
+ * The least height of every top bar in the window. The short bar is [DdsBar.top]. The tall bar is
+ * [DdsBar.topTall], or two lines of the title style plus a margin when the font is so large that
+ * two lines do not fit in that, so every bar in the window gets the same height whatever its title.
+ */
+@Composable
+internal fun barMinHeight(tall: Boolean): Dp {
+    if (!tall) return DdsBar.top.dp
+    val lineHeight = DdsTheme.typography.title2.lineHeight
+    val twoLines = if (lineHeight.isSp) with(LocalDensity.current) { lineHeight.toDp() } * 2 else 0.dp
+    return maxOf(DdsBar.topTall.dp, twoLines + DdsSpace.s12.dp * 2)
+}
 
 /** The same decision with the window's [gutter] given, for the frame, which has not provided itself yet. */
 @Composable

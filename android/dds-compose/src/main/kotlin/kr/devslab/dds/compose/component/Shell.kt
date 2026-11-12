@@ -40,9 +40,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.unit.Constraints
+import kr.devslab.dds.compose.layout.BarTitleStart
+import kr.devslab.dds.compose.layout.barMinHeight
 import androidx.compose.ui.res.stringResource
 import kr.devslab.dds.compose.icons.DdsIcons
 import kr.devslab.dds.tokens.DdsIcon as DdsIconSize
@@ -107,46 +110,62 @@ public fun DdsTopBar(
     val frame = ddsFrame()
     val gutter = frame.width.gutter
     val tall = frame.tallBar
-    // A 48dp button holds a 24dp glyph, so the touch area reaches this far past the glyph.
-    val hang = ((DdsTouch.min - DdsIconSize.md) / 2).dp
+    val minHeight = barMinHeight(tall)
     Column(modifier.fillMaxWidth().background(colors.bgDefault)) {
         Box(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars), contentAlignment = Alignment.TopCenter) {
-            Row(
-                Modifier
-                    .widthIn(max = columnMax)
-                    .fillMaxWidth()
-                    .heightIn(min = (if (tall) DdsBar.topTall else DdsBar.top).dp)
-                    .padding(start = if (onBack != null) gutter - hang else gutter, end = gutter),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CompositionLocalProvider(LocalContentColor provides colors.textPrimary) {
-                    if (onBack != null) {
-                        DdsIconButton(DdsIcons.ArrowLeft, backDescription, onBack, enabled = backEnabled)
-                        Spacer(Modifier.width(DdsSpace.s4.dp))
-                    } else if (leading != null) {
-                        Box(Modifier.widthIn(min = BarMarkRoom), contentAlignment = Alignment.CenterStart) { leading() }
-                        Spacer(Modifier.width(DdsSpace.s12.dp))
+            CompositionLocalProvider(LocalContentColor provides colors.textPrimary) {
+                // One layout places the arrow or mark, the title and the actions from the same pixel
+                // lines, so where the title starts does not depend on what stands before it.
+                Layout(
+                    content = {
+                        if (onBack != null) {
+                            DdsIconButton(DdsIcons.ArrowLeft, backDescription, onBack, Modifier.layoutId(BarSlot.Arrow), enabled = backEnabled)
+                        } else if (leading != null) {
+                            Box(Modifier.layoutId(BarSlot.Mark)) { leading() }
+                        }
+                        Text(
+                            title,
+                            Modifier.layoutId(BarSlot.Title).testTag(DdsTestTags.TopBarTitle).semantics { heading() },
+                            style = DdsTheme.typography.title2,
+                            color = colors.textPrimary,
+                            maxLines = if (tall) 2 else 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Row(Modifier.layoutId(BarSlot.Actions), verticalAlignment = Alignment.CenterVertically, content = actions)
+                    },
+                    modifier = Modifier.widthIn(max = columnMax).fillMaxWidth(),
+                ) { measurables, constraints ->
+                    val width = constraints.maxWidth
+                    val textLine = gutter.roundToPx()
+                    val endLine = width - textLine
+                    // A 48dp button holds a 24dp glyph in its middle. The arrow is placed so the glyph's start
+                    // edge is on the text line, the last icon so the glyph's end edge is on the end line;
+                    // the touch areas reach `hang` past the glyph into the gutter.
+                    val buttonPx = DdsTouch.min.dp.roundToPx()
+                    val glyphPx = DdsIconSize.md.dp.roundToPx()
+                    val hangStart = (buttonPx - glyphPx + 1) / 2
+                    val hangEnd = buttonPx - glyphPx - hangStart
+                    val loose = Constraints(maxWidth = width, maxHeight = constraints.maxHeight)
+                    fun measure(slot: BarSlot, limit: Constraints = loose) = measurables.firstOrNull { it.layoutId == slot }?.measure(limit)
+                    val arrow = measure(BarSlot.Arrow)
+                    val mark = measure(BarSlot.Mark)
+                    val actionsPlaced = measure(BarSlot.Actions, loose.copy(maxWidth = (endLine + hangEnd).coerceAtLeast(0)))
+                    val actionsLeft = if (actionsPlaced != null && actionsPlaced.width > 0) endLine + hangEnd - actionsPlaced.width else endLine
+                    // The title starts at one place after an arrow or a mark; a mark wider than its room pushes it.
+                    val titleStart = when {
+                        arrow != null -> textLine + BarTitleStart.roundToPx()
+                        mark != null -> textLine + maxOf(BarTitleStart.roundToPx(), mark.width + DdsSpace.s12.dp.roundToPx())
+                        else -> textLine
                     }
-                    Text(
-                        title,
-                        Modifier.weight(1f).testTag(DdsTestTags.TopBarTitle).semantics { heading() },
-                        style = DdsTheme.typography.title2,
-                        color = colors.textPrimary,
-                        maxLines = if (tall) 2 else 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    // The row reports itself `hang` short at the end, so the last icon's touch area
-                    // reaches into the gutter and its glyph ends on the line; the title stops short of
-                    // the glyph by the same gap an icon would leave.
-                    Row(
-                        Modifier.layout { measurable, constraints ->
-                            val placeable = measurable.measure(constraints)
-                            val short = if (placeable.width > 0) hang.roundToPx() else 0
-                            layout((placeable.width - short).coerceAtLeast(0), placeable.height) { placeable.placeRelative(0, 0) }
-                        },
-                        verticalAlignment = Alignment.CenterVertically,
-                        content = actions,
-                    )
+                    val titlePlaced = measurables.first { it.layoutId == BarSlot.Title }
+                        .measure(Constraints(maxWidth = (actionsLeft - titleStart).coerceAtLeast(0), maxHeight = constraints.maxHeight))
+                    val height = maxOf(minHeight.roundToPx(), titlePlaced.height, arrow?.height ?: 0, mark?.height ?: 0, actionsPlaced?.height ?: 0)
+                    layout(width, height) {
+                        arrow?.placeRelative(textLine - hangStart, (height - arrow.height) / 2)
+                        mark?.placeRelative(textLine, (height - mark.height) / 2)
+                        titlePlaced.placeRelative(titleStart, (height - titlePlaced.height) / 2)
+                        actionsPlaced?.placeRelative(actionsLeft, (height - actionsPlaced.height) / 2)
+                    }
                 }
             }
         }
@@ -154,8 +173,7 @@ public fun DdsTopBar(
     }
 }
 
-/** The room a mark gets before the title: at least this wide, so the title lines up after a mark or an arrow. */
-private val BarMarkRoom: Dp = (DdsSpace.s24 + DdsSpace.s4).dp
+private enum class BarSlot { Arrow, Mark, Title, Actions }
 
 /** One destination of the bottom tabs or the rail. The label is the app's. */
 @Immutable

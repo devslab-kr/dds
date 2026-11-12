@@ -19,7 +19,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.component.DdsNavItem
@@ -85,8 +87,12 @@ public fun DdsAppFrame(
         val width = ddsWindowWidth(maxWidth)
         val rail = navigation && width != DdsWindowWidth.Compact && navItems.isNotEmpty()
         val listPinned = navigation && width == DdsWindowWidth.Expanded && list != null
-        // What a screen gets is the window less the rail and the list, each with its hairline.
-        val areaWidth = maxWidth -
+        // What a screen gets is the window less the rail and the list, each with its hairline, and less the
+        // display cutouts the frame keeps clear of at the sides (whichever of the rail, list or content pads them).
+        val density = LocalDensity.current
+        val sides = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+        val cutouts = with(density) { (sides.getLeft(density, LocalLayoutDirection.current) + sides.getRight(density, LocalLayoutDirection.current)).toDp() }
+        val areaWidth = maxWidth - cutouts -
             (if (rail) (DdsBar.rail + DdsBorder.hairline).dp else 0.dp) -
             (if (listPinned) (DdsScreen.listPane + DdsBorder.hairline).dp else 0.dp)
         val tallBar = barTitles.isNotEmpty() &&

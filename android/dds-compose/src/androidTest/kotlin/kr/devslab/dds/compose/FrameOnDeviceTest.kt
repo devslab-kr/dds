@@ -74,6 +74,11 @@ import kr.devslab.dds.compose.component.DdsIconButton
 import kr.devslab.dds.compose.component.DdsTopBar
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.Density
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -573,23 +578,31 @@ class FrameOnDeviceTest {
         scale: Float = 1f,
         barTitles: () -> List<String> = { emptyList() },
         barReserve: (String) -> Dp = { 0.dp },
+        density: Float? = null,
+        insets: WindowInsetsCompat = noInsets,
         topBar: @Composable () -> Unit,
     ) {
         rule.setContent {
-            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
-                DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(noInsets)) {
+            // The window is forced in pixels of the target density, then the content is given that density
+            // (innermost, since the font scale override puts the device's density back).
+            val root = LocalDensity.current
+            val ratio = (density ?: root.density) / root.density
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(DpSize(size.width * ratio, size.height * ratio))) {
+                DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(insets)) {
                     DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(scale)) {
-                        DdsTheme {
-                            DdsAppFrame(
-                                navItems = four,
-                                selectedIndex = 0,
-                                onSelect = {},
-                                modifier = Modifier.testTag("frame"),
-                                barTitles = barTitles(),
-                                barReserve = barReserve,
-                            ) {
-                                DdsScaffold(topBar = topBar, bottomTabs = false) { padding ->
-                                    Box(Modifier.fillMaxSize().padding(padding)) { DdsBodyColumn { Text("본문") } }
+                        CompositionLocalProvider(LocalDensity provides LocalDensity.current.let { Density(density ?: it.density, it.fontScale) }) {
+                            DdsTheme {
+                                DdsAppFrame(
+                                    navItems = four,
+                                    selectedIndex = 0,
+                                    onSelect = {},
+                                    modifier = Modifier.testTag("frame"),
+                                    barTitles = barTitles(),
+                                    barReserve = barReserve,
+                                ) {
+                                    DdsScaffold(topBar = topBar, bottomTabs = false) { padding ->
+                                        Box(Modifier.fillMaxSize().padding(padding)) { DdsBodyColumn { Text("본문") } }
+                                    }
                                 }
                             }
                         }
@@ -614,9 +627,11 @@ class FrameOnDeviceTest {
         val gutter = gutterAt(size)
         val back = rule.onNodeWithContentDescription(backWord).getUnclippedBoundsInRoot()
         val hang = (back.right - back.left - DdsIcon.md.dp) / 2
-        assertNear("the arrow's glyph starts on the body's text line at $size", body.left + gutter, back.left + hang)
+        // Rounding the gutter, the button and the glyph to pixels each costs up to half a pixel.
+        val pixel = 1.5f / rule.density.density
+        assertEquals("the arrow's glyph starts on the body's text line at $size", (body.left + gutter).value, (back.left + hang).value, pixel)
         val last = bounds("last-action")
-        assertNear("the last icon's glyph ends on the body's end line at $size", body.right - gutter, last.right - (last.right - last.left - DdsIcon.md.dp) / 2)
+        assertEquals("the last icon's glyph ends on the body's end line at $size", (body.right - gutter).value, (last.right - (last.right - last.left - DdsIcon.md.dp) / 2).value, pixel)
     }
 
     @Test
@@ -625,9 +640,9 @@ class FrameOnDeviceTest {
     @Test
     fun theBackArrowAndTheLastIconStandOnTheBodysLinesOnAPhone() = assertArrowAndLastIconOnTheLines(phone)
 
-    private fun assertTheTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrow(size: DpSize) {
+    private fun assertTheTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrow(size: DpSize, density: Float? = null) {
         var detail by mutableStateOf(false)
-        barScreen(size) {
+        barScreen(size, density = density) {
             DdsTopBar(
                 "거래처",
                 Modifier.testTag("bar"),
@@ -635,12 +650,18 @@ class FrameOnDeviceTest {
                 onBack = if (detail) ({}) else null,
             )
         }
-        val expected = bounds(DdsTestTags.Body).left + gutterAt(size) + DdsSpace.s40.dp
-        assertTitleLeft(expected, "after a mark at $size")
-        assertNear("the mark starts on the text line at $size", bounds(DdsTestTags.Body).left + gutterAt(size), bounds("mark").left)
+        val d = density ?: rule.density.density
+        // Pixels, from the unclipped bounds (the forced window is larger than the screen).
+        fun left(tag: String) = bounds(tag).left.value * d // the node reports dp of its own density
+        val bodyLeft = left(DdsTestTags.Body)
+        val afterMark = left(DdsTestTags.TopBarTitle)
+        assertEquals("the mark starts on the text line at $size density $d", bodyLeft + gutterAt(size).value * d, left("mark"), d)
         detail = true
         rule.waitForIdle()
-        assertTitleLeft(expected, "after an arrow at $size")
+        val afterArrow = left(DdsTestTags.TopBarTitle)
+        // The same pixel, not the same within a dp: going from a tab screen to a detail must not move the title.
+        assertEquals("the title's x after a mark and after an arrow at $size density $d", afterMark, afterArrow, 0.5f)
+        assertEquals("the title is gutter + 40dp in from the body at $size density $d", bodyLeft + (gutterAt(size).value + DdsSpace.s40) * d, afterArrow, d)
     }
 
     @Test
@@ -648,6 +669,36 @@ class FrameOnDeviceTest {
 
     @Test
     fun theTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrowOnAPhone() = assertTheTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrow(phone)
+
+    // Densities where rounding the pieces one by one disagrees with rounding the sum (1.0625: 59px vs 60px on a phone, 68 vs 69 on a wider window).
+    @Test
+    fun theTitleDoesNotMoveAtDensity1p0625OnAPhone() = assertTheTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrow(phone, 1.0625f)
+
+    @Test
+    fun theTitleDoesNotMoveAtDensity1p0625OnAMediumWindow() = assertTheTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrow(DpSize(704.dp, 933.dp), 1.0625f)
+
+    @Test
+    fun theTitleDoesNotMoveAtDensity1p3() = assertTheTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrow(phone, 1.3f)
+
+    @Test
+    fun theTitleDoesNotMoveAtDensity1p5OnAMediumWindow() = assertTheTitleStartsInTheSamePlaceAfterAMarkAndAfterAnArrow(DpSize(704.dp, 933.dp), 1.5f)
+
+    @Test
+    fun theHangingPartsOfTheArrowAndTheLastIconCanBeTapped() {
+        var backs = 0
+        var lasts = 0
+        barScreen(wide) {
+            DdsTopBar("거래처", Modifier.testTag("bar"), onBack = { backs++ }) {
+                DdsIconButton(DdsIcons.Search, "검색", {})
+                DdsIconButton(DdsIcons.Plus, "추가", { lasts++ }, Modifier.testTag("last-action"))
+            }
+        }
+        // 6dp in from the outer edge is in the 12dp the touch area reaches past the glyph.
+        rule.onNodeWithContentDescription(backWord).performTouchInput { click(Offset(6.dp.toPx(), centerY)) }
+        rule.onNodeWithTag("last-action").performTouchInput { click(Offset(width - 6.dp.toPx(), centerY)) }
+        assertEquals("taps on the arrow's hanging strip", 1, backs)
+        assertEquals("taps on the last icon's hanging strip", 1, lasts)
+    }
 
     @Test
     fun aTitleWithNothingBeforeItStartsOnTheBodysLine() {
@@ -718,5 +769,47 @@ class FrameOnDeviceTest {
         reserve = 120.dp
         rule.waitForIdle()
         assertNear("with 120dp kept for something else the same title needs two lines", DdsBar.topTall.dp, barHeight())
+    }
+
+    @Test
+    fun aShortBarAndALongBarAreTheSameHeightAtAVeryLargeFont() {
+        var title by mutableStateOf("홈")
+        barScreen(phone, scale = 3f, barTitles = { listOf(longName) }) { DdsTopBar(title, Modifier.testTag("bar")) }
+        fun barHeight() = bounds("bar").let { it.bottom - it.top - DdsBorder.hairline.dp }
+        val short = barHeight()
+        assertTrue("the tall bar is at least ${DdsBar.topTall}dp, was $short", short >= DdsBar.topTall.dp - 0.6.dp)
+        title = longName
+        rule.waitForIdle()
+        assertEquals("the long title takes two lines", 2, layoutOf(rule.onNodeWithTag(DdsTestTags.TopBarTitle)).lineCount)
+        assertNear("a long title does not make its bar taller than a short one's", short, barHeight())
+    }
+
+    @Test
+    fun aMediumWindowWithTheRailGivesTheTitleWhatIsLeftBesideTheRail() {
+        val size = DpSize(640.dp, 900.dp)
+        var reserve by mutableStateOf(0.dp)
+        val title = "거래처 매출 관리 현황 보고서"
+        barScreen(size, barTitles = { listOf(title) }, barReserve = { reserve }) { DdsTopBar(title, Modifier.testTag("bar")) }
+        fun barHeight() = bounds("bar").let { it.bottom - it.top - DdsBorder.hairline.dp }
+        assertNear("the title fits at first", DdsBar.top.dp, barHeight())
+        val wanted = with(rule.density) { layoutOf(rule.onNodeWithTag(DdsTestTags.TopBarTitle)).multiParagraph.maxIntrinsicWidth.toDp() }
+        // Beside the rail the title has the window less the rail and its hairline, the gutters, the arrow's room and two icons.
+        val room = size.width - (DdsBar.rail + DdsBorder.hairline).dp - gutterAt(size) * 2 - DdsSpace.s40.dp - DdsTouch.min.dp * 2
+        reserve = room - wanted + 20.dp
+        rule.waitForIdle()
+        assertNear("the title is 20dp short of fitting beside the rail, though it would fit without it", DdsBar.topTall.dp, barHeight())
+    }
+
+    @Test
+    fun aCutoutAtTheSidesTakesRoomFromTheTitle() {
+        val title = "거래처 매출 관리 현황 보고서"
+        val cutouts = with(rule.density) { Insets.of(150.dp.roundToPx(), 0, 150.dp.roundToPx(), 0) }
+        barScreen(
+            phone,
+            barTitles = { listOf(title) },
+            insets = WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.displayCutout(), cutouts).build(),
+        ) { DdsTopBar(title, Modifier.testTag("bar")) }
+        val height = bounds("bar").let { it.bottom - it.top - DdsBorder.hairline.dp }
+        assertNear("150dp of cutout on each side leaves the title too little room", DdsBar.topTall.dp, height)
     }
 }
