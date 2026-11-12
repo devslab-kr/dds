@@ -79,6 +79,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Density
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.performSemanticsAction
+import kr.devslab.dds.compose.component.DdsPaneItem
+import kr.devslab.dds.compose.component.DdsPaneList
+import kr.devslab.dds.compose.layout.DdsCenteredColumn
+import kr.devslab.dds.compose.layout.DdsCenteredTitle
+import kr.devslab.dds.tokens.DdsControl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -811,5 +822,237 @@ class FrameOnDeviceTest {
         ) { DdsTopBar(title, Modifier.testTag("bar")) }
         val height = bounds("bar").let { it.bottom - it.top - DdsBorder.hairline.dp }
         assertNear("150dp of cutout on each side leaves the title too little room", DdsBar.topTall.dp, height)
+    }
+
+    // ---- the centered block: a screen with one thing to do ----
+
+    /**
+     * A centered block holding [content] in a window of [size] at font [scale]: inside a frame with
+     * its navigation off, or with no frame at all.
+     */
+    private fun centered(
+        size: () -> DpSize,
+        scale: Float = 1f,
+        inFrame: Boolean = true,
+        content: @Composable ColumnScope.() -> Unit,
+    ) {
+        rule.setContent {
+            // The font scale goes outside: its override puts the device's density back, the forced size keeps the scale.
+            DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(scale)) {
+                DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size())) {
+                    DdsTheme {
+                        if (inFrame) {
+                            DdsAppFrame(four, 0, {}, navigation = false) { DdsCenteredColumn(content = content) }
+                        } else {
+                            DdsCenteredColumn(content = content)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** The block is [width] wide with the same space on its two sides, and the same above and below. */
+    private fun assertTheBlockIsInTheMiddle(message: String, width: Dp) {
+        val area = bounds(DdsTestTags.CenteredArea)
+        val block = bounds(DdsTestTags.Centered)
+        assertNear("$message: the block's width", width, block.right - block.left)
+        // Centering lands on a whole pixel, which in a forced window can be most of a dp.
+        assertEquals("$message: the space at its two sides", (block.left - area.left).value, (area.right - block.right).value, 1f)
+        assertEquals("$message: the space above and below", (block.top - area.top).value, (area.bottom - block.bottom).value, 1f)
+        assertTrue("$message: it does not start at the top", block.top - area.top > DdsScreen.blockGap.dp)
+    }
+
+    @Test
+    fun theOneBlockIsInTheMiddleAndNoWiderThanItsLimit() {
+        var size by mutableStateOf(wide)
+        centered({ size }) { Text("한 가지 일", Modifier.fillMaxWidth().testTag("only")) }
+        val window = bounds(DdsTestTags.CenteredArea)
+        assertEquals("the area is the window", wide.width.value, (window.right - window.left).value, 1f)
+        assertTheBlockIsInTheMiddle("on a wide window", DdsScreen.centeredMax.dp)
+
+        // A folded phone's 475dp still has room for the whole 400dp block.
+        size = phone
+        rule.waitForIdle()
+        val folded = bounds(DdsTestTags.CenteredArea)
+        assertEquals("the area is the window", phone.width.value, (folded.right - folded.left).value, 1f)
+        assertTheBlockIsInTheMiddle("on a folded phone", DdsScreen.centeredMax.dp)
+
+        // A window narrower than the block and its gutters: the block is what the gutters leave.
+        size = small
+        rule.waitForIdle()
+        val area = bounds(DdsTestTags.CenteredArea)
+        assertEquals("the area is the window", small.width.value, (area.right - area.left).value, 1f)
+        assertTheBlockIsInTheMiddle("on a small phone", area.right - area.left - DdsScreen.gutter.dp * 2)
+        assertNear("on a small phone the block keeps the gutter", area.left + DdsScreen.gutter.dp, bounds(DdsTestTags.Centered).left)
+    }
+
+    /** A phone narrower than the centered block's limit and its two gutters. */
+    private val small = DpSize(360.dp, 751.dp)
+
+    @Test
+    fun theOneBlockWorksWithoutAFrame() {
+        centered({ small }, inFrame = false) { Text("한 가지 일", Modifier.fillMaxWidth()) }
+        val area = bounds(DdsTestTags.CenteredArea)
+        assertEquals("the area is the window", small.width.value, (area.right - area.left).value, 1f)
+        assertTheBlockIsInTheMiddle("with no frame", area.right - area.left - DdsScreen.gutter.dp * 2)
+    }
+
+    @Test
+    fun aBlockTallerThanTheWindowStartsAtTheTopAndScrolls() {
+        centered({ phone }, scale = 2f) {
+            repeat(10) { Text("줄 ${it + 1}\n둘째 줄", Modifier.testTag("line-$it"), style = DdsTheme.typography.title1) }
+        }
+        val area = bounds(DdsTestTags.CenteredArea)
+        val gap = DdsScreen.blockGap.dp
+        assertEquals("the area is the window, however tall the block", phone.height.value, (area.bottom - area.top).value, 1f)
+        assertNear("the first line starts under the top padding, not cut above the window", area.top + gap, bounds("line-0").top)
+        assertTrue("the last line starts below the window, so the block is taller than it", bounds("line-9").top > area.bottom)
+        rule.onNodeWithTag("line-9").performScrollTo().assertIsDisplayed()
+        // To the very end: more than there is left to scroll.
+        rule.onNode(hasScrollAction()).performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, 100_000f) }
+        rule.waitForIdle()
+        assertNear("scrolled to the end, the last line stands on the bottom padding", area.bottom - gap, bounds("line-9").bottom)
+    }
+
+    @Test
+    fun aCenteredTitleKeepsItsLineBreaks() {
+        centered({ wide }) {
+            DdsCenteredTitle("정산을\n시작합니다", Modifier.testTag("two"))
+            DdsCenteredTitle("정산을 시작합니다", Modifier.testTag("one"))
+        }
+        val two = bounds("two")
+        val one = bounds("one")
+        assertTrue("a title with a line break is a line taller: $two against $one", (two.bottom - two.top) > (one.bottom - one.top) + 20.dp)
+        val block = bounds(DdsTestTags.Centered)
+        val words = rule.onNodeWithText("정산을 시작합니다", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        assertNear("the title's words are in the middle of the block", (block.left + block.right) / 2, (words.left + words.right) / 2)
+    }
+
+    // ---- the rows of the pinned list ----
+
+    /** A frame at [size] whose pinned list (or, on a narrow window, its one screen) is a pane list of [rows]. */
+    private fun pane(
+        size: DpSize = wide,
+        scale: Float = 1f,
+        largeText: () -> Boolean = { false },
+        rows: @Composable ColumnScope.() -> Unit,
+    ) {
+        rule.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(scale)) {
+                DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                    DdsTheme(largeText = largeText()) {
+                        val pinned = size.width >= DdsScreen.breakpointExpanded.dp
+                        DdsAppFrame(four, 0, {}, Modifier.testTag("frame"), list = { DdsPaneList(content = rows) }) {
+                            DdsScaffold(topBar = {}) { padding ->
+                                Box(Modifier.fillMaxSize().padding(padding).testTag("screen-body")) {
+                                    if (!pinned) DdsPaneList(content = rows)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun height(tag: String): Dp = bounds(tag).let { it.bottom - it.top }
+
+    private fun label(text: String) = rule.onNodeWithText(text, useUnmergedTree = true).getUnclippedBoundsInRoot()
+
+    @Test
+    fun theItemChosenInTheListLooksLikeTheRailsChoice() {
+        pane {
+            DdsPaneItem("매출 현황", selected = true, onClick = {}, modifier = Modifier.testTag("chosen"))
+            DdsPaneItem("매출 현황", selected = false, onClick = {}, modifier = Modifier.testTag("other"))
+        }
+        val pixels = rule.onRoot().captureToImage().toPixelMap()
+        fun px(tag: String) = rule.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot
+        val rail = px(DdsTestTags.Rail)
+        val dp = rail.width / DdsBar.rail // pixels to a dp in this forced window
+        val screen = px("screen-body")
+        val page = pixels[(screen.right - 8 * dp).toInt(), screen.center.y.toInt()]
+
+        // The rail's selected pill is 56dp wide around a 24dp icon: 20dp left of the middle is pill, clear of the icon.
+        val home = rule.onNodeWithText("홈").fetchSemanticsNode().boundsInRoot
+        val x = (home.center.x - 20 * dp).toInt()
+        val pillTop = (home.top.toInt() until home.bottom.toInt()).first { pixels[x, it] != page }
+        val pill = pixels[x, (pillTop + 8 * dp).toInt()]
+        assertTrue("the rail's pill $pill is not the page $page", pill != page)
+
+        val chosen = px("chosen")
+        val other = px("other")
+        val fill = pixels[(chosen.right - 16 * dp).toInt(), chosen.center.y.toInt()]
+        assertEquals("the chosen row is filled with the color of the rail's pill", pill, fill)
+        assertEquals("a row that is not chosen has no fill", page, pixels[(other.right - 16 * dp).toInt(), other.center.y.toInt()])
+
+        // Not by color alone: the same words are drawn heavier. Count what is not background in the middle band of each row.
+        fun ink(row: androidx.compose.ui.geometry.Rect, paper: androidx.compose.ui.graphics.Color): Int {
+            var count = 0
+            for (py in (row.top + row.height / 4).toInt() until (row.bottom - row.height / 4).toInt()) {
+                for (qx in (row.left + 4 * dp).toInt() until (row.right - 4 * dp).toInt()) if (pixels[qx, py] != paper) count++
+            }
+            return count
+        }
+        val heavy = ink(chosen, fill)
+        val light = ink(other, page)
+        assertTrue("the unchosen label is drawn: $light pixels", light > 0)
+        assertTrue("the chosen label is heavier: $heavy pixels of ink against $light", heavy > light * 1.05f)
+        assertNear("being chosen does not change the row's height", height("other"), height("chosen"))
+    }
+
+    @Test
+    fun aListItemsLabelStandsOnTheGutterLine() {
+        pane {
+            DdsPaneItem("매출 현황", selected = true, onClick = {})
+            DdsPaneItem("미수금", selected = false, onClick = {})
+        }
+        val line = bounds(DdsTestTags.ListPane).left + DdsScreen.gutterWide.dp
+        assertNear("the chosen row's label starts on the pane's gutter line", line, label("매출 현황").left)
+        assertNear("another row's label starts on the same line", line, label("미수금").left)
+    }
+
+    @Test
+    fun aListShownAsAScreenOnAPhoneStandsOnThePhonesGutter() {
+        pane(size = phone) { DdsPaneItem("매출 현황", selected = true, onClick = {}) }
+        assertNear("the label starts on the phone's gutter", bounds("screen-body").left + DdsScreen.gutter.dp, label("매출 현황").left)
+    }
+
+    @Test
+    fun aListItemIsAControlTallAndTallerInLargeTextMode() {
+        var large by mutableStateOf(false)
+        pane(largeText = { large }) { DdsPaneItem("매출 현황", selected = false, onClick = {}, modifier = Modifier.testTag("row")) }
+        assertNear("a row's height", DdsControl.md.dp, height("row"))
+        large = true
+        rule.waitForIdle()
+        assertNear("a row's height in large text mode", DdsTouch.large.dp, height("row"))
+    }
+
+    @Test
+    fun aLongListLabelWrapsAtALargeFontInsteadOfBeingCut() {
+        val long = "거래처별 매출과 미수금 현황 보고서"
+        pane(scale = 2f) {
+            DdsPaneItem("미수금", selected = false, onClick = {}, modifier = Modifier.testTag("short"))
+            DdsPaneItem(long, selected = false, onClick = {}, modifier = Modifier.testTag("long"))
+            DdsPaneItem("$long 둘", selected = true, onClick = {}, modifier = Modifier.testTag("long-chosen"))
+        }
+        val oneLine = label("미수금").let { it.bottom - it.top }
+        assertTrue("the font is twice its size: a line is $oneLine", oneLine > 40.dp)
+        val words = label(long)
+        assertTrue("the long label takes more lines than one ($oneLine): ${words.bottom - words.top}", words.bottom - words.top > oneLine * 1.5f)
+        val pane = bounds(DdsTestTags.ListPane)
+        for (tag in listOf("long", "long-chosen")) {
+            val row = bounds(tag)
+            val text = label(if (tag == "long") long else "$long 둘")
+            assertTrue("the label $text is inside its row $row", text.top >= row.top && text.bottom <= row.bottom && text.left >= row.left && text.right <= row.right)
+            assertTrue("the row $row is inside the pane $pane", row.left >= pane.left && row.right <= pane.right)
+        }
+        assertTrue("the row grew with its label", height("long") > height("short"))
+    }
+
+    @Test
+    fun theListScrollsWhenItsRowsDoNotFit() {
+        pane { repeat(30) { DdsPaneItem("항목 ${it + 1}", selected = it == 0, onClick = {}) } }
+        rule.onNodeWithText("항목 30").performScrollTo().assertIsDisplayed()
     }
 }
