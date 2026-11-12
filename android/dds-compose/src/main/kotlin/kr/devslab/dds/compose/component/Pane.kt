@@ -66,7 +66,8 @@ public fun DdsPaneList(modifier: Modifier = Modifier, content: @Composable Colum
  * One row of a [DdsPaneList]: a place in this area of the app.
  *
  * The chosen row looks like the chosen destination of the rail: the pale brand fill, the brand
- * color, and a heavier label, never the color alone. The colors ease in. The row is as wide as the
+ * color, and a heavier label, never the color alone. A row that is not chosen is written in the
+ * secondary text color, as the rail's and the bottom tabs' other destinations are. The colors ease in. The row is as wide as the
  * list lets it be and at least [DdsControl.md] high ([DdsTouch.large] in large text mode); a label
  * too long for one line wraps and the row grows. Being chosen changes neither the width nor the
  * height.
@@ -74,6 +75,7 @@ public fun DdsPaneList(modifier: Modifier = Modifier, content: @Composable Colum
  * @param label the name of the place, in the app's words
  * @param selected true for the row whose screen is showing
  * @param onClick called when the row is picked
+ * @param modifier applied to the row, which is as wide as the list lets it be
  * @param enabled false dims the row and it cannot be picked
  */
 @Composable
@@ -82,7 +84,7 @@ public fun DdsPaneItem(label: String, selected: Boolean, onClick: () -> Unit, mo
     val interaction = remember { MutableInteractionSource() }
     val shape = MaterialTheme.shapes.small
     val fill by colorChange(if (selected) colors.bgBrandSubtle else colors.bgBrandSubtle.clear())
-    val ink by colorChange(if (selected) colors.textBrand else colors.textPrimary)
+    val ink by colorChange(if (selected) colors.textBrand else colors.textSecondary)
     val minHeight = if (DdsTheme.largeText) DdsTouch.large else DdsControl.md
     val style = DdsTheme.typography.body1
     Box(

@@ -99,6 +99,9 @@ import kr.devslab.dds.compose.layout.ddsBody
 import kr.devslab.dds.compose.testing.DdsFrameCheck
 import kr.devslab.dds.compose.testing.DdsScreenKind
 import kr.devslab.dds.compose.theme.DdsBrand
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.font.FontWeight
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -848,12 +851,16 @@ class FrameOnDeviceTest {
         rule.setContent {
             // The font scale goes outside: its override puts the device's density back, the forced size keeps the scale.
             DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(scale)) {
-                DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size())) {
-                    DdsTheme {
-                        if (inFrame) {
-                            DdsAppFrame(four, 0, {}, navigation = false) { DdsCenteredColumn(content = content) }
-                        } else {
-                            DdsCenteredColumn(content = content)
+                // No bars and no keyboard here: the room the block is centered in is the whole window.
+                // (Outside the forced size: inside it, a change of the forced size does not reach the content.)
+                DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(noInsets)) {
+                    DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size())) {
+                        DdsTheme {
+                            if (inFrame) {
+                                DdsAppFrame(four, 0, {}, navigation = false) { DdsCenteredColumn(content = content) }
+                            } else {
+                                DdsCenteredColumn(content = content)
+                            }
                         }
                     }
                 }
@@ -936,6 +943,21 @@ class FrameOnDeviceTest {
         val block = bounds(DdsTestTags.Centered)
         val words = rule.onNodeWithText("정산을 시작합니다", useUnmergedTree = true).getUnclippedBoundsInRoot()
         assertNear("the title's words are in the middle of the block", (block.left + block.right) / 2, (words.left + words.right) / 2)
+
+        // Each line of the two-line title is centered, not only the title as a whole: the ink of the short first
+        // line and of the longer second one are both around the middle.
+        val pixels = rule.onNodeWithTag("two").captureToImage().toPixelMap()
+        val paper = pixels[0, 0]
+        fun ink(rows: IntRange): IntRange {
+            val columns = (0 until pixels.width).filter { x -> rows.any { y -> pixels[x, y] != paper } }
+            return columns.first()..columns.last()
+        }
+        val first = ink(0 until pixels.height / 2)
+        val second = ink(pixels.height / 2 until pixels.height)
+        val widthOf = { line: IntRange -> line.last - line.first }
+        assertTrue("the first line ($first) is shorter than the second ($second)", widthOf(second) > widthOf(first) + 16)
+        assertEquals("the first line's ink is centered in ${pixels.width}px", pixels.width / 2f, (first.first + first.last) / 2f, 4f)
+        assertEquals("the second line's ink is centered in ${pixels.width}px", pixels.width / 2f, (second.first + second.last) / 2f, 4f)
     }
 
     // ---- the rows of the pinned list ----
@@ -1272,4 +1294,163 @@ class FrameOnDeviceTest {
 
     @Test
     fun atTwiceTheFontNothingInTheFrameIsCutOnAWideWindow() = assertNoTextInTheFrameIsCut(wide)
+
+    // ---- the centered block: the bars, the keyboard, its gaps and its arrival ----
+
+    /**
+     * A centered block (in a frame tagged `frame`, navigation off) in a window of [size] at font [scale],
+     * under a status bar [top] tall and over a keyboard [bottom] tall.
+     */
+    private fun centeredBetweenBars(
+        size: DpSize,
+        scale: Float = 1f,
+        top: Dp = 24.dp,
+        bottom: Dp = 300.dp,
+        content: @Composable ColumnScope.() -> Unit,
+    ) {
+        rule.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(scale)) {
+                DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                    val insets = with(LocalDensity.current) {
+                        WindowInsetsCompat.Builder()
+                            .setInsets(WindowInsetsCompat.Type.statusBars(), Insets.of(0, top.roundToPx(), 0, 0))
+                            .setInsets(WindowInsetsCompat.Type.ime(), Insets.of(0, 0, 0, bottom.roundToPx()))
+                            .setVisible(WindowInsetsCompat.Type.ime(), true)
+                            .build()
+                    }
+                    DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(insets)) {
+                        DdsTheme {
+                            DdsAppFrame(four, 0, {}, Modifier.testTag("frame"), navigation = false) { DdsCenteredColumn(content = content) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun theOneBlockIsCenteredBetweenTheBarsAndTheKeyboard() {
+        centeredBetweenBars(phone) { Text("한 가지 일", Modifier.fillMaxWidth()) }
+        val frame = bounds("frame")
+        val area = bounds(DdsTestTags.CenteredArea)
+        val block = bounds(DdsTestTags.Centered)
+        val clearTop = frame.top + 24.dp
+        val clearBottom = frame.bottom - 300.dp
+        assertNear("the room the block is centered in starts under the status bar", clearTop, area.top)
+        assertNear("and ends above the keyboard", clearBottom, area.bottom)
+        assertEquals("the block is in the middle of what the bar and the keyboard leave", ((clearTop + clearBottom) / 2).value, ((block.top + block.bottom) / 2).value, 1f)
+    }
+
+    @Test
+    fun aTallBlockStartsUnderTheStatusBarAndItsEndComesUpAboveTheKeyboard() {
+        centeredBetweenBars(phone, scale = 2f) {
+            repeat(10) { Text("줄 ${it + 1}\n둘째 줄", Modifier.testTag("line-$it"), style = DdsTheme.typography.title1) }
+        }
+        val frame = bounds("frame")
+        val gap = DdsScreen.blockGap.dp
+        assertNear("the first line starts under the status bar and the top padding", frame.top + 24.dp + gap, bounds("line-0").top)
+        assertTrue("the block is taller than the room: the last line starts under the keyboard's top", bounds("line-9").top > frame.bottom - 300.dp)
+        rule.onNode(hasScrollAction()).performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, 100_000f) }
+        rule.waitForIdle()
+        assertNear("scrolled to the end, the last line stands on the bottom padding above the keyboard", frame.bottom - 300.dp - gap, bounds("line-9").bottom)
+    }
+
+    @Test
+    fun thePiecesOfTheOneBlockAreABlockGapApart() {
+        centered({ wide }) {
+            Text("하나", Modifier.testTag("first"))
+            Text("둘", Modifier.testTag("second"))
+            Text("셋", Modifier.testTag("third"))
+        }
+        assertNear("the second piece is a block gap under the first", bounds("first").bottom + DdsScreen.blockGap.dp, bounds("second").top)
+        assertNear("the third a block gap under the second", bounds("second").bottom + DdsScreen.blockGap.dp, bounds("third").top)
+        val block = bounds(DdsTestTags.Centered)
+        assertNear("no gap above the first piece", block.top, bounds("first").top)
+        assertNear("none under the last", block.bottom, bounds("third").bottom)
+    }
+
+    @Test
+    fun theOneBlockSlidesWhenTheScreenArrives() {
+        assumeFalse("animations are turned off on this device", isReducedMotion(InstrumentationRegistry.getInstrumentation().targetContext))
+        var screen by mutableStateOf("a")
+        var move by mutableStateOf(DdsMove.None)
+        rule.setContent {
+            DdsTheme {
+                DdsScreenHost(screen, move) { shown ->
+                    DdsCenteredColumn { Text("한 가지 일 $shown", Modifier.testTag("text-$shown")) }
+                }
+            }
+        }
+        fun left(shown: String) = rule.onNodeWithTag("text-$shown", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.left
+        rule.mainClock.autoAdvance = false
+        move = DdsMove.Push
+        screen = "b"
+        rule.mainClock.advanceTimeByFrame()
+        rule.mainClock.advanceTimeByFrame()
+        val arriving = left("b")
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        val settled = left("b")
+        assertTrue("the block starts to the trailing side of where it settles: $arriving vs $settled", arriving > settled + 1f)
+    }
+
+    // ---- the list's rows beside the rail's ----
+
+    @Test
+    fun aListItemThatIsNotChosenIsInTheSecondaryTextColor() {
+        val words = "매출 현황"
+        rule.setContent {
+            DdsTheme(darkTheme = false) {
+                Column(Modifier.background(DdsTheme.colors.bgDefault)) {
+                    DdsPaneList { DdsPaneItem(words, selected = false, onClick = {}, modifier = Modifier.testTag("other")) }
+                    // The same words in the two inks it could be, to compare what reaches the screen.
+                    Text(words, Modifier.testTag("secondary"), color = DdsTheme.colors.textSecondary, style = DdsTheme.typography.body1)
+                    Text(words, Modifier.testTag("primary"), color = DdsTheme.colors.textPrimary, style = DdsTheme.typography.body1)
+                }
+            }
+        }
+        /** The darkest point of the words: the ink where a stroke covers a whole pixel. */
+        fun darkest(tag: String): Float {
+            val pixels = rule.onNodeWithTag(tag).captureToImage().toPixelMap()
+            var least = 3f
+            for (y in 0 until pixels.height) for (x in 0 until pixels.width) pixels[x, y].let { least = minOf(least, it.red + it.green + it.blue) }
+            return least
+        }
+        val secondary = darkest("secondary")
+        val primary = darkest("primary")
+        assertTrue("the two inks can be told apart on screen: $primary and $secondary", secondary > primary + 0.3f)
+        assertEquals("a row that is not chosen is written in the secondary ink, as the rail's and the tabs' are", secondary, darkest("other"), 0.06f)
+    }
+
+    @Test
+    fun choosingAListItemWhoseLabelOnlyJustFitsDoesNotMakeItTaller() {
+        val label = "Sales and receivables overview"
+        var paneWidth by mutableStateOf(400.dp)
+        rule.setContent {
+            DdsTheme {
+                Column {
+                    Text(label, Modifier.testTag("normal"), style = DdsTheme.typography.body1, softWrap = false, maxLines = 1)
+                    Text(label, Modifier.testTag("heavy"), style = DdsTheme.typography.body1.copy(fontWeight = FontWeight.SemiBold), softWrap = false, maxLines = 1)
+                    Box(Modifier.width(paneWidth)) {
+                        DdsPaneList {
+                            DdsPaneItem(label, selected = false, onClick = {}, modifier = Modifier.testTag("other"))
+                            DdsPaneItem(label, selected = true, onClick = {}, modifier = Modifier.testTag("chosen"))
+                            DdsPaneItem("Sales", selected = false, onClick = {}, modifier = Modifier.testTag("one-line"))
+                        }
+                    }
+                }
+            }
+        }
+        fun width(tag: String) = bounds(tag).let { it.right - it.left }
+        val normal = width("normal")
+        val heavy = width("heavy")
+        assertTrue("the heavier label is wider: $normal against $heavy", heavy > normal + 2.dp)
+        // A row's label has the list's width less the gutter at each side. Give it room for the label
+        // at its normal weight and not at the heavier one.
+        val gutter = bounds("other").left + DdsSpace.s12.dp - bounds("normal").left
+        paneWidth = (normal + heavy) / 2 + gutter * 2
+        rule.waitForIdle()
+        assertTrue("the chosen row needs a second line: ${height("chosen")} against ${height("one-line")}", height("chosen") > height("one-line") + 12.dp)
+        assertNear("the row that is not chosen is already as tall, so choosing it moves nothing", height("chosen"), height("other"))
+    }
 }
