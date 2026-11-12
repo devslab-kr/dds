@@ -31,7 +31,7 @@ iOS는 아직 범위 밖이다.
 1. **값은 토큰에서만 온다.** 앱 코드에 hex, `Color(0x…)`, 높이·시간 숫자를 적지 않는다. `[명세 §1]`
 2. **색은 `DdsTheme.colors`에서 읽는다.** 시맨틱 토큰만 쓴다. `[명세 §3.1]`
 3. **어두운 화면은 같은 토큰의 다른 대응이다.** 부품이 테마로 갈라지지 않는다. `[명세 §3.1]`
-4. **앱이 넘기는 것은 브랜드 색(여섯 토큰)뿐이다.** 나머지는 가족 공통이다. `[명세 §3.1, D-012]`
+4. **앱이 넘기는 것은 브랜드 색(여섯 토큰)과 바탕 셋뿐이다.** 나머지는 가족 공통이다. `[명세 §3.1, D-012, D-053]`
 5. **움직임은 무엇이 바뀌었는지 알릴 때만 쓴다.** `[정산나우 모션 명세]`
 
 ## 2. 모션과 디테일
@@ -419,10 +419,10 @@ DdsPullRefresh(busy = state.busy, onRefresh = { refresh() }, onPulling = { pulli
 
 ## 3. 색
 
-### 3.1 브랜드 색 덮어쓰기 `[명세 §3.1, D-010, D-012]`
+### 3.1 브랜드 색과 바탕 덮어쓰기 `[명세 §3.1, D-010, D-012, D-053]`
 
-웹과 같은 규약이다. **앱이 바꿀 수 있는 것은 브랜드 조각 여섯 토큰뿐**이고 이름과
-개수가 웹과 같다. 아무것도 넘기지 않으면 DDS 기본 색이다.
+웹과 같은 규약이다. **앱이 바꿀 수 있는 것은 브랜드 여섯 토큰과 바탕 셋**이고 이름이
+웹과 같다. 아무것도 넘기지 않으면 DDS 기본 색이다.
 
 | 토큰 | 안드로이드 리소스 | 제품이 정하는 것 |
 | --- | --- | --- |
@@ -432,6 +432,9 @@ DdsPullRefresh(busy = state.busy, onRefresh = { refresh() }, onPulling = { pulli
 | `color.text.on-brand` | `dds_color_text_on_brand` | 그 면 위의 글자 |
 | `color.text.brand` | `dds_color_text_brand` | 브랜드 글자·링크·선택된 아이콘 |
 | `color.border.focus` | `dds_color_border_focus` | 포커스 링 |
+| `color.bg.default` | `dds_color_bg_default` | 페이지 바탕 (0.6.0) |
+| `color.bg.subtle` | `dds_color_bg_subtle` | 옅은 바탕 (0.6.0) |
+| `color.bg.elevated` | `dds_color_bg_elevated` | 카드·시트·다이얼로그·메뉴의 바탕 (0.6.0) |
 
 **덮어쓰는 방법.** 웹이 `[data-brand]` 아래에서 CSS 변수를 다시 정하듯, 앱은 같은
 이름의 색 리소스를 자기 `res/values`(어두운 화면용은 `res/values-night`)에 다시 정한다.
@@ -463,18 +466,94 @@ DdsPullRefresh(busy = state.busy, onRefresh = { refresh() }, onPulling = { pulli
   정산나우는 `on-brand`를 따로 적지 않아도 된다.
 - 어두운 메인 색을 쓰는 앱은 `dds_color_text_on_brand`를 흰색으로 다시 정한다. 코드에서는
   `onBrandFor(bgBrand)`가 규칙대로 골라 준다.
-- **규칙을 어긴 브랜드는 `DdsTheme`이 거부한다.** 다음 세 쌍 중 하나라도 4.5:1에 못
-  미치면 예외가 나고 메시지에 잰 값이 나온다: 면 위 글자, 화면 바탕 위 브랜드 글자,
-  옅은 브랜드 배경 위 브랜드 글자.
+- **규칙을 어긴 브랜드는 `DdsTheme`이 거부한다.** 아래 "무엇을 검사하는가"의 조합 중
+  하나라도 4.5:1에 못 미치면 예외가 나서 앱이 뜨지 않는다. 메시지에 잰 값과, 예외를
+  어디에 어떻게 적으면 되는지가 나온다. 제품이 그 조합의 예외를 적었으면 거부하지 않는다.
 
 나머지 다섯 값을 메인 색에서 어떻게 정하는지는 웹에도 규칙이 없다(제품이 직접
 고른다). §10의 1번.
+
+**바탕 셋 (0.6.0, D-053).** 페이지 바탕, 옅은 바탕, 카드 바탕도 같은 방법으로 바꾼다.
+같은 이름의 색 리소스를 다시 정한다.
+
+```xml
+<!-- res/values/dds_brand.xml — 따뜻한 종이색 페이지. 카드는 DDS의 흰색 그대로 -->
+<resources>
+    <color name="dds_color_bg_default">#FAF5EB</color>
+</resources>
+```
+
+```xml
+<!-- res/values-night/dds_brand.xml — 어두운 화면의 페이지는 따로 적는다 -->
+<resources>
+    <color name="dds_color_bg_default">#12100D</color>
+</resources>
+```
+
+- 정하지 않은 바탕은 DDS 값이다. 하나만 바꾸면 나머지 둘은 그대로다.
+- `DdsTheme.colors.bgDefault / bgSubtle / bgElevated`와 Material의 `background`·`surface`
+  계열이 바뀐 값을 따른다. 상단 줄, 아래 탭, 레일, 카드, 시트, 다이얼로그, 메뉴,
+  `DdsScreenHost`의 기본 배경은 이 값을 읽는다. 기기에서 픽셀로 확인한 것은 상단 줄과
+  아래 탭뿐이다. 나머지는 같은 값을 읽는다는 것을 코드로만 확인했다.
+- **`res/values`에만 적은 바탕은 어두운 화면의 바탕이기도 하다.** 안드로이드는
+  `values-night`에 없는 값을 `values`에서 가져온다. 밝은 종이색을 `values`에만 적으면
+  어두운 화면에서 밝은 글자가 그 위에 놓여 `DdsTheme`이 거부한다. 오류 문구가 이것을 먼저
+  말한다. 어두운 화면용 `dds_color_bg_*`를 `res/values-night`에 적는 것이 보통의 답이다.
+- **바탕은 불투명해야 한다.** 반투명한 바탕은 그 위 글자의 대비를 잴 수 없다. 알파가
+  1이 아니면 `DdsTheme`이 거부하고, 예외로도 통과하지 못한다.
+- 코드로 넘길 때는 `DdsBrandColors(bgDefault = …, bgSubtle = …, bgElevated = …)`. 넘기지
+  않은 값(`Color.Unspecified`)은 DDS 값이다. 코드로 넘긴 바탕은 스플래시와 창 바탕(XML)에는
+  닿지 않는다.
+
+**무엇을 검사하는가 (0.6.0).** 밝은 화면과 어두운 화면에서 따로, 4.5:1을 기준으로.
+
+| 조합 | 검사하는 것 |
+| --- | --- |
+| `TextOnBrand` | 브랜드 면(`bg.brand`) 위의 글자(`text.on-brand`) |
+| `TextBrand` | 브랜드 글자(`text.brand`) — 페이지 바탕, 옅은 바탕, 카드 바탕, 옅은 브랜드 배경 위 |
+| `TextOnBackground` | 본문 글자(`text.primary`)와 보조 글자(`text.secondary`) — 페이지 바탕, 옅은 바탕, 카드 바탕 위 |
+
+0.5.0은 브랜드 글자를 페이지 바탕과 옅은 브랜드 배경 위에서만 검사했다. 본문·보조 글자는
+DDS의 색이라, 제품이 바탕을 바꿨을 때만 걸릴 수 있다.
+
+**검사하지 않는 것.** 컨트롤 테두리의 3:1(D-050). DDS 기본 바탕에서 맞춘 값이다. 바탕을
+많이 바꾼 제품은 입력칸·체크 상자·라디오의 테두리가 자기 바탕에서 보이는지 스스로
+확인한다. 안내 글귀 색(`text.muted`), 상태색, 선 색도 검사하지 않는다.
+
+**예외를 적는 법 (0.6.0, D-053).** 4.5:1에 못 미치는 조합을 일부러 쓰려면 그 조합의 이름을
+적는다. 적은 조합만 검사하지 않는다. 하한은 없고 글자 크기 조건도 없다. 그 조합이
+읽히는지는 적은 제품이 책임진다.
+
+리소스로 적는다(권장). 색을 적는 곳과 같은 곳이다.
+
+```xml
+<!-- res/values/dds_brand.xml — 주황 면 위의 흰 글자(약 2.9:1)를 쓰겠다고 적는다 -->
+<resources>
+    <color name="dds_color_bg_brand">#FF6A1F</color>
+    <color name="dds_color_text_on_brand">#FFFFFF</color>
+    <bool name="dds_allow_contrast_text_on_brand">true</bool>
+</resources>
+```
+
+| 리소스 (`bool`, DDS 기본값 `false`) | 조합 |
+| --- | --- |
+| `dds_allow_contrast_text_on_brand` | `TextOnBrand` |
+| `dds_allow_contrast_text_brand` | `TextBrand` |
+| `dds_allow_contrast_text_on_background` | `TextOnBackground` |
+
+- **`res/values`에 적은 예외는 어두운 화면에도 적용된다.** 색과 같은 규칙이다
+  (`values-night`에 없으면 `values`에서 가져온다). 어두운 화면은 다시 검사하게 하려면
+  `res/values-night`에 `false`로 적는다.
+- 코드로는 `DdsBrandColors(…, allow = setOf(DdsContrastPair.TextOnBrand))`. 밝은 화면용과
+  어두운 화면용 `DdsBrandColors`에 따로 넘긴다. 한쪽에만 넘기면 다른 쪽은 검사한다.
+- 예외는 `text.on-brand`를 제품이 직접 정했을 때만 뜻이 있다. 정하지 않으면 규칙이 통과하는
+  색을 고른다.
 
 **덮어쓸 수 있는 것과 고정인 것.**
 
 | 덮어쓸 수 있다 | 가족 공통으로 고정 |
 | --- | --- |
-| 브랜드 조각 여섯 토큰 | 중립 바탕·글자·선, 상태색 네 쌍, 글자 단계, 간격, 둥글기, 컨트롤 높이, 모션 값, 터치 크기 |
+| 브랜드 여섯 토큰. 바탕 셋(페이지, 옅은 바탕, 카드 바탕). 글자 대비 조합 셋의 예외 | 글자색, 선 색, 덮개색, 상태색 네 쌍, 글자 단계, 간격, 둥글기, 컨트롤 높이, 모션 값, 터치 크기 |
 
 ### 3.2 색을 쓰는 법 `[명세 §3.1]`
 
@@ -639,7 +718,8 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 | 글꼴 | 라틴 Geist + 한글 Pretendard | Pretendard | Compose는 글꼴을 굵기로 고른다. 두 글꼴을 한 묶음에 넣으면 첫 글꼴만 쓰인다 |
 | 드문 한글 음절 | 전부 Pretendard | KS X 1001 밖의 음절은 시스템 글꼴 | 글꼴 파일을 굵기당 약 0.5MB로 줄였다 |
 | 색 역할 | CSS 변수 | Material3 역할 대응표(§3.3) | Material 부품이 역할로 색을 읽는다 |
-| 브랜드 덮어쓰기 | `[data-brand]` CSS | 같은 이름의 색 리소스 | 플랫폼의 덮어쓰기 수단이 다르다. 토큰 여섯 개와 이름은 같다 |
+| 브랜드 덮어쓰기 | `[data-brand]` CSS | 같은 이름의 색 리소스 | 플랫폼의 덮어쓰기 수단이 다르다. 토큰 여섯 개, 바탕 셋과 이름은 같다 |
+| 대비 검사 | 없음(규칙 문서만) | `DdsBrand`가 4.5:1 미만을 거부, 제품이 적은 조합은 통과 | 웹은 CSS 변수를 덮어쓰는 방식이라 막는 장치가 없다(D-053) |
 | 시스템 바 | — | 투명, 화면 끝까지 | 플랫폼 관례 |
 | 뒤로 가기 | 브라우저 | 시스템 뒤로 | 플랫폼 관례 |
 | 모달 | Dialog | 선택·작업 메뉴는 아래 시트, 확인은 Dialog | `[명세 §5]` 역할 대응 |
@@ -721,7 +801,7 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 
 | 부품 | 고정해 주는 것 | 웹 |
 | --- | --- | --- |
-| `DdsButton` (`Primary` / `Secondary` / `Ghost` / `Danger`, `Sm` 40 / `Md` 48 / `Lg` 56), `DdsIconButton` | 높이 하나, `bg.brand` + `text.on-brand`, 진행 중에도 크기 그대로이고 흐려지지 않는다, 비활성 0.45, 2dp 포커스 링, 아이콘 버튼은 설명 문구 필수에 터치 48 | Button `[명세 §4.2]` |
+| `DdsButton` (`Primary` / `Secondary` / `Ghost` / `Plain` / `Danger`, `Sm` 40 / `Md` 48 / `Lg` 56), `DdsIconButton` | 높이 하나, `bg.brand` + `text.on-brand`, `Secondary`는 카드 바탕으로 채운 면 + 선, `Ghost`는 브랜드 색 글자, `Plain`은 본문 글자색 글자(0.6.0), 진행 중에도 크기 그대로이고 흐려지지 않는다, 비활성 0.45, 2dp 포커스 링, 아이콘 버튼은 설명 문구 필수에 터치 48 | Button `[명세 §4.2]` |
 | `DdsTextField` | 라벨은 위(떠다니는 라벨 없음), 높이 56, 메시지 줄을 항상 비워 두어 오류가 떠도 폼이 밀리지 않는다, 오류는 읽어 준다 | Field, Input |
 | `DdsCheckbox`, `DdsRadio`, `DdsSwitch` | 행 전체가 터치 영역(48 이상), 상태를 읽어 준다 | Checkbox, Radio, Switch |
 | `DdsCard`, `DdsSection`, `DdsDivider`, `DdsListRow` | `bg.elevated` + 1dp 선 + 둥글기 12, 그림자 없음. 섹션 제목은 제목으로 읽힌다. 행은 56 또는 72 | Card |
@@ -749,7 +829,7 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 | `DdsValueRow` | 이름과 값 한 줄: 이름은 앞, 값은 끝 가장자리, 숫자는 고정폭, 줄마다 구분선 | — |
 | `DdsTabs` | 화면 안에서 같은 것의 여러 보기: 고른 탭으로 미끄러지는 브랜드 밑줄과 굵은 라벨. 탭은 폭을 똑같이 나누고, 라벨이 자기 몫에 안 들어가면 옆으로 넘긴다 | Tabs |
 | `DdsBottomSheet` | 선택과 작업 메뉴. 뒤로, 바깥 탭, 끌어내리기로 닫힌다. 위쪽 모서리 둥글기 16 | Sheet |
-| `DdsMenu`, `DdsMenuItem` | 버튼에 붙어 열리는 짧은 메뉴. 지우는 항목은 위험색 | Menu |
+| `DdsMenu`, `DdsMenuItem`, `DdsMenuDivider` | 버튼에 붙어 열리는 짧은 메뉴. 그림자 없이 카드 바탕과 1dp 선으로 구분한다(0.6.0). `align = DdsMenuAlign.End`면 메뉴의 끝이 버튼의 끝에 맞는다(0.6.0). 지우는 항목은 위험색이고 그 앞에 `DdsMenuDivider()`를 둔다 | Menu |
 | `DdsToastHost` | 스스로 사라지는 짧은 알림, 반전 면. 꼭 읽어야 하는 것에는 쓰지 않는다 | Toast |
 
 - **글은 쓴 그대로 읽힌다.** `keepWords()`는 단어의 글자 사이에 보이지 않는 연결 문자를
@@ -763,5 +843,27 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
   `hasSetTextAction() and hasText(label)`로 찾는다 — 설명 문구는 더 이상 없다.
 - **검색칸 하나, 선택칸 하나를 앱 전체에서 쓴다.** 같은 일을 하는 칸이 화면마다 다르게
   생기면 가장 먼저 눈에 띄는 불일치가 된다.
+
+**0.6.0에서 바뀐 것 (D-053)**
+
+- **보조 버튼(`Secondary`)은 채운 면이다.** 바탕이 투명하지 않고 카드 바탕(`bg.elevated`)이다.
+  DDS 기본 밝은 화면에서는 페이지와 카드 바탕이 같은 흰색이라 전과 똑같이 보인다. **어두운
+  화면에서는 버튼 면이 페이지보다 눈에 띄게 밝다**(`zinc.950` 페이지 위의 `zinc.900` 면).
+  색 있는 페이지에서는 흰 면이 된다. 누르면 그 면 위에 옅은 덮개가 올라간다. 선과 글자는
+  그대로다.
+- **`DdsButtonVariant.Plain`** — 바탕 없는 본문 글자색 버튼. 브랜드 색이 아닌 글자 버튼이
+  필요할 때 쓴다. `Ghost`(브랜드 색 글자)는 그대로다.
+- **메뉴에 그림자가 없다.** 카드·시트·다이얼로그처럼 카드 바탕과 1dp 선으로만 구분한다.
+  어두운 화면에서 카드 위에 열린 메뉴는 면 색이 카드와 같아 선으로만 구분된다.
+- **`DdsMenu(align = DdsMenuAlign.End)`** — 줄이나 칸의 끝에 있는 "더 보기" 버튼에 쓴다.
+  메뉴가 버튼의 끝에 맞춰 안쪽으로 열린다. 그쪽에 자리가 없으면 버튼의 시작에 맞추고,
+  그것도 안 되면 창 가장자리에 맞춘다. 창 밖으로 나가지 않는다. 기본값은 전과 같은 `Start`다.
+  메뉴의 `modifier`에는 한쪽을 가리키는 것(시작·끝 여백)을 주지 않는다. 끝 맞춤 메뉴에서
+  그것이 어떻게 되는지는 시험하지 않았다.
+- **`DdsMenuDivider()`** — 1dp 선, 위아래 4dp. 낭독기에는 요소로 잡히지 않는다.
+- 메뉴 안의 내용은 메뉴를 연 화면의 글 방향을 따른다.
+
+`android/catalog`의 Colors 탭 "Product colors"가 이것들을 한 화면에 보여 준다(주황 면 + 흰 글자,
+종이색 페이지 위의 흰 카드, 버튼 넷, 끝 맞춤 메뉴).
 
 아직 없는 것: 날짜·시간 선택. `DdsTheme` 아래에서 Material3 부품을 쓴다.

@@ -231,8 +231,9 @@ re-maps the brand slice of the semantic layer under a `[data-brand="…"]`
 selector, applied to `<html>` or any subtree and freely combined with
 `data-theme`.
 
-The brand slice is exactly six tokens — nothing else may be overridden
-(neutrals, status colors, type and spacing stay the system's):
+A product decides six brand tokens and three backgrounds (D-053). Nothing
+else may be overridden: the other neutrals (text, borders, overlays), status
+colors, type and spacing stay the system's.
 
 | Token | What the product decides |
 | --- | --- |
@@ -242,6 +243,13 @@ The brand slice is exactly six tokens — nothing else may be overridden
 | `color.text.on-brand` | text/marks **on** that surface (the on-brand rule) |
 | `color.text.brand` | brand text and links |
 | `color.border.focus` | the focus ring |
+| `color.bg.default` | the page background |
+| `color.bg.subtle` | the quiet grouping background |
+| `color.bg.elevated` | the background of cards, sheets, dialogs and menus |
+
+A background the product does not set is the system's. A product that sets
+one checks the text on it: body text, secondary text and brand text must
+clear 4.5:1 on all three backgrounds.
 
 ```css
 /* product repo — e.g. asklinq apps/api/src/dds/brand.ts, booklinq app.css */
@@ -261,7 +269,7 @@ The brand slice is exactly six tokens — nothing else may be overridden
 }
 ```
 
-Every component re-tints from these six variables with no component change —
+Every component re-tints from these variables with no component change —
 the same property that makes dark mode a mapping swap.
 
 > **On-brand is a rule, not a color.** BookLinq fills with `teal.700`
@@ -270,6 +278,17 @@ the same property that makes dark mode a mapping swap.
 > brand surface must clear 4.5:1", and on a light hue like cyan that forces
 > `zinc.950` — a product with a dark brand hue satisfies the same rule with
 > white.
+
+> **A product may declare an exception (D-053).** 4.5:1 stays the default.
+> A product that wants a pair below it says so by name, pair by pair and
+> theme by theme: text on the brand surface, brand text on its backgrounds,
+> or body and secondary text on a background the product changed. Only the
+> named pair is let through, and there is no lower limit, so the product
+> answers for how that pair reads. On Android the check runs in code:
+> `DdsBrand` rejects a brand below 4.5:1 unless the pair is declared
+> ([`mobile-native.md`](mobile-native.md) §3.1). Web code is unchanged and
+> never enforced the check: a product overrides CSS variables and nothing
+> stops it. On the web the rule lives in this document only.
 
 ### 3.2 Typography
 
@@ -476,7 +495,8 @@ the docs.
 
 ## 6. Accessibility — the minimum bar
 
-- Text contrast ≥ 4.5:1; large text and UI elements ≥ 3:1 (WCAG AA)
+- Text contrast ≥ 4.5:1; large text and UI elements ≥ 3:1 (WCAG AA). A
+  product may declare an exception for a named text pair (§3.1, D-053)
 - Touch targets ≥ 44×44 (mobile) / click targets ≥ 24×24 (web)
 - Web: every interactive element keyboard-reachable, with a `focus-visible`
   ring (`color.border.focus`, 2px). Text, multiline, select, choice, number and
