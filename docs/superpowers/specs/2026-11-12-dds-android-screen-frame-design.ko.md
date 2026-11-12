@@ -432,8 +432,18 @@ class DdsFrameCheck(rule: ComposeTestRule) {
 
 구현 계획에서 먼저 확인한다.
 
-- Material `NavigationBar`와 레일 항목이 라벨 두 줄만큼 높아지는지. 안 되면 탭 줄을 0.5.0의 탭처럼 직접 그린다.
-- 테스트에서 창 크기를 강제로 바꾸는 방법이 933×704를 폰 크기 에뮬레이터에서 제대로 흉내 내는지.
+- 확인: Material `NavigationBar`와 레일 항목은 라벨 줄 수만큼 높아진다. 에뮬레이터(API 36)에서 라벨 폭을 60dp로 묶고
+  재었다. 글자 배율 1에서 라벨이 3줄이고 탭 줄 높이는 88dp, 레일 항목 높이도 88dp다. 배율 2에서는 라벨이 5줄이고
+  탭 줄과 레일 항목 모두 200dp까지 자란다. 두 경우 모두 라벨 노드가 줄 안에 들어 있고 글자는 넘치지 않는다
+  (`hasVisualOverflow`가 거짓). `heightIn(min = 160.dp)`를 얹어도 결과는 같았다(200dp). 그래서 Material 항목을
+  감싸서 쓴다. 직접 그릴 필요가 없다.
+- 확인: `DeviceConfigurationOverride(ForcedSize(DpSize(933.dp, 704.dp)))`는 폰 크기 에뮬레이터에서도 안쪽
+  `BoxWithConstraints`에 `maxWidth` 933.19dp, `maxHeight` 704dp를 준다. 오차는 1dp 안이다. 다만 이 덮어쓰기는 창이
+  아니라 밀도를 바꿔 그 크기를 화면에 맞춘다(밀도 1.15625, 실제 기기 밀도는 2.625). 그래서 창 크기는
+  `BoxWithConstraints`로만 읽어야 한다. `LocalWindowInfo.current.containerSize`는 덮어쓰기와 무관하게 실제 창인
+  1080×2400px을 그대로 주고, 덮어쓴 밀도로 나누면 934×2076dp라서 너비는 우연히 맞고 높이는 틀린다.
+  `LocalConfiguration.current.screenWidthDp`도 덮어쓰이지 않아 411을 준다(높이 838). 테스트에서 창 크기를
+  강제하는 방법은 `ForcedSize`를 쓴다. `requiredSize` 우회는 필요 없다.
 - 릴리스 워크플로가 세 번째 꾸러미를 함께 올리는지.
 - 고정 목록이 있을 때 화면의 제목과 목록의 제목을 검사가 구분하는 방법(본문 기둥의 좌우 안에 있는 제목을
   화면의 것으로 본다).
