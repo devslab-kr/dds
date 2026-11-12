@@ -23,10 +23,12 @@
 - **`DdsFrame`, `LocalDdsFrame`, `ddsFrame()`** — 틀이 정한 것. 화면은 재지 않고 이것을 읽는다.
 - **`DdsWindowWidth`, `ddsWindowWidth()`, `DdsWindowWidth.gutter`** — 600과 840 기준의 Compact / Medium /
   Expanded, 옆 여백 16 / 24 / 24.
-- **`DdsScaffold(topBar, modifier, bottomTabs)`** — 틀 안의 화면 하나. 예전 `DdsScaffold(topBar, navItems, …)`는
-  그대로다.
+- **`DdsScaffold(topBar, modifier, bottomTabs)`** — 틀 안의 화면 하나. 안쪽 여백이 이미 비켜 준 시스템 영역은
+  내용에서 쓴 것으로 표시해, 안에 둔 `DdsCenteredColumn`이나 `imePadding()`이 두 번 비우지 않는다. 예전
+  `DdsScaffold(topBar, navItems, …)`는 그대로다.
 - **`DdsBodyColumn`, `Modifier.ddsBody()`, `Modifier.ddsBodyLines()`, `DdsBodyDefaults`** — 화면마다 본문 기둥
-  하나. 여백 포함 680dp를 넘지 않고, 레일과 목록이 남긴 자리의 가운데에 선다.
+  하나. 여백 포함 680dp를 넘지 않고, 레일과 목록이 남긴 자리의 가운데에 선다. `paneTitle`은 화면이 들어올 때
+  화면 낭독기가 말할 화면 이름이다(`DdsCenteredColumn`도 같다).
 - **`DdsTopBar(onBack, backEnabled, backDescription, columnMax)`** — 상단 줄이 본문의 선에 선다. `onBack`을 주면
   화살표를 그리고 선에 맞춘다. **`ddsBarNeedsTwoLines()`** — 두 줄 판단. 틀 안에서는 `barTitles`로 창 전체에
   대해 정한다(104dp).
@@ -47,12 +49,16 @@ androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
 
 **버전만 올려도 달라지는 것**
 
-0.6.0으로 컴파일되던 코드는 0.7.0으로도 컴파일된다. 아무것도 바꾸지 않아도 이렇게 보인다.
+0.6.0으로 컴파일되던 코드는 0.7.0으로도 컴파일된다. 예외가 하나 있다. `DdsTopBar(title, Modifier, { 로고 },
+{ 동작 })`처럼 동작을 자리로 넘기는 호출은 컴파일되지 않는다. 네 번째 인자가 이제 `onBack`이기 때문이다.
+`actions`를 이름으로 넘기거나 끝의 람다로 넘긴다. `DdsTopBar` 인자의 변경은 바이너리 호환도 깨진다. 0.6.0에
+맞춰 컴파일한 라이브러리가 `DdsTopBar`를 부르면 0.7.0에 맞춰 다시 빌드해야 한다. 아무것도 바꾸지 않아도 이렇게
+보인다.
 
 - **`DdsTopBar`.** 넓은 창에서 내용이 본문 기둥 폭(680dp)으로 가운데에 모인다. 아래 선과 바탕은 여전히 영역
   전체 폭이다. 옆 여백이 창 폭 600부터 24가 된다(전에는 어디서나 16). `leading` 로고 뒤 제목이 시작선에서
   40dp 뒤에서 시작한다. `leading`으로 뒤로 버튼을 넣던 코드는 그대로 동작하지만 선에 맞지 않으니 `onBack`으로
-  옮긴다.
+  옮긴다. 동작 아이콘은 나란히 붙는다. 48dp 터치 영역이 맞닿는다(0.6.0에서는 12dp 떨어져 있었다).
 - **`DdsBottomBar`, `DdsNavRail`.** 라벨이 한 줄에서 잘리지 않고 두 줄까지 쓰며, 탭 줄이나 레일 항목이 그만큼
   높아진다. 레일 폭은 늘 80이다. 글자 200%에서 세 줄이 필요한 라벨은 두 번째 줄 뒤에서 잘린다.
 - **가운데 묶음 화면이 움직이고 바탕을 칠한다.** `DdsCenteredColumn`이 본문 기둥처럼 화면과 함께 밀려 들어오고,

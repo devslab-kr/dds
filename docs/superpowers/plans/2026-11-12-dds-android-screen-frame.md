@@ -341,7 +341,7 @@ public class DdsFrameCheck(private val rule: ComposeTestRule) {
 
 **Files:**
 - Modify: `docs/mobile-native.md` + `.ko.md` (a new "Screen frame / 화면 틀" section with the rules, numbers, the two samples — a Navigation 3 app and a `DdsScreenHost` app — and what was checked; the component table; §10 item 2: the gutter is decided), `android/CHANGELOG.md` + `.ko.md` (0.7.0), `android/README.md` + `.ko.md` (third artifact, install lines, device tests), `README.md` + `README.ko.md` (version line), `docs/decisions.md` (D-052: built, what was verified, what was not), `docs/backlog.md`, `android/gradle.properties` (`VERSION_NAME=0.7.0`), the spec's status line and a "달라진 것" list if the build departed from it
-- Create: shared note `C:\Users\jlc48\AppData\Roaming\Claude\side-session-notes\local_87d93ef3-1438-478e-805e-3de580369000\dds-android-0.7.0-consumer.md`
+- Create: shared note `dds-android-0.7.0-consumer.md`
 
 - [ ] **Step 1:** Write the guide section and the changelog from what was built and measured, saying plainly what was not checked (a physical phone; the back swipe; light on a phone). List the visible changes of spec §10 under "If you move up".
 - [ ] **Step 2:** Write the consumer note: the local Maven build (`publishToMavenLocal`, commit hash, time), the JeongsanNow mapping table of spec §10, the three windows to check on the phone and what to look for (start lines, title position, rail through a change, bottom tabs covered, large text), and that nothing is on Maven Central yet.

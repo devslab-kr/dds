@@ -935,13 +935,13 @@ SM-F971N의 창 세 가지에서는 이렇게 된다(이 크기로 고정한 에
 | `DdsWindowWidth`, `ddsWindowWidth(width)`, `DdsWindowWidth.gutter` | 600과 840을 기준으로 Compact / Medium / Expanded. 각각의 옆 여백 |
 | `DdsAppFrame(navItems, selectedIndex, onSelect, navigation, barTitles, barActions, barReserve, list) { … }` | 앱에 하나. 화면 전환기(`NavDisplay`나 `DdsScreenHost`) 바깥에 둔다. 레일과 고정 목록을 그린다. 그것들이 나타나거나 사라져도 내용은 제자리에 있다(접거나 돌려도 스크롤 위치와 입력한 글자가 남는다). 옆쪽의 카메라 구멍을 피한다. 오른쪽에서 왼쪽으로 쓰는 언어에서는 뒤집힌다. `navigation = false`면 메뉴를 모두 끈다(로그인 전, 스캔, 작성 화면). 바탕은 `bgDefault` |
 | `DdsFrame`, `LocalDdsFrame`, `ddsFrame()` | 틀이 정한 것: `width`, `rail`, `listPinned`, `tallBar`. 틀 밖에서 `ddsFrame()`은 창으로 정한 `width`만 갖는다 |
-| `DdsScaffold(topBar, modifier, bottomTabs) { padding -> … }` | 틀 안의 화면 하나. 최상위 화면은 `bottomTabs = true`. 탭은 Compact 창에서만, 틀이 받은 항목과 선택으로 그려진다. 예전 `DdsScaffold(topBar, navItems, …)`도 그대로 동작하지만 틀 안에 넣지 않는다(레일이 둘이 된다) |
+| `DdsScaffold(topBar, modifier, bottomTabs) { padding -> … }` | 틀 안의 화면 하나. 최상위 화면은 `bottomTabs = true`. 탭은 Compact 창에서만, 틀이 받은 항목과 선택으로 그려진다. `padding`이 이미 비켜 준 시스템 영역(상단 줄 밑의 상태 표시줄, 내용 밑의 내비게이션 바)은 내용에서 쓴 것으로 표시한다. 그래서 안에 둔 `DdsCenteredColumn`이나 `imePadding()`이 그만큼을 다시 비우지 않는다. 예전 `DdsScaffold(topBar, navItems, …)`도 그대로 동작하지만 틀 안에 넣지 않는다(레일이 둘이 된다) |
 | `DdsTopBar(title, leading, onBack, backEnabled, backDescription, columnMax, actions)` | 본문의 선에 선다. `onBack`을 주면 화살표를 그리고 선에 맞춘다. `leading`은 로고 자리(폭 최소 28). 둘 다 주면 화살표만. 화면이 본문 최대 폭을 바꾸면 `columnMax`에 같은 값 |
 | `ddsBarNeedsTwoLines(areaWidth, titles, actions, reserve, columnMax)` | 틀이 하는 두 줄 판단. 틀을 쓰지 않는 앱용 |
-| `DdsBodyColumn(modifier, scroll, max, spacing, contentPadding) { … }` | 상단 줄 아래 본문 전체. 스크롤되는 한 단으로 가운데에 놓이고, 네 방향 여백이 옆 여백 값이고, 블록 사이가 24. 화면이 들어올 때 밀려 들어온다(`ddsScreenContent()`가 붙어 있으니 다시 붙이지 않는다) |
+| `DdsBodyColumn(modifier, scroll, max, spacing, contentPadding, paneTitle) { … }` | 상단 줄 아래 본문 전체. 스크롤되는 한 단으로 가운데에 놓이고, 네 방향 여백이 옆 여백 값이고, 블록 사이가 24. 화면이 들어올 때 밀려 들어온다(`ddsScreenContent(paneTitle)`가 붙어 있으니 다시 붙이지 않는다). `paneTitle`에 상단 줄 제목을 준다. 화면이 바뀔 때 화면 낭독기가 그 이름을 말한다(§8.1) |
 | `Modifier.ddsBody(max)` | 본문을 직접 짜는 화면용. 폭을 제한하고 검사용 표시를 단다. 가운데 놓기와 여백은 화면이 한다 |
 | `Modifier.ddsBodyLines(max)` | 본문은 아니지만 본문의 선에 서야 하는 것용: 진행 표시줄, 단계 표시, 아래쪽 버튼 줄. 폭과 옆 여백만 주고 표시는 달지 않는다 |
-| `DdsCenteredColumn(modifier, max) { … }`, `DdsCenteredTitle(title, modifier, description)` | 한 가지 일만 하는 화면. 묶음은 시스템 줄과 키보드가 남긴 자리의 가운데에 놓인다(입력칸이 키보드 위에 남는다). 옆은 창의 여백, 위·아래와 조각 사이는 24. 자리보다 길면 위에서 시작해 스크롤된다. 자리 전체에 페이지 바탕을 칠하고 묶음은 그 위로 밀려 들어온다. 제목은 가운데 정렬에 줄 길이가 고르고, 적어 넣은 줄바꿈을 지키고, 제목 하나로 읽힌다 |
+| `DdsCenteredColumn(modifier, max, paneTitle) { … }`, `DdsCenteredTitle(title, modifier, description)` | 한 가지 일만 하는 화면(본문 기둥처럼 `paneTitle`에 화면 이름을 준다). 묶음은 시스템 줄과 키보드가 남긴 자리의 가운데에 놓인다(입력칸이 키보드 위에 남는다). 옆은 창의 여백, 위·아래와 조각 사이는 24. 자리보다 길면 위에서 시작해 스크롤된다. 자리 전체에 페이지 바탕을 칠하고 묶음은 그 위로 밀려 들어온다. 제목은 가운데 정렬에 줄 길이가 고르고, 적어 넣은 줄바꿈을 지키고, 제목 하나로 읽힌다 |
 | `DdsPaneList { … }`, `DdsPaneItem(label, selected, onClick, modifier, enabled)` | 영역 목록의 줄. 고른 줄은 레일에서 고른 항목처럼 보인다(옅은 브랜드 바탕, 브랜드 색, 굵게). 나머지는 레일과 같은 회색(`textSecondary`). 높이 48, 큰 글자 모드에서 56. 줄의 글자가 목록의 여백 선에 선다. "선택됨, 7개 중 2번째"로 읽힌다. 목록은 스크롤된다 |
 | `DdsTestTags` | 부품이 스스로 달고 검사가 읽는 표시: `Body`, `TopBarTitle`, `Rail`, `ListPane`, `BottomTabs`, `Centered`, `CenteredArea` |
 | `kr.devslab:dds-compose-testing` | `DdsFrameCheck`(§13.6) |
@@ -949,6 +949,15 @@ SM-F971N의 창 세 가지에서는 이렇게 된다(이 크기로 고정한 에
 레일과 하단 탭(틀 안이든 밖이든): 라벨은 두 줄까지 쓰고 항목도 그만큼 높아진다. 그래서 글자 200%에서도
 "거래처 매출"이 잘리지 않는다. 200%에서 세 줄이 필요한 라벨은 두 번째 줄 끝에서 말줄임표로 잘리고, 레일은
 80 그대로다. 항목이 다 들어가지 않으면 레일이 스크롤된다.
+
+**틀 없이 두 줄 상단 줄 쓰기.** `DdsTopBar`는 `ddsFrame().tallBar`를 읽는데, 이 값은 틀만 정한다.
+`DdsAppFrame`을 쓰지 않는 앱은 `ddsBarNeedsTwoLines`로 판단하고, 틀이 하는 것처럼 화면들에 건넨다.
+
+```kotlin
+val width = ddsFrame().width
+val tall = ddsBarNeedsTwoLines(areaWidth = maxWidth, titles = everyBarTitle)  // BoxWithConstraints 안에서
+CompositionLocalProvider(LocalDdsFrame provides DdsFrame(width, tallBar = tall)) { Screens() }
+```
 
 **고정 목록 쓰는 법.** 좁은 창에서 한 화면으로 여는 그 목록과 같은 것이다. 앱은 한 번만 짠다. 고정 목록
 옆에서 줄을 고르면 화면을 바꿔 끼운다(밀리지 않는다. `DdsMove.Tab`이 그렇게 한다). 그 화면에는 뒤로
@@ -981,12 +990,12 @@ fun HomeScreen() = DdsScaffold(
     topBar = { DdsTopBar("홈", leading = { AppMark() }) { DdsIconButton(DdsIcons.Search, "검색", onClick = {}) } },
     bottomTabs = true,
 ) { padding ->
-    Box(Modifier.padding(padding)) { DdsBodyColumn { /* 블록 */ } }
+    Box(Modifier.padding(padding)) { DdsBodyColumn(paneTitle = "홈") { /* 블록 */ } }
 }
 
 @Composable
 fun OrderScreen(onBack: () -> Unit) = DdsScaffold(topBar = { DdsTopBar("주문", onBack = onBack) }) { padding ->
-    Box(Modifier.padding(padding)) { DdsBodyColumn { /* 블록 */ } }
+    Box(Modifier.padding(padding)) { DdsBodyColumn(paneTitle = "주문") { /* 블록 */ } }
 }
 
 @Composable
@@ -1039,6 +1048,12 @@ androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
 
 `dds-compose`, Compose 테스트 규칙(`ui-test-junit4`, 버전은 이 꾸러미가 적은 Compose BOM이 정한다),
 그리고 **Espresso 3.7.0**을 함께 가져온다. Compose BOM이 가져오는 Espresso(3.5.0)는 Android 17에서 돌지 않는다.
+`createComposeRule()`을 쓰는 테스트는 그 규칙이 띄우는 빈 액티비티도 필요하다. 이것은 앱이 직접 더한다
+(`dds-compose`의 테스트도 그렇게 한다).
+
+```kotlin
+debugImplementation("androidx.compose.ui:ui-test-manifest")   // 버전은 앱의 Compose BOM이 정한다
+```
 
 기기 테스트에서 앱의 실제 화면을 하나씩 열고 하나씩 본다.
 
@@ -1085,7 +1100,8 @@ check.assertSameLines()
 
 - 틀, 본문, 상단 줄, 가운데 묶음, 목록 줄, 검사 자체, 그리고 견본 앱 하나(탭 둘, 들어간 화면, 목록이 있는
   영역, 메뉴를 끈 화면, 로그인 묶음)를 475×751, 704×933, 933×704에서 기기 테스트로 잰다. 제품이 정한 페이지
-  색에서도 쟀다. 새 테스트는 모두 실패하는 것을 먼저 보았다. 전체 기기 테스트는 실물 폰(SM-F971N, Android
+  색에서도 쟀다. 새 테스트는 모두 실패하는 것을 먼저 보았다. 예외는 견본 앱 테스트의 두 부분이다 — 페이지 색
+  검사와 `assertSameLines` 호출은 실패하는 것을 본 적이 없다. 전체 기기 테스트는 실물 폰(SM-F971N, Android
   17)에서 돌렸다. 개수와 창 크기는 변경 기록에 있다.
 - 화면이 바뀌는 동안, 시계를 멈추고 프레임마다: 레일은 자리도 픽셀도 그대로다. 탭 화면 위로 연 화면은 빈
   프레임 없이 하단 탭을 덮는다. 가운데 묶음 화면은 모든 프레임에서 아래 화면을 페이지 바탕으로 덮는다.
@@ -1109,4 +1125,6 @@ check.assertSameLines()
 
 알고도 그대로 둔 것: 상단 줄 끝의 글자 버튼은 끝선보다 12dp 나간다(끝에 12dp를 준다). 두 줄 판단은 시스템이
 알려 주는 옆쪽 구멍을 자리에서 뺀다. 그래서 틀 위의 무언가가 이미 그만큼 비켜 놓았다면 두 번 빠지고, 두 줄이
-몇 dp 일찍 된다. 좁은 상단 줄에 아이콘이 일곱 개 넘게 있으면 제목과 겹치는지 재지 않는다.
+몇 dp 일찍 된다. 좁은 상단 줄에 아이콘이 일곱 개 넘게 있으면 제목과 겹치는지 재지 않는다. Expanded 창에서 두 줄 판단은 고정
+목록이 보일 때는 그 옆에 남은 자리를, 아닐 때는 목록 없는 자리를 잰다. 그래서 긴 제목 하나가 목록 있는
+영역에서는 상단 줄을 높이고 다른 곳에서는 낮게 둘 수 있다.

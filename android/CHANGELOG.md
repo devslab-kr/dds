@@ -28,16 +28,18 @@ local build and check it on its phone in three windows (folded 475×751, unfolde
   read instead of measuring.
 - **`DdsWindowWidth`, `ddsWindowWidth()`, `DdsWindowWidth.gutter`** — Compact / Medium /
   Expanded at 600 and 840; the gutter 16 / 24 / 24.
-- **`DdsScaffold(topBar, modifier, bottomTabs)`** — one screen inside the frame. The old
-  `DdsScaffold(topBar, navItems, …)` is unchanged.
+- **`DdsScaffold(topBar, modifier, bottomTabs)`** — one screen inside the frame. The system
+  insets its padding already covers are marked used for the content, so a `DdsCenteredColumn`
+  or an `imePadding()` inside does not pad them twice. The old `DdsScaffold(topBar, navItems, …)`
+  is unchanged.
 - **`DdsBodyColumn`, `Modifier.ddsBody()`, `Modifier.ddsBodyLines()`, `DdsBodyDefaults`**
   — one body column per screen, no wider than 680dp with its gutters, in the middle of what
-  the rail and the list leave.
+  the rail and the list leave. `paneTitle` names the screen for a screen reader when it arrives.
 - **`DdsTopBar(onBack, backEnabled, backDescription, columnMax)`** — the bar stands on the
   body's lines; `onBack` draws the arrow and lines it up. **`ddsBarNeedsTwoLines()`** — the
   two-line decision; inside a frame `barTitles` makes it for the whole window (104dp).
 - **`DdsCenteredColumn`, `DdsCenteredTitle`** — a screen with one thing to do: one block,
-  at most 400dp, in the middle of what the bars and the keyboard leave.
+  at most 400dp, in the middle of what the bars and the keyboard leave. Takes `paneTitle` too.
 - **`DdsPaneList`, `DdsPaneItem`** — the rows of a pinned list.
 - **`DdsTestTags`** — the tags the parts put on themselves.
 - **New artifact `kr.devslab:dds-compose-testing`** — `DdsFrameCheck(rule).look(name, kind)`
@@ -54,14 +56,19 @@ androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
 
 **If you move up**
 
-Code that compiled with 0.6.0 compiles with 0.7.0. What looks different without changing
-anything:
+Code that compiled with 0.6.0 compiles with 0.7.0, with one exception: a `DdsTopBar` call
+that passes its actions by position, `DdsTopBar(title, Modifier, { mark }, { actions })`,
+does not, because the fourth parameter is now `onBack`. Pass `actions` by name or as the
+trailing lambda. The change to `DdsTopBar`'s parameters is also binary-incompatible: a
+library compiled against 0.6.0 that calls `DdsTopBar` must be rebuilt against 0.7.0. What
+looks different without changing anything:
 
 - **`DdsTopBar`.** On a wide window its content gathers into the body column's width
   (680dp) in the middle; the line under it and its background still span the area. The side
   gutter is 24 from a 600dp window (was 16 everywhere). A title after a `leading` mark
   starts 40dp after the start line. Code that passed a back button as `leading` still works
-  but is not on the lines; move it to `onBack`.
+  but is not on the lines; move it to `onBack`. Action icons sit side by side, their 48dp
+  touch areas touching; in 0.6.0 they were 12dp apart.
 - **`DdsBottomBar`, `DdsNavRail`.** A label is no longer cut at one line; it takes up to
   two, and the bar or the rail item grows with it. The rail is always 80 wide. At 200% font
   a label that needs a third line is cut after the second.

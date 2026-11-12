@@ -988,13 +988,13 @@ emulator forced to these sizes, and in the device tests):
 | `DdsWindowWidth`, `ddsWindowWidth(width)`, `DdsWindowWidth.gutter` | Compact / Medium / Expanded at 600 and 840; the gutter of each |
 | `DdsAppFrame(navItems, selectedIndex, onSelect, navigation, barTitles, barActions, barReserve, list) { … }` | Once per app, outside the screen switcher (a `NavDisplay` or a `DdsScreenHost`). Draws the rail and the pinned list; keeps the content where it is when they appear or go (on a fold or a rotation the scroll position and typed text stay); keeps screens clear of a cutout at the sides; mirrors in right-to-left. `navigation = false` turns every menu off (before sign-in, a scanner, a writing screen). Its background is `bgDefault` |
 | `DdsFrame`, `LocalDdsFrame`, `ddsFrame()` | What the frame decided: `width`, `rail`, `listPinned`, `tallBar`. Outside a frame `ddsFrame()` has only `width`, from the window |
-| `DdsScaffold(topBar, modifier, bottomTabs) { padding -> … }` | One screen inside the frame. `bottomTabs = true` on top-level screens: the tabs show on a Compact window only, with the items and selection the frame was given. The old `DdsScaffold(topBar, navItems, …)` still works; do not put it inside a frame (two rails) |
+| `DdsScaffold(topBar, modifier, bottomTabs) { padding -> … }` | One screen inside the frame. `bottomTabs = true` on top-level screens: the tabs show on a Compact window only, with the items and selection the frame was given. The system insets its `padding` already covers (the status bar under the top bar, the navigation bar under the content) are marked used for the content, so a `DdsCenteredColumn` or an `imePadding()` inside does not pad them again. The old `DdsScaffold(topBar, navItems, …)` still works; do not put it inside a frame (two rails) |
 | `DdsTopBar(title, leading, onBack, backEnabled, backDescription, columnMax, actions)` | Stands on the body's lines. Pass `onBack` and it draws the arrow and lines it up; a `leading` is a mark (at least 28 wide). With both, only the arrow. `columnMax` is the body's widest, if a screen changes it |
 | `ddsBarNeedsTwoLines(areaWidth, titles, actions, reserve, columnMax)` | The frame's two-line decision, for an app without a frame |
-| `DdsBodyColumn(modifier, scroll, max, spacing, contentPadding) { … }` | The whole body under the top bar: one scrolling column, centered, the gutter on all four sides, 24 between blocks. It slides when the screen arrives (`ddsScreenContent()` is applied; do not add it again) |
+| `DdsBodyColumn(modifier, scroll, max, spacing, contentPadding, paneTitle) { … }` | The whole body under the top bar: one scrolling column, centered, the gutter on all four sides, 24 between blocks. It slides when the screen arrives (`ddsScreenContent(paneTitle)` is applied; do not add it again). Pass the top bar's title as `paneTitle`: a screen reader says it when the screen changes (§8.1) |
 | `Modifier.ddsBody(max)` | For a screen that lays its body out itself: limits the width and tags it for the check. Centering and padding are the screen's |
 | `Modifier.ddsBodyLines(max)` | For something that is not the body but stands on its lines: a progress bar, a step bar, a row of buttons at the bottom. Width and gutter, no tag |
-| `DdsCenteredColumn(modifier, max) { … }`, `DdsCenteredTitle(title, modifier, description)` | A screen with one thing to do. The block is centered in what the bars and the keyboard leave (a field stays above the keyboard), with the window's gutter at its sides and 24 above, below and between its pieces; taller than the room, it starts at the top and scrolls. It paints the page behind its whole area and slides in over it. The title is centered with lines of even length, keeps the line breaks written into it, and is read as one heading |
+| `DdsCenteredColumn(modifier, max, paneTitle) { … }`, `DdsCenteredTitle(title, modifier, description)` | A screen with one thing to do (give it the screen's name as `paneTitle`, as a body column). The block is centered in what the bars and the keyboard leave (a field stays above the keyboard), with the window's gutter at its sides and 24 above, below and between its pieces; taller than the room, it starts at the top and scrolls. It paints the page behind its whole area and slides in over it. The title is centered with lines of even length, keeps the line breaks written into it, and is read as one heading |
 | `DdsPaneList { … }`, `DdsPaneItem(label, selected, onClick, modifier, enabled)` | The rows of an area's list. A chosen row looks like a chosen rail item (pale brand face, brand color, heavier); the others are in the rail's grey (`textSecondary`). 48 high, 56 in large text mode. The row's text stands on the list's gutter line. Read as "selected, 2 of 7". The list scrolls |
 | `DdsTestTags` | The tags the parts put on themselves and the check reads: `Body`, `TopBarTitle`, `Rail`, `ListPane`, `BottomTabs`, `Centered`, `CenteredArea` |
 | `kr.devslab:dds-compose-testing` | `DdsFrameCheck` (§13.6) |
@@ -1003,6 +1003,16 @@ The rail and the bottom tabs (inside a frame or not): labels take up to two line
 item grows with them, so "거래처 매출" at 200% font is not cut. A label that needs three
 lines at 200% is cut with an ellipsis after the second; the rail stays 80. The rail
 scrolls when its items do not fit.
+
+**The tall bar without a frame.** `DdsTopBar` reads `ddsFrame().tallBar`, which only a frame
+sets. An app without `DdsAppFrame` makes the decision with `ddsBarNeedsTwoLines` and hands it
+to its screens the way the frame does:
+
+```kotlin
+val width = ddsFrame().width
+val tall = ddsBarNeedsTwoLines(areaWidth = maxWidth, titles = everyBarTitle)  // in a BoxWithConstraints
+CompositionLocalProvider(LocalDdsFrame provides DdsFrame(width, tallBar = tall)) { Screens() }
+```
 
 **How the pinned list is used.** It is the same list that is a screen of its own on a
 narrower window; the app writes it once. Beside the pinned list, choosing a row swaps the
@@ -1037,12 +1047,12 @@ fun HomeScreen() = DdsScaffold(
     topBar = { DdsTopBar("홈", leading = { AppMark() }) { DdsIconButton(DdsIcons.Search, "검색", onClick = {}) } },
     bottomTabs = true,
 ) { padding ->
-    Box(Modifier.padding(padding)) { DdsBodyColumn { /* blocks */ } }
+    Box(Modifier.padding(padding)) { DdsBodyColumn(paneTitle = "홈") { /* blocks */ } }
 }
 
 @Composable
 fun OrderScreen(onBack: () -> Unit) = DdsScaffold(topBar = { DdsTopBar("주문", onBack = onBack) }) { padding ->
-    Box(Modifier.padding(padding)) { DdsBodyColumn { /* blocks */ } }
+    Box(Modifier.padding(padding)) { DdsBodyColumn(paneTitle = "주문") { /* blocks */ } }
 }
 
 @Composable
@@ -1097,7 +1107,12 @@ androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
 
 It brings `dds-compose`, the Compose test rule (`ui-test-junit4`, versioned by the Compose
 BOM it names) and **Espresso 3.7.0**: the Espresso the Compose BOM brings (3.5.0) does not
-run on Android 17.
+run on Android 17. A test that uses `createComposeRule()` also needs the empty activity it
+starts, which the app adds itself, as `dds-compose`'s own tests do:
+
+```kotlin
+debugImplementation("androidx.compose.ui:ui-test-manifest")   // versioned by the app's Compose BOM
+```
 
 In a device test, open the app's real screens one by one and look at each:
 
@@ -1150,7 +1165,9 @@ Checked:
 - Device tests of the frame, the body, the top bar, the centered block, the list rows,
   the check itself, and a whole sample app (two tabs, an inner screen, an area with a list,
   a whole-window screen, a sign-in block) at 475×751, 704×933 and 933×704, also under a
-  product's own page color. Every new test was first seen failing. The whole suite ran on
+  product's own page color. Every new test was first seen failing, except two parts of the
+  sample-app test: its page-color assertions and its `assertSameLines` call were never seen
+  failing. The whole suite ran on
   the phone (SM-F971N, Android 17); the count and the window are in the changelog.
 - During a change of screen, with the clock held, frame by frame: the rail keeps its place
   and every pixel; a screen opened over a tab screen covers the bottom tabs with no empty
@@ -1181,4 +1198,6 @@ Known and left as is: a text button at the end of a top bar hangs 12dp past the 
 (give it 12dp at its end); the two-line decision takes the side cutouts off the room as
 the system reports them, so if something above the frame has already made room for them
 they are taken off twice and two lines come a few dp early; seven or more icons on a
-narrow top bar are not measured against the title.
+narrow top bar are not measured against the title. At Expanded the two-line decision measures
+the room beside the pinned list when the list is shown and the room without it otherwise, so a
+long title can make the bar tall in an area with a list and short elsewhere.
