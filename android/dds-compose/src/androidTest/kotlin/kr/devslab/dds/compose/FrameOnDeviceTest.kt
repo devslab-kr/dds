@@ -63,6 +63,7 @@ import kr.devslab.dds.compose.layout.DdsTestTags
 import kr.devslab.dds.compose.layout.DdsWindowWidth
 import kr.devslab.dds.compose.layout.ddsFrame
 import kr.devslab.dds.compose.layout.ddsWindowWidth
+import kr.devslab.dds.compose.layout.gutter
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsBorder
@@ -153,7 +154,12 @@ class FrameOnDeviceTest {
 
     @Test
     fun aLongLabelIsShownOnTwoLinesNotCutInTheBottomTabs() {
-        shown(scale = 2f) { DdsBottomBar(items(long, "홈", "설정", "더보기"), 0, {}, Modifier) }
+        // A folded phone's window, so each tab's share is narrow whatever the device's own window is.
+        shown(scale = 2f) {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(phone)) {
+                DdsBottomBar(items(long, "홈", "설정", "더보기"), 0, {}, Modifier)
+            }
+        }
         val layout = assertLabelIsTwoLinesInside(long, DdsTestTags.BottomTabs)
         assertFalse("the label ran out of room", layout.hasVisualOverflow)
     }
@@ -846,6 +852,7 @@ class FrameOnDeviceTest {
         size: () -> DpSize,
         scale: Float = 1f,
         inFrame: Boolean = true,
+        onWindow: (Dp) -> Unit = {},
         content: @Composable ColumnScope.() -> Unit,
     ) {
         rule.setContent {
@@ -856,6 +863,8 @@ class FrameOnDeviceTest {
                 DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(noInsets)) {
                     DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size())) {
                         DdsTheme {
+                            // The window as the library reads it outside a frame: LocalWindowInfo in this density.
+                            onWindow(with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() })
                             if (inFrame) {
                                 DdsAppFrame(four, 0, {}, navigation = false) { DdsCenteredColumn(content = content) }
                             } else {
@@ -908,10 +917,17 @@ class FrameOnDeviceTest {
 
     @Test
     fun theOneBlockWorksWithoutAFrame() {
-        centered({ small }, inFrame = false) { Text("한 가지 일", Modifier.fillMaxWidth()) }
+        // Outside a frame the gutter comes from the window (LocalWindowInfo), which a forced size does not change:
+        // the expected gutter is the one of the window the test really gets, classified as the library does.
+        var window = 0.dp
+        centered({ small }, inFrame = false, onWindow = { window = it }) { Text("한 가지 일", Modifier.fillMaxWidth()) }
+        val gutter = ddsWindowWidth(window).gutter
         val area = bounds(DdsTestTags.CenteredArea)
-        assertEquals("the area is the window", small.width.value, (area.right - area.left).value, 1f)
-        assertTheBlockIsInTheMiddle("with no frame", area.right - area.left - DdsScreen.gutter.dp * 2)
+        val areaWidth = area.right - area.left
+        assertEquals("the area is the forced size", small.width.value, areaWidth.value, 1f)
+        val width = minOf(DdsScreen.centeredMax.dp, areaWidth - gutter * 2)
+        assertTheBlockIsInTheMiddle("with no frame (window ${window.value}dp)", width)
+        assertNear("with no frame the block keeps the window's gutter (${gutter.value}dp)", area.left + gutter, bounds(DdsTestTags.Centered).left)
     }
 
     @Test
