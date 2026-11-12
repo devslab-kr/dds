@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Contrast exceptions a product may declare. DDS rejects a brand whose text is
+     below 4.5:1; an app that wants one of these pairs lower sets its bool to true
+     by defining the same name in its own resources: res/values for the light
+     theme, res/values-night for the dark theme. A bool set only in res/values
+     applies to the dark theme too, unless res/values-night sets it back to false.
+     Only the declared pair is let through. DdsBrand.fromResources reads them. -->
+<resources>
+    <!-- textOnBrand on bgBrand: the primary button's label. -->
+    <bool name="dds_allow_contrast_text_on_brand">false</bool>
+    <!-- textBrand on the page and on bgBrandSubtle: text buttons, links, selected tabs. -->
+    <bool name="dds_allow_contrast_text_brand">false</bool>
+    <!-- Body and secondary text on the backgrounds a product may repaint. -->
+    <bool name="dds_allow_contrast_text_on_background">false</bool>
+</resources>

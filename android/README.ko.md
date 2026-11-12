@@ -17,9 +17,12 @@
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.5.0") // dds-android-tokens를 함께 가져온다
+    implementation("kr.devslab:dds-compose:0.6.0") // dds-android-tokens를 함께 가져온다
 }
 ```
+
+0.6.0은 아직 Maven Central에 없고 0.5.0이 올라가 있다. 배포 전까지는 Maven Central의 0.5.0을 쓰거나
+로컬 저장소의 0.6.0을 쓴다(아래).
 
 ```kotlin
 setContent {
@@ -36,7 +39,10 @@ setContent {
 [가이드 §12](../docs/mobile-native.ko.md)에 있다.
 
 앱의 메인 색은 색 리소스로 덮어쓴다. XML과 Compose가 함께 바뀐다
-([가이드 §3.1](../docs/mobile-native.ko.md)).
+([가이드 §3.1](../docs/mobile-native.ko.md)). 페이지 바탕, 옅은 바탕, 카드 바탕도 같은
+방법으로 덮어쓴다(`dds_color_bg_default`, `dds_color_bg_subtle`, `dds_color_bg_elevated`).
+글자 대비가 4.5:1에 못 미치면 거부된다. 앱이 그 조합의 예외를 적으면
+통과한다(`dds_allow_contrast_*`). 적는 법은 가이드에 있다.
 
 ```xml
 <!-- app/src/main/res/values/dds_brand.xml -->

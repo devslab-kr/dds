@@ -21,11 +21,11 @@ import kr.devslab.dds.tokens.DdsLightColors
  */
 @Immutable
 public class DdsColors internal constructor(
-    /** Screen background. */
+    /** Screen background. The product's, if its brand names one. */
     public val bgDefault: Color,
-    /** Quiet grouping background (a flat card inside a sheet). */
+    /** Quiet grouping background (a flat card inside a sheet). The product's, if its brand names one. */
     public val bgSubtle: Color,
-    /** Cards, sheets, dialogs, menus. */
+    /** Cards, sheets, dialogs, menus. The product's, if its brand names one. */
     public val bgElevated: Color,
     /** Filled brand face — the primary button. The same in light and dark. */
     public val bgBrand: Color,
@@ -77,9 +77,9 @@ public class DdsColors internal constructor(
 internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
     if (dark) {
         DdsColors(
-            bgDefault = Color(DdsDarkColors.bgDefault),
-            bgSubtle = Color(DdsDarkColors.bgSubtle),
-            bgElevated = Color(DdsDarkColors.bgElevated),
+            bgDefault = pageBackground(brand.dark, night = true),
+            bgSubtle = subtleBackground(brand.dark, night = true),
+            bgElevated = cardBackground(brand.dark, night = true),
             bgBrand = brand.dark.bgBrand,
             bgBrandHover = brand.dark.bgBrandHover,
             bgBrandSubtle = brand.dark.bgBrandSubtle,
@@ -109,9 +109,9 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
         )
     } else {
         DdsColors(
-            bgDefault = Color(DdsLightColors.bgDefault),
-            bgSubtle = Color(DdsLightColors.bgSubtle),
-            bgElevated = Color(DdsLightColors.bgElevated),
+            bgDefault = pageBackground(brand.light, night = false),
+            bgSubtle = subtleBackground(brand.light, night = false),
+            bgElevated = cardBackground(brand.light, night = false),
             bgBrand = brand.light.bgBrand,
             bgBrandHover = brand.light.bgBrandHover,
             bgBrandSubtle = brand.light.bgBrandSubtle,
@@ -147,8 +147,13 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
  * Material's `primary` is both a fill and a text color; DDS splits those into
  * `bg.brand` and `text.brand`. `primary` takes the *text* one: that keeps
  * every stock Material component (text buttons, selected tabs, progress
- * indicators, links) above 4.5:1 on the page. The filled brand face is
- * [DdsColors.bgBrand], used directly by DDS components.
+ * indicators, links) above 4.5:1 on the page, unless the product declares
+ * [DdsContrastPair.TextBrand]. The filled brand face is [DdsColors.bgBrand],
+ * used directly by DDS components.
+ *
+ * `background` and `surface` are the page background, and the container roles
+ * are the card and subtle backgrounds, so a product that repaints those three
+ * repaints stock Material components with them.
  *
  * `secondaryContainer` is the pale brand background because Material uses it for
  * *selection* (the navigation bar pill, a selected chip). Material also uses it

@@ -33,7 +33,7 @@ Minimum Android 8 (API 26). Usage and versioning: [`android/README.md`](../andro
 1. **Values come only from tokens.** No hex, no `Color(0x…)`, no height or duration number in app code. `[spec §1]`
 2. **Read colors from `DdsTheme.colors`.** Semantic tokens only. `[spec §3.1]`
 3. **Dark is another mapping of the same tokens.** Components never branch on the theme. `[spec §3.1]`
-4. **The only thing an app passes in is its brand color (six tokens).** Everything else is shared by the family. `[spec §3.1, D-012]`
+4. **The only things an app passes in are its brand color (six tokens) and three backgrounds.** Everything else is shared by the family. `[spec §3.1, D-012, D-053]`
 5. **Movement is used only to say what changed.** `[JeongsanNow motion spec]`
 
 ## 2. Motion and detail
@@ -440,10 +440,10 @@ The Motion screen of the `android/catalog` app has every behavior in this sectio
 
 ## 3. Color
 
-### 3.1 Overriding the brand color `[spec §3.1, D-010, D-012]`
+### 3.1 Overriding the brand color and the backgrounds `[spec §3.1, D-010, D-012, D-053]`
 
-The convention is the web's. **An app may replace the six tokens of the brand
-slice and nothing else**; names and count match the web. Pass nothing and you get the DDS default.
+The convention is the web's. **An app may replace the six brand tokens and three
+backgrounds**; the names match the web. Pass nothing and you get the DDS default.
 
 | Token | Android resource | What the product decides |
 | --- | --- | --- |
@@ -453,6 +453,9 @@ slice and nothing else**; names and count match the web. Pass nothing and you ge
 | `color.text.on-brand` | `dds_color_text_on_brand` | text on that face |
 | `color.text.brand` | `dds_color_text_brand` | brand text, links, selected icons |
 | `color.border.focus` | `dds_color_border_focus` | focus ring |
+| `color.bg.default` | `dds_color_bg_default` | the page background (0.6.0) |
+| `color.bg.subtle` | `dds_color_bg_subtle` | the subtle background (0.6.0) |
+| `color.bg.elevated` | `dds_color_bg_elevated` | the background of cards, sheets, dialogs and menus (0.6.0) |
 
 **How to override.** Where the web redefines CSS variables under `[data-brand]`, an
 app redefines the color resources of the same names in its own `res/values`
@@ -472,8 +475,9 @@ may be written (the counterpart of the web's `brand.ts`).
 
 A token that is the same in light and dark (`bg_brand`, `bg_brand_hover`,
 `text_on_brand`) needs one definition in `res/values` and applies to both. A token
-with a dark value of its own (`bg_brand_subtle`, `text_brand`, `border_focus`) must
-also be redefined in `res/values-night`; otherwise the DDS default stays there.
+with a dark value of its own (`bg_brand_subtle`, `text_brand`, `border_focus`, and the
+three backgrounds `bg_default`, `bg_subtle`, `bg_elevated`) must also be redefined in
+`res/values-night`; otherwise the DDS default stays there.
 
 A brand can also be passed in code (`DdsTheme(brand = DdsBrand(light = …, dark = …))`).
 XML resources are then unchanged, so the splash keeps the default color. Prefer resources.
@@ -485,18 +489,106 @@ brand face must exceed 4.5:1. A bright face takes dark text, a dark face white.
   `zinc.950`, so JeongsanNow need not write `on-brand` at all.
 - An app with a dark main color redefines `dds_color_text_on_brand` as white. In
   code, `onBrandFor(bgBrand)` picks by the rule.
-- **`DdsTheme` rejects a brand that breaks the rule.** If any of three pairs is
-  below 4.5:1 it throws, with the measured ratio in the message: text on the face,
-  brand text on the page background, brand text on the pale brand background.
+- **`DdsTheme` rejects a brand that breaks the rule.** If any pair under "What is
+  checked" below is under 4.5:1 it throws, and the app does not start. The message
+  gives the measured ratio and says where and how to declare an exception. A pair the
+  product has declared is not rejected.
 
 How the other five values follow from a main color is not a rule on the web either
 (the product picks them). See §10, item 1.
+
+**The three backgrounds (0.6.0, D-053).** The page background, the subtle background
+and the card background are replaced the same way: redefine the color resource of the
+same name.
+
+```xml
+<!-- res/values/dds_brand.xml — a warm paper page; the card stays DDS's white -->
+<resources>
+    <color name="dds_color_bg_default">#FAF5EB</color>
+</resources>
+```
+
+```xml
+<!-- res/values-night/dds_brand.xml — the dark page is written separately -->
+<resources>
+    <color name="dds_color_bg_default">#12100D</color>
+</resources>
+```
+
+- A background you do not set is DDS's. Change one and the other two stay.
+- `DdsTheme.colors.bgDefault / bgSubtle / bgElevated` and Material's `background` and
+  `surface` roles follow. The top bar, bottom tabs, rail, cards, sheets, dialogs, menus
+  and `DdsScreenHost`'s default background read these values. Only the top bar and the
+  bottom tabs were checked pixel by pixel on a device; for the rest, only the code was
+  read to see that they use the same values.
+- **A background set only in `res/values` changes the light theme only.** DDS has a dark
+  value of its own for each of the three backgrounds, so the dark theme keeps DDS's dark
+  background until the app also defines `dds_color_bg_*` in `res/values-night`. This is
+  the same as for `bg_brand_subtle`, `text_brand` and `border_focus` above.
+- **The dark theme needs a dark background.** Its text is DDS's light text. A light
+  background given to the dark theme (in `res/values-night`, or in the dark
+  `DdsBrandColors`) is rejected, and the message says which background to define.
+- **A background must be opaque.** Contrast cannot be measured on a translucent one. If
+  alpha is not 1, `DdsTheme` rejects it, and no exception lets it through.
+- In code: `DdsBrandColors(bgDefault = …, bgSubtle = …, bgElevated = …)`. A value left
+  out (`Color.Unspecified`) is DDS's. A background passed in code does not reach the
+  splash or the window background (XML).
+
+**What is checked (0.6.0).** In light and in dark separately, against 4.5:1.
+
+| Pair | What is measured |
+| --- | --- |
+| `TextOnBrand` | text (`text.on-brand`) on the brand face (`bg.brand`) |
+| `TextBrand` | brand text (`text.brand`) on the page, the subtle background, the card background and the pale brand background |
+| `TextOnBackground` | body text (`text.primary`) and secondary text (`text.secondary`) on the page, the subtle background and the card background |
+
+0.5.0 checked brand text on the page and the pale brand background only. Body and
+secondary text are DDS's colors, so they can fail only when a product changes a background.
+
+**What is not checked.** The 3:1 edge of a control (D-050). That value was set against
+DDS's own backgrounds. A product that moves a background far from them checks for
+itself that the edge of a text field, a checkbox and a radio still shows. Placeholder
+text (`text.muted`), status colors and line colors are not checked either.
+
+**Declaring an exception (0.6.0, D-053).** To use a pair below 4.5:1 on purpose, name
+the pair. Only a named pair is left unchecked. There is no lower limit and no condition
+on text size. The product that names it answers for how it reads.
+
+In resources (recommended), where the colors are written:
+
+```xml
+<!-- res/values/dds_brand.xml — white on an orange face (about 2.9:1), declared -->
+<resources>
+    <color name="dds_color_bg_brand">#FF6A1F</color>
+    <color name="dds_color_bg_brand_hover">#EB5C14</color>
+    <color name="dds_color_text_on_brand">#FFFFFF</color>
+    <bool name="dds_allow_contrast_text_on_brand">true</bool>
+</resources>
+```
+
+These three colors have one value in DDS, so written once in `res/values` they apply to
+light and dark. `bg_brand_subtle` and `text_brand` stay DDS's (cyan) unless the product
+sets them too, in both `res/values` and `res/values-night`.
+
+| Resource (`bool`, `false` in DDS) | Pair |
+| --- | --- |
+| `dds_allow_contrast_text_on_brand` | `TextOnBrand` |
+| `dds_allow_contrast_text_brand` | `TextBrand` |
+| `dds_allow_contrast_text_on_background` | `TextOnBackground` |
+
+- **An exception written in `res/values` covers the dark theme too.** DDS defines these
+  bools in `values` only, and Android takes from `values` what `values-night` does not
+  have. To have the dark theme checked again, write `false` in `res/values-night`.
+- In code: `DdsBrandColors(…, allow = setOf(DdsContrastPair.TextOnBrand))`, passed to the
+  light and to the dark `DdsBrandColors` separately. Pass it to one and the other is checked.
+- An exception only means something when the product sets `text.on-brand` itself. Left
+  out, the rule picks a color that passes.
 
 **What may be replaced, and what is fixed.**
 
 | May be replaced | Fixed for the family |
 | --- | --- |
-| the six tokens of the brand slice | neutral backgrounds, text and lines; the four status pairs; the type scale; spacing; radii; control heights; motion values; touch size |
+| the six brand tokens; three backgrounds (page, subtle, card); an exception for each of the three text-contrast pairs | text colors, line colors, overlay colors; the four status pairs; the type scale; spacing; radii; control heights; motion values; touch size |
 
 ### 3.2 Using color `[spec §3.1]`
 
@@ -667,7 +759,8 @@ Low vision, at 200% font with large text:
 | Typeface | Latin Geist + Korean Pretendard | Pretendard | Compose picks a font by weight; two families at one weight means only the first is used |
 | Rare Korean syllables | all Pretendard | syllables outside KS X 1001 use the system font | the font files are cut to about 0.5 MB per weight |
 | Color roles | CSS variables | the Material3 role mapping (§3.3) | Material components read color by role |
-| Brand override | `[data-brand]` CSS | color resources of the same names | the platform's override mechanism differs; the six tokens and their names do not |
+| Brand override | `[data-brand]` CSS | color resources of the same names | the platform's override mechanism differs; the six tokens, the three backgrounds and their names do not |
+| Contrast check | none (the rule document only) | `DdsBrand` rejects under 4.5:1; a pair the product declares passes | the web overrides CSS variables and has nothing to stop it (D-053) |
 | System bars | — | transparent, edge to edge | platform convention |
 | Back | browser | system back | platform convention |
 | Modal | Dialog | bottom sheet for choices and actions, Dialog to confirm | `[spec §5]` role mapping |
@@ -751,7 +844,7 @@ all of them (the Parts tab); the web counterpart is named where there is one.
 
 | Component | What it fixes | Web |
 | --- | --- | --- |
-| `DdsButton` (`Primary` / `Secondary` / `Ghost` / `Danger`; `Sm` 40 / `Md` 48 / `Lg` 56), `DdsIconButton` | one height; `bg.brand` + `text.on-brand`; loading keeps the exact size and is not dimmed; disabled at 0.45; 2dp focus ring; an icon button requires a description and is 48 to touch | Button `[spec §4.2]` |
+| `DdsButton` (`Primary` / `Secondary` / `Ghost` / `Plain` / `Danger`; `Sm` 40 / `Md` 48 / `Lg` 56), `DdsIconButton` | one height; `bg.brand` + `text.on-brand`; `Secondary` is a face filled with the card background, plus an edge; `Ghost` is brand-colored text; `Plain` is text in the body color (0.6.0); loading keeps the exact size and is not dimmed; disabled at 0.45; 2dp focus ring; an icon button requires a description and is 48 to touch | Button `[spec §4.2]` |
 | `DdsTextField` | label above (never a floating label), 56 high, a message line that is always reserved so an error does not move the form; the error is announced | Field, Input |
 | `DdsCheckbox`, `DdsRadio`, `DdsSwitch` | the whole row is the target (48 or more), state is announced | Checkbox, Radio, Switch |
 | `DdsCard`, `DdsSection`, `DdsDivider`, `DdsListRow` | `bg.elevated` + 1dp edge + radius 12, no shadow; a section title is a heading; a row is 56 or 72 | Card |
@@ -779,7 +872,7 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
 | `DdsValueRow` | a name and its value on one line: name at the start, value at the end edge, tabular digits, a line under each row | — |
 | `DdsTabs` | views of one thing inside a page: a brand underline that slides to the chosen tab, and a heavier label; the tabs share the width, and scroll when a label does not fit its share | Tabs |
 | `DdsBottomSheet` | choices and actions; closes on back, outside tap, drag; radius 16 on the top corners | Sheet |
-| `DdsMenu`, `DdsMenuItem` | a short menu anchored to its button; a destructive item in the danger color | Menu |
+| `DdsMenu`, `DdsMenuItem`, `DdsMenuDivider` | a short menu anchored to its button; no shadow, set apart by the card background and a 1dp edge (0.6.0); with `align = DdsMenuAlign.End` the menu's end sits on the button's end (0.6.0); a destructive item in the danger color, with a `DdsMenuDivider()` before it | Menu |
 | `DdsToastHost` | a short message that leaves by itself, on the inverse surface; never for something that must be read | Toast |
 
 - **Text is read as it was written.** `keepWords()` puts an invisible joiner between the
@@ -795,5 +888,31 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
   description.
 - **One search field and one select field in the whole app.** Two looks for the same job on
   two screens is the inconsistency people notice first.
+
+**Changed in 0.6.0 (D-053)**
+
+- **The secondary button (`Secondary`) is a filled face.** Its background is the card
+  background (`bg.elevated`), not transparent. On DDS's default light page the page and
+  the card are the same white, so it looks as it did. **In the dark theme the face is
+  visibly lighter than the page** (a `zinc.900` face on the `zinc.950` page). On a colored
+  page it is a white face. Pressed, a pale tint lies over the face. Edge and text are unchanged.
+- **`DdsButtonVariant.Plain`** — a button with no background and text in the body color,
+  for a text button that is not brand-colored. `Ghost` (brand-colored text) is unchanged.
+- **The menu has no shadow.** Like a card, a sheet and a dialog it is set apart by the
+  card background and a 1dp edge only. In the dark theme a menu open over a card has the
+  card's own color, and only the edge separates them.
+- **`DdsMenu(align = DdsMenuAlign.End)`** — for a "more" button at the end of a row or a
+  pane: the menu lines up with the button's end and opens inward. With no room on that
+  side it lines up with the button's start, and failing that with the edge of the window.
+  It never leaves the window. The default is `Start`, as before. Give the menu's `modifier`
+  nothing that names a side (a start or end padding): what that does on an end-aligned
+  menu is not tested.
+- **`DdsMenuDivider()`** — a 1dp line with 4dp above and below. A screen reader does not
+  stop on it.
+- What is in a menu reads in the layout direction of the screen that opened it.
+
+The "Product colors" section on the Colors tab of `android/catalog` shows these on one
+screen (white on an orange face, a white card on a paper page, the four buttons, an
+end-aligned menu).
 
 Not yet built: date and time pickers. Use the Material3 ones under `DdsTheme`.

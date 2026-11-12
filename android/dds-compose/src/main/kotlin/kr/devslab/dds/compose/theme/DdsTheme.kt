@@ -23,9 +23,10 @@ import kr.devslab.dds.tokens.DdsTouch
  *
  * @param darkTheme defaults to the system setting
  * @param brand the product brand slice. By default it is read from the
- * `dds_color_*` brand resources, so an app that redefines those six colors in
- * its own `res/values` rebrands XML and Compose together; with no override
- * that is DevsLab cyan
+ * `dds_color_*` brand resources, so an app that redefines those six colors —
+ * and, if it has its own, the page, subtle and card backgrounds — in its own
+ * `res/values` rebrands XML and Compose together; with no override that is
+ * DevsLab cyan on the system's backgrounds
  * @param largeText the app-offered large text mode: a stepped-up type scale
  * and a larger minimum touch target. It stacks with the system font scale.
  */

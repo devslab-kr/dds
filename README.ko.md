@@ -120,7 +120,7 @@ Source-Available License 1.0을 따른다. compatibility canary는 비공개·�
 때만 만든다 (명세 §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 인벤토리 (Core 6종 ✅ 2026-08-13, +13종 ✅ 2026-08-15) →
 AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → 안드로이드 네이티브 값·테마·모션
-(0.5.0, 2026-11-12 — 테마·모션·부품·아이콘). RN·Ionic 패키지는 그 제품이 생길 때.
+(0.6.0, 2026-11-12, 만들었고 아직 배포 전. Maven Central에는 0.5.0 — 테마·모션·부품·아이콘). RN·Ionic 패키지는 그 제품이 생길 때.
 
 ## 입력·선택·공유 달력 확장
 

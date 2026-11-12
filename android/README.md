@@ -17,9 +17,12 @@ Minimum Android 8 (API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.5.0") // brings dds-android-tokens
+    implementation("kr.devslab:dds-compose:0.6.0") // brings dds-android-tokens
 }
 ```
+
+0.6.0 is not on Maven Central yet; 0.5.0 is. Until the release, use 0.5.0 from Maven
+Central or 0.6.0 from the local repository (below).
 
 ```kotlin
 setContent {
@@ -36,7 +39,10 @@ The components (buttons, fields, choices, cards and list rows, notices, bars, di
 and the generated icons are listed in [guide §12](../docs/mobile-native.md).
 
 An app overrides its main color with a color resource; XML and Compose change
-together ([guide §3.1](../docs/mobile-native.md)).
+together ([guide §3.1](../docs/mobile-native.md)). The page, subtle and card
+backgrounds are overridden the same way (`dds_color_bg_default`, `dds_color_bg_subtle`,
+`dds_color_bg_elevated`). Text contrast under 4.5:1 is rejected unless the app declares
+that pair (`dds_allow_contrast_*`); the guide says how.
 
 ```xml
 <!-- app/src/main/res/values/dds_brand.xml -->

@@ -104,6 +104,87 @@ class ColorSchemeTest {
         }
     }
 
+    /**
+     * What [DdsBrand] checks once a product may repaint the backgrounds: brand
+     * text on the page, the subtle background, the card background and the pale
+     * brand background; body and secondary text on the first three. The system's
+     * own values must clear all of them with nothing declared, in both themes.
+     */
+    @Test
+    fun theDefaultTextReadsOnEveryDefaultBackground() {
+        for ((c, name) in listOf(light to "light", dark to "dark")) {
+            val backgrounds = listOf(c.bgDefault to "bgDefault", c.bgSubtle to "bgSubtle", c.bgElevated to "bgElevated")
+            val pairs = backgrounds.flatMap { (background, label) ->
+                listOf(
+                    "textBrand on $label" to (c.textBrand to background),
+                    "textPrimary on $label" to (c.textPrimary to background),
+                    "textSecondary on $label" to (c.textSecondary to background),
+                )
+            } + ("textBrand on bgBrandSubtle" to (c.textBrand to c.bgBrandSubtle))
+            for ((label, pair) in pairs) {
+                val ratio = contrastRatio(pair.first, pair.second)
+                assertTrue("$name $label is %.2f:1".format(ratio), ratio >= DdsMinTextContrast)
+            }
+        }
+    }
+
+    /** A warm paper page: light enough for every system text color. */
+    private val paper = Color(red = 0.98f, green = 0.96f, blue = 0.92f)
+
+    @Test
+    fun theMaterialSchemeFollowsTheProductBackground() {
+        val card = Color(red = 0.99f, green = 0.99f, blue = 0.97f)
+        val section = Color(red = 0.96f, green = 0.94f, blue = 0.9f)
+        val product = DdsBrand(
+            light = DdsBrand.Default.light.copy(bgDefault = paper, bgSubtle = section, bgElevated = card),
+            dark = DdsBrand.Default.dark,
+        )
+        val scheme = ddsColorScheme(ddsColors(dark = false, brand = product), dark = false, inverseTextBrand = dark.textBrand)
+        // The roles that are the page.
+        assertEquals(paper, scheme.background)
+        assertEquals(paper, scheme.surface)
+        assertEquals(paper, scheme.surfaceBright)
+        assertEquals(paper, scheme.surfaceContainerLowest)
+        assertEquals(paper, scheme.onSecondary)
+        // The roles that are a card.
+        assertEquals(card, scheme.surfaceContainerLow)
+        assertEquals(card, scheme.surfaceContainer)
+        assertEquals(card, scheme.surfaceContainerHigh)
+        // The roles that are the subtle background.
+        assertEquals(section, scheme.surfaceDim)
+        assertEquals(section, scheme.surfaceContainerHighest)
+        // The dark half was not repainted.
+        val darkProduct = ddsColorScheme(ddsColors(dark = true, brand = product), dark = true, inverseTextBrand = light.textBrand)
+        assertEquals(darkScheme.background, darkProduct.background)
+        assertEquals(darkScheme.surfaceContainer, darkProduct.surfaceContainer)
+    }
+
+    /** A brand written in code that names no background gets the scheme 0.5.0 gave it. */
+    @Test
+    fun aBrandWithoutBackgroundsGetsTheSameMaterialScheme() {
+        fun DdsBrandColors.withoutBackgrounds() =
+            copy(bgDefault = Color.Unspecified, bgSubtle = Color.Unspecified, bgElevated = Color.Unspecified)
+        val inCode = DdsBrand(DdsBrand.Default.light.withoutBackgrounds(), DdsBrand.Default.dark.withoutBackgrounds())
+        val schemes = listOf(
+            ddsColorScheme(ddsColors(dark = false, brand = inCode), dark = false, inverseTextBrand = inCode.dark.textBrand) to lightScheme,
+            ddsColorScheme(ddsColors(dark = true, brand = inCode), dark = true, inverseTextBrand = inCode.light.textBrand) to darkScheme,
+        )
+        for ((actual, expected) in schemes) {
+            assertEquals(expected.background, actual.background)
+            assertEquals(expected.surface, actual.surface)
+            assertEquals(expected.onSecondary, actual.onSecondary)
+            assertEquals(expected.surfaceBright, actual.surfaceBright)
+            assertEquals(expected.surfaceDim, actual.surfaceDim)
+            assertEquals(expected.surfaceContainerLowest, actual.surfaceContainerLowest)
+            assertEquals(expected.surfaceContainerLow, actual.surfaceContainerLow)
+            assertEquals(expected.surfaceContainer, actual.surfaceContainer)
+            assertEquals(expected.surfaceContainerHigh, actual.surfaceContainerHigh)
+            assertEquals(expected.surfaceContainerHighest, actual.surfaceContainerHighest)
+            assertEquals(expected.primary, actual.primary)
+            assertEquals(expected.onSurface, actual.onSurface)
+        }
+    }
+
     @Test
     fun materialOutlinedControlsGetTheControlEdge() {
         assertEquals(light.borderControl, ddsColorScheme(light, dark = false, inverseTextBrand = dark.textBrand).outline)
