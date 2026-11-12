@@ -38,6 +38,7 @@ import kr.devslab.dds.tokens.DdsBorder
 import kr.devslab.dds.tokens.DdsSpace
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -245,9 +246,13 @@ class MenuOnDeviceTest {
             assertTrue("$message: expected $expected but was $actual", close(expected, actual))
         }
 
-        /** Checked where it can be: on a capture that is only darkened. */
+        /**
+         * [captured] is [written], as this capture shows it. Only a capture that is merely darkened
+         * can say so; on a tinted one the test is reported as skipped, not passed.
+         */
         fun assertIsTheColor(message: String, written: Color, captured: Color) {
-            if (onlyDarkened) assertTrue("$message: expected ${seen(written)} (that is $written on this screen) but was $captured", close(seen(written), captured))
+            assumeTrue("the capture is tinted; exact colors cannot be compared", onlyDarkened)
+            assertTrue("$message: expected ${seen(written)} (that is $written on this screen) but was $captured", close(seen(written), captured))
         }
     }
 
@@ -281,7 +286,6 @@ class MenuOnDeviceTest {
         val page = screen.page
         assertTrue("the page beside the menu is the green, however dark or tinted: $page", page.green > 0.2f && page.green > 2 * page.red && page.green > 2 * page.blue)
         assertTrue("the menu's face is drawn and is not the page: ${screen.face(menu)}", !close(screen.face(menu), page))
-        screen.assertIsTheColor("the menu's face", colors.bgElevated, screen.face(menu))
         return screen
     }
 
@@ -309,7 +313,34 @@ class MenuOnDeviceTest {
         assertTrue("the edge line is not the face: $edge", !close(edge, screen.face(menu)))
         assertTrue("the edge line is not the page: $edge", !close(edge, screen.page))
         screen.assertSame("the edge line at the bottom", edge, menu.center.x, menu.bottom - 2f)
-        screen.assertIsTheColor("the edge line", colors.borderDefault, edge)
+    }
+
+    /**
+     * The colors themselves, not only how they stand to each other. Skipped — and counted as
+     * skipped — on a screen whose capture is tinted (a phone with its eye-comfort filter on).
+     */
+    @Test
+    fun theMenusFaceAndEdgeLineAreTheThemesColors() {
+        show()
+        val menu = onScreen("menu")
+        val screen = screenWithTheMenuDrawn(menu)
+        screen.assertIsTheColor("the menu's face", colors.bgElevated, screen.face(menu))
+        screen.assertIsTheColor("the edge line", colors.borderDefault, screen.edge(menu, menu.center.y))
+    }
+
+    /** As above, for the divider: skipped and counted where the capture is tinted. */
+    @Test
+    fun theDividerIsTheThemesBorderColor() {
+        show {
+            DdsMenuItem("수정", onClick = {}, modifier = Modifier.testTag("first"))
+            DdsMenuDivider()
+            DdsMenuItem("삭제", onClick = {}, modifier = Modifier.testTag("second"), danger = true)
+        }
+        val menu = onScreen("menu")
+        val first = onScreen("first")
+        val middle = first.bottom + DdsSpace.s4.dp.px() + (DdsBorder.hairline.dp.px() - 1) / 2f
+        val screen = screenWithTheMenuDrawn(menu)
+        screen.assertIsTheColor("the divider", colors.borderDefault, screen.at(menu.center.x, middle))
     }
 
     @Test
@@ -331,7 +362,6 @@ class MenuOnDeviceTest {
         // The menu's own edge line, level with the first item: the divider is the same line.
         val edge = screen.edge(menu, first.center.y)
         assertTrue("the edge line is not the face: $edge", !close(edge, face))
-        screen.assertIsTheColor("the line", colors.borderDefault, edge)
         val middle = first.bottom + space + (line - 1) / 2f
         // From just inside one edge to just inside the other.
         screen.assertSame("the line, in the middle", edge, menu.center.x, middle)

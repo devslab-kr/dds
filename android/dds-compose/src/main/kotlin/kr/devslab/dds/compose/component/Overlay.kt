@@ -122,9 +122,9 @@ public enum class DdsMenuAlign {
  *
  * What is in the menu reads in the layout direction of the screen that opened it.
  *
- * @param modifier applied to the menu's own surface, which Material lays out
- * and which an end-aligned menu opens mirrored: give it nothing that names a
- * side (a width or a test tag is fine)
+ * @param modifier applied to the menu's own surface, which Material lays out.
+ * Give it nothing that names a side (a width or a test tag is fine): what a
+ * start or end padding does on an end-aligned menu is not tested
  * @param align which edge of the control the menu lines up with. When there is
  * no room in the window on that side, the menu lines up with the other edge,
  * and failing that with the edge of the window; it never leaves the window
