@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.layout
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,9 +50,12 @@ import kr.devslab.dds.tokens.DdsSpace
  * screens clear of a cutout there). The tag [DdsTestTags.CenteredArea] is on that room, inside the
  * bars and the keyboard; [DdsTestTags.Centered] is on the block.
  *
- * It works inside [DdsAppFrame] (with `navigation = false`) and with no frame at all. It draws no
- * background and no bars of its own. When the screen arrives the block slides in as a body column
- * does: it applies [ddsScreenContent] itself; do not add it again.
+ * It works inside [DdsAppFrame] (with `navigation = false`) and with no frame at all. It paints
+ * the page ([DdsTheme] `bgDefault`) behind its whole area, so as a screen of its own it covers the
+ * screen under it on every frame of a change, also in a `NavDisplay`, which paints nothing behind
+ * its entries. It draws no bars of its own. When the screen arrives the block slides in as a body
+ * column does, over the page, which stays still: it applies [ddsScreenContent] itself; do not add
+ * it again.
  *
  * @param modifier applied to the area the block is centered in, which fills what it is given
  * @param max the widest the block gets; [DdsScreen.centeredMax] by default
@@ -67,6 +71,9 @@ public fun DdsCenteredColumn(
     Box(
         modifier
             .fillMaxSize()
+            // The page, behind the whole area and still while the block slides: the screen covers
+            // what is under it on every frame of a change, with or without a host that paints.
+            .background(DdsTheme.colors.bgDefault)
             .ddsScreenContent()
             // The bars above and below, and the keyboard: the block is centered in what they leave.
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))

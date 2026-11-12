@@ -32,6 +32,9 @@ dependencies {
     // Named here too, so this artifact's own POM carries the version of the test rule below.
     api(platform(libs.compose.bom))
     api(libs.compose.ui.test.junit4)
+    // The test rule above brings Espresso 3.5.0 through the BOM, which does not run on Android 17.
+    // An app that adds this artifact gets 3.7.0 from it, as this repo's own device tests do.
+    api(libs.androidx.test.espresso.core)
 }
 
 mavenPublishing {
