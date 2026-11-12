@@ -57,7 +57,11 @@ public enum class DdsButtonVariant {
     /** The one main action of a screen: a filled brand face. */
     Primary,
 
-    /** An action beside the main one: an outline. */
+    /**
+     * An action beside the main one: the card background with an outline. On
+     * the default light page it is the page's own white; on a colored page it
+     * is a face of its own.
+     */
     Secondary,
 
     /** A quiet action: brand-colored text only. */
@@ -65,6 +69,12 @@ public enum class DdsButtonVariant {
 
     /** A destructive action: a filled danger face. */
     Danger,
+
+    /**
+     * A quiet action in ink: text in the primary text color, no face and no
+     * edge. Use it where brand-colored text would compete with the main action.
+     */
+    Plain,
 }
 
 /** Control sizes. The names are the web's; the heights are touch heights. */
@@ -133,7 +143,11 @@ public fun DdsButton(
         when (variant) {
             DdsButtonVariant.Primary -> if (pressed) colors.bgBrandHover else colors.bgBrand
             DdsButtonVariant.Danger -> if (pressed) colors.overlayPressedTint.compositeOver(colors.statusDanger) else colors.statusDanger
-            else -> if (pressed) colors.overlayPressedTint else colors.overlayPressedTint.clear()
+            // A face of its own, so it reads as a button on a colored page too.
+            DdsButtonVariant.Secondary -> if (pressed) colors.overlayPressedTint.compositeOver(colors.bgElevated) else colors.bgElevated
+            DdsButtonVariant.Ghost,
+            DdsButtonVariant.Plain,
+            -> if (pressed) colors.overlayPressedTint else colors.overlayPressedTint.clear()
         },
     )
     val contentColor: Color = when (variant) {
@@ -141,6 +155,7 @@ public fun DdsButton(
         DdsButtonVariant.Danger -> colors.textOnStatus
         DdsButtonVariant.Secondary -> colors.textPrimary
         DdsButtonVariant.Ghost -> colors.textBrand
+        DdsButtonVariant.Plain -> colors.textPrimary
     }
     val minHeight = when (size) {
         DdsSize.Sm -> DdsControl.sm

@@ -44,6 +44,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import kr.devslab.dds.compose.component.DdsBottomSheet
 import kr.devslab.dds.compose.component.DdsButton
+import kr.devslab.dds.compose.component.DdsButtonVariant
 import kr.devslab.dds.compose.component.DdsCheckbox
 import kr.devslab.dds.compose.component.DdsChip
 import kr.devslab.dds.compose.component.DdsListRow
@@ -217,6 +218,20 @@ class ScreenReaderTest {
             .performClick()
         rule.waitForIdle()
         assertEquals(0, presses)
+    }
+
+    @Test
+    fun aPlainButtonIsAButtonWithItsLabel() {
+        var presses by mutableIntStateOf(0)
+        show { DdsButton("닫기", onClick = { presses++ }, variant = DdsButtonVariant.Plain) }
+        // Quieter to look at, the same to hear: one stop, its words, "button".
+        rule.onAllNodes(hasText("닫기")).assertCountEquals(1)
+        rule.onNodeWithText("닫기")
+            .assert(expectValue(SemanticsProperties.Role, Role.Button))
+            .assertIsEnabled()
+            .performClick()
+        rule.waitForIdle()
+        assertEquals(1, presses)
     }
 
     @Test
