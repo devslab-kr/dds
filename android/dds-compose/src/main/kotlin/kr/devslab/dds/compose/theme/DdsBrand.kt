@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import java.util.Locale
+import kr.devslab.dds.compose.R as ComposeR
 import kr.devslab.dds.tokens.DdsDarkColors
 import kr.devslab.dds.tokens.DdsLightColors
 import kr.devslab.dds.tokens.R as TokensR
@@ -29,6 +30,10 @@ import kr.devslab.dds.tokens.R as TokensR
  * @param textOnBrand text and icons on [bgBrand]. Defaults to the on-brand
  * rule: whichever of the system's dark text and white reads better on the fill
  * @param borderFocus focus ring. Defaults to the system's neutral ring
+ * @param allow the contrast pairs this product lets through in this theme even
+ * though they are below [DdsMinTextContrast]. Empty by default: every pair is
+ * checked. A pair named here is not checked at all — there is no lower limit —
+ * and it counts for this theme only; the other theme's colors carry their own set
  */
 @Immutable
 public data class DdsBrandColors(
@@ -38,7 +43,29 @@ public data class DdsBrandColors(
     val textBrand: Color,
     val textOnBrand: Color = onBrandFor(bgBrand),
     val borderFocus: Color = Color.Unspecified,
+    val allow: Set<DdsContrastPair> = emptySet(),
 )
+
+/**
+ * The text-on-background pairs [DdsBrand] checks against [DdsMinTextContrast].
+ *
+ * A product that wants one of them below that line says so by name, in
+ * [DdsBrandColors.allow] or with the matching `dds_allow_contrast_*` bool
+ * resource. Only the named pair is let through; the others are still checked.
+ */
+public enum class DdsContrastPair {
+    /** [DdsBrandColors.textOnBrand] on [DdsBrandColors.bgBrand] — the primary button's label. */
+    TextOnBrand,
+
+    /**
+     * [DdsBrandColors.textBrand] on the page background and on
+     * [DdsBrandColors.bgBrandSubtle] — text buttons, links, selected tabs.
+     */
+    TextBrand,
+
+    /** Body and secondary text on the backgrounds a product may repaint. */
+    TextOnBackground,
+}
 
 /**
  * The on-brand rule as a function: of the two colors the system puts on a
@@ -68,15 +95,22 @@ public fun onBrandFor(fill: Color): Color =
  * components draw text buttons, links and selected tabs with, so it must read
  * on the page and on the pale brand background.
  *
+ * A product may declare an exception, pair by pair ([DdsContrastPair]) and
+ * theme by theme: a pair named in a theme's [DdsBrandColors.allow] is not
+ * checked in that theme, however low its contrast. Nothing is let through
+ * unless it is named, and an exception declared for the light theme does not
+ * cover the dark one. The rejection message says what to declare.
+ *
  * @throws IllegalArgumentException if, in either theme, [DdsBrandColors.textOnBrand]
  * on [DdsBrandColors.bgBrand], or [DdsBrandColors.textBrand] on the page background
- * or on [DdsBrandColors.bgBrandSubtle], is below [DdsMinTextContrast]
+ * or on [DdsBrandColors.bgBrandSubtle], is below [DdsMinTextContrast] and that
+ * theme's [DdsBrandColors.allow] does not name the pair
  */
 @Immutable
 public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBrandColors) {
     init {
-        requireBrandContrast("light", light, pageBackground = Color(DdsLightColors.bgDefault))
-        requireBrandContrast("dark", dark, pageBackground = Color(DdsDarkColors.bgDefault))
+        requireBrandContrast(light, night = false, pageBackground = Color(DdsLightColors.bgDefault))
+        requireBrandContrast(dark, night = true, pageBackground = Color(DdsDarkColors.bgDefault))
     }
 
     override fun equals(other: Any?): Boolean = other is DdsBrand && light == other.light && dark == other.dark
@@ -109,7 +143,21 @@ public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBran
          * themes at once — whatever the system setting is — so an app that
          * pins its own theme still gets the right half.
          *
+         * The contrast exceptions are read from the same place. The bools
+         * `dds_allow_contrast_text_on_brand`, `dds_allow_contrast_text_brand`
+         * and `dds_allow_contrast_text_on_background` (all `false` in DDS)
+         * become each theme's [DdsBrandColors.allow]: the light theme reads
+         * `res/values`, the dark theme `res/values-night`.
+         *
+         * Android falls back from `values-night` to `values`, for these bools
+         * just as for the colors. A bool set to `true` only in `res/values`
+         * therefore applies to the dark theme too; to keep the dark theme
+         * checked, set it back to `false` in `res/values-night`.
+         *
          * Without overrides this equals [Default].
+         *
+         * @throws IllegalArgumentException as [DdsBrand] does, if the colors
+         * break a contrast rule and the bools do not declare that pair
          */
         public fun fromResources(context: Context): DdsBrand =
             DdsBrand(light = readBrand(context, night = false), dark = readBrand(context, night = true))
@@ -138,20 +186,51 @@ private fun readBrand(context: Context, night: Boolean): DdsBrandColors {
         textBrand = color(TokensR.color.dds_color_text_brand),
         textOnBrand = color(TokensR.color.dds_color_text_on_brand),
         borderFocus = color(TokensR.color.dds_color_border_focus),
+        allow = DdsContrastPair.entries.filterTo(mutableSetOf()) { themed.resources.getBoolean(it.allowResource) },
     )
 }
 
-private fun requireBrandContrast(theme: String, colors: DdsBrandColors, pageBackground: Color) {
-    val pairs = listOf(
-        Triple("textOnBrand on bgBrand", colors.textOnBrand, colors.bgBrand),
-        Triple("textBrand on the page background", colors.textBrand, pageBackground),
-        Triple("textBrand on bgBrandSubtle", colors.textBrand, colors.bgBrandSubtle),
+/** The bool resource an app sets to `true` to declare this pair's exception. */
+internal val DdsContrastPair.allowResource: Int
+    get() = when (this) {
+        DdsContrastPair.TextOnBrand -> ComposeR.bool.dds_allow_contrast_text_on_brand
+        DdsContrastPair.TextBrand -> ComposeR.bool.dds_allow_contrast_text_brand
+        DdsContrastPair.TextOnBackground -> ComposeR.bool.dds_allow_contrast_text_on_background
+    }
+
+/**
+ * That resource's name, as an app writes it and as the rejection message prints
+ * it. The message is built without a [Context], so the name is written out here;
+ * a device test holds it to [allowResource].
+ */
+internal val DdsContrastPair.allowResourceName: String
+    get() = when (this) {
+        DdsContrastPair.TextOnBrand -> "dds_allow_contrast_text_on_brand"
+        DdsContrastPair.TextBrand -> "dds_allow_contrast_text_brand"
+        DdsContrastPair.TextOnBackground -> "dds_allow_contrast_text_on_background"
+    }
+
+/** One measurement: [foreground] on [fill], part of [pair], called [name] in the message. */
+private class ContrastCheck(val pair: DdsContrastPair, val name: String, val foreground: Color, val fill: Color)
+
+private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean, pageBackground: Color) {
+    val theme = if (night) "dark" else "light"
+    val checks = listOf(
+        ContrastCheck(DdsContrastPair.TextOnBrand, "textOnBrand on bgBrand", colors.textOnBrand, colors.bgBrand),
+        ContrastCheck(DdsContrastPair.TextBrand, "textBrand on the page background", colors.textBrand, pageBackground),
+        ContrastCheck(DdsContrastPair.TextBrand, "textBrand on bgBrandSubtle", colors.textBrand, colors.bgBrandSubtle),
     )
-    for ((name, foreground, fill) in pairs) {
-        val ratio = contrastRatio(foreground, fill)
+    for (check in checks) {
+        // A declared pair is not measured: the product has taken that decision, for this theme.
+        if (check.pair in colors.allow) continue
+        val ratio = contrastRatio(check.foreground, check.fill)
         require(ratio >= DdsMinTextContrast) {
             // Locale.ROOT: this is a message for developers, the same on every machine.
-            String.format(Locale.ROOT, "DdsBrand (%s): %s is %.2f:1, below %.1f:1.", theme, name, ratio, DdsMinTextContrast)
+            val measured = String.format(Locale.ROOT, "%.2f:1, below %.1f:1", ratio, DdsMinTextContrast)
+            val folder = if (night) "res/values-night" else "res/values"
+            "DdsBrand ($theme): ${check.name} is $measured. " +
+                "To allow it in the $theme theme, set <bool name=\"${check.pair.allowResourceName}\">true</bool> " +
+                "in $folder or pass allow = setOf(DdsContrastPair.${check.pair.name}) to the $theme DdsBrandColors."
         }
     }
 }

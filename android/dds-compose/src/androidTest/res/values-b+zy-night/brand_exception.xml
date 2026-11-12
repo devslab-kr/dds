@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BrandResourcesTest, product B, dark theme: the exception is set back to false,
+     so the dark theme is checked again. The colors still come from values-b+zy. -->
+<resources>
+    <bool name="dds_allow_contrast_text_on_brand">false</bool>
+</resources>

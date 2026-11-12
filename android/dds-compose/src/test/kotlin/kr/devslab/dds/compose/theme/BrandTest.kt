@@ -77,6 +77,86 @@ class BrandTest {
         assertTrue(error.message.orEmpty(), error.message.orEmpty().contains("textBrand on the page background"))
     }
 
+    /** A bright orange fill: white text on it is about 2.9:1. */
+    private val orange = Color(red = 1f, green = 0.416f, blue = 0.122f)
+
+    private fun whiteOnOrange(colors: DdsBrandColors, allow: Set<DdsContrastPair> = emptySet()) =
+        colors.copy(bgBrand = orange, textOnBrand = Color.White, allow = allow)
+
+    @Test
+    fun whiteOnOrangeIsRejectedWithoutAnException() {
+        assertTrue(contrastRatio(Color.White, orange) < DdsMinTextContrast)
+        assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = whiteOnOrange(DdsBrand.Default.light), dark = DdsBrand.Default.dark)
+        }
+    }
+
+    @Test
+    fun aDeclaredExceptionLetsThatPairThrough() {
+        val declared = whiteOnOrange(DdsBrand.Default.light, allow = setOf(DdsContrastPair.TextOnBrand))
+        val brand = DdsBrand(light = declared, dark = DdsBrand.Default.dark)
+        assertEquals(Color.White, brand.light.textOnBrand)
+        assertEquals(setOf(DdsContrastPair.TextOnBrand), brand.light.allow)
+    }
+
+    @Test
+    fun anExceptionCoversOnlyItsPair() {
+        val faintBrandText = whiteOnOrange(DdsBrand.Default.light, allow = setOf(DdsContrastPair.TextOnBrand))
+            .copy(textBrand = DdsBrand.Default.light.bgBrandHover)
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = faintBrandText, dark = DdsBrand.Default.dark)
+        }
+        val message = error.message.orEmpty()
+        assertTrue(message, message.contains("textBrand on the page background"))
+        assertTrue(message, message.contains("dds_allow_contrast_text_brand"))
+        assertTrue(message, message.contains("DdsContrastPair.TextBrand"))
+    }
+
+    @Test
+    fun anExceptionForBrandTextCoversBothOfItsBackgrounds() {
+        val faint = DdsBrand.Default.light.copy(
+            textBrand = DdsBrand.Default.light.bgBrandHover,
+            allow = setOf(DdsContrastPair.TextBrand),
+        )
+        DdsBrand(light = faint, dark = DdsBrand.Default.dark)
+    }
+
+    @Test
+    fun anExceptionInOneThemeDoesNotCoverTheOther() {
+        val light = whiteOnOrange(DdsBrand.Default.light, allow = setOf(DdsContrastPair.TextOnBrand))
+        val dark = whiteOnOrange(DdsBrand.Default.dark)
+        val error = assertThrows(IllegalArgumentException::class.java) { DdsBrand(light = light, dark = dark) }
+        val message = error.message.orEmpty()
+        assertTrue(message, message.contains("DdsBrand (dark)"))
+        assertTrue(message, message.contains("res/values-night"))
+        // And the other way round: declared for dark only, the light theme is still checked.
+        val lightError = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = dark.copy(textBrand = DdsBrand.Default.light.textBrand), dark = light.copy(textBrand = DdsBrand.Default.dark.textBrand))
+        }
+        assertTrue(lightError.message.orEmpty(), lightError.message.orEmpty().contains("DdsBrand (light)"))
+    }
+
+    @Test
+    fun theRejectionSaysHowToDeclareIt() {
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = whiteOnOrange(DdsBrand.Default.light), dark = DdsBrand.Default.dark)
+        }
+        val message = error.message.orEmpty()
+        assertTrue(message, message.startsWith("DdsBrand (light): textOnBrand on bgBrand is "))
+        assertTrue(message, message.contains("below 4.5:1."))
+        assertTrue(message, message.contains("dds_allow_contrast_text_on_brand"))
+        assertTrue(message, message.contains("res/values "))
+        assertTrue(message, message.contains("allow = setOf(DdsContrastPair.TextOnBrand)"))
+    }
+
+    @Test
+    fun theDefaultBrandNeedsNoException() {
+        assertEquals(emptySet<DdsContrastPair>(), DdsBrand.Default.light.allow)
+        assertEquals(emptySet<DdsContrastPair>(), DdsBrand.Default.dark.allow)
+        // Built again from its own colors, with nothing declared, it still passes.
+        DdsBrand(light = DdsBrand.Default.light.copy(allow = emptySet()), dark = DdsBrand.Default.dark.copy(allow = emptySet()))
+    }
+
     @Test
     fun keepWordsOnlyAllowsBreaksAtSpaces() {
         val j = 0x2060.toChar()
