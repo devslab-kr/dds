@@ -9,7 +9,7 @@ separate from the web packages (D-048). Releases are cut by an `android-v<versio
 
 From Qooroo redrawing its app: white text on an orange face, a paper-colored page, a
 white-faced secondary button, a menu without a shadow. A product can now decide more of
-its colors, and says so where it does (D-053). Built and checked; not released yet.
+its colors, and says so where it does (D-053).
 
 **What a product can now do**
 
