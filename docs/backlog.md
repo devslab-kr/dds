@@ -337,8 +337,8 @@ D-048. 가이드 [`mobile-native.ko.md`](mobile-native.ko.md), 설계
 - [ ] **화면 틀(0.7.0) — 만들었다, 소유자의 머지·배포 결정 대기(2026-11-12).** 브랜치 `feat/android-screen-frame`.
       `DdsAppFrame`, 새 `DdsScaffold`, `DdsBodyColumn`·`ddsBody`·`ddsBodyLines`, 본문 선에 서는 `DdsTopBar`
       (`onBack`, 두 줄 제목), `DdsCenteredColumn`·`DdsCenteredTitle`, `DdsPaneList`·`DdsPaneItem`, 새 꾸러미
-      `dds-compose-testing`(`DdsFrameCheck`). 기기 테스트 전체 실물 폰(창 1248x1972)에서 170개 실행, 실패 0,
-      건너뜀 2. 카탈로그를 새 틀로 옮기고 Layout 쪽을 더했다. 가이드 §13, 변경 기록 0.7.0, D-052. **배포는
+      `dds-compose-testing`(`DdsFrameCheck`). 기기 테스트 전체 실물 폰 접은 화면(1248x1972) 170개, 펼친 화면(2448x1848) 174개 실행,
+      실패 0, 건너뜀 2. 카탈로그를 새 틀로 옮기고 Layout 쪽을 더했다. 가이드 §13, 변경 기록 0.7.0, D-052. **배포는
       정산나우가 로컬 빌드로 옮겨 폰의 창 세 가지에서 확인한 뒤.** 인계 메모: 공유 노트
       `dds-android-0.7.0-consumer.md`. 확인하지 못한 것: 뒤로 밀기, 진짜 옆쪽 구멍, 오른쪽에서 왼쪽 기기 언어,
       화면 분할, 따로 만든 앱에서 테스트 꾸러미, TalkBack.

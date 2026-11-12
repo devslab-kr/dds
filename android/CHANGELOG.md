@@ -87,8 +87,9 @@ design (spec §10).
 
 - Unit tests, lint and build: green.
 - Device tests, the whole suite, read from the result files, on the phone (SM-F971N,
-  Android 17, window 1248x1972): 170 run, 0 failed, 0 errors, 2 skipped. The
-  skipped are the menu's two exact-color checks, which cannot run there (0.6.0). The frame
+  Android 17): folded (window 1248x1972) 170 run, 0 failed, 0 errors, 2 skipped; unfolded
+  (2448x1848, the wide window with the rail and the pinned list) 174 run, 0 failed, 0 errors,
+  2 skipped, at the final code. The skipped are the menu's two exact-color checks, which cannot run there (0.6.0). The frame
   tests force the three windows inside the test.
 - The catalog, on the new frame with a Layout page, on an emulator forced to 475×751,
   704×933 and 933×704: light at all three, dark at 933×704, the largest font at 475×751,

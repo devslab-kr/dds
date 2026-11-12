@@ -128,7 +128,8 @@ dark), the menu loses its shadow, and brand text is newly checked on the subtle 
 Android 17에서 돌지 않는다). 검사는 가운데 묶음 하나를 화면의 본문 하나로 센다.
 
 **검증.** 단위 테스트·린트·빌드 통과. 기기 테스트 전체를 결과 파일로 읽었다 — 실물 폰(SM-F971N, Android 17,
-창 1248x1972)에서 170개 실행, 실패 0, 오류 0, 건너뜀 2(폰에서 돌 수 없는 메뉴의 색 값 검사 둘, 0.6.0과 같다).
+접은 화면 1248x1972)에서 170개 실행, 실패 0, 오류 0, 건너뜀 2, 펼친 화면(2448x1848)에서 최종 코드로 174개 실행,
+실패 0, 오류 0, 건너뜀 2(폰에서 돌 수 없는 메뉴의 색 값 검사 둘, 0.6.0과 같다).
 틀 테스트는 테스트 안에서 창을 475×751, 704×933, 933×704로 고정한다. 견본 앱 하나(탭 둘, 들어간 화면, 목록이
 있는 영역, 메뉴를 끈 화면, 로그인 묶음)를 세 창에서 `DdsFrameCheck`로 쟀고, 제품 페이지 색에서도 쟀다. 시계를
 멈추고 프레임마다 본 것: 화면이 바뀌는 동안 레일의 자리와 픽셀이 그대로다. 탭 화면 위로 연 화면이 빈 프레임
@@ -149,7 +150,7 @@ Android 17에서 돌지 않는다). 검사는 가운데 묶음 하나를 화면�
 outside the screen switcher); the gutter is 16 / 24 by the window's width; one body column of at most 680dp
 per screen; the top bar stands on the body's lines; a centered block of at most 400dp for a screen with one
 thing to do; `kr.devslab:dds-compose-testing` lets an app check its own screens. Verified: the whole device
-suite on the phone (SM-F971N, Android 17, window 1248x1972), 170 run, 0 failed, 2 skipped (the menu's
+suite on the phone (SM-F971N, Android 17, folded 1248x1972: 170 run; unfolded 2448x1848 at the final code: 174 run), 0 failed, 2 skipped (the menu's
 exact-color checks); the catalog looked at on an emulator forced to the three windows. Not verified:
 JeongsanNow on its phone (the condition for the release), the back swipe, a real side cutout, a
 right-to-left device language, split screen, the testing artifact from a separate build, TalkBack.
