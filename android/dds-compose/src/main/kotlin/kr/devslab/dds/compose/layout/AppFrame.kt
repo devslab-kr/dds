@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
@@ -81,7 +83,11 @@ public fun DdsAppFrame(
         val rail = navigation && width != DdsWindowWidth.Compact && navItems.isNotEmpty()
         val listPinned = navigation && width == DdsWindowWidth.Expanded && list != null
         val frame = DdsFrame(width = width, rail = rail, listPinned = listPinned, tallBar = false)
-        val nav = remember(navItems, selectedIndex, onSelect) { FrameNav(navItems, selectedIndex, onSelect) }
+        val currentOnSelect = rememberUpdatedState(onSelect)
+        // The screens draw the bottom tabs from this, so it exists only when there is a menu to draw.
+        val nav = remember(navItems, selectedIndex, navigation) {
+            if (navigation && navItems.isNotEmpty()) FrameNav(navItems, selectedIndex) { currentOnSelect.value(it) } else null
+        }
         val start = WindowInsets.safeDrawing.only(WindowInsetsSides.Start)
         val end = WindowInsets.safeDrawing.only(WindowInsetsSides.End)
         CompositionLocalProvider(LocalDdsFrame provides frame, LocalFrameNav provides nav) {
@@ -98,7 +104,10 @@ public fun DdsAppFrame(
                     }
                 }
                 val contentInsets = if (rail || listPinned) end else start.union(end)
-                Box(Modifier.weight(1f).fillMaxHeight().windowInsetsPadding(contentInsets)) { content() }
+                // The start inset the rail or the list already took is marked used, so a screen's own
+                // scaffold does not take it a second time.
+                val used = if (rail || listPinned) Modifier.consumeWindowInsets(start) else Modifier
+                Box(Modifier.weight(1f).fillMaxHeight().then(used).windowInsetsPadding(contentInsets)) { content() }
             }
         }
     }

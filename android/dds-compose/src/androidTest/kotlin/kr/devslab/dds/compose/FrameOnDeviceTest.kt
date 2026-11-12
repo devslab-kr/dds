@@ -159,21 +159,22 @@ class FrameOnDeviceTest {
         navigation: Boolean = true,
         list: Boolean = false,
         topLevel: Boolean = true,
+        destinations: List<DdsNavItem> = four,
         override: @Composable (@Composable () -> Unit) -> Unit = { it() },
     ) {
         rule.setContent {
             DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
                 override {
-                    DdsTheme { FrameUnderTest(navigation, list, topLevel) }
+                    DdsTheme { FrameUnderTest(navigation, list, topLevel, destinations) }
                 }
             }
         }
     }
 
     @Composable
-    private fun FrameUnderTest(navigation: Boolean, list: Boolean, topLevel: Boolean) {
+    private fun FrameUnderTest(navigation: Boolean, list: Boolean, topLevel: Boolean, destinations: List<DdsNavItem>) {
         DdsAppFrame(
-            navItems = four,
+            navItems = destinations,
             selectedIndex = 0,
             onSelect = {},
             modifier = Modifier.testTag("frame"),
@@ -198,7 +199,6 @@ class FrameOnDeviceTest {
         rule.onNodeWithTag(DdsTestTags.BottomTabs).assertExists()
         rule.onNodeWithTag(DdsTestTags.Rail).assertDoesNotExist()
         rule.onNodeWithTag(DdsTestTags.ListPane).assertDoesNotExist()
-        println("FRAME-MEASURE 475x751 tabs=${bounds(DdsTestTags.BottomTabs)} body=${bounds("screen-body")}")
     }
 
     @Test
@@ -214,7 +214,6 @@ class FrameOnDeviceTest {
         rule.onNodeWithTag(DdsTestTags.Rail).assertExists()
         rule.onNodeWithTag(DdsTestTags.ListPane).assertDoesNotExist()
         rule.onNodeWithTag(DdsTestTags.BottomTabs).assertDoesNotExist()
-        println("FRAME-MEASURE 704x933 rail=${bounds(DdsTestTags.Rail)} body=${bounds("screen-body")}")
     }
 
     @Test
@@ -223,7 +222,6 @@ class FrameOnDeviceTest {
         val rail = bounds(DdsTestTags.Rail)
         val list = bounds(DdsTestTags.ListPane)
         val body = bounds("screen-body")
-        println("FRAME-MEASURE 933x704 rail=${rail.left}..${rail.right} list=${list.left}..${list.right} body.left=${body.left}")
         assertNear("rail starts at the window edge", 0.dp, rail.left)
         assertNear("rail width", DdsBar.rail.dp, rail.right - rail.left)
         assertNear("the list starts where the rail's row ends", rail.right + DdsBorder.hairline.dp, list.left)
@@ -232,10 +230,24 @@ class FrameOnDeviceTest {
     }
 
     private fun assertNothingIsDrawnWithNavigationOff(size: DpSize) {
-        frame(size, navigation = false, list = true, topLevel = false)
+        frame(size, navigation = false, list = true, topLevel = true)
         rule.onNodeWithTag(DdsTestTags.Rail).assertDoesNotExist()
         rule.onNodeWithTag(DdsTestTags.ListPane).assertDoesNotExist()
         rule.onNodeWithTag(DdsTestTags.BottomTabs).assertDoesNotExist()
+        rule.onNodeWithTag("screen-body").assertExists()
+    }
+
+    @Test
+    fun withNoDestinationsNoTabsOrRailAreDrawn() {
+        frame(DpSize(475.dp, 751.dp), destinations = emptyList(), topLevel = true)
+        rule.onNodeWithTag(DdsTestTags.BottomTabs).assertDoesNotExist()
+        rule.onNodeWithTag("screen-body").assertExists()
+    }
+
+    @Test
+    fun withNoDestinationsNoRailIsDrawnWhenWide() {
+        frame(DpSize(933.dp, 704.dp), destinations = emptyList(), topLevel = true)
+        rule.onNodeWithTag(DdsTestTags.Rail).assertDoesNotExist()
         rule.onNodeWithTag("screen-body").assertExists()
     }
 
@@ -333,28 +345,56 @@ class FrameOnDeviceTest {
         DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(insets)) { content() }
     }
 
-    @Test
-    fun aCutoutAtTheStartIsKeptClearByTheRail() {
-        frame(DpSize(933.dp, 704.dp), list = true, override = withCutout(left = 40.dp))
-        val item = rule.onNodeWithText("거래처", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        assertTrue("the rail's items start after the cutout: ${item.left}", item.left >= 40.dp)
-        assertNear("the rail keeps its width", DdsBar.rail.dp, bounds(DdsTestTags.Rail).let { it.right - it.left })
+    private val cutout = 40.dp
+
+    /** The label is drawn whole: on its one line, with no ellipsis. */
+    private fun assertLabelIsWhole(label: SemanticsNodeInteraction) {
+        val layout = layoutOf(label)
+        assertEquals("the label's lines", 1, layout.lineCount)
+        assertFalse("the label ends in an ellipsis", layout.isLineEllipsized(0))
     }
 
     @Test
-    fun aCutoutAtTheEndIsKeptClearByTheContent() {
-        frame(DpSize(933.dp, 704.dp), list = true, override = withCutout(right = 40.dp))
-        val root = bounds("frame")
-        val body = bounds("screen-body")
-        assertTrue("the content ends before the cutout: ${body.right} of ${root.right}", body.right <= root.right - 40.dp + 0.6.dp)
+    fun aCutoutAtTheStartLeavesTheRailItsFullWidthAfterTheCutout() {
+        frame(DpSize(933.dp, 704.dp), list = true, override = withCutout(left = cutout))
+        val rail = bounds(DdsTestTags.Rail)
+        val list = bounds(DdsTestTags.ListPane)
+        assertNear("the rail starts after the cutout", cutout, rail.left)
+        assertNear("the rail keeps its width", DdsBar.rail.dp, rail.right - rail.left)
+        assertNear("the list follows the rail", rail.right + DdsBorder.hairline.dp, list.left)
+        assertNear("the content follows the list, the cutout is not taken twice", list.right + DdsBorder.hairline.dp, bounds("screen-body").left)
+        val label = rule.onNodeWithText("거래처", useUnmergedTree = true)
+        assertLabelIsWhole(label)
+        val box = label.getUnclippedBoundsInRoot()
+        assertTrue("the label $box is inside the rail $rail", box.left >= rail.left && box.right <= rail.right)
     }
 
     @Test
-    fun withNavigationOffTheContentClearsBothCutouts() {
-        frame(DpSize(933.dp, 704.dp), navigation = false, topLevel = false, override = withCutout(left = 40.dp, right = 40.dp))
-        val root = bounds("frame")
+    fun withoutACutoutTheRailLabelIsNotCutEither() {
+        frame(DpSize(933.dp, 704.dp), list = true)
+        assertLabelIsWhole(rule.onNodeWithText("거래처", useUnmergedTree = true))
+    }
+
+    @Test
+    fun aCutoutAtTheEndStopsTheContentAtTheCutout() {
+        frame(DpSize(933.dp, 704.dp), list = true, override = withCutout(right = cutout))
+        assertNear("the content ends at the cutout", bounds("frame").right - cutout, bounds("screen-body").right)
+        assertNear("the rail is not moved", 0.dp, bounds(DdsTestTags.Rail).left)
+    }
+
+    @Test
+    fun withNeitherRailNorListTheContentClearsBothCutouts() {
+        frame(DpSize(933.dp, 704.dp), navigation = false, topLevel = true, override = withCutout(left = cutout, right = cutout))
         val body = bounds("screen-body")
-        assertTrue("clears the start cutout: ${body.left}", body.left >= 40.dp - 0.6.dp)
-        assertTrue("clears the end cutout: ${body.right}", body.right <= root.right - 40.dp + 0.6.dp)
+        assertNear("starts at the start cutout", cutout, body.left)
+        assertNear("ends at the end cutout", bounds("frame").right - cutout, body.right)
+    }
+
+    @Test
+    fun withTheListAndNoRailTheListClearsTheStartCutout() {
+        frame(DpSize(933.dp, 704.dp), list = true, destinations = emptyList(), override = withCutout(left = cutout, right = cutout))
+        val list = bounds(DdsTestTags.ListPane)
+        assertNear("the list starts at the start cutout", cutout, list.left)
+        assertNear("the content ends at the end cutout", bounds("frame").right - cutout, bounds("screen-body").right)
     }
 }

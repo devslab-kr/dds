@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,10 +26,10 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailDefaults
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -160,28 +158,36 @@ public fun DdsNavRail(
 ) {
     val colors = DdsTheme.colors
     Row(modifier.fillMaxHeight()) {
-        NavigationRail(Modifier.testTag(DdsTestTags.Rail).width(DdsBar.rail.dp), containerColor = colors.bgDefault) {
-            // The items scroll when there are more than the rail is tall: at large text each one is taller.
-            Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+        // The system insets (a display cutout at the start, the bars above and below) go outside the
+        // rail, so the rail itself is always its full width and its items keep all of it.
+        Row(Modifier.fillMaxHeight().windowInsetsPadding(NavigationRailDefaults.windowInsets)) {
+            NavigationRail(
+                Modifier.testTag(DdsTestTags.Rail).width(DdsBar.rail.dp),
+                containerColor = colors.bgDefault,
+                windowInsets = WindowInsets(0, 0, 0, 0),
             ) {
-                items.forEachIndexed { index, item ->
-                    val selected = index == selectedIndex
-                    NavigationRailItem(
-                        selected = selected,
-                        onClick = { onSelect(index) },
-                        icon = { DdsIcon(item.icon, contentDescription = null) },
-                        label = { NavLabel(item.label, selected) },
-                        colors = NavigationRailItemDefaults.colors(
-                            selectedIconColor = colors.textBrand,
-                            selectedTextColor = colors.textBrand,
-                            indicatorColor = colors.bgBrandSubtle,
-                            unselectedIconColor = colors.textSecondary,
-                            unselectedTextColor = colors.textSecondary,
-                        ),
-                    )
+                // The items scroll when there are more than the rail is tall: at large text each one is taller.
+                Column(
+                    Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    items.forEachIndexed { index, item ->
+                        val selected = index == selectedIndex
+                        NavigationRailItem(
+                            selected = selected,
+                            onClick = { onSelect(index) },
+                            icon = { DdsIcon(item.icon, contentDescription = null) },
+                            label = { NavLabel(item.label, selected) },
+                            colors = NavigationRailItemDefaults.colors(
+                                selectedIconColor = colors.textBrand,
+                                selectedTextColor = colors.textBrand,
+                                indicatorColor = colors.bgBrandSubtle,
+                                unselectedIconColor = colors.textSecondary,
+                                unselectedTextColor = colors.textSecondary,
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -248,8 +254,8 @@ public fun DdsScaffold(
  * no rail, and only when a frame supplied the destinations. Set [bottomTabs] on top-level
  * screens and leave it off on detail screens.
  *
- * The frame keeps the screen clear of a display cutout at the sides, so this does not add
- * horizontal insets of its own.
+ * The frame keeps the screen clear of a display cutout at the sides and marks those insets as
+ * used, so this does not add them again.
  *
  * @param content the body of the screen; apply the given padding to it
  */
@@ -268,7 +274,6 @@ public fun DdsScaffold(
         bottomBar = { if (showTabs && nav != null) DdsBottomBar(nav.items, nav.selectedIndex, nav.onSelect) },
         containerColor = DdsTheme.colors.bgDefault,
         contentColor = DdsTheme.colors.textPrimary,
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Vertical),
         content = content,
     )
 }
