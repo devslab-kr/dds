@@ -452,7 +452,8 @@ DdsPullRefresh(busy = state.busy, onRefresh = { refresh() }, onPulling = { pulli
 
 밝은 화면과 어두운 화면에서 같은 값인 토큰(`bg_brand`, `bg_brand_hover`,
 `text_on_brand`)은 `res/values`에 한 번만 적으면 두 화면에 모두 적용된다. 어두운
-화면 값이 따로 있는 토큰(`bg_brand_subtle`, `text_brand`, `border_focus`)을 바꾸려면
+화면 값이 따로 있는 토큰(`bg_brand_subtle`, `text_brand`, `border_focus`, 그리고 바탕 셋
+`bg_default`, `bg_subtle`, `bg_elevated`)을 바꾸려면
 `res/values-night`에도 적는다. 적지 않으면 그쪽은 DDS 기본값이 남는다.
 이 파일은 앱에서 hex를 적어도 되는 유일한 곳이다(웹의 `brand.ts`와 같은 자리).
 
@@ -495,10 +496,12 @@ DdsPullRefresh(busy = state.busy, onRefresh = { refresh() }, onPulling = { pulli
   계열이 바뀐 값을 따른다. 상단 줄, 아래 탭, 레일, 카드, 시트, 다이얼로그, 메뉴,
   `DdsScreenHost`의 기본 배경은 이 값을 읽는다. 기기에서 픽셀로 확인한 것은 상단 줄과
   아래 탭뿐이다. 나머지는 같은 값을 읽는다는 것을 코드로만 확인했다.
-- **`res/values`에만 적은 바탕은 어두운 화면의 바탕이기도 하다.** 안드로이드는
-  `values-night`에 없는 값을 `values`에서 가져온다. 밝은 종이색을 `values`에만 적으면
-  어두운 화면에서 밝은 글자가 그 위에 놓여 `DdsTheme`이 거부한다. 오류 문구가 이것을 먼저
-  말한다. 어두운 화면용 `dds_color_bg_*`를 `res/values-night`에 적는 것이 보통의 답이다.
+- **`res/values`에만 적은 바탕은 밝은 화면만 바꾼다.** DDS에는 바탕 셋의 어두운 화면 값이
+  따로 있다. 그래서 앱이 `res/values-night`에도 `dds_color_bg_*`를 적기 전까지 어두운 화면은
+  DDS의 어두운 바탕 그대로다. 위의 `bg_brand_subtle`, `text_brand`, `border_focus`와 같다.
+- **어두운 화면에는 어두운 바탕이 필요하다.** 어두운 화면의 글자는 DDS의 밝은 글자다. 어두운
+  화면에 밝은 바탕을 주면(`res/values-night`에 적거나 어두운 화면용 `DdsBrandColors`에 넘기면)
+  `DdsTheme`이 거부하고, 오류 문구가 어느 바탕을 정하면 되는지 알려 준다.
 - **바탕은 불투명해야 한다.** 반투명한 바탕은 그 위 글자의 대비를 잴 수 없다. 알파가
   1이 아니면 `DdsTheme`이 거부하고, 예외로도 통과하지 못한다.
 - 코드로 넘길 때는 `DdsBrandColors(bgDefault = …, bgSubtle = …, bgElevated = …)`. 넘기지
@@ -530,10 +533,15 @@ DDS의 색이라, 제품이 바탕을 바꿨을 때만 걸릴 수 있다.
 <!-- res/values/dds_brand.xml — 주황 면 위의 흰 글자(약 2.9:1)를 쓰겠다고 적는다 -->
 <resources>
     <color name="dds_color_bg_brand">#FF6A1F</color>
+    <color name="dds_color_bg_brand_hover">#EB5C14</color>
     <color name="dds_color_text_on_brand">#FFFFFF</color>
     <bool name="dds_allow_contrast_text_on_brand">true</bool>
 </resources>
 ```
+
+이 세 색은 DDS에 값이 하나뿐이라 `res/values`에 한 번 적으면 밝은 화면과 어두운 화면에 함께
+적용된다. `bg_brand_subtle`과 `text_brand`는 제품이 따로 정하지 않으면 DDS 값(청록)으로 남는다.
+정하려면 `res/values`와 `res/values-night` 둘 다에 적는다.
 
 | 리소스 (`bool`, DDS 기본값 `false`) | 조합 |
 | --- | --- |
@@ -541,9 +549,9 @@ DDS의 색이라, 제품이 바탕을 바꿨을 때만 걸릴 수 있다.
 | `dds_allow_contrast_text_brand` | `TextBrand` |
 | `dds_allow_contrast_text_on_background` | `TextOnBackground` |
 
-- **`res/values`에 적은 예외는 어두운 화면에도 적용된다.** 색과 같은 규칙이다
-  (`values-night`에 없으면 `values`에서 가져온다). 어두운 화면은 다시 검사하게 하려면
-  `res/values-night`에 `false`로 적는다.
+- **`res/values`에 적은 예외는 어두운 화면에도 적용된다.** DDS는 이 `bool`을 `values`에만
+  두었고, 안드로이드는 `values-night`에 없는 값을 `values`에서 가져온다. 어두운 화면은 다시
+  검사하게 하려면 `res/values-night`에 `false`로 적는다.
 - 코드로는 `DdsBrandColors(…, allow = setOf(DdsContrastPair.TextOnBrand))`. 밝은 화면용과
   어두운 화면용 `DdsBrandColors`에 따로 넘긴다. 한쪽에만 넘기면 다른 쪽은 검사한다.
 - 예외는 `text.on-brand`를 제품이 직접 정했을 때만 뜻이 있다. 정하지 않으면 규칙이 통과하는

@@ -475,8 +475,9 @@ may be written (the counterpart of the web's `brand.ts`).
 
 A token that is the same in light and dark (`bg_brand`, `bg_brand_hover`,
 `text_on_brand`) needs one definition in `res/values` and applies to both. A token
-with a dark value of its own (`bg_brand_subtle`, `text_brand`, `border_focus`) must
-also be redefined in `res/values-night`; otherwise the DDS default stays there.
+with a dark value of its own (`bg_brand_subtle`, `text_brand`, `border_focus`, and the
+three backgrounds `bg_default`, `bg_subtle`, `bg_elevated`) must also be redefined in
+`res/values-night`; otherwise the DDS default stays there.
 
 A brand can also be passed in code (`DdsTheme(brand = DdsBrand(light = …, dark = …))`).
 XML resources are then unchanged, so the splash keeps the default color. Prefer resources.
@@ -520,10 +521,13 @@ same name.
   and `DdsScreenHost`'s default background read these values. Only the top bar and the
   bottom tabs were checked pixel by pixel on a device; for the rest, only the code was
   read to see that they use the same values.
-- **A background set only in `res/values` is the dark theme's background too.** Android
-  takes from `values` what `values-night` does not have. A light paper set only in
-  `values` puts the dark theme's light text on it, and `DdsTheme` rejects that. The
-  message says this first. The usual answer is a dark `dds_color_bg_*` in `res/values-night`.
+- **A background set only in `res/values` changes the light theme only.** DDS has a dark
+  value of its own for each of the three backgrounds, so the dark theme keeps DDS's dark
+  background until the app also defines `dds_color_bg_*` in `res/values-night`. This is
+  the same as for `bg_brand_subtle`, `text_brand` and `border_focus` above.
+- **The dark theme needs a dark background.** Its text is DDS's light text. A light
+  background given to the dark theme (in `res/values-night`, or in the dark
+  `DdsBrandColors`) is rejected, and the message says which background to define.
 - **A background must be opaque.** Contrast cannot be measured on a translucent one. If
   alpha is not 1, `DdsTheme` rejects it, and no exception lets it through.
 - In code: `DdsBrandColors(bgDefault = …, bgSubtle = …, bgElevated = …)`. A value left
@@ -556,10 +560,15 @@ In resources (recommended), where the colors are written:
 <!-- res/values/dds_brand.xml — white on an orange face (about 2.9:1), declared -->
 <resources>
     <color name="dds_color_bg_brand">#FF6A1F</color>
+    <color name="dds_color_bg_brand_hover">#EB5C14</color>
     <color name="dds_color_text_on_brand">#FFFFFF</color>
     <bool name="dds_allow_contrast_text_on_brand">true</bool>
 </resources>
 ```
+
+These three colors have one value in DDS, so written once in `res/values` they apply to
+light and dark. `bg_brand_subtle` and `text_brand` stay DDS's (cyan) unless the product
+sets them too, in both `res/values` and `res/values-night`.
 
 | Resource (`bool`, `false` in DDS) | Pair |
 | --- | --- |
@@ -567,9 +576,9 @@ In resources (recommended), where the colors are written:
 | `dds_allow_contrast_text_brand` | `TextBrand` |
 | `dds_allow_contrast_text_on_background` | `TextOnBackground` |
 
-- **An exception written in `res/values` covers the dark theme too.** The same rule as
-  for colors: what `values-night` does not have comes from `values`. To have the dark
-  theme checked again, write `false` in `res/values-night`.
+- **An exception written in `res/values` covers the dark theme too.** DDS defines these
+  bools in `values` only, and Android takes from `values` what `values-night` does not
+  have. To have the dark theme checked again, write `false` in `res/values-night`.
 - In code: `DdsBrandColors(…, allow = setOf(DdsContrastPair.TextOnBrand))`, passed to the
   light and to the dark `DdsBrandColors` separately. Pass it to one and the other is checked.
 - An exception only means something when the product sets `text.on-brand` itself. Left

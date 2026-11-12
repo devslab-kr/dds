@@ -21,6 +21,9 @@ dependencies {
 }
 ```
 
+0.6.0은 아직 Maven Central에 없고 0.5.0이 올라가 있다. 배포 전까지는 Maven Central의 0.5.0을 쓰거나
+로컬 저장소의 0.6.0을 쓴다(아래).
+
 ```kotlin
 setContent {
     DdsTheme {                       // 시스템의 밝은·어두운 설정을 따른다

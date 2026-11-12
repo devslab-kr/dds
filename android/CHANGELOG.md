@@ -25,7 +25,9 @@ its colors, and says so where it does (D-053). Built and checked; not released y
   `dds_color_bg_subtle`, `dds_color_bg_elevated` in the app's own `res/values` and
   `res/values-night`, as with the six brand colors; or pass `bgDefault`, `bgSubtle`,
   `bgElevated` to `DdsBrandColors`. What is not set is DDS's. `DdsTheme.colors` and
-  Material's `background` and `surface` roles follow. A background must be opaque.
+  Material's `background` and `surface` roles follow. A background must be opaque. DDS
+  has a dark value of its own for each background, so one written only in `res/values`
+  changes the light theme only; write the dark one in `res/values-night`.
 - **A plain text button:** `DdsButtonVariant.Plain` — no background, text in the body
   color. `Ghost` (brand-colored text) is unchanged.
 - **A menu that ends on its button's end:** `DdsMenu(align = DdsMenuAlign.End)`, for a
@@ -45,6 +47,10 @@ its colors, and says so where it does (D-053). Built and checked; not released y
 - **The menu has no shadow.** It is set apart by the card background and a 1dp edge, like
   a card, a sheet and a dialog. In dark, a menu open over a card has the card's color and
   only the edge separates them.
+- **Backgrounds an app already overrode now reach Compose.** An app that redefined
+  `dds_color_bg_default`, `dds_color_bg_subtle` or `dds_color_bg_elevated` in 0.5.0 (for
+  the splash or the window, say) now gets its Compose page, cards and Material
+  `background` / `surface` in those colors, and the text on them is now checked.
 - **What is in a menu sits in DDS's own column**, inside Material's. Width and order are
   the same. A child that used `Modifier.weight` or an alignment from the menu's
   `ColumnScope` now refers to that column. Content reads in the layout direction of the
@@ -66,17 +72,25 @@ darken or lighten the color, or declare `TextBrand`. DDS's own brand passes ever
 with nothing declared (the narrowest pair is 5.04:1).
 
 Also new: a background that is not opaque is rejected, and no exception covers that. A
-light background set only in `res/values` is the dark page too, and fails under the dark
-theme's light text; the message says first to define `dds_color_bg_*` in `res/values-night`.
+light background given to the dark theme fails under the dark theme's light text; the
+message names the background to define in `res/values-night`. When brand text fails, the
+message names the color to change (`dds_color_text_brand`).
 
 **New names**
 
 `DdsContrastPair` (`TextOnBrand`, `TextBrand`, `TextOnBackground`);
 `DdsBrandColors.bgDefault`, `.bgSubtle`, `.bgElevated`, `.allow`; the three
 `dds_allow_contrast_*` bools; `DdsButtonVariant.Plain`; `DdsMenuAlign` (`Start`, `End`);
-`DdsMenu(align)`; `DdsMenuDivider`. `DdsBrandColors` and `DdsMenu` gained parameters:
-code compiles unchanged, but a library compiled against 0.5.0 that calls them must be
-compiled again.
+`DdsMenu(align)`; `DdsMenuDivider`.
+
+**If your code stops compiling**
+
+- An exhaustive `when` over `DdsButtonVariant` needs a `Plain` branch.
+- A call that passes `DdsMenu`'s content lambda inside the parentheses by position, as
+  the fourth argument, no longer compiles: `align` now sits there. Use a trailing lambda
+  or `content = { … }`.
+- `DdsBrandColors` is source-compatible. A library compiled against 0.5.0 that calls
+  `DdsBrandColors` or `DdsMenu` must be compiled again.
 
 **Do not**
 
@@ -85,9 +99,11 @@ compiled again.
 
 **Checked**
 
-- Unit tests: 77, none failed.
+- Unit tests: 79, none failed.
 - Device tests, the whole suite, read from the result files. Emulator (Android 16,
-  1080x2400): 74 run, none failed, none skipped. Phone (SM-F971N, Android 17, window 2448x1848): 74 run, none failed, 2 skipped — the two
+  1080x2400): 74 run, none failed, none skipped. Phone (SM-F971N, Android 17, window
+  2448x1848), before the last change to the rejection messages: 74 run, none failed, 2
+  skipped — the two
   skipped are the menu's exact-color checks, which cannot run there (see below).
 - The catalog's "Product colors" section, looked at on the emulator in light and dark, at
   normal and at the largest font size, menu closed and open: button rows of one height,
@@ -101,12 +117,13 @@ compiled again.
 
 - A device set to a right-to-left language. Right-to-left was set in the tests, not on
   the device.
-- The whole suite at the phone's other window size. The 74 ran with the window at
-  2448x1848. At 1248x1972 the suite last ran before the last few tests were added (72,
-  none failed), and only the menu tests ran again at this code (16, 2 skipped).
-- Two earlier runs on the phone the same day failed five menu tests that read a screen
-  capture: the capture showed gray where the page should be. Run again, they passed. The
-  cause was not found; another project's tests use the same phone.
+- The whole suite on the phone at 1248x1972. It last passed there before the last tests
+  were added (72). With all 74, a run at 1248x1972 had the five menu tests that read a
+  screen capture fail, twice: the capture showed gray where the page should be. The cause
+  is not known; another project's tests use the same phone. The whole 74 passed at 2448x1848.
+- Resource overriding in a separate app. It was tested inside the library's own test APK
+  with a stand-in (resources under a made-up locale). That stand-in does not behave like
+  an app for the colors DDS defines in its own `values-night`.
 - The focus ring and the loading state of `Plain` and of the filled `Secondary` on a
   device. They share code with what was there.
 - A product's own card background under the `Secondary` button. The tests use DDS's, in

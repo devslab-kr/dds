@@ -21,6 +21,9 @@ dependencies {
 }
 ```
 
+0.6.0 is not on Maven Central yet; 0.5.0 is. Until the release, use 0.5.0 from Maven
+Central or 0.6.0 from the local repository (below).
+
 ```kotlin
 setContent {
     DdsTheme {                       // follows the system light/dark setting
