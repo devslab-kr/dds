@@ -44,7 +44,9 @@
     },
     "bar": {
       "top": { "$value": 64, "$type": "dimension" },
-      "bottom": { "$value": 80, "$type": "dimension" }
+      "bottom": { "$value": 80, "$type": "dimension" },
+      "rail": { "$value": 80, "$type": "dimension" },
+      "top-tall": { "$value": 104, "$type": "dimension" }
     },
     "icon": {
       "sm": { "$value": 20, "$type": "dimension" },
@@ -55,11 +57,15 @@
       "focus": { "$value": 2, "$type": "dimension" }
     },
     "screen": {
-      "$description": "gutter below the breakpoint width, gutter-wide at or above it; block-gap between stacked blocks.",
+      "$description": "gutter below the breakpoint width, gutter-wide at or above it; block-gap between stacked blocks. breakpoint-expanded is the width where the list and detail show side by side; body-max the widest a reading column gets; list-pane the width of the list; centered-max the widest a centered form gets.",
       "gutter": { "$value": 16, "$type": "dimension" },
       "gutter-wide": { "$value": 24, "$type": "dimension" },
       "breakpoint": { "$value": 600, "$type": "dimension" },
-      "block-gap": { "$value": 24, "$type": "dimension" }
+      "block-gap": { "$value": 24, "$type": "dimension" },
+      "breakpoint-expanded": { "$value": 840, "$type": "dimension" },
+      "body-max": { "$value": 680, "$type": "dimension" },
+      "list-pane": { "$value": 264, "$type": "dimension" },
+      "centered-max": { "$value": 400, "$type": "dimension" }
     },
     "large-text": {
       "$description": "The app-offered large text mode: the same eight styles, stepped up. It stacks with the system font scale (values are sp).",

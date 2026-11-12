@@ -87,6 +87,76 @@ dark), the menu loses its shadow, and brand text is newly checked on the subtle 
 
 ---
 
+## D-052 — 화면 틀: 창 폭이 메뉴를 정하고, 본문은 한 기둥에 선다 (2026-11-12)
+
+**상태.** 만들었다. 아직 배포 전(안드로이드 0.7.0, 브랜치 `feat/android-screen-frame`). 정산나우가 로컬 빌드로 옮겨 실물 폰의 창 세 가지에서 확인한 뒤에 배포한다. 설계 문서: `docs/superpowers/specs/2026-11-12-dds-android-screen-frame-design.ko.md`(설계와 달라진 것은 그 문서의 "달라진 것").
+
+**문제.** 정산나우에서 소유자가 펼친 폰으로 찾았다. 화면마다 본문 시작선이 달랐고(펼친 가로에서 187,
+147, 127, 끝에서 끝까지), 왼쪽 레일은 탭 화면에만 있었으며, 상단 줄은 화면 왼쪽 끝에서 본문은 가운데에서
+시작했다. 원인은 하나였다. DDS에 숫자(여백 16/24, 기준 600)는 있는데 그 숫자를 지키게 하는 부품이 없어서
+화면마다 폭을 손으로 적었다.
+
+**결정.** 소유자가 2026-11-12에 정했다.
+
+- **옆 여백은 16(창 폭 600 미만) / 24(600 이상)** 이다. 가이드 §10의 2번에 제안값으로 남아 있던 것을
+  확정한다. 정산나우의 20은 이 값으로 옮긴다. 여백은 화면에 남은 영역이 아니라 창 폭으로 정한다.
+- **숫자 넷을 더한다:** 고정 목록 시작 840, 본문 기둥 최대 680(여백 포함), 고정 목록 폭 264, 가운데 묶음
+  최대 400. 정산나우가 실물 폰에서 검증한 값이다.
+- **DDS 틀 부품이 메뉴를 그린다.** `DdsAppFrame`을 화면 전환기 바깥에 두고, 창 폭에 따라 레일(600 이상)과
+  고정 목록(840 이상)을 그린다. 하단 탭은 최상위 화면이 전환기 안에서 그린다. 상세 화면이 탭 줄까지 덮어야
+  하기 때문이다. 화면은 폭을 재지 않고 틀이 알려 주는 값만 읽는다.
+- **중간 폭(600~839)은 레일만** 둔다. 목록은 한 화면으로 열고 뒤로 돌아온다.
+- **본문은 한 기둥에 서고 상단 줄은 그 선에 맞춘다.** 뒤로 화살표와 마지막 아이콘은 눌리는 영역이 아니라
+  보이는 그림이 본문 선에 서고, 제목은 로고 뒤든 화살표 뒤든 같은 자리에서 시작한다. 두 줄 제목은 창
+  단위로 정해 모든 상단 줄의 높이가 같다.
+- **검사 도우미를 새 꾸러미(`dds-compose-testing`)로 낸다.** 앱이 자기 화면들의 시작선과 메뉴를 잰다.
+
+**대안.** ① Material의 적응형 틀을 감싼다 — 새 의존성, 목록 폭과 칸 전환을 그쪽 규칙으로 정함, 시작선
+문제는 풀어 주지 않음. ② 숫자와 도우미만 준다 — 원인이 그대로 남는다. ③ 하단 탭도 틀이 그린다 — 상세
+화면을 열 때 탭 줄이 전환과 따로 사라져 내용이 튄다.
+
+**영향.** 기존 코드는 그대로 컴파일된다. `DdsTopBar`는 넓은 창에서 내용이 본문 기둥 폭에 모이고 600
+이상에서 옆 여백이 24가 된다. 레일·하단 탭 라벨은 두 줄까지 쓴다. Maven 꾸러미가 셋이 된다. 정산나우는
+틀·본문·상단 줄·측정 테스트를 DDS 것으로 바꾸고 여백이 20에서 16/24가 된다. Qooroo는 창 폭 분류·여백·본문
+기둥만 골라 쓴다.
+
+**구현하며 더 정한 것.** 가운데 묶음은 시스템 줄과 키보드를 피하고(입력칸이 키보드 위에 남는다), 조각 사이를
+24 띄우고, 화면과 함께 밀려 들어오며, 자리 전체에 페이지 바탕을 칠한다(D-051 — 모든 화면은 아래 화면을 덮는다.
+`NavDisplay`는 화면 뒤에 아무것도 칠하지 않는다). 고정 목록의 고르지 않은 줄은 레일과 같은 회색이다. 200%
+글자에서 세 줄이 필요한 레일 라벨은 두 번째 줄 뒤에서 자르고 레일은 80 그대로다. 옆쪽 카메라 구멍이 있으면
+레일이 차지하는 폭은 구멍 + 80이다. 검사 꾸러미는 Espresso 3.7.0을 함께 가져온다(Compose BOM의 3.5.0은
+Android 17에서 돌지 않는다). 검사는 가운데 묶음 하나를 화면의 본문 하나로 센다.
+
+**검증.** 단위 테스트·린트·빌드 통과. 기기 테스트 전체를 결과 파일로 읽었다 — 실물 폰(SM-F971N, Android 17,
+접은 화면 1248x1972)에서 170개 실행, 실패 0, 오류 0, 건너뜀 2, 펼친 화면(2448x1848)에서 최종 코드로 174개 실행,
+실패 0, 오류 0, 건너뜀 2(폰에서 돌 수 없는 메뉴의 색 값 검사 둘, 0.6.0과 같다).
+틀 테스트는 테스트 안에서 창을 475×751, 704×933, 933×704로 고정한다. 견본 앱 하나(탭 둘, 들어간 화면, 목록이
+있는 영역, 메뉴를 끈 화면, 로그인 묶음)를 세 창에서 `DdsFrameCheck`로 쟀고, 제품 페이지 색에서도 쟀다. 시계를
+멈추고 프레임마다 본 것: 화면이 바뀌는 동안 레일의 자리와 픽셀이 그대로다. 탭 화면 위로 연 화면이 빈 프레임
+없이 하단 탭을 덮는다. 가운데 묶음 화면이 모든 프레임에서 아래 화면을 페이지 바탕으로 덮는다. 새 테스트는
+모두 실패하는 것을 먼저 보았다. 예외: 견본 앱 테스트의 페이지 색 검사와 `assertSameLines` 호출은 실패하는 것을
+본 적이 없다. 카탈로그를 새 틀로 옮기고 Layout 쪽을 더해, 고정한 에뮬레이터에서 세 창(밝은
+화면), 933×704 어두운 화면, 475×751 가장 큰 글자와 키보드를 캡처하고 본문의 선을 그어 보았다.
+
+**확인하지 못한 것.** 정산나우가 자기 폰에서 확인(배포 조건). 폰에서 카탈로그. 틀과 함께 하는 뒤로 밀기. 진짜
+옆쪽 카메라 구멍(테스트 안에서만 설정)과 `DdsFrameCheck`의 옆 여백 처리. 오른쪽에서 왼쪽으로 쓰는 기기 언어.
+틀 밖의 화면 분할. 따로 만든 앱에서 테스트 꾸러미 받기, 릴리스 워크플로가 세 번째 꾸러미를 올리는지. TalkBack.
+
+**재검토 시점.** 목록과 상세를 반반으로 나누는 앱이 둘 이상이 되면(지금은 Qooroo 하나). 반쯤 접은 자세를
+써야 하는 화면이 생기면. 실물 폰 확인에서 선이 어긋나면.
+
+**English.** Built, not released (Android 0.7.0). The window's width decides the menus (bottom tabs under
+600dp drawn by the top-level screens, a rail from 600 and a pinned list from 840 drawn by `DdsAppFrame`
+outside the screen switcher); the gutter is 16 / 24 by the window's width; one body column of at most 680dp
+per screen; the top bar stands on the body's lines; a centered block of at most 400dp for a screen with one
+thing to do; `kr.devslab:dds-compose-testing` lets an app check its own screens. Verified: the whole device
+suite on the phone (SM-F971N, Android 17, folded 1248x1972: 170 run; unfolded 2448x1848 at the final code: 174 run), 0 failed, 2 skipped (the menu's
+exact-color checks); the catalog looked at on an emulator forced to the three windows. Not verified:
+JeongsanNow on its phone (the condition for the release), the back swipe, a real side cutout, a
+right-to-left device language, split screen, the testing artifact from a separate build, TalkBack.
+
+---
+
 ## D-051 — 화면은 겹쳐서 바꾼다: 바뀌는 동안 언제나 두 화면이 있다 (2026-11-11)
 
 **문제.** 안드로이드 0.3.0과 0.4.0은 화면 전환의 페이드를 차례로 뺐다. 하단 탭의 150ms 페이드는

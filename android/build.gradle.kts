@@ -15,7 +15,8 @@ val ddsTokensVersion: String = groovy.json.JsonSlurper()
     .parse(rootDir.resolve("../packages/dds-tokens/package.json"))
     .let { (it as Map<*, *>)["version"] as String }
 
-// Shared by the two published modules (kr.devslab:dds-android-tokens, kr.devslab:dds-compose).
+// Shared by the three published modules (kr.devslab:dds-android-tokens, kr.devslab:dds-compose,
+// kr.devslab:dds-compose-testing).
 subprojects {
     plugins.withId("com.vanniktech.maven.publish") {
         extensions.configure<MavenPublishBaseExtension> {

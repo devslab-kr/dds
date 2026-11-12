@@ -8,7 +8,8 @@
 | 모듈 | 좌표 | 내용 |
 | --- | --- | --- |
 | `dds-tokens` | `kr.devslab:dds-android-tokens` | 값만. Kotlin 상수와 XML 리소스. Compose 의존 없음 |
-| `dds-compose` | `kr.devslab:dds-compose` | Material3 테마, 브랜드, 모션·불러오기 도우미, 부품, 아이콘 |
+| `dds-compose` | `kr.devslab:dds-compose` | Material3 테마, 브랜드, 모션·불러오기 도우미, 부품, 아이콘, 화면 틀 |
+| `dds-compose-testing` | `kr.devslab:dds-compose-testing` | 앱의 기기 테스트용. `DdsFrameCheck`가 앱 화면을 틀에 대고 잰다. Espresso 3.7.0을 함께 가져온다. 0.7.0부터 |
 | `catalog` | 배포하지 않음 | 모든 값과 도우미를 화면에 띄우는 확인용 앱 |
 
 최소 Android 8(API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00.
@@ -18,6 +19,17 @@
 ```kotlin
 dependencies {
     implementation("kr.devslab:dds-compose:0.6.0") // dds-android-tokens를 함께 가져온다
+}
+```
+
+**Maven Central에 있는 것은 0.6.0이다.** 0.7.0(화면 틀, 가이드 §13, 그리고 `dds-compose-testing` 꾸러미)은
+만들었지만 아직 Maven Central에 없다. 정산나우가 폰에서 확인한 뒤에 올린다. 지금 쓰려면 로컬 저장소에
+만들어 넣고(아래) 이렇게 받는다.
+
+```kotlin
+dependencies {
+    implementation("kr.devslab:dds-compose:0.7.0")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
 }
 ```
 
@@ -91,7 +103,7 @@ adb -s <기기> shell am start -n kr.devslab.dds.catalog/.MainActivity \
   --es theme dark --es page parts --ez large true
 ```
 
-`page`는 `colors`, `type`, `parts`, `motion`. 부품이나 값을 바꾸면 밝은·어두운,
+`page`는 `colors`, `type`, `parts`, `motion`, `layout`. `--es demo body|bar|centered|wholewindow`는 Layout 시연을, `--ei item 2`는 Motion의 항목(들어간 화면)을 바로 연다. 부품이나 값을 바꾸면 밝은·어두운,
 글자 배율 200%, 큰 글자 모드, "애니메이션 삭제"에서 직접 띄워 본다.
 
 ## 기기 테스트
@@ -99,7 +111,8 @@ adb -s <기기> shell am start -n kr.devslab.dds.catalog/.MainActivity \
 `dds-compose/src/androidTest`는 화면 낭독기에 전달되는 것을 읽고(`ScreenReaderTest`), 시계를 멈춘 채
 움직임의 중간 지점을 잰다(`MotionOnDeviceTest`, Navigation 3 안에서 재는 `NavDisplayOnDeviceTest` —
 Navigation 3은 테스트에만 쓰는 의존성이다 — 액티비티를 다시 만드는 `RebuiltWindowTest`,
-그리고 걷히는 스플래시 덮개를 재는 `SplashOverlayOnDeviceTest`). 에뮬레이터나 폰이 필요해서
+그리고 걷히는 스플래시 덮개를 재는 `SplashOverlayOnDeviceTest`). `FrameOnDeviceTest`는 창을 세 가지(475×751,
+704×933, 933×704)로 고정하고 화면 틀을 재고, `FrameCheckTest`는 `dds-compose-testing`의 검사를 잰다. 에뮬레이터나 폰이 필요해서
 CI는 돌리지 않는다. 기기를 지정한다 — 지정하지 않으면 연결된 모든 기기에서 돈다.
 
 ```
@@ -108,7 +121,7 @@ ANDROID_SERIAL=<기기> ./gradlew :dds-compose:connectedDebugAndroidTest
 
 ## 버전과 배포
 
-- 웹 패키지와 **다른 버전 번호**를 쓴다. 두 좌표는 항상 같은 버전이다(`gradle.properties`의 `VERSION_NAME`).
+- 웹 패키지와 **다른 버전 번호**를 쓴다. 좌표들(0.7.0부터 셋)은 항상 같은 버전이다(`gradle.properties`의 `VERSION_NAME`).
 - 토큰 이름을 지우거나 바꾸는 변경, 공개 API를 지우는 변경은 major(0.x 동안은 minor)다.
 - 배포는 `android-v<버전>` 태그를 올릴 때만 일어난다(`.github/workflows/android-release.yml`).
   DevsLab의 Java 라이브러리와 같은 시크릿 다섯 개가 이 저장소에 있어야 한다.

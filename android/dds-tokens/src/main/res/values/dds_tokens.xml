@@ -57,6 +57,8 @@
     <dimen name="dds_row_two_line">72dp</dimen>
     <dimen name="dds_bar_top">64dp</dimen>
     <dimen name="dds_bar_bottom">80dp</dimen>
+    <dimen name="dds_bar_rail">80dp</dimen>
+    <dimen name="dds_bar_top_tall">104dp</dimen>
     <dimen name="dds_icon_sm">20dp</dimen>
     <dimen name="dds_icon_md">24dp</dimen>
     <dimen name="dds_border_hairline">1dp</dimen>
@@ -65,6 +67,10 @@
     <dimen name="dds_screen_gutter_wide">24dp</dimen>
     <dimen name="dds_screen_breakpoint">600dp</dimen>
     <dimen name="dds_screen_block_gap">24dp</dimen>
+    <dimen name="dds_screen_breakpoint_expanded">840dp</dimen>
+    <dimen name="dds_screen_body_max">680dp</dimen>
+    <dimen name="dds_screen_list_pane">264dp</dimen>
+    <dimen name="dds_screen_centered_max">400dp</dimen>
     <integer name="dds_motion_fast">100</integer>
     <integer name="dds_motion_short">150</integer>
     <integer name="dds_motion_base">200</integer>

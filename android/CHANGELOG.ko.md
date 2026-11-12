@@ -2,8 +2,92 @@
 
 [English](CHANGELOG.md) · **한국어**
 
-`kr.devslab:dds-android-tokens`와 `kr.devslab:dds-compose`는 한 버전을 쓰고, 웹 패키지와는
+`kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
+
+## 0.7.0 — 아직 배포 전
+
+화면 틀(D-052). 정산나우가 펼친 폰에서 찾았다. 화면마다 시작선이 달랐고(187, 147, 127dp, 또는 끝에서
+끝까지), 레일은 탭 화면에만 있었고, 상단 줄은 창 끝에서 본문은 가운데에서 시작했다. DDS에 숫자는 있는데
+그 숫자를 지키는 부품이 없었다. 이제 부품이 있다. 가이드 §13.
+
+**아직 Maven Central에 없다.** 정산나우가 로컬 빌드로 옮겨 폰의 창 세 가지(접힌 475×751, 펼친 세로
+704×933, 펼친 가로 933×704)에서 확인한 뒤에 배포한다. 그때까지는 이 레포에서 `./gradlew publishToMavenLocal`로
+만든다.
+
+**새로 생긴 것**
+
+- **`DdsAppFrame`** — 앱에 하나, 화면 전환기 바깥에 둔다. 창 폭이 메뉴를 정한다. 600dp 미만은 하단 탭(최상위
+  화면이 그린다), 600dp부터 레일, 840dp부터 레일과 영역의 고정 목록. `navigation = false`면 모두 끈다. 메뉴가
+  나타나거나 사라져도 내용은 제자리라, 접거나 돌려도 스크롤 위치와 입력한 글자가 남는다.
+- **`DdsFrame`, `LocalDdsFrame`, `ddsFrame()`** — 틀이 정한 것. 화면은 재지 않고 이것을 읽는다.
+- **`DdsWindowWidth`, `ddsWindowWidth()`, `DdsWindowWidth.gutter`** — 600과 840 기준의 Compact / Medium /
+  Expanded, 옆 여백 16 / 24 / 24.
+- **`DdsScaffold(topBar, modifier, bottomTabs)`** — 틀 안의 화면 하나. 안쪽 여백이 이미 비켜 준 시스템 영역은
+  내용에서 쓴 것으로 표시해, 안에 둔 `DdsCenteredColumn`이나 `imePadding()`이 두 번 비우지 않는다. 예전
+  `DdsScaffold(topBar, navItems, …)`는 그대로다.
+- **`DdsBodyColumn`, `Modifier.ddsBody()`, `Modifier.ddsBodyLines()`, `DdsBodyDefaults`** — 화면마다 본문 기둥
+  하나. 여백 포함 680dp를 넘지 않고, 레일과 목록이 남긴 자리의 가운데에 선다. `paneTitle`은 화면이 들어올 때
+  화면 낭독기가 말할 화면 이름이다(`DdsCenteredColumn`도 같다).
+- **`DdsTopBar(onBack, backEnabled, backDescription, columnMax)`** — 상단 줄이 본문의 선에 선다. `onBack`을 주면
+  화살표를 그리고 선에 맞춘다. **`ddsBarNeedsTwoLines()`** — 두 줄 판단. 틀 안에서는 `barTitles`로 창 전체에
+  대해 정한다(104dp).
+- **`DdsCenteredColumn`, `DdsCenteredTitle`** — 한 가지 일만 하는 화면. 최대 400dp의 한 묶음이 시스템 줄과
+  키보드가 남긴 자리의 가운데에 선다.
+- **`DdsPaneList`, `DdsPaneItem`** — 고정 목록의 줄.
+- **`DdsTestTags`** — 부품이 스스로 다는 표시.
+- **새 꾸러미 `kr.devslab:dds-compose-testing`** — `DdsFrameCheck(rule).look(name, kind)`와
+  `.assertSameLines()`. 앱의 기기 테스트가 모든 화면이 한 시작선에 서는지, 창 폭과 화면 종류에 맞는 메뉴만
+  있는지 검사한다. Espresso 3.7.0을 함께 가져온다(Compose BOM이 가져오는 3.5.0은 Android 17에서 돌지 않는다).
+- **새 토큰:** `DdsScreen.breakpointExpanded` 840, `bodyMax` 680, `listPane` 264, `centeredMax` 400.
+  `DdsBar.rail` 80, `topTall` 104.
+
+```kotlin
+implementation("kr.devslab:dds-compose:0.7.0")
+androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
+```
+
+**버전만 올려도 달라지는 것**
+
+0.6.0으로 컴파일되던 코드는 0.7.0으로도 컴파일된다. 예외가 하나 있다. `DdsTopBar(title, Modifier, { 로고 },
+{ 동작 })`처럼 동작을 자리로 넘기는 호출은 컴파일되지 않는다. 네 번째 인자가 이제 `onBack`이기 때문이다.
+`actions`를 이름으로 넘기거나 끝의 람다로 넘긴다. `DdsTopBar` 인자의 변경은 바이너리 호환도 깨진다. 0.6.0에
+맞춰 컴파일한 라이브러리가 `DdsTopBar`를 부르면 0.7.0에 맞춰 다시 빌드해야 한다. 아무것도 바꾸지 않아도 이렇게
+보인다.
+
+- **`DdsTopBar`.** 넓은 창에서 내용이 본문 기둥 폭(680dp)으로 가운데에 모인다. 아래 선과 바탕은 여전히 영역
+  전체 폭이다. 옆 여백이 창 폭 600부터 24가 된다(전에는 어디서나 16). `leading` 로고 뒤 제목이 시작선에서
+  40dp 뒤에서 시작한다. `leading`으로 뒤로 버튼을 넣던 코드는 그대로 동작하지만 선에 맞지 않으니 `onBack`으로
+  옮긴다. 동작 아이콘은 나란히 붙는다. 48dp 터치 영역이 맞닿는다(0.6.0에서는 12dp 떨어져 있었다).
+- **`DdsBottomBar`, `DdsNavRail`.** 라벨이 한 줄에서 잘리지 않고 두 줄까지 쓰며, 탭 줄이나 레일 항목이 그만큼
+  높아진다. 레일 폭은 늘 80이다. 글자 200%에서 세 줄이 필요한 라벨은 두 번째 줄 뒤에서 잘린다.
+- **가운데 묶음 화면이 움직이고 바탕을 칠한다.** `DdsCenteredColumn`이 본문 기둥처럼 화면과 함께 밀려 들어오고,
+  자리 전체에 페이지 바탕(`bgDefault`)을 칠한다. 그래서 바뀌는 동안 모든 프레임에서 아래 화면을 덮는다.
+  `NavDisplay` 안에서도 그렇다.
+- **고정 목록의 고르지 않은 줄**은 본문 색이 아니라 레일과 같은 회색(`textSecondary`)이다.
+
+정산나우가 자기 틀을 옮기면: 옆 여백이 20에서 접으면 16, 펼치면 24가 되고, 상단 줄 아래 선이 늘 보이고,
+본문 위쪽 여백이 12나 20에서 16이나 24가 된다. 정산나우 부품과 DDS 부품의 대응은 인계 메모와 설계(§10)에 있다.
+
+**확인한 것**
+
+- 단위 테스트, 린트, 빌드: 통과.
+- 기기 테스트 전체, 결과 파일로 읽었다. 실물 폰(SM-F971N, Android 17): 접은 화면(창 1248x1972) 170개 실행, 실패 0,
+  오류 0, 건너뜀 2. 펼친 화면(2448x1848, 레일과 고정 목록이 나오는 넓은 창) 최종 코드에서 174개 실행, 실패 0,
+  오류 0, 건너뜀 2. 건너뛴 둘은 그 폰에서 돌 수 없는 메뉴의 색 값 검사다(0.6.0과 같다). 틀 테스트는 테스트
+  안에서 창 세 가지로 크기를 고정한다.
+- 카탈로그를 새 틀로 옮기고 Layout 쪽을 더해, 475×751, 704×933, 933×704로 고정한 에뮬레이터에서 보았다. 세 창
+  모두 밝은 화면, 933×704에서 어두운 화면, 475×751에서 가장 큰 글자, 475×751에서 키보드를 연 채. 캡처마다 본문의
+  시작선과 끝선을 그었고, 화살표, 제목, 마지막 아이콘, 본문 글자가 그 선에 섰다.
+- `publishToMavenLocal`: 꾸러미 셋이 0.7.0으로 나온다. Espresso를 적은 POM은 `dds-compose-testing` 것뿐이다.
+
+**확인하지 못한 것**
+
+- 정산나우가 자기 폰에서 확인(배포 조건).
+- 폰에서 카탈로그, 틀과 함께 하는 뒤로 밀기, 진짜 옆쪽 카메라 구멍(테스트 안에서만 설정), 오른쪽에서 왼쪽으로
+  쓰는 기기 언어, 틀 밖의 화면 분할, 따로 만든 앱에서 테스트 꾸러미 받기, 릴리스 워크플로가 세 번째 꾸러미를
+  올리는지, TalkBack.
+- 옆 여백(시스템 줄·구멍)이 있을 때, 폭이 다른 본문일 때, 대화상자가 떠 있을 때의 `DdsFrameCheck`.
 
 ## 0.6.0 — 2026-11-12
 

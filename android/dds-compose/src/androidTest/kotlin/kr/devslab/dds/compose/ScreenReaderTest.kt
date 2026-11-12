@@ -58,6 +58,11 @@ import kr.devslab.dds.compose.component.DdsMenuAlign
 import kr.devslab.dds.compose.component.DdsMenuDivider
 import kr.devslab.dds.compose.component.DdsMenuItem
 import kr.devslab.dds.compose.component.DdsNotice
+import kr.devslab.dds.compose.component.DdsPaneItem
+import kr.devslab.dds.compose.component.DdsPaneList
+import kr.devslab.dds.compose.layout.DdsBodyColumn
+import kr.devslab.dds.compose.layout.DdsCenteredColumn
+import kr.devslab.dds.compose.layout.DdsCenteredTitle
 import kr.devslab.dds.compose.component.DdsSearchField
 import kr.devslab.dds.compose.component.DdsSelectField
 import kr.devslab.dds.compose.component.DdsTabs
@@ -369,9 +374,70 @@ class ScreenReaderTest {
     }
 
     @Test
+    fun theBackButtonHasAName() {
+        show { kr.devslab.dds.compose.component.DdsTopBar("거래처", onBack = {}) }
+        val name = word(R.string.dds_a11y_back)
+        assertTrue("the back button's name is not empty", name.isNotBlank())
+        rule.onNodeWithContentDescription(name).assertExists()
+    }
+
+    @Test
     fun aScreenCanSayItsName() {
         show { Box(Modifier.ddsScreenContent(paneTitle = "설정")) { Text("내용") } }
         rule.onNode(expectValue(SemanticsProperties.PaneTitle, "설정")).assertExists()
+    }
+
+    @Test
+    fun aBodyColumnSaysTheNameOfItsScreen() {
+        show { DdsBodyColumn(paneTitle = "거래처") { Text("내용") } }
+        rule.onNode(expectValue(SemanticsProperties.PaneTitle, "거래처")).assertExists()
+    }
+
+    @Test
+    fun aCenteredColumnSaysTheNameOfItsScreen() {
+        show { DdsCenteredColumn(paneTitle = "로그인") { Text("내용") } }
+        rule.onNode(expectValue(SemanticsProperties.PaneTitle, "로그인")).assertExists()
+    }
+
+    @Test
+    fun aColumnGivenNoNameGivesTheScreenNone() {
+        show {
+            Column {
+                DdsBodyColumn(Modifier.height(100.dp)) { Text("내용") }
+                DdsCenteredColumn(Modifier.height(100.dp)) { Text("가운데") }
+            }
+        }
+        rule.onAllNodes(keyIsDefined(SemanticsProperties.PaneTitle)).assertCountEquals(0)
+    }
+
+    // --- the screen frame ----------------------------------------------------------
+
+    @Test
+    fun theCenteredTitleIsOneHeading() {
+        show { DdsCenteredTitle("정산을\n시작합니다", description = "사업자 번호로 로그인하세요") }
+        // One stop: the title as written, line break and all, and its sentence with it.
+        rule.onAllNodes(keyIsDefined(SemanticsProperties.Heading)).assertCountEquals(1)
+        rule.onNode(keyIsDefined(SemanticsProperties.Heading))
+            .assert(hasText("정산을\n시작합니다"))
+            .assert(hasText("사업자 번호로 로그인하세요"))
+        rule.onAllNodes(hasText("사업자 번호로 로그인하세요")).assertCountEquals(1)
+    }
+
+    @Test
+    fun aListItemSaysItIsChosenAndWhereItIs() {
+        val names = listOf("기본 정보", "매출 현황", "미수금", "거래처", "품목", "세금계산서", "설정")
+        show {
+            DdsPaneList {
+                names.forEachIndexed { index, name -> DdsPaneItem(name, selected = index == 1, onClick = {}, enabled = index != 6) }
+            }
+        }
+        // A group of things to choose from is what makes a screen reader say "2 of 7"; each row says whether it is the one chosen.
+        val rows = rule.onNode(keyIsDefined(SemanticsProperties.SelectableGroup)).onChildren()
+        rows.assertCountEquals(7)
+        rows.assertAll(expectValue(SemanticsProperties.Role, Role.Tab))
+        rows[1].assert(hasText("매출 현황")).assert(expectValue(SemanticsProperties.Selected, true))
+        rows[0].assert(hasText("기본 정보")).assert(expectValue(SemanticsProperties.Selected, false))
+        rows[6].assert(hasText("설정")).assert(keyIsDefined(SemanticsProperties.Disabled))
     }
 
 }

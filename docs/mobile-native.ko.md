@@ -20,7 +20,8 @@ iOS는 아직 범위 밖이다.
 | 좌표 | 내용 |
 | --- | --- |
 | `kr.devslab:dds-android-tokens` | 값만. Kotlin 상수와 XML 리소스. Compose가 필요 없다 |
-| `kr.devslab:dds-compose` | 테마, 브랜드, 모션·불러오기 도우미. 위 좌표를 함께 가져온다 |
+| `kr.devslab:dds-compose` | 테마, 브랜드, 모션·불러오기 도우미, 부품, 화면 틀(§13). 위 좌표를 함께 가져온다 |
+| `kr.devslab:dds-compose-testing` | 앱의 기기 테스트 전용. `DdsFrameCheck`가 앱 화면을 틀에 대고 잰다(§13.6). 0.7.0부터 |
 
 최소 Android 8(API 26). 사용법과 버전 규칙은 [`android/README.ko.md`](../android/README.ko.md).
 
@@ -637,8 +638,8 @@ Material3의 `primary`는 채움 면과 글자색을 겸하는데 DDS는 둘을 
 | 버튼 | `DdsControl.sm / md / lg` | 40 / **48** / 56 | §10의 2번 |
 | 입력칸 | `DdsField.height` | 56 | §10의 2번 |
 | 목록 행 | `DdsRow.min / twoLine` | 56 / 72 | §10의 2번 |
-| 상단 바 / 아래 탭 | `DdsBar.top / bottom` | 64 / 80 | §10의 2번 |
-| 화면 여백 / 블록 사이 | `DdsScreen.gutter / gutterWide / blockGap` | 16 / 24(폭 600 이상) / 24 | §10의 2번 |
+| 상단 바 / 아래 탭 / 옆 레일 / 높은 상단 바 | `DdsBar.top / bottom / rail / topTall` | 64 / 80 / 80 / 104 | §10의 2번 |
+| 화면 여백 / 블록 사이 / 넓은 화면 | `DdsScreen.gutter / gutterWide / blockGap / breakpointExpanded / bodyMax / listPane / centeredMax` | 16 / 24(폭 600 이상) / 24 / 840(목록과 상세를 나란히) / 680(본문 최대 폭) / 264(목록 폭) / 400(가운데 폼 최대 폭) | §10의 2번 |
 | 최소 터치 | `DdsTouch.min / large` | 48 / 56 | §9 |
 
 - **버튼 높이는 48 하나다.** `lg`(56)는 화면 맨 아래의 주 버튼 하나에만 쓴다.
@@ -742,7 +743,7 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 | # | 빠진 규칙 | 지금 넣어 둔 값 | 근거 |
 | --- | --- | --- | --- |
 | 1 | 메인 색 하나에서 나머지 다섯(누름, 옅은 배경, 브랜드 글자, 포커스, 어두운 화면용)을 정하는 법 | 없음 — 웹처럼 제품이 직접 정한다. 적지 않은 값은 DDS 기본값 | 웹에는 asklinq·booklinq 예시만 있다. 정산나우는 메인 색이 DDS와 같은 색 계열이라 한 줄로 충분하다 |
-| 2 | 터치 화면의 컨트롤 높이, 입력칸, 목록 행, 바 높이, 화면 여백 | 40·48·56 / 56 / 56·72 / 64·80 / 16·24 | 웹 버튼은 32·40·48. 세 앱과 Material3 기본값 |
+| 2 | 터치 화면의 컨트롤 높이, 입력칸, 목록 행, 바 높이, 화면 여백 | 40·48·56 / 56 / 56·72 / 64·80 / 16·24 | 웹 버튼은 32·40·48. 세 앱과 Material3 기본값. **옆 여백은 정해졌다(2026-11-12, D-052): 창 폭 600dp 미만 16, 600부터 24. 창 폭으로 정한다(§13)** |
 | 3 | 150ms, 순차 30ms × 6, 밀기 24dp, `Travel` 이징, 스플래시 150ms·1초 | 정산나우 확정값 | 웹 토큰에는 100·200·300과 이징 셋만 있다 |
 | 4 | 자리 표시가 움직이는가 | 정지 | 웹은 1600ms로 맥동한다. 정산나우·Qooroo는 정지 |
 | 5 | 카드 그림자 | 없음, 선만 | 웹은 `elevation.1`. 세 앱 모두 그림자를 쓰지 않는다 |
@@ -815,7 +816,8 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 | `DdsCard`, `DdsSection`, `DdsDivider`, `DdsListRow` | `bg.elevated` + 1dp 선 + 둥글기 12, 그림자 없음. 섹션 제목은 제목으로 읽힌다. 행은 56 또는 72 | Card |
 | `DdsNotice`, `DdsBadge`, `DdsChip` | 뜻마다 아이콘과 색 쌍이 다르다. 배지는 점으로 상태를 한 번 더 알린다. 중립은 선을 둔다 | Alert, Badge, Tag |
 | `DdsEmptyState`, `DdsSpinner` | 점선 테두리, 제목, 한 문장, 동작은 많아야 하나 | EmptyState, Spinner |
-| `DdsTopBar`, `DdsBottomBar`, `DdsNavRail`, `DdsScaffold` | 바는 고정이고 1dp 선으로 구분한다. 600dp 미만은 아래 탭, 600dp부터 레일. 선택은 알약·색·굵기가 함께 바뀐다 | — (모바일에만) |
+| `DdsTopBar`, `DdsBottomBar`, `DdsNavRail`, `DdsScaffold` | 바는 고정이고 1dp 선으로 구분한다. 600dp 미만은 아래 탭, 600dp부터 레일. 선택은 알약·색·굵기가 함께 바뀐다. 0.7.0부터 상단 줄은 본문의 선에 서고 라벨은 두 줄까지 쓴다(§13) | — (모바일에만) |
+| `DdsAppFrame`, `DdsBodyColumn`, `DdsCenteredColumn`, `DdsCenteredTitle`, `DdsPaneList`, `DdsPaneItem` (0.7.0) | 화면 틀. 창 폭이 메뉴를 정하고, 화면마다 본문 기둥 하나, 한 가지 일만 하는 화면의 가운데 묶음, 고정 목록의 줄(§13) | — (모바일에만) |
 | `DdsDialog` | 결정을 확인한다. 둥글기 12, `bg.elevated` | Dialog |
 
 캡처(밝은 화면, 어두운 화면, 글자 200%, 큰 글자, 넓은 화면)를 읽고 나온 규칙:
@@ -875,3 +877,254 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 종이색 페이지 위의 흰 카드, 버튼 넷, 끝 맞춤 메뉴).
 
 아직 없는 것: 날짜·시간 선택. `DdsTheme` 아래에서 Material3 부품을 쓴다.
+
+## 13. 화면 틀 (0.7.0, D-052)
+
+앱의 모든 화면은 한 시작선에 서고, 상단 줄은 본문과 같은 선에 선다. 정산나우가 펼친 폰에서 찾은 문제가
+이것이었다. 화면마다 본문이 187, 147, 127dp에서 시작했고, 레일은 탭 화면에만 있었고, 상단 줄은 창 끝에서
+본문은 가운데에서 시작했다. DDS에 숫자는 있는데 그 숫자를 지키게 하는 부품이 없어서, 화면마다 폭을 손으로
+적었기 때문이다. 0.7.0이 그 부품을 더한다. 부품을 쓰면 선이 맞는다. 화면은 아무것도 재지 않는다.
+
+### 13.1 규칙
+
+1. **창 폭이 메뉴를 정한다.** 600dp 미만: 최상위 화면에 하단 탭. 600dp부터: 레일. 840dp부터: 레일과,
+   화면이 목록이 있는 영역에 속하면 그 옆에 목록. 화면은 창을 재지 않고 틀이 정한 것(`ddsFrame()`)을 읽는다.
+2. **옆 여백은 남은 자리가 아니라 창 폭으로 정한다.** 600 미만 16dp, 600부터 24dp. 고정 목록 옆의 화면은
+   587dp밖에 안 되지만 창이 넓으니 24다. 상단 줄, 본문, 목록이 모두 자기 창의 여백을 쓴다. (§10의 2번에서
+   여백은 이것으로 정해졌다.)
+3. **본문 기둥은 화면마다 하나다.** 여백을 포함해 680dp를 넘지 않고, 레일과 목록이 남긴 자리의 가운데에 선다.
+4. **상단 줄은 본문의 선에 선다.** 상단 줄의 내용은 본문과 같은 폭으로 같은 자리에 놓인다. 뒤로 화살표의
+   24dp 그림은 시작선에서 시작하고, 마지막 아이콘의 24dp 그림은 끝선에서 끝난다. 아이콘마다 눌리는 영역
+   48dp는 여백 쪽으로 12dp 나간다. 제목은 로고 뒤든 화살표 뒤든 시작선에서 40dp 뒤에서 시작한다. 그래서
+   화면을 열어도 제목이 옆으로 움직이지 않는다. 둘 다 없으면 시작선에서 시작한다.
+5. **레일은 틀이, 하단 탭은 화면이 그린다.** 레일은 모든 화면에 같고, 옆의 화면이 바뀌는 동안 움직이면
+   안 된다. 하단 탭은 최상위 화면의 것이다. 상세 화면은 열리면서 탭을 덮어야 하는데, 탭이 그 아래 화면의
+   일부일 때만 그렇게 된다(D-051).
+6. **한 가지 일만 하는 화면**(로그인, 잠금 풀기)은 400dp를 넘지 않는 한 묶음으로, 주어진 자리의 한가운데에 선다.
+7. **상단 줄의 높이는 창이 정한다.** 앱이 알려 준 제목 중 하나라도 지금 글자 크기에서 한 줄에 들어가지
+   않으면, 그 창의 모든 상단 줄이 두 줄, 104dp가 된다. 그래야 화면마다 본문이 위아래로 튀지 않는다.
+
+### 13.2 숫자
+
+| 무엇 | 값 | 토큰 |
+| --- | --- | --- |
+| 중간 창 시작 / 넓은 창 시작 | 600 / 840 | `DdsScreen.breakpoint` / `breakpointExpanded` |
+| 옆 여백, 600 미만 / 600부터 | 16 / 24 | `DdsScreen.gutter` / `gutterWide`, 또는 `DdsWindowWidth.gutter` |
+| 본문 기둥 최대(여백 포함) | 680 | `DdsScreen.bodyMax` |
+| 고정 목록 | 264, 그 뒤에 1dp 선 | `DdsScreen.listPane` |
+| 가운데 묶음 최대 | 400 | `DdsScreen.centeredMax` |
+| 레일 | 80 | `DdsBar.rail` |
+| 상단 줄 / 두 줄 제목일 때 | 64 / 104 | `DdsBar.top` / `topTall` |
+| 제목 시작 | 시작선 + 40 | — |
+| 아이콘 버튼 / 그 그림 | 48 / 24, 여백 쪽으로 12 나감 | `DdsTouch.min`, `DdsIcon.md` |
+| 제목 앞의 로고 | 폭 최소 28, 그 뒤 12 띄우고 제목 | — |
+
+SM-F971N의 창 세 가지에서는 이렇게 된다(이 크기로 고정한 에뮬레이터의 카탈로그와 기기 테스트에서 쟀다).
+
+| 창 | 메뉴 | 본문 글자의 선(창 시작부터 dp) |
+| --- | --- | --- |
+| 475×751 (접힌) | 최상위 화면에 하단 탭 | 16과 459 |
+| 704×933 (펼친 세로) | 레일(80 + 1dp 선) | 105와 680 |
+| 933×704 (펼친 가로) | 레일 | 191과 823 |
+| 933×704, 목록이 있는 영역 | 레일, 목록 81~345, 1dp 선 | 목록 글자 105, 본문 370과 909 |
+
+### 13.3 부품
+
+| 부품 | 하는 일 |
+| --- | --- |
+| `DdsWindowWidth`, `ddsWindowWidth(width)`, `DdsWindowWidth.gutter` | 600과 840을 기준으로 Compact / Medium / Expanded. 각각의 옆 여백 |
+| `DdsAppFrame(navItems, selectedIndex, onSelect, navigation, barTitles, barActions, barReserve, list) { … }` | 앱에 하나. 화면 전환기(`NavDisplay`나 `DdsScreenHost`) 바깥에 둔다. 레일과 고정 목록을 그린다. 그것들이 나타나거나 사라져도 내용은 제자리에 있다(접거나 돌려도 스크롤 위치와 입력한 글자가 남는다). 옆쪽의 카메라 구멍을 피한다. 오른쪽에서 왼쪽으로 쓰는 언어에서는 뒤집힌다. `navigation = false`면 메뉴를 모두 끈다(로그인 전, 스캔, 작성 화면). 바탕은 `bgDefault` |
+| `DdsFrame`, `LocalDdsFrame`, `ddsFrame()` | 틀이 정한 것: `width`, `rail`, `listPinned`, `tallBar`. 틀 밖에서 `ddsFrame()`은 창으로 정한 `width`만 갖는다 |
+| `DdsScaffold(topBar, modifier, bottomTabs) { padding -> … }` | 틀 안의 화면 하나. 최상위 화면은 `bottomTabs = true`. 탭은 Compact 창에서만, 틀이 받은 항목과 선택으로 그려진다. `padding`이 이미 비켜 준 시스템 영역(상단 줄 밑의 상태 표시줄, 내용 밑의 내비게이션 바)은 내용에서 쓴 것으로 표시한다. 그래서 안에 둔 `DdsCenteredColumn`이나 `imePadding()`이 그만큼을 다시 비우지 않는다. 예전 `DdsScaffold(topBar, navItems, …)`도 그대로 동작하지만 틀 안에 넣지 않는다(레일이 둘이 된다) |
+| `DdsTopBar(title, leading, onBack, backEnabled, backDescription, columnMax, actions)` | 본문의 선에 선다. `onBack`을 주면 화살표를 그리고 선에 맞춘다. `leading`은 로고 자리(폭 최소 28). 둘 다 주면 화살표만. 화면이 본문 최대 폭을 바꾸면 `columnMax`에 같은 값 |
+| `ddsBarNeedsTwoLines(areaWidth, titles, actions, reserve, columnMax)` | 틀이 하는 두 줄 판단. 틀을 쓰지 않는 앱용 |
+| `DdsBodyColumn(modifier, scroll, max, spacing, contentPadding, paneTitle) { … }` | 상단 줄 아래 본문 전체. 스크롤되는 한 단으로 가운데에 놓이고, 네 방향 여백이 옆 여백 값이고, 블록 사이가 24. 화면이 들어올 때 밀려 들어온다(`ddsScreenContent(paneTitle)`가 붙어 있으니 다시 붙이지 않는다). `paneTitle`에 상단 줄 제목을 준다. 화면이 바뀔 때 화면 낭독기가 그 이름을 말한다(§8.1) |
+| `Modifier.ddsBody(max)` | 본문을 직접 짜는 화면용. 폭을 제한하고 검사용 표시를 단다. 가운데 놓기와 여백은 화면이 한다 |
+| `Modifier.ddsBodyLines(max)` | 본문은 아니지만 본문의 선에 서야 하는 것용: 진행 표시줄, 단계 표시, 아래쪽 버튼 줄. 폭과 옆 여백만 주고 표시는 달지 않는다 |
+| `DdsCenteredColumn(modifier, max, paneTitle) { … }`, `DdsCenteredTitle(title, modifier, description)` | 한 가지 일만 하는 화면(본문 기둥처럼 `paneTitle`에 화면 이름을 준다). 묶음은 시스템 줄과 키보드가 남긴 자리의 가운데에 놓인다(입력칸이 키보드 위에 남는다). 옆은 창의 여백, 위·아래와 조각 사이는 24. 자리보다 길면 위에서 시작해 스크롤된다. 자리 전체에 페이지 바탕을 칠하고 묶음은 그 위로 밀려 들어온다. 제목은 가운데 정렬에 줄 길이가 고르고, 적어 넣은 줄바꿈을 지키고, 제목 하나로 읽힌다 |
+| `DdsPaneList { … }`, `DdsPaneItem(label, selected, onClick, modifier, enabled)` | 영역 목록의 줄. 고른 줄은 레일에서 고른 항목처럼 보인다(옅은 브랜드 바탕, 브랜드 색, 굵게). 나머지는 레일과 같은 회색(`textSecondary`). 높이 48, 큰 글자 모드에서 56. 줄의 글자가 목록의 여백 선에 선다. "선택됨, 7개 중 2번째"로 읽힌다. 목록은 스크롤된다 |
+| `DdsTestTags` | 부품이 스스로 달고 검사가 읽는 표시: `Body`, `TopBarTitle`, `Rail`, `ListPane`, `BottomTabs`, `Centered`, `CenteredArea` |
+| `kr.devslab:dds-compose-testing` | `DdsFrameCheck`(§13.6) |
+
+레일과 하단 탭(틀 안이든 밖이든): 라벨은 두 줄까지 쓰고 항목도 그만큼 높아진다. 그래서 글자 200%에서도
+"거래처 매출"이 잘리지 않는다. 200%에서 세 줄이 필요한 라벨은 두 번째 줄 끝에서 말줄임표로 잘리고, 레일은
+80 그대로다. 항목이 다 들어가지 않으면 레일이 스크롤된다.
+
+**틀 없이 두 줄 상단 줄 쓰기.** `DdsTopBar`는 `ddsFrame().tallBar`를 읽는데, 이 값은 틀만 정한다.
+`DdsAppFrame`을 쓰지 않는 앱은 `ddsBarNeedsTwoLines`로 판단하고, 틀이 하는 것처럼 화면들에 건넨다.
+
+```kotlin
+val width = ddsFrame().width
+val tall = ddsBarNeedsTwoLines(areaWidth = maxWidth, titles = everyBarTitle)  // BoxWithConstraints 안에서
+CompositionLocalProvider(LocalDdsFrame provides DdsFrame(width, tallBar = tall)) { Screens() }
+```
+
+**고정 목록 쓰는 법.** 좁은 창에서 한 화면으로 여는 그 목록과 같은 것이다. 앱은 한 번만 짠다. 고정 목록
+옆에서 줄을 고르면 화면을 바꿔 끼운다(밀리지 않는다. `DdsMove.Tab`이 그렇게 한다). 그 화면에는 뒤로
+화살표가 없다(`ddsFrame().listPinned`로 안다). 뒤로 가기는 고른 줄을 되짚지 않고 영역을 나간다. 목록이 한
+화면일 때는 목록, 화면, 뒤로다. 목록 자기 상단 줄에는 로고도 화살표도 없어서 제목이 목록의 선에 선다.
+
+### 13.4 Navigation 3을 쓰는 앱
+
+```kotlin
+DdsAppFrame(
+    navItems = tabs,                                   // List<DdsNavItem>
+    selectedIndex = tabOf(top),
+    onSelect = { goToTab(it) },
+    navigation = top !is SignIn && top !is Scanner,    // 한 가지 일만 하는 화면
+    barTitles = everyBarTitle,                         // 두 줄 판단용
+    list = if (top in salesArea) ({ SalesList(chosen = top, onChoose = ::swapTo) }) else null,
+) {
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        transitionSpec = { ddsScreenChange(move, reduced) },
+        popTransitionSpec = { ddsScreenChange(DdsMove.Pop, reduced) },
+        predictivePopTransitionSpec = { ddsScreenChange(DdsMove.Pop, reduced) },
+        entryProvider = { key -> NavEntry(key) { DdsScreenMotion(move) { Screen(key) } } },
+    )
+}
+
+@Composable
+fun HomeScreen() = DdsScaffold(
+    topBar = { DdsTopBar("홈", leading = { AppMark() }) { DdsIconButton(DdsIcons.Search, "검색", onClick = {}) } },
+    bottomTabs = true,
+) { padding ->
+    Box(Modifier.padding(padding)) { DdsBodyColumn(paneTitle = "홈") { /* 블록 */ } }
+}
+
+@Composable
+fun OrderScreen(onBack: () -> Unit) = DdsScaffold(topBar = { DdsTopBar("주문", onBack = onBack) }) { padding ->
+    Box(Modifier.padding(padding)) { DdsBodyColumn(paneTitle = "주문") { /* 블록 */ } }
+}
+
+@Composable
+fun SalesList(chosen: Any, onChoose: (Any) -> Unit) = DdsScaffold(topBar = { DdsTopBar("매출") }) { padding ->
+    Box(Modifier.padding(padding)) {
+        DdsPaneList { for (row in rows) DdsPaneItem(row.name, selected = row == chosen, onClick = { onChoose(row) }) }
+    }
+}
+```
+
+`NavDisplay`는 화면 뒤에 아무것도 칠하지 않는다. `DdsScaffold`와 `DdsCenteredColumn`은 페이지 바탕을
+칠하므로, 이것들로 짠 화면은 바뀌는 동안 모든 프레임에서 아래 화면을 덮는다. 다른 것으로 짠 화면은 바탕을
+따로 줘야 한다.
+
+### 13.5 `DdsScreenHost`를 쓰는 앱
+
+카탈로그(`android/catalog`의 `MainActivity.kt`와 `LayoutPages.kt`)가 통째로 그 예다.
+
+```kotlin
+DdsAppFrame(
+    navItems = Page.entries.map { DdsNavItem(it.title, it.icon) },
+    selectedIndex = page.ordinal,
+    onSelect = { index -> openTab(index) },
+    navigation = !(page == Page.Layout && demo == LayoutDemo.WholeWindow),
+    barTitles = BarTitles,
+    list = if (page == Page.Layout) ({ LayoutPinnedList(demo ?: LayoutDemo.Body, choose) }) else null,
+) {
+    val pinned = ddsFrame().listPinned
+    // 고정 목록 옆에는 늘 보여 줄 화면이 있다. 고르기 전까지는 첫 번째.
+    val shown = Shown(page, detail, if (page == Page.Layout) demo ?: (if (pinned) LayoutDemo.Body else null) else null)
+    DdsScreenHost(screen = shown, move = move) { (shownPage, shownDetail, shownDemo) ->
+        when {
+            shownDetail != null -> InnerScreen("Item ${shownDetail + 1}", goBack) { /* … */ }
+            shownDemo != null -> LayoutDemoScreen(shownDemo, onBack = if (pinned) null else goBack)
+            else -> TabScreen(shownPage) { /* … */ }   // DdsScaffold(…, bottomTabs = true)
+        }
+    }
+}
+```
+
+카탈로그의 Layout 탭이 부품을 보여 준다. 창에 대해 틀이 정한 것을 찍어 보이는 본문 기둥, 화살표와 아이콘
+둘이 있는 상단 줄, 입력칸과 버튼이 있는 로그인 모양의 가운데 묶음, 메뉴를 끈 화면. 실행 인자로 바로 연다.
+`--es page layout --es demo body|bar|centered|wholewindow`, 들어간 화면은 `--es page motion --ei item 2`.
+
+### 13.6 앱이 자기 화면을 검사하기: `dds-compose-testing`
+
+```kotlin
+androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
+```
+
+`dds-compose`, Compose 테스트 규칙(`ui-test-junit4`, 버전은 이 꾸러미가 적은 Compose BOM이 정한다),
+그리고 **Espresso 3.7.0**을 함께 가져온다. Compose BOM이 가져오는 Espresso(3.5.0)는 Android 17에서 돌지 않는다.
+`createComposeRule()`을 쓰는 테스트는 그 규칙이 띄우는 빈 액티비티도 필요하다. 이것은 앱이 직접 더한다
+(`dds-compose`의 테스트도 그렇게 한다).
+
+```kotlin
+debugImplementation("androidx.compose.ui:ui-test-manifest")   // 버전은 앱의 Compose BOM이 정한다
+```
+
+기기 테스트에서 앱의 실제 화면을 하나씩 열고 하나씩 본다.
+
+```kotlin
+val check = DdsFrameCheck(composeRule)
+for (window in listOf(DpSize(475.dp, 751.dp), DpSize(704.dp, 933.dp), DpSize(933.dp, 704.dp))) {
+    size = window                                   // DeviceConfigurationOverride.ForcedSize
+    open(Home);  check.look("Home at ${window.width}", DdsScreenKind.TopLevel)
+    open(Order); check.look("Order at ${window.width}", DdsScreenKind.Inner)
+    open(Sales); check.look("Sales at ${window.width}", DdsScreenKind.Listed)
+    open(Scan);  check.look("Scan at ${window.width}", DdsScreenKind.WholeWindow)
+}
+check.assertSameLines()
+```
+
+`look`은 아래가 아니면 실패한다. 실패 문구는 화면 이름, 잰 값(dp), 맞게 해 주는 DDS 부품을 말한다.
+
+1. 본문이 화면에 정확히 하나 있다(`DdsBodyColumn`이나 `ddsBody()`, 또는 `DdsCenteredColumn` 하나).
+2. 그 창에서 그 종류의 화면에 맞는 메뉴만 있다.
+
+   | 종류 | 레일 | 고정 목록 | 하단 탭 |
+   | --- | --- | --- | --- |
+   | `TopLevel` | 600부터 | 없음 | 600 미만 |
+   | `Inner` | 600부터 | 없음 | 없음 |
+   | `Listed` | 600부터 | 840부터 | 없음 |
+   | `WholeWindow` | 없음 | 없음 | 없음 |
+
+3. 고정 목록은 레일이 끝나는 곳(1dp 선 뒤)에서 시작하고, 본문은 목록 뒤에서 시작한다.
+4. 본문의 가운데가 레일과 목록이 남긴 자리의 가운데에서 1dp 안에 있다.
+5. 화면의 제목이 본문의 양 끝 안에 있다. 고정 목록이 있으면 상단 줄이 둘인데, 목록 위의 제목은 목록의
+   것으로 보고 뺀다.
+
+`assertSameLines()`는 본 화면들을 종류, 고정 목록 유무, 본문인지 가운데 묶음인지, 창 폭으로 묶는다. 한
+묶음 안의 두 화면이 시작선이나 폭에서 1dp 넘게 다르면 둘 다 이름을 대며 실패한다. 화면은 바뀌는 중이 아니라
+멈춘 뒤에 본다.
+
+`look`이 돌려주는 `DdsScreenReading`은 앱이 증거로 남길 수 있다: `name`, `kind`, `window`, `windowWidthDp`,
+`bodyLeftDp`, `bodyWidthDp`, `titleLeftDp`(상단 줄 제목이 없는 화면과 가운데 묶음은 null), `rail`,
+`listPane`, `bottomTabs`, `centered`. `check.readings`에 다 모인다.
+
+### 13.7 확인한 것과 확인하지 못한 것
+
+확인한 것:
+
+- 틀, 본문, 상단 줄, 가운데 묶음, 목록 줄, 검사 자체, 그리고 견본 앱 하나(탭 둘, 들어간 화면, 목록이 있는
+  영역, 메뉴를 끈 화면, 로그인 묶음)를 475×751, 704×933, 933×704에서 기기 테스트로 잰다. 제품이 정한 페이지
+  색에서도 쟀다. 새 테스트는 모두 실패하는 것을 먼저 보았다. 예외는 견본 앱 테스트의 두 부분이다 — 페이지 색
+  검사와 `assertSameLines` 호출은 실패하는 것을 본 적이 없다. 전체 기기 테스트는 실물 폰(SM-F971N, Android
+  17)에서 돌렸다. 개수와 창 크기는 변경 기록에 있다.
+- 화면이 바뀌는 동안, 시계를 멈추고 프레임마다: 레일은 자리도 픽셀도 그대로다. 탭 화면 위로 연 화면은 빈
+  프레임 없이 하단 탭을 덮는다. 가운데 묶음 화면은 모든 프레임에서 아래 화면을 페이지 바탕으로 덮는다.
+  `NavDisplay` 안에서도 그렇다.
+- 글자 200%: 레일과 탭의 라벨, 제목이 잘리지 않는다.
+- 오른쪽에서 왼쪽(테스트에서 설정): 레일과 목록이 오른쪽에 온다.
+- 카탈로그를 창 세 가지로 고정한 에뮬레이터에서 보았다. 세 창 모두 밝은 화면, 933×704에서 어두운 화면,
+  475×751에서 가장 큰 글자, 475×751에서 키보드를 연 채. 캡처마다 본문의 선을 그어 보았다.
+
+확인하지 못한 것:
+
+- **요청한 앱을 그 폰에서.** 정산나우가 로컬 빌드로 0.7.0에 옮기고 폰의 창 세 가지에서 확인한 뒤에 배포한다.
+- 폰에서 카탈로그(에뮬레이터에서만 보았다).
+- 틀과 함께 하는 뒤로 밀기(예측 뒤로 가기).
+- 진짜 옆쪽 카메라 구멍. 구멍은 테스트 안에서만 설정했다. `DdsFrameCheck`가 옆 여백(시스템 줄·구멍)을 다루는 부분은 테스트가 없다.
+- 오른쪽에서 왼쪽으로 쓰는 기기 언어, 그리고 그때의 카메라 구멍.
+- 화면 분할: 앱 창이 화면보다 작을 때 틀 밖의 `ddsFrame()`이 읽는 폭.
+- 따로 만든 앱의 빌드에서 이 꾸러미를 받아 쓰기, 그리고 릴리스 워크플로가 세 번째 꾸러미를 올리는지(올리는
+  단계가 꾸러미를 내는 모든 모듈을 덮지만 돌려 보지 않았다).
+- TalkBack으로 듣기.
+
+알고도 그대로 둔 것: 상단 줄 끝의 글자 버튼은 끝선보다 12dp 나간다(끝에 12dp를 준다). 두 줄 판단은 시스템이
+알려 주는 옆쪽 구멍을 자리에서 뺀다. 그래서 틀 위의 무언가가 이미 그만큼 비켜 놓았다면 두 번 빠지고, 두 줄이
+몇 dp 일찍 된다. 좁은 상단 줄에 아이콘이 일곱 개 넘게 있으면 제목과 겹치는지 재지 않는다. Expanded 창에서 두 줄 판단은 고정
+목록이 보일 때는 그 옆에 남은 자리를, 아닐 때는 목록 없는 자리를 잰다. 그래서 긴 제목 하나가 목록 있는
+영역에서는 상단 줄을 높이고 다른 곳에서는 낮게 둘 수 있다.

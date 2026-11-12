@@ -70,6 +70,35 @@ test("native-only values and motion come from the token files", async () => {
   assert.ok(motion.includes(`val exit = DdsEasingToken(${x1}f, ${y1}f, ${x2}f, ${y2}f)`));
 });
 
+test("the screen frame numbers are generated for Kotlin and XML", () => {
+  const files = generateAndroidTokens();
+  const dimens = files.get(`${kotlinDir}/DdsDimens.kt`);
+  const screen = dimens.slice(dimens.indexOf("object DdsScreen"));
+  const bar = dimens.slice(dimens.indexOf("object DdsBar"), dimens.indexOf("object DdsIcon"));
+  const expected = [
+    [screen, "breakpointExpanded", 840],
+    [screen, "bodyMax", 680],
+    [screen, "listPane", 264],
+    [screen, "centeredMax", 400],
+    [bar, "rail", 80],
+    [bar, "topTall", 104],
+  ];
+  for (const [block, name, value] of expected) {
+    assert.match(block, new RegExp(`const val ${name}: Int = ${value}\\b`));
+  }
+  const xml = files.get(`${resDir}/values/dds_tokens.xml`);
+  for (const [name, value] of [
+    ["dds_screen_breakpoint_expanded", 840],
+    ["dds_screen_body_max", 680],
+    ["dds_screen_list_pane", 264],
+    ["dds_screen_centered_max", 400],
+    ["dds_bar_rail", 80],
+    ["dds_bar_top_tall", 104],
+  ]) {
+    assert.match(xml, new RegExp(`<dimen name="${name}">${value}dp</dimen>`));
+  }
+});
+
 test("every generated file carries the do-not-edit header", () => {
   for (const [path, content] of generateAndroidTokens()) {
     assert.ok(content.includes(GENERATED_HEADER), `${path} is missing the generated header`);

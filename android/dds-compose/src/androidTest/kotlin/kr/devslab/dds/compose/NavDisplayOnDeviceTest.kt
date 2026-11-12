@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
+import kr.devslab.dds.compose.layout.DdsCenteredColumn
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -180,5 +182,55 @@ class NavDisplayOnDeviceTest {
         val body = rule.onNodeWithTag("body b", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         val host = rule.onNodeWithTag("host").fetchSemanticsNode().boundsInRoot
         assertTrue("forward starts to the trailing side of where it ends", body.left > host.left)
+    }
+
+    @Test
+    fun aCenteredScreenCoversTheScreenUnderItWithThePageAllTheWay() {
+        var page = Color.Unspecified
+        rule.setContent {
+            DdsTheme {
+                page = DdsTheme.colors.bgDefault
+                // Green stands for the window: it shows only where no screen covers it. A NavDisplay paints
+                // nothing behind its entries, so a centered screen must cover the one under it by itself.
+                Box(Modifier.size(200.dp).background(Color.Green).testTag("host")) {
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = { },
+                        transitionSpec = { ddsScreenChange(move, reduced = false) },
+                        popTransitionSpec = { ddsScreenChange(DdsMove.Pop, reduced = false) },
+                        predictivePopTransitionSpec = { ddsScreenChange(DdsMove.Pop, reduced = false) },
+                        entryProvider = { key ->
+                            NavEntry(key) {
+                                DdsScreenMotion(move) {
+                                    if (key == "a") {
+                                        Box(Modifier.fillMaxSize().background(red))
+                                    } else {
+                                        DdsCenteredColumn { Text("word $key") }
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+            }
+        }
+        // A point at the start of the top edge, clear of the block in the middle, and inside the 24dp the
+        // content slides across: what is there while the block is still on its way is the page, not the window.
+        fun corner(): Color {
+            val pixels = rule.onNodeWithTag("host").captureToImage().toPixelMap()
+            return pixels[4, 4]
+        }
+        assertEquals(red, corner())
+
+        rule.mainClock.autoAdvance = false
+        forward("b")
+        repeat(24) { frame -> // 24 frames is longer than the 300ms the slide takes
+            rule.mainClock.advanceTimeByFrame()
+            val now = corner()
+            assertEquals("frame $frame: the window shows through at the corner of the centered screen ($now)", 0f, now.green - minOf(now.red, now.blue), 0.06f)
+        }
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        assertEquals("at the end the centered screen shows the page where the red screen was", page, corner())
     }
 }

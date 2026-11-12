@@ -82,6 +82,8 @@ import kr.devslab.dds.compose.component.DdsTextField
 import kr.devslab.dds.compose.component.DdsTone
 import kr.devslab.dds.compose.icons.DdsIcon
 import kr.devslab.dds.compose.icons.DdsIcons
+import kr.devslab.dds.compose.layout.DdsBodyColumn
+import kr.devslab.dds.compose.layout.ddsBodyLines
 import kr.devslab.dds.compose.motion.DdsBusyBar
 import kr.devslab.dds.compose.motion.DdsLoadingRows
 import kr.devslab.dds.compose.motion.DdsMotion
@@ -104,18 +106,13 @@ import kr.devslab.dds.tokens.DdsScreen
 import kr.devslab.dds.tokens.DdsSpace
 import kr.devslab.dds.tokens.DdsTokensInfo
 
-/** The scrolling body of a page: the part that arrives when the page is opened. */
+/**
+ * The scrolling body of a page: the part that arrives when the page is opened. A body column
+ * stands on the window's lines: the same start line on every page, beside the rail or not.
+ */
 @Composable
 private fun PageBody(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .ddsScreenContent()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = DdsScreen.gutter.dp, vertical = DdsSpace.s16.dp),
-        verticalArrangement = Arrangement.spacedBy(DdsScreen.blockGap.dp),
-        content = content,
-    )
+    DdsBodyColumn(content = content)
 }
 
 @Composable
@@ -561,7 +558,7 @@ fun MotionPage(onOpen: (Int) -> Unit) {
         }
         // Drawn over the content, so work starting or ending never pushes the page down;
         // hidden while the pull indicator is already showing the same work.
-        DdsBusyBar(busy = busy && !pulling, modifier = Modifier.padding(horizontal = DdsScreen.gutter.dp))
+        DdsBusyBar(busy = busy && !pulling, modifier = Modifier.ddsBodyLines())
     }
 }
 
