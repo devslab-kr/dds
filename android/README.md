@@ -8,7 +8,8 @@ repository root. The rules are in [`docs/mobile-native.md`](../docs/mobile-nativ
 | Module | Coordinate | Contents |
 | --- | --- | --- |
 | `dds-tokens` | `kr.devslab:dds-android-tokens` | Values only: Kotlin constants and XML resources. No Compose dependency |
-| `dds-compose` | `kr.devslab:dds-compose` | Material3 theme, brand, motion and loading helpers, components, icons |
+| `dds-compose` | `kr.devslab:dds-compose` | Material3 theme, brand, motion and loading helpers, components, icons, the screen frame |
+| `dds-compose-testing` | `kr.devslab:dds-compose-testing` | For an app's device tests: `DdsFrameCheck` checks its screens against the frame. Brings Espresso 3.7.0. From 0.7.0 |
 | `catalog` | not published | An app that puts every value and helper on screen, for checking |
 
 Minimum Android 8 (API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00.
@@ -18,6 +19,18 @@ Minimum Android 8 (API 26), compileSdk 36, Kotlin 2.2.20, Compose BOM 2026.01.00
 ```kotlin
 dependencies {
     implementation("kr.devslab:dds-compose:0.6.0") // brings dds-android-tokens
+}
+```
+
+**0.6.0 is the version on Maven Central.** 0.7.0 (the screen frame, guide §13, and the
+`dds-compose-testing` artifact) is built but not on Maven Central yet: it waits for
+JeongsanNow's check on its phone. To use it now, build it into the local repository (below),
+then:
+
+```kotlin
+dependencies {
+    implementation("kr.devslab:dds-compose:0.7.0")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
 }
 ```
 
@@ -91,7 +104,7 @@ adb -s <device> shell am start -n kr.devslab.dds.catalog/.MainActivity \
   --es theme dark --es page parts --ez large true
 ```
 
-`page` is one of `colors`, `type`, `parts`, `motion`. After changing a value or
+`page` is one of `colors`, `type`, `parts`, `motion`, `layout`. `--es demo body|bar|centered|wholewindow` opens a Layout demo; `--ei item 2` opens a Motion item (an inner screen). After changing a value or
 a helper, look at it in light and dark, at a 200% font scale, in large text mode,
 and with "Remove animations" on.
 
@@ -101,7 +114,8 @@ and with "Remove animations" on.
 measures what moves part-way through, with the clock held (`MotionOnDeviceTest`,
 `NavDisplayOnDeviceTest` inside Navigation 3 — a test-only dependency — and
 `RebuiltWindowTest`, which rebuilds the activity; `SplashOverlayOnDeviceTest` for the
-splash cover as it lifts). It needs an
+splash cover as it lifts). `FrameOnDeviceTest` measures the screen frame in three forced windows (475×751,
+704×933, 933×704), and `FrameCheckTest` the check of `dds-compose-testing`. It needs an
 emulator or a phone, so CI does not run it. Name the device — the task otherwise runs on every device
 that is connected:
 
@@ -111,8 +125,8 @@ ANDROID_SERIAL=<device> ./gradlew :dds-compose:connectedDebugAndroidTest
 
 ## Versions and releases
 
-- Android has **its own version number**, apart from the web packages. The two
-  coordinates always share one version (`VERSION_NAME` in `gradle.properties`).
+- Android has **its own version number**, apart from the web packages. The
+  coordinates (three from 0.7.0) always share one version (`VERSION_NAME` in `gradle.properties`).
 - Removing or renaming a token, or removing public API, is a major change (a minor one during 0.x).
 - A release happens only when an `android-v<version>` tag is pushed
   (`.github/workflows/android-release.yml`). The repository needs the same five

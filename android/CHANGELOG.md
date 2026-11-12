@@ -2,8 +2,101 @@
 
 **English** · [한국어](CHANGELOG.ko.md)
 
-`kr.devslab:dds-android-tokens` and `kr.devslab:dds-compose` share one version,
+`kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
+
+## 0.7.0 — not released yet
+
+The screen frame (D-052), from JeongsanNow on an unfolded phone: screens started on
+different lines (187, 147, 127dp, or edge to edge), the rail was there on tab screens
+only, and the top bar started at the window's edge while the body started in the middle.
+DDS had the numbers and no part that kept them. Now it has the parts. Guide §13.
+
+**Not on Maven Central yet.** The release waits for JeongsanNow to move onto it from a
+local build and check it on its phone in three windows (folded 475×751, unfolded upright
+704×933, unfolded on its side 933×704). Until then it is built from this repository with
+`./gradlew publishToMavenLocal`.
+
+**What is new**
+
+- **`DdsAppFrame`** — once per app, outside the screen switcher. The window's width
+  decides the menus: bottom tabs under 600dp (drawn by the top-level screens), a rail from
+  600dp, a rail and the area's pinned list from 840dp. `navigation = false` turns them all
+  off. The content stays where it is when a menu appears or goes, so a fold or a rotation
+  keeps scroll positions and typed text.
+- **`DdsFrame`, `LocalDdsFrame`, `ddsFrame()`** — what the frame decided, for a screen to
+  read instead of measuring.
+- **`DdsWindowWidth`, `ddsWindowWidth()`, `DdsWindowWidth.gutter`** — Compact / Medium /
+  Expanded at 600 and 840; the gutter 16 / 24 / 24.
+- **`DdsScaffold(topBar, modifier, bottomTabs)`** — one screen inside the frame. The old
+  `DdsScaffold(topBar, navItems, …)` is unchanged.
+- **`DdsBodyColumn`, `Modifier.ddsBody()`, `Modifier.ddsBodyLines()`, `DdsBodyDefaults`**
+  — one body column per screen, no wider than 680dp with its gutters, in the middle of what
+  the rail and the list leave.
+- **`DdsTopBar(onBack, backEnabled, backDescription, columnMax)`** — the bar stands on the
+  body's lines; `onBack` draws the arrow and lines it up. **`ddsBarNeedsTwoLines()`** — the
+  two-line decision; inside a frame `barTitles` makes it for the whole window (104dp).
+- **`DdsCenteredColumn`, `DdsCenteredTitle`** — a screen with one thing to do: one block,
+  at most 400dp, in the middle of what the bars and the keyboard leave.
+- **`DdsPaneList`, `DdsPaneItem`** — the rows of a pinned list.
+- **`DdsTestTags`** — the tags the parts put on themselves.
+- **New artifact `kr.devslab:dds-compose-testing`** — `DdsFrameCheck(rule).look(name, kind)`
+  and `.assertSameLines()`: an app's device tests check that every screen keeps one start
+  line and has only the menus its window and kind call for. It brings Espresso 3.7.0 (the
+  one the Compose BOM brings, 3.5.0, does not run on Android 17).
+- **New tokens:** `DdsScreen.breakpointExpanded` 840, `bodyMax` 680, `listPane` 264,
+  `centeredMax` 400; `DdsBar.rail` 80, `topTall` 104.
+
+```kotlin
+implementation("kr.devslab:dds-compose:0.7.0")
+androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
+```
+
+**If you move up**
+
+Code that compiled with 0.6.0 compiles with 0.7.0. What looks different without changing
+anything:
+
+- **`DdsTopBar`.** On a wide window its content gathers into the body column's width
+  (680dp) in the middle; the line under it and its background still span the area. The side
+  gutter is 24 from a 600dp window (was 16 everywhere). A title after a `leading` mark
+  starts 40dp after the start line. Code that passed a back button as `leading` still works
+  but is not on the lines; move it to `onBack`.
+- **`DdsBottomBar`, `DdsNavRail`.** A label is no longer cut at one line; it takes up to
+  two, and the bar or the rail item grows with it. The rail is always 80 wide. At 200% font
+  a label that needs a third line is cut after the second.
+- **A centered screen moves and paints.** `DdsCenteredColumn` slides in with the screen as a
+  body column does, and paints the page (`bgDefault`) behind its whole area, so it covers the
+  screen under it on every frame of a change, also in a `NavDisplay`.
+- **The rows of a pinned list** that are not chosen are in the rail's grey (`textSecondary`),
+  not the body color.
+
+JeongsanNow, moving its own frame over: the gutter goes from 20 to 16 folded and 24
+unfolded, the line under the top bar is always shown, and the space above the body is 16 or
+24 (was 12 or 20). The mapping from its parts to DDS's is in the hand-over note and the
+design (spec §10).
+
+**Checked**
+
+- Unit tests, lint and build: green.
+- Device tests, the whole suite, read from the result files, on the phone (SM-F971N,
+  Android 17, window 1248x1972): 170 run, 0 failed, 0 errors, 2 skipped. The
+  skipped are the menu's two exact-color checks, which cannot run there (0.6.0). The frame
+  tests force the three windows inside the test.
+- The catalog, on the new frame with a Layout page, on an emulator forced to 475×751,
+  704×933 and 933×704: light at all three, dark at 933×704, the largest font at 475×751,
+  the keyboard open at 475×751. The body's start and end lines were drawn over every
+  capture; the arrow, the title, the last icon and the body text stand on them.
+- `publishToMavenLocal`: three artifacts at 0.7.0. Only `dds-compose-testing`'s POM names
+  Espresso.
+
+**Not verified**
+
+- JeongsanNow on its phone (the condition for the release).
+- The catalog on the phone; the back swipe with the frame; a real side cutout (set in tests
+  only); a right-to-left device language; split screen outside a frame; the testing artifact
+  from a separate app's build; the release workflow publishing the third artifact; TalkBack.
+- `DdsFrameCheck` with side insets, with a body of another width, with a dialog open.
 
 ## 0.6.0 — 2026-11-12
 

@@ -89,7 +89,7 @@ dark), the menu loses its shadow, and brand text is newly checked on the subtle 
 
 ## D-052 — 화면 틀: 창 폭이 메뉴를 정하고, 본문은 한 기둥에 선다 (2026-11-12)
 
-**상태.** 설계 승인, 구현 전. 설계 문서: `docs/superpowers/specs/2026-11-12-dds-android-screen-frame-design.ko.md`. 대상은 안드로이드 0.7.0.
+**상태.** 만들었다. 아직 배포 전(안드로이드 0.7.0, 브랜치 `feat/android-screen-frame`). 정산나우가 로컬 빌드로 옮겨 실물 폰의 창 세 가지에서 확인한 뒤에 배포한다. 설계 문서: `docs/superpowers/specs/2026-11-12-dds-android-screen-frame-design.ko.md`(설계와 달라진 것은 그 문서의 "달라진 것").
 
 **문제.** 정산나우에서 소유자가 펼친 폰으로 찾았다. 화면마다 본문 시작선이 달랐고(펼친 가로에서 187,
 147, 127, 끝에서 끝까지), 왼쪽 레일은 탭 화면에만 있었으며, 상단 줄은 화면 왼쪽 끝에서 본문은 가운데에서
@@ -120,8 +120,38 @@ dark), the menu loses its shadow, and brand text is newly checked on the subtle 
 틀·본문·상단 줄·측정 테스트를 DDS 것으로 바꾸고 여백이 20에서 16/24가 된다. Qooroo는 창 폭 분류·여백·본문
 기둥만 골라 쓴다.
 
+**구현하며 더 정한 것.** 가운데 묶음은 시스템 줄과 키보드를 피하고(입력칸이 키보드 위에 남는다), 조각 사이를
+24 띄우고, 화면과 함께 밀려 들어오며, 자리 전체에 페이지 바탕을 칠한다(D-051 — 모든 화면은 아래 화면을 덮는다.
+`NavDisplay`는 화면 뒤에 아무것도 칠하지 않는다). 고정 목록의 고르지 않은 줄은 레일과 같은 회색이다. 200%
+글자에서 세 줄이 필요한 레일 라벨은 두 번째 줄 뒤에서 자르고 레일은 80 그대로다. 옆쪽 카메라 구멍이 있으면
+레일이 차지하는 폭은 구멍 + 80이다. 검사 꾸러미는 Espresso 3.7.0을 함께 가져온다(Compose BOM의 3.5.0은
+Android 17에서 돌지 않는다). 검사는 가운데 묶음 하나를 화면의 본문 하나로 센다.
+
+**검증.** 단위 테스트·린트·빌드 통과. 기기 테스트 전체를 결과 파일로 읽었다 — 실물 폰(SM-F971N, Android 17,
+창 1248x1972)에서 170개 실행, 실패 0, 오류 0, 건너뜀 2(폰에서 돌 수 없는 메뉴의 색 값 검사 둘, 0.6.0과 같다).
+틀 테스트는 테스트 안에서 창을 475×751, 704×933, 933×704로 고정한다. 견본 앱 하나(탭 둘, 들어간 화면, 목록이
+있는 영역, 메뉴를 끈 화면, 로그인 묶음)를 세 창에서 `DdsFrameCheck`로 쟀고, 제품 페이지 색에서도 쟀다. 시계를
+멈추고 프레임마다 본 것: 화면이 바뀌는 동안 레일의 자리와 픽셀이 그대로다. 탭 화면 위로 연 화면이 빈 프레임
+없이 하단 탭을 덮는다. 가운데 묶음 화면이 모든 프레임에서 아래 화면을 페이지 바탕으로 덮는다. 새 테스트는
+모두 실패하는 것을 먼저 보았다. 카탈로그를 새 틀로 옮기고 Layout 쪽을 더해, 고정한 에뮬레이터에서 세 창(밝은
+화면), 933×704 어두운 화면, 475×751 가장 큰 글자와 키보드를 캡처하고 본문의 선을 그어 보았다.
+
+**확인하지 못한 것.** 정산나우가 자기 폰에서 확인(배포 조건). 폰에서 카탈로그. 틀과 함께 하는 뒤로 밀기. 진짜
+옆쪽 카메라 구멍(테스트 안에서만 설정)과 `DdsFrameCheck`의 옆 여백 처리. 오른쪽에서 왼쪽으로 쓰는 기기 언어.
+틀 밖의 화면 분할. 따로 만든 앱에서 테스트 꾸러미 받기, 릴리스 워크플로가 세 번째 꾸러미를 올리는지. TalkBack.
+
 **재검토 시점.** 목록과 상세를 반반으로 나누는 앱이 둘 이상이 되면(지금은 Qooroo 하나). 반쯤 접은 자세를
 써야 하는 화면이 생기면. 실물 폰 확인에서 선이 어긋나면.
+
+**English.** Built, not released (Android 0.7.0). The window's width decides the menus (bottom tabs under
+600dp drawn by the top-level screens, a rail from 600 and a pinned list from 840 drawn by `DdsAppFrame`
+outside the screen switcher); the gutter is 16 / 24 by the window's width; one body column of at most 680dp
+per screen; the top bar stands on the body's lines; a centered block of at most 400dp for a screen with one
+thing to do; `kr.devslab:dds-compose-testing` lets an app check its own screens. Verified: the whole device
+suite on the phone (SM-F971N, Android 17, window 1248x1972), 170 run, 0 failed, 2 skipped (the menu's
+exact-color checks); the catalog looked at on an emulator forced to the three windows. Not verified:
+JeongsanNow on its phone (the condition for the release), the back swipe, a real side cutout, a
+right-to-left device language, split screen, the testing artifact from a separate build, TalkBack.
 
 ---
 
