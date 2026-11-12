@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -32,10 +33,11 @@ import kr.devslab.dds.tokens.R as TokensR
  * @param textOnBrand text and icons on [bgBrand]. Defaults to the on-brand
  * rule: whichever of the system's dark text and white reads better on the fill
  * @param borderFocus focus ring. Defaults to the system's neutral ring
- * @param bgDefault the page background. [Color.Unspecified], the default, means
- * the system's value for this theme
- * @param bgSubtle the quiet grouping background. [Color.Unspecified] means the system's
- * @param bgElevated the background of cards, sheets, dialogs and menus.
+ * @param bgDefault the page background, opaque. [Color.Unspecified], the
+ * default, means the system's value for this theme
+ * @param bgSubtle the quiet grouping background, opaque. [Color.Unspecified]
+ * means the system's
+ * @param bgElevated the background of cards, sheets, dialogs and menus, opaque.
  * [Color.Unspecified] means the system's
  * @param allow the contrast pairs this product lets through in this theme even
  * though they are below [DdsMinTextContrast]. Empty by default: every pair is
@@ -120,6 +122,10 @@ public fun onBrandFor(fill: Color): Color =
  * passes. The edge of a control (3:1, D-050) is not checked here; a product
  * that moves a background far from the system's checks that itself.
  *
+ * A background a product names must be opaque. Contrast is measured against
+ * the color as given, and what shows through a translucent one is not known
+ * here. No exception covers this.
+ *
  * A product may declare an exception, pair by pair ([DdsContrastPair]) and
  * theme by theme: a pair named in a theme's [DdsBrandColors.allow] is not
  * checked in that theme, however low its contrast. Nothing is let through
@@ -128,7 +134,8 @@ public fun onBrandFor(fill: Color): Color =
  *
  * @throws IllegalArgumentException if, in either theme, one of the pairs of
  * [DdsContrastPair] is below [DdsMinTextContrast] and that theme's
- * [DdsBrandColors.allow] does not name the pair
+ * [DdsBrandColors.allow] does not name the pair, or if a background a product
+ * names is not opaque
  */
 @Immutable
 public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBrandColors) {
@@ -188,8 +195,14 @@ public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBran
          *
          * Without overrides this equals [Default].
          *
+         * The colors fall back the same way: a background set only in
+         * `res/values` is the dark theme's background too. A light page there
+         * fails the dark theme's text check; give the dark theme its own
+         * `dds_color_bg_*` in `res/values-night`.
+         *
          * @throws IllegalArgumentException as [DdsBrand] does, if the colors
-         * break a contrast rule and the bools do not declare that pair
+         * break a contrast rule and the bools do not declare that pair, or if
+         * a background is not opaque
          */
         public fun fromResources(context: Context): DdsBrand =
             DdsBrand(light = readBrand(context, night = false), dark = readBrand(context, night = true))
@@ -245,8 +258,21 @@ internal val DdsContrastPair.allowResourceName: String
         DdsContrastPair.TextOnBackground -> "dds_allow_contrast_text_on_background"
     }
 
-/** One measurement: [foreground] on [fill], part of [pair], called [name] in the message. */
-private class ContrastCheck(val pair: DdsContrastPair, val name: String, val foreground: Color, val fill: Color)
+/**
+ * One measurement: [foreground] on [fill], part of [pair], called [name] in the
+ * message. [fillResource] is the color resource behind [fill] when it is one of
+ * the three backgrounds a product may set, else null.
+ */
+private class ContrastCheck(
+    val pair: DdsContrastPair,
+    val name: String,
+    val foreground: Color,
+    val fill: Color,
+    val fillResource: String? = null,
+)
+
+/** One of the three backgrounds a product may set, as the checks and their messages see it. */
+private class ProductBackground(val field: String, val name: String, val resource: String, val given: Color, val resolved: Color)
 
 /** The page background of [colors] in that theme: the product's if it named one, else the system's. */
 internal fun pageBackground(colors: DdsBrandColors, night: Boolean): Color =
@@ -263,21 +289,30 @@ internal fun cardBackground(colors: DdsBrandColors, night: Boolean): Color =
 private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean) {
     val theme = if (night) "dark" else "light"
     val backgrounds = listOf(
-        "the page background (bgDefault)" to pageBackground(colors, night),
-        "the subtle background (bgSubtle)" to subtleBackground(colors, night),
-        "the card background (bgElevated)" to cardBackground(colors, night),
+        ProductBackground("bgDefault", "the page background (bgDefault)", "dds_color_bg_default", colors.bgDefault, pageBackground(colors, night)),
+        ProductBackground("bgSubtle", "the subtle background (bgSubtle)", "dds_color_bg_subtle", colors.bgSubtle, subtleBackground(colors, night)),
+        ProductBackground("bgElevated", "the card background (bgElevated)", "dds_color_bg_elevated", colors.bgElevated, cardBackground(colors, night)),
     )
+    for (background in backgrounds) {
+        // Unspecified is the system's background, which is opaque; its own alpha means nothing.
+        require(background.given.isUnspecified || background.given.alpha == 1f) {
+            val alpha = String.format(Locale.ROOT, "%.2f", background.given.alpha)
+            "DdsBrand ($theme): ${background.field} must be opaque (alpha is $alpha, from ${background.resource} or the $theme DdsBrandColors). " +
+                "Text contrast cannot be measured on a translucent background, and no exception covers it."
+        }
+    }
     // Body and secondary text are the system's; only the background under them can be a product's.
     val textPrimary = Color(if (night) DdsDarkColors.textPrimary else DdsLightColors.textPrimary)
     val textSecondary = Color(if (night) DdsDarkColors.textSecondary else DdsLightColors.textSecondary)
     val checks = buildList {
         add(ContrastCheck(DdsContrastPair.TextOnBrand, "textOnBrand on bgBrand", colors.textOnBrand, colors.bgBrand))
-        for ((name, background) in backgrounds) {
-            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textPrimary on $name", textPrimary, background))
-            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textSecondary on $name", textSecondary, background))
+        for (background in backgrounds) {
+            val (name, fill, resource) = Triple(background.name, background.resolved, background.resource)
+            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textPrimary on $name", textPrimary, fill, resource))
+            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textSecondary on $name", textSecondary, fill, resource))
         }
-        for ((name, background) in backgrounds) {
-            add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on $name", colors.textBrand, background))
+        for (background in backgrounds) {
+            add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on ${background.name}", colors.textBrand, background.resolved, background.resource))
         }
         add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on bgBrandSubtle", colors.textBrand, colors.bgBrandSubtle))
     }
@@ -294,7 +329,15 @@ private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean) {
             } else {
                 "res/values (a bool set there also covers the dark theme unless res/values-night sets it to false)"
             }
-            "DdsBrand ($theme): ${check.name} is $measured. " +
+            // The colors fall back the same way, and that is the usual cause in the dark theme:
+            // a light page set once in res/values, under the dark theme's light text.
+            val fallback = if (night && check.fillResource != null) {
+                "A background set only in res/values is the dark page too; " +
+                    "the usual fix is to define ${check.fillResource} in res/values-night. "
+            } else {
+                ""
+            }
+            "DdsBrand ($theme): ${check.name} is $measured. " + fallback +
                 "To allow it in the $theme theme, set <bool name=\"${check.pair.allowResourceName}\">true</bool> " +
                 "in $folder or pass allow = setOf(DdsContrastPair.${check.pair.name}) to the $theme DdsBrandColors."
         }

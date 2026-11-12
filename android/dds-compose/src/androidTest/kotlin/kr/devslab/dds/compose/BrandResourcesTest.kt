@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.Locale
 import kr.devslab.dds.compose.component.DdsBottomBar
@@ -99,6 +100,8 @@ class BrandResourcesTest {
     /** Product C's page: a warm paper color, not the system's white. */
     private val paper = Color(context.getColor(TestR.color.dds_test_paper))
 
+    // The paper is a color state list with lStar, which Android reads from API 31 on.
+    @SdkSuppress(minSdkVersion = 31)
     @Test
     fun aPageBackgroundSetInResourcesIsReadAndTheOtherTwoStayTheSystems() {
         assertNotEquals("the paper must not be the system's page", Color(DdsLightColors.bgDefault), paper)
@@ -115,6 +118,8 @@ class BrandResourcesTest {
         assertEquals(DdsBrand.Default.dark.copy(bgDefault = Color.Black), brand.dark)
     }
 
+    // The paper is a color state list with lStar, which Android reads from API 31 on.
+    @SdkSuppress(minSdkVersion = 31)
     @Test
     fun theThemeTheMaterialSchemeAndTheBarsTakeTheProductPage() {
         val brand = DdsBrand.fromResources(product("zx"))

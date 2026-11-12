@@ -319,6 +319,82 @@ class BrandTest {
     }
 
     @Test
+    fun aDarkBackgroundRejectionFirstSaysWhereToDefineTheDarkBackground() {
+        val resources = listOf("dds_color_bg_default", "dds_color_bg_subtle", "dds_color_bg_elevated")
+        for ((index, background) in backgrounds.withIndex()) {
+            val (name, set) = background
+            val hint = "A background set only in res/values is the dark page too; " +
+                "the usual fix is to define ${resources[index]} in res/values-night. "
+            // Body text on a light background that fell through into the dark theme.
+            val body = assertThrows(IllegalArgumentException::class.java) {
+                DdsBrand(light = DdsBrand.Default.light, dark = set(DdsBrand.Default.dark, paper))
+            }.message.orEmpty()
+            assertTrue(body, body.startsWith("DdsBrand (dark): textPrimary on $name is "))
+            assertTrue(body, body.contains("below 4.5:1. $hint" + "To allow it in the dark theme, set <bool name=\"dds_allow_contrast_text_on_background\">"))
+            assertTrue(body, body.endsWith("in res/values-night or pass allow = setOf(DdsContrastPair.TextOnBackground) to the dark DdsBrandColors."))
+            // Brand text on the same background, once body text is declared.
+            val brandText = assertThrows(IllegalArgumentException::class.java) {
+                DdsBrand(
+                    light = DdsBrand.Default.light,
+                    dark = set(DdsBrand.Default.dark, paper).copy(allow = setOf(DdsContrastPair.TextOnBackground)),
+                )
+            }.message.orEmpty()
+            assertTrue(brandText, brandText.startsWith("DdsBrand (dark): textBrand on $name is "))
+            assertTrue(brandText, brandText.contains("below 4.5:1. $hint" + "To allow it in the dark theme, set <bool name=\"dds_allow_contrast_text_brand\">"))
+            // The light theme reads res/values itself: nothing fell through, so no such advice.
+            val light = assertThrows(IllegalArgumentException::class.java) {
+                DdsBrand(light = set(DdsBrand.Default.light, nearBlack), dark = DdsBrand.Default.dark)
+            }.message.orEmpty()
+            assertTrue(light, !light.contains("is the dark page too"))
+        }
+        // Pairs that have no page, subtle or card background under them say nothing about one.
+        val onBrand = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = DdsBrand.Default.light, dark = whiteOnOrange(DdsBrand.Default.dark))
+        }.message.orEmpty()
+        assertTrue(onBrand, !onBrand.contains("is the dark page too"))
+        val onPale = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = DdsBrand.Default.light, dark = DdsBrand.Default.dark.copy(bgBrandSubtle = DdsBrand.Default.dark.textBrand))
+        }.message.orEmpty()
+        assertTrue(onPale, onPale.startsWith("DdsBrand (dark): textBrand on bgBrandSubtle is "))
+        assertTrue(onPale, !onPale.contains("is the dark page too"))
+    }
+
+    @Test
+    fun aProductBackgroundMustBeOpaque() {
+        val fields = listOf("bgDefault", "bgSubtle", "bgElevated")
+        for ((index, background) in backgrounds.withIndex()) {
+            val set = background.second
+            val light = assertThrows(IllegalArgumentException::class.java) {
+                DdsBrand(light = set(DdsBrand.Default.light, paper.copy(alpha = 0.5f)), dark = DdsBrand.Default.dark)
+            }.message.orEmpty()
+            assertTrue(light, light.startsWith("DdsBrand (light): ${fields[index]} must be opaque"))
+            assertTrue(light, light.contains("0.50"))
+            val dark = assertThrows(IllegalArgumentException::class.java) {
+                DdsBrand(light = DdsBrand.Default.light, dark = set(DdsBrand.Default.dark, Color.Black.copy(alpha = 0.99f)))
+            }.message.orEmpty()
+            assertTrue(dark, dark.startsWith("DdsBrand (dark): ${fields[index]} must be opaque"))
+        }
+    }
+
+    @Test
+    fun noExceptionLetsATranslucentBackgroundThrough() {
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(
+                light = DdsBrand.Default.light.copy(bgDefault = paper.copy(alpha = 0.5f), allow = DdsContrastPair.entries.toSet()),
+                dark = DdsBrand.Default.dark,
+            )
+        }
+        assertTrue(error.message.orEmpty(), error.message.orEmpty().contains("bgDefault must be opaque"))
+    }
+
+    @Test
+    fun anOpaqueOrUnspecifiedBackgroundIsNotHeldToTheOpaqueRule() {
+        // Unspecified has no alpha of its own; it means the system's background, which is opaque.
+        DdsBrand(DdsBrand.Default.light.withoutBackgrounds(), DdsBrand.Default.dark.withoutBackgrounds())
+        DdsBrand(light = DdsBrand.Default.light.copy(bgDefault = paper.copy(alpha = 1f)), dark = DdsBrand.Default.dark)
+    }
+
+    @Test
     fun keepWordsOnlyAllowsBreaksAtSpaces() {
         val j = 0x2060.toChar()
         assertEquals("확${j}인 하${j}세${j}요", "확인 하세요".keepWords())
