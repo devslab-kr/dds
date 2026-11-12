@@ -572,8 +572,8 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
 | Button | `DdsControl.sm / md / lg` | 40 / **48** / 56 | §10, item 2 |
 | Text field | `DdsField.height` | 56 | §10, item 2 |
 | List row | `DdsRow.min / twoLine` | 56 / 72 | §10, item 2 |
-| Top bar / bottom tabs | `DdsBar.top / bottom` | 64 / 80 | §10, item 2 |
-| Screen gutter / between blocks | `DdsScreen.gutter / gutterWide / blockGap` | 16 / 24 (width 600+) / 24 | §10, item 2 |
+| Top bar / bottom tabs / side rail / tall top bar | `DdsBar.top / bottom / rail / topTall` | 64 / 80 / 80 / 104 | §10, item 2 |
+| Screen gutter / between blocks / wide screens | `DdsScreen.gutter / gutterWide / blockGap / breakpointExpanded / bodyMax / listPane / centeredMax` | 16 / 24 (width 600+) / 24 / 840 (list and detail side by side) / 680 (widest reading column) / 264 (list width) / 400 (widest centered form) | §10, item 2 |
 | Minimum touch | `DdsTouch.min / large` | 48 / 56 | §9 |
 
 - **There is one button height, 48.** `lg` (56) is for the single primary button at the bottom of a screen.

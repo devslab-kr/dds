@@ -62,10 +62,12 @@ object DdsRow {
     const val twoLine: Int = 72
 }
 
-/** Top bar and bottom navigation bar heights (dp). */
+/** Top bar, bottom navigation bar and side rail sizes (dp). `rail` is the rail width; `topTall` is the tall top bar height. */
 object DdsBar {
     const val top: Int = 64
     const val bottom: Int = 80
+    const val rail: Int = 80
+    const val topTall: Int = 104
 }
 
 /** Icon sizes (dp). */
@@ -80,10 +82,14 @@ object DdsBorder {
     const val focus: Int = 2
 }
 
-/** Screen gutters, the width (dp) at which the wide gutter and rail apply, and the gap between blocks. */
+/** Screen gutters, the widths (dp) at which the wide gutter and the side-by-side layout apply, the widest reading column and centered form, the list pane width, and the gap between blocks. */
 object DdsScreen {
     const val gutter: Int = 16
     const val gutterWide: Int = 24
     const val breakpoint: Int = 600
     const val blockGap: Int = 24
+    const val breakpointExpanded: Int = 840
+    const val bodyMax: Int = 680
+    const val listPane: Int = 264
+    const val centeredMax: Int = 400
 }

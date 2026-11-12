@@ -550,8 +550,8 @@ Material3의 `primary`는 채움 면과 글자색을 겸하는데 DDS는 둘을 
 | 버튼 | `DdsControl.sm / md / lg` | 40 / **48** / 56 | §10의 2번 |
 | 입력칸 | `DdsField.height` | 56 | §10의 2번 |
 | 목록 행 | `DdsRow.min / twoLine` | 56 / 72 | §10의 2번 |
-| 상단 바 / 아래 탭 | `DdsBar.top / bottom` | 64 / 80 | §10의 2번 |
-| 화면 여백 / 블록 사이 | `DdsScreen.gutter / gutterWide / blockGap` | 16 / 24(폭 600 이상) / 24 | §10의 2번 |
+| 상단 바 / 아래 탭 / 옆 레일 / 높은 상단 바 | `DdsBar.top / bottom / rail / topTall` | 64 / 80 / 80 / 104 | §10의 2번 |
+| 화면 여백 / 블록 사이 / 넓은 화면 | `DdsScreen.gutter / gutterWide / blockGap / breakpointExpanded / bodyMax / listPane / centeredMax` | 16 / 24(폭 600 이상) / 24 / 840(목록과 상세를 나란히) / 680(본문 최대 폭) / 264(목록 폭) / 400(가운데 폼 최대 폭) | §10의 2번 |
 | 최소 터치 | `DdsTouch.min / large` | 48 / 56 | §9 |
 
 - **버튼 높이는 48 하나다.** `lg`(56)는 화면 맨 아래의 주 버튼 하나에만 쓴다.

@@ -162,10 +162,10 @@ export function renderAndroidTokens({ light, dark, sourceSha256 }) {
     control: "Button heights (dp, minimums). `sm` is the visible height; its touch area is still [DdsTouch.min].",
     field: "Text field height (dp, minimum).",
     row: "List row heights (dp, minimums).",
-    bar: "Top bar and bottom navigation bar heights (dp).",
+    bar: "Top bar, bottom navigation bar and side rail sizes (dp). `rail` is the rail width; `topTall` is the tall top bar height.",
     icon: "Icon sizes (dp).",
     border: "Stroke widths (dp).",
-    screen: "Screen gutters, the width (dp) at which the wide gutter and rail apply, and the gap between blocks.",
+    screen: "Screen gutters, the widths (dp) at which the wide gutter and the side-by-side layout apply, the widest reading column and centered form, the list pane width, and the gap between blocks.",
   };
   const dimensKt = kotlinFile(
     [
