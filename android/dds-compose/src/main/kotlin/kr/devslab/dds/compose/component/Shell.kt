@@ -40,7 +40,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.res.stringResource
+import kr.devslab.dds.compose.icons.DdsIcons
+import kr.devslab.dds.tokens.DdsIcon as DdsIconSize
+import kr.devslab.dds.tokens.DdsTouch
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.text.font.FontWeight
+import kr.devslab.dds.compose.R
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,6 +58,7 @@ import kr.devslab.dds.compose.layout.DdsTestTags
 import kr.devslab.dds.compose.layout.DdsWindowWidth
 import kr.devslab.dds.compose.layout.LocalFrameNav
 import kr.devslab.dds.compose.layout.ddsFrame
+import kr.devslab.dds.compose.layout.gutter
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsBorder
@@ -62,44 +72,90 @@ import kr.devslab.dds.tokens.DdsSpace
  * screens, a bar that is the same on both shows no change, and a title that
  * differs fades to the new one.
  *
- * @param leading drawn before the title: the app mark on a top-level screen,
- * or a back [DdsIconButton] on a deeper one
- * @param actions drawn at the end (icon buttons)
+ * The content sits on the same lines as the body column ([kr.devslab.dds.compose.layout.DdsBodyColumn]):
+ * it is centered in the area, no wider than [columnMax], and keeps the window's gutter from each
+ * edge. The back arrow's glyph starts on the text line and the last icon's glyph ends on the end
+ * line, so their 48dp touch areas reach 12dp into the gutter. The title starts 40dp after the
+ * text line whether an arrow or a mark comes before it, so it does not move when a screen opens a
+ * detail; with neither it starts on the line itself. The hairline and the background span the
+ * whole area.
+ *
+ * When the frame says the bar is tall ([kr.devslab.dds.compose.layout.DdsFrame.tallBar]) the bar is
+ * [DdsBar.topTall] high and the title takes two lines; otherwise it is [DdsBar.top] high on one.
+ *
+ * @param leading drawn before the title, at least 28dp wide: the app mark on a top-level screen.
+ * A wider one (a button) still works; the title moves over. Not drawn when [onBack] is set.
+ * @param onBack goes back; when set, the bar draws the back arrow itself, aligned to the lines
+ * @param backEnabled false greys the arrow out while going back is not allowed
+ * @param backDescription what a screen reader says for the arrow
+ * @param columnMax the widest the content gets; pass the same value the screen's body column has
+ * @param actions drawn at the end: icon buttons. A text button at the end needs the app to leave
+ * 12dp after it, since only an icon button's glyph is inset from its touch area.
  */
 @Composable
 public fun DdsTopBar(
     title: String,
     modifier: Modifier = Modifier,
     leading: (@Composable () -> Unit)? = null,
+    onBack: (() -> Unit)? = null,
+    backEnabled: Boolean = true,
+    backDescription: String = stringResource(R.string.dds_a11y_back),
+    columnMax: Dp = DdsScreen.bodyMax.dp,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val colors = DdsTheme.colors
+    val frame = ddsFrame()
+    val gutter = frame.width.gutter
+    val tall = frame.tallBar
+    // A 48dp button holds a 24dp glyph, so the touch area reaches this far past the glyph.
+    val hang = ((DdsTouch.min - DdsIconSize.md) / 2).dp
     Column(modifier.fillMaxWidth().background(colors.bgDefault)) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .heightIn(min = DdsBar.top.dp)
-                .padding(horizontal = DdsScreen.gutter.dp),
-            horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CompositionLocalProvider(LocalContentColor provides colors.textPrimary) {
-                leading?.invoke()
-                Text(
-                    title,
-                    Modifier.weight(1f).semantics { heading() },
-                    style = DdsTheme.typography.title2,
-                    color = colors.textPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                actions()
+        Box(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars), contentAlignment = Alignment.TopCenter) {
+            Row(
+                Modifier
+                    .widthIn(max = columnMax)
+                    .fillMaxWidth()
+                    .heightIn(min = (if (tall) DdsBar.topTall else DdsBar.top).dp)
+                    .padding(start = if (onBack != null) gutter - hang else gutter, end = gutter),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CompositionLocalProvider(LocalContentColor provides colors.textPrimary) {
+                    if (onBack != null) {
+                        DdsIconButton(DdsIcons.ArrowLeft, backDescription, onBack, enabled = backEnabled)
+                        Spacer(Modifier.width(DdsSpace.s4.dp))
+                    } else if (leading != null) {
+                        Box(Modifier.widthIn(min = BarMarkRoom), contentAlignment = Alignment.CenterStart) { leading() }
+                        Spacer(Modifier.width(DdsSpace.s12.dp))
+                    }
+                    Text(
+                        title,
+                        Modifier.weight(1f).testTag(DdsTestTags.TopBarTitle).semantics { heading() },
+                        style = DdsTheme.typography.title2,
+                        color = colors.textPrimary,
+                        maxLines = if (tall) 2 else 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    // The row reports itself `hang` short at the end, so the last icon's touch area
+                    // reaches into the gutter and its glyph ends on the line; the title stops short of
+                    // the glyph by the same gap an icon would leave.
+                    Row(
+                        Modifier.layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            val short = if (placeable.width > 0) hang.roundToPx() else 0
+                            layout((placeable.width - short).coerceAtLeast(0), placeable.height) { placeable.placeRelative(0, 0) }
+                        },
+                        verticalAlignment = Alignment.CenterVertically,
+                        content = actions,
+                    )
+                }
             }
         }
         DdsDivider()
     }
 }
+
+/** The room a mark gets before the title: at least this wide, so the title lines up after a mark or an arrow. */
+private val BarMarkRoom: Dp = (DdsSpace.s24 + DdsSpace.s4).dp
 
 /** One destination of the bottom tabs or the rail. The label is the app's. */
 @Immutable

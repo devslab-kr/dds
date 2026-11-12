@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.component.DdsNavItem
 import kr.devslab.dds.compose.component.DdsNavRail
 import kr.devslab.dds.compose.theme.DdsTheme
+import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsBorder
 import kr.devslab.dds.tokens.DdsScreen
 
@@ -53,11 +54,13 @@ import kr.devslab.dds.tokens.DdsScreen
  * @param onSelect called with the index of the destination the user picks
  * @param navigation false for a screen that has no menu at all (sign-in, a single-task screen):
  * nothing is drawn at any width and the content gets the whole window
- * @param barTitles the titles the top bars of the app's top-level screens can show, so the frame
- * can tell whether any of them needs the tall two-line bar at this width. Not used yet.
- * @param barActions how many action buttons the top bars have at most. Not used yet.
+ * @param barTitles the titles the top bars of the app can show. When any of them does not fit on
+ * one line at the current text size and width, every top bar in the window becomes the tall
+ * two-line bar ([DdsFrame.tallBar]), so the body starts at the same height on every screen. Empty
+ * (the default) keeps the short bar with a title cut to one line.
+ * @param barActions how many icon buttons a top bar has at its end, at most
  * @param barReserve the width a screen's top bar keeps free for something of its own next to the
- * title, for a given title. Not used yet.
+ * title, for a given title (a step counter, for example)
  * @param list the list that belongs to the area the current screen is in, or null when there is
  * none; it is pinned beside the content only on a wide window
  * @param content the screen switcher
@@ -82,7 +85,13 @@ public fun DdsAppFrame(
         val width = ddsWindowWidth(maxWidth)
         val rail = navigation && width != DdsWindowWidth.Compact && navItems.isNotEmpty()
         val listPinned = navigation && width == DdsWindowWidth.Expanded && list != null
-        val frame = DdsFrame(width = width, rail = rail, listPinned = listPinned, tallBar = false)
+        // What a screen gets is the window less the rail and the list, each with its hairline.
+        val areaWidth = maxWidth -
+            (if (rail) (DdsBar.rail + DdsBorder.hairline).dp else 0.dp) -
+            (if (listPinned) (DdsScreen.listPane + DdsBorder.hairline).dp else 0.dp)
+        val tallBar = barTitles.isNotEmpty() &&
+            barNeedsTwoLines(width.gutter, areaWidth, barTitles, barActions, barReserve, DdsScreen.bodyMax.dp)
+        val frame = DdsFrame(width = width, rail = rail, listPinned = listPinned, tallBar = tallBar)
         val currentOnSelect = rememberUpdatedState(onSelect)
         // The screens draw the bottom tabs from this, so it exists only when there is a menu to draw.
         val nav = remember(navItems, selectedIndex, navigation) {

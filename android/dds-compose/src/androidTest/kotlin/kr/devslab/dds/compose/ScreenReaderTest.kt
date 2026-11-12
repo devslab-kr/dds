@@ -311,6 +311,14 @@ class ScreenReaderTest {
     }
 
     @Test
+    fun theBackButtonHasAName() {
+        show { kr.devslab.dds.compose.component.DdsTopBar("거래처", onBack = {}) }
+        val name = word(R.string.dds_a11y_back)
+        assertTrue("the back button's name is not empty", name.isNotBlank())
+        rule.onNodeWithContentDescription(name).assertExists()
+    }
+
+    @Test
     fun aScreenCanSayItsName() {
         show { Box(Modifier.ddsScreenContent(paneTitle = "설정")) { Text("내용") } }
         rule.onNode(expectValue(SemanticsProperties.PaneTitle, "설정")).assertExists()
