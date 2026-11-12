@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BrandResourcesTest, product B (made-up locale "zy"): the same colors and the
+     same declaration as product A. Its night folder takes the declaration back. -->
+<resources>
+    <color name="dds_color_bg_brand">@android:color/holo_orange_dark</color>
+    <color name="dds_color_text_on_brand">@android:color/white</color>
+    <bool name="dds_allow_contrast_text_on_brand">true</bool>
+</resources>

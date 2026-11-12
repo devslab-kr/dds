@@ -53,6 +53,8 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4.accessibility)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
+    // Newer than the one the Compose test rule brings in, which does not run on Android 17.
+    androidTestImplementation(libs.androidx.test.espresso.core)
     // The apps change screens with Navigation 3; the screen change is measured inside it.
     androidTestImplementation(libs.navigation3.runtime)
     androidTestImplementation(libs.navigation3.ui)

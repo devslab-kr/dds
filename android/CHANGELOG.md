@@ -5,6 +5,140 @@
 `kr.devslab:dds-android-tokens` and `kr.devslab:dds-compose` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.6.0 — 2026-11-12
+
+From Qooroo redrawing its app: white text on an orange face, a paper-colored page, a
+white-faced secondary button, a menu without a shadow. A product can now decide more of
+its colors, and says so where it does (D-053).
+
+**What a product can now do**
+
+- **Declare a contrast exception, pair by pair.** 4.5:1 stays the default and `DdsTheme`
+  still refuses a brand below it. A product that wants a pair below it names the pair, and
+  only that pair is left unchecked. There is no lower limit, so the product answers for
+  how it reads. In resources: `dds_allow_contrast_text_on_brand`,
+  `dds_allow_contrast_text_brand`, `dds_allow_contrast_text_on_background` (`bool`, `false`
+  in DDS). In code: `DdsBrandColors(allow = setOf(DdsContrastPair.TextOnBrand))`. Light and
+  dark are declared separately. A bool written only in `res/values` covers dark too; write
+  `false` in `res/values-night` to have dark checked again.
+- **Set the page, subtle and card backgrounds.** Redefine `dds_color_bg_default`,
+  `dds_color_bg_subtle`, `dds_color_bg_elevated` in the app's own `res/values` and
+  `res/values-night`, as with the six brand colors; or pass `bgDefault`, `bgSubtle`,
+  `bgElevated` to `DdsBrandColors`. What is not set is DDS's. `DdsTheme.colors` and
+  Material's `background` and `surface` roles follow. A background must be opaque. DDS
+  has a dark value of its own for each background, so one written only in `res/values`
+  changes the light theme only; write the dark one in `res/values-night`.
+- **A plain text button:** `DdsButtonVariant.Plain` — no background, text in the body
+  color. `Ghost` (brand-colored text) is unchanged.
+- **A menu that ends on its button's end:** `DdsMenu(align = DdsMenuAlign.End)`, for a
+  "more" button at the end of a row or a pane. With no room on that side it lines up with
+  the button's start, then with the edge of the window; it never leaves the window. The
+  default is `Start`, as before.
+- **`DdsMenuDivider()`** — a 1dp line with 4dp above and below, for the line before a
+  destructive item. A screen reader does not stop on it.
+
+**What changes by itself when you move up**
+
+- **The secondary button is a filled face.** `Secondary` is filled with the card
+  background (`bgElevated`) instead of being transparent. On the default light page it
+  looks exactly as it did (page and card are the same white). **In dark the face is now
+  visibly lighter than the page** (`zinc.900` on `zinc.950`). On a colored page it is a
+  white face. Edge and text are unchanged; pressed, a pale tint lies over the face.
+- **The menu has no shadow.** It is set apart by the card background and a 1dp edge, like
+  a card, a sheet and a dialog. In dark, a menu open over a card has the card's color and
+  only the edge separates them.
+- **Backgrounds an app already overrode now reach Compose.** An app that redefined
+  `dds_color_bg_default`, `dds_color_bg_subtle` or `dds_color_bg_elevated` in 0.5.0 (for
+  the splash or the window, say) now gets its Compose page, cards and Material
+  `background` / `surface` in those colors, and the text on them is now checked.
+- **What is in a menu sits in DDS's own column**, inside Material's. Width and order are
+  the same. A child that used `Modifier.weight` or an alignment from the menu's
+  `ColumnScope` now refers to that column. Content reads in the layout direction of the
+  screen that opened the menu.
+
+**What can newly be rejected when you move up**
+
+Brand text (`textBrand`) is now checked on the subtle background and the card background
+too; 0.5.0 checked it on the page and the pale brand background only. A brand that passed
+0.5.0 narrowly can fail, and the app then does not start:
+
+- **Light:** a `textBrand` between 4.50:1 and about 4.69:1 on white now fails on the
+  subtle background.
+- **Dark:** a `textBrand` between 4.50:1 and about 5.05:1 on the dark page now fails on
+  the subtle background and the card background.
+
+The message says which text on which background, the measured ratio, and what to do:
+darken or lighten the color, or declare `TextBrand`. DDS's own brand passes everything
+with nothing declared (the narrowest pair is 5.04:1).
+
+Also new: a background that is not opaque is rejected, and no exception covers that. A
+light background given to the dark theme fails under the dark theme's light text; the
+message names the background to define in `res/values-night`. When brand text fails, the
+message names the color to change (`dds_color_text_brand`).
+
+**New names**
+
+`DdsContrastPair` (`TextOnBrand`, `TextBrand`, `TextOnBackground`);
+`DdsBrandColors.bgDefault`, `.bgSubtle`, `.bgElevated`, `.allow`; the three
+`dds_allow_contrast_*` bools; `DdsButtonVariant.Plain`; `DdsMenuAlign` (`Start`, `End`);
+`DdsMenu(align)`; `DdsMenuDivider`.
+
+**If your code stops compiling**
+
+- An exhaustive `when` over `DdsButtonVariant` needs a `Plain` branch.
+- A call that passes `DdsMenu`'s content lambda inside the parentheses by position, as
+  the fourth argument, no longer compiles: `align` now sits there. Use a trailing lambda
+  or `content = { … }`.
+- `DdsBrandColors` is source-compatible. A library compiled against 0.5.0 that calls
+  `DdsBrandColors` or `DdsMenu` must be compiled again.
+
+**Do not**
+
+- Give an end-aligned menu's `modifier` anything that names a side (a start or end
+  padding). What that does on an end-aligned menu is not tested.
+
+**Checked**
+
+- Unit tests: 79, none failed.
+- Device tests, the whole suite, read from the result files. Emulator (Android 16,
+  1080x2400): 74 run, none failed, none skipped. Phone (SM-F971N, Android 17, window
+  2448x1848), before the last change to the rejection messages: 74 run, none failed, 2
+  skipped — the two
+  skipped are the menu's exact-color checks, which cannot run there (see below).
+- The catalog's "Product colors" section, looked at on the emulator in light and dark, at
+  normal and at the largest font size, menu closed and open: button rows of one height,
+  no cut text, the menu's end on its button's end, nothing drawn outside the menu's edge,
+  the white card and the white secondary button on the paper page.
+- Test tooling only: the device tests now use Espresso 3.7.0, because the version the
+  Compose test rule brings does not run on Android 17. It is a test dependency and is not
+  in the published POM.
+
+**Not verified**
+
+- A device set to a right-to-left language. Right-to-left was set in the tests, not on
+  the device.
+- The whole suite on the phone at 1248x1972. It last passed there before the last tests
+  were added (72). With all 74, a run at 1248x1972 had the five menu tests that read a
+  screen capture fail, twice: the capture showed gray where the page should be. The cause
+  is not known; another project's tests use the same phone. The whole 74 passed at 2448x1848.
+- Resource overriding in a separate app. It was tested inside the library's own test APK
+  with a stand-in (resources under a made-up locale). That stand-in does not behave like
+  an app for the colors DDS defines in its own `values-night`.
+- The focus ring and the loading state of `Plain` and of the filled `Secondary` on a
+  device. They share code with what was there.
+- A product's own card background under the `Secondary` button. The tests use DDS's, in
+  light and dark; the catalog shows it on a product page with DDS's card color.
+- The menu's exact colors (face, edge, divider) on the phone: its screen capture is
+  tinted by the eye-comfort filter, so those two tests are skipped there and ran on the
+  emulator only. The shadow check ran on both, under a system dialog that darkens the
+  capture, which makes it less sensitive than a clean capture would be.
+- On a product page, only the top bar and the bottom tabs were checked pixel by pixel.
+  The rail, sheet, card, dialog and menu read the same values; that was read in code.
+- The edge of a control (3:1) on a product background. DDS does not check it; the
+  product does.
+- Nobody has listened with TalkBack.
+- No check that the public API stayed compatible exists in the build.
+
 ## 0.5.0 — 2026-11-12
 
 For people who use a screen reader, a keyboard or large text, and for eyes that are not

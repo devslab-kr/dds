@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BrandResourcesTest, product C (made-up locale "zx"): a product that repaints
+     only the page background, the way an app would in its own res/values. The
+     subtle and card backgrounds and every brand color stay the system's. -->
+<resources>
+    <color name="dds_color_bg_default">@color/dds_test_paper</color>
+</resources>
