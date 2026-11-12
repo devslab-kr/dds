@@ -5,17 +5,14 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
-## 0.7.0 — not released yet
+## 0.7.0 — 2026-11-13
 
 The screen frame (D-052), from JeongsanNow on an unfolded phone: screens started on
 different lines (187, 147, 127dp, or edge to edge), the rail was there on tab screens
 only, and the top bar started at the window's edge while the body started in the middle.
 DDS had the numbers and no part that kept them. Now it has the parts. Guide §13.
 
-**Not on Maven Central yet.** The release waits for JeongsanNow to move onto it from a
-local build and check it on its phone in three windows (folded 475×751, unfolded upright
-704×933, unfolded on its side 933×704). Until then it is built from this repository with
-`./gradlew publishToMavenLocal`.
+JeongsanNow moved onto it from the local build and checked it before the release: every screen of its app on the DDS parts, at 475×751, 704×933 and 933×704 in light and dark (and 475×751 at 200% text), measured with `DdsFrameCheck` and `assertSameLines` — no start line off by more than 1dp; its whole device suite on the unfolded phone had no DDS failure. Not checked there: the phone actually turned on its side, TalkBack, the folded phone's whole suite.
 
 **What is new**
 

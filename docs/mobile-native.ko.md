@@ -1069,6 +1069,10 @@ for (window in listOf(DpSize(475.dp, 751.dp), DpSize(704.dp, 933.dp), DpSize(933
 check.assertSameLines()
 ```
 
+크기는 `DdsAppFrame` 바깥에서 고정한다. 틀 없이 그린 부품은 `ddsFrame()`이 창을 읽어 여백을 정하는데, 이때
+`ForcedSize`가 바꾸지 못하는 기기의 실제 창을 읽는다. 그런 테스트에서는 `LocalDdsFrame`을 직접 넣는다. 정산나우가
+자기 테스트에서 이것을 만났다.
+
 `look`은 아래가 아니면 실패한다. 실패 문구는 화면 이름, 잰 값(dp), 맞게 해 주는 DDS 부품을 말한다.
 
 1. 본문이 화면에 정확히 하나 있다(`DdsBodyColumn`이나 `ddsBody()`, 또는 `DdsCenteredColumn` 하나).

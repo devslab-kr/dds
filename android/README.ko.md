@@ -22,9 +22,7 @@ dependencies {
 }
 ```
 
-**Maven Central에 있는 것은 0.6.0이다.** 0.7.0(화면 틀, 가이드 §13, 그리고 `dds-compose-testing` 꾸러미)은
-만들었지만 아직 Maven Central에 없다. 정산나우가 폰에서 확인한 뒤에 올린다. 지금 쓰려면 로컬 저장소에
-만들어 넣고(아래) 이렇게 받는다.
+0.7.0에서 화면 틀(가이드 §13)과 `dds-compose-testing` 꾸러미가 생겼다.
 
 ```kotlin
 dependencies {

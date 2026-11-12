@@ -124,7 +124,7 @@ Priorities live in [`docs/backlog.md`](docs/backlog.md). Packages are created
 only when a consumer exists (spec §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 inventory (Core 6 ✅ 2026-08-13, +13 ✅ 2026-08-15) →
 AskLinq adoption → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → native Android values, theme and motion
-(0.6.0, 2026-11-12, on Maven Central — theme, motion, components, icons). 0.7.0, the screen frame and the `dds-compose-testing` artifact, is built but **not on Maven Central yet**: it waits for JeongsanNow's check on its phone (D-052). RN and Ionic packages only when such a product exists.
+(0.6.0, 2026-11-12, on Maven Central — theme, motion, components, icons). 0.7.0 (2026-11-13, on Maven Central) adds the screen frame and the `dds-compose-testing` artifact (D-052). RN and Ionic packages only when such a product exists.
 
 ## Input, choice and shared calendar additions
 
