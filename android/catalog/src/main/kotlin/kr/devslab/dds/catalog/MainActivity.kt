@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -40,9 +39,11 @@ import kr.devslab.dds.compose.component.DdsScaffold
 import kr.devslab.dds.compose.navigation.DdsBackHandler
 import kr.devslab.dds.compose.navigation.rememberDdsTabTrail
 import androidx.activity.compose.LocalActivity
-import kr.devslab.dds.compose.component.DdsSize
 import kr.devslab.dds.compose.component.DdsTopBar
 import kr.devslab.dds.compose.icons.DdsIcons
+import kr.devslab.dds.compose.layout.DdsAppFrame
+import kr.devslab.dds.compose.layout.DdsWindowWidth
+import kr.devslab.dds.compose.layout.ddsFrame
 import kr.devslab.dds.compose.motion.DdsMove
 import kr.devslab.dds.compose.motion.DdsScreenHost
 import kr.devslab.dds.compose.motion.DdsSplashHandoff
@@ -63,7 +64,9 @@ import kr.devslab.dds.tokens.R as TokensR
 
 /**
  * Launch extras, so every state can be captured from adb without tapping:
- *   --es page colors|type|parts|motion        first page
+ *   --es page colors|type|parts|motion|layout first page
+ *   --ei item 0..7                            open a Motion item (an inner screen)
+ *   --es demo body|bar|centered|wholewindow   open a Layout demo
  *   --es theme light|dark                     pin the theme (default: system)
  *   --ez large true                           large text mode
  *   --es brand ink                            a product brand, to see every brand place change
@@ -97,6 +100,8 @@ class MainActivity : ComponentActivity() {
         val pinnedTheme = intent.getStringExtra("theme")
         val large = intent.getBooleanExtra("large", false)
         val inkBrand = intent.getStringExtra("brand") == "ink"
+        val firstDemo = LayoutDemo.entries.firstOrNull { it.name.equals(intent.getStringExtra("demo"), ignoreCase = true) }
+        val firstItem = if (intent.hasExtra("item")) intent.getIntExtra("item", 0).coerceIn(0, 7) else null
 
         setContent {
             val dark = when (pinnedTheme) {
@@ -115,7 +120,7 @@ class MainActivity : ComponentActivity() {
             DdsTheme(darkTheme = dark, brand = if (inkBrand) InkBrand else rememberDdsBrand(), largeText = largeText) {
                 CompositionLocalProvider(LocalDdsSplashHandoff provides handoff) {
                     Box(Modifier.fillMaxSize()) {
-                        Catalog(firstPage, largeText, onLargeText = { largeText = it })
+                        Catalog(firstPage, firstDemo, firstItem, largeText, onLargeText = { largeText = it })
                         DdsSplashOverlay(
                             handoff = handoff,
                             background = DdsTheme.colors.bgDefault,
@@ -174,35 +179,52 @@ fun CatalogMark(size: Dp, modifier: Modifier = Modifier) {
     Box(modifier.size(size).clip(RoundedCornerShape(corner)).background(DdsTheme.colors.bgBrand))
 }
 
+
 enum class Page(val title: String, val icon: ImageVector) {
     Colors("Colors", DdsIcons.LayoutGrid),
     Type("Type", DdsIcons.Doc),
     Parts("Parts", DdsIcons.Tool),
     Motion("Motion", DdsIcons.Refresh),
+    Layout("Layout", DdsIcons.Menu),
 }
 
+/** One screen of the catalog: a tab, and what was opened in it (a Motion item or a Layout demo). */
+private data class Shown(val page: Page, val detail: Int?, val demo: LayoutDemo?)
+
+/** Every name a top bar of the catalog shows, so the frame can tell whether one needs two lines. */
+private val BarTitles: List<String> =
+    Page.entries.map { it.title } + (1..8).map { "Item $it" } + LayoutDemo.entries.map { it.title }
+
 @Composable
-private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) -> Unit) {
+private fun Catalog(firstPage: Page, firstDemo: LayoutDemo?, firstItem: Int?, largeText: Boolean, onLargeText: (Boolean) -> Unit) {
     var page by rememberSaveable { mutableStateOf(firstPage) }
     // The Motion page has a second level, to show push and pop.
-    var detail by rememberSaveable { mutableStateOf<Int?>(null) }
+    var detail by rememberSaveable { mutableStateOf(firstItem) }
+    // The Layout page's demo: opened over the list on a narrow window, beside it on a wide one.
+    var demo by rememberSaveable { mutableStateOf(firstDemo) }
     var move by remember { mutableStateOf(DdsMove.None) }
+    // Read outside the frame, from the window: the frame pins the list on the same width.
+    val listPinnable = ddsFrame().width == DdsWindowWidth.Expanded && page == Page.Layout && demo != LayoutDemo.WholeWindow
     val goBack = {
         move = DdsMove.Pop
-        detail = null
+        if (page == Page.Layout) demo = null else detail = null
     }
-    // Back goes back: the screen first, then the tab before; leaving the app is asked.
+    val openTab = { index: Int ->
+        move = DdsMove.Tab
+        detail = null
+        demo = null
+        page = Page.entries[index]
+    }
+    // Back goes back: the screen first, then the tab before; leaving the app is asked. Beside the
+    // pinned list a demo is not a step to go back from: back leaves the area.
     val trail = rememberDdsTabTrail(startTab = firstPage.ordinal)
     var askingToExit by rememberSaveable { mutableStateOf(false) }
     val activity = LocalActivity.current
     DdsBackHandler(
         trail = trail,
-        canPop = detail != null,
+        canPop = detail != null || (demo != null && !listPinnable),
         onPop = goBack,
-        onTab = { index ->
-            move = DdsMove.Tab
-            page = Page.entries[index]
-        },
+        onTab = openTab,
         onAskToExit = { askingToExit = true },
         enabled = !askingToExit,
     )
@@ -214,51 +236,78 @@ private fun Catalog(firstPage: Page, largeText: Boolean, onLargeText: (Boolean) 
             dismiss = { DdsButton("취소", onClick = { askingToExit = false }, variant = DdsButtonVariant.Ghost) },
         )
     }
+    val choose = { chosen: LayoutDemo ->
+        // Beside the pinned list choosing swaps the screen; over a list that is a screen it opens one.
+        move = if (listPinnable) DdsMove.Tab else DdsMove.Push
+        demo = chosen
+    }
 
+    DdsAppFrame(
+        navItems = Page.entries.map { DdsNavItem(it.title, it.icon) },
+        selectedIndex = page.ordinal,
+        onSelect = { index ->
+            if (index != page.ordinal || detail != null || demo != null) {
+                openTab(index)
+                trail.visit(index)
+            }
+        },
+        // The whole-window demo turns the menus off, as an app does before sign-in or for a scanner.
+        navigation = !(page == Page.Layout && demo == LayoutDemo.WholeWindow),
+        barTitles = BarTitles,
+        list = if (page == Page.Layout) ({ LayoutPinnedList(demo ?: LayoutDemo.Body, choose) }) else null,
+    ) {
+        val pinned = ddsFrame().listPinned
+        // Beside the pinned list there is always a demo to show: the first, until one is chosen.
+        val shown = Shown(page, detail, if (page == Page.Layout) demo ?: (if (pinned) LayoutDemo.Body else null) else null)
+        // The screen before stays drawn underneath until the new one covers it.
+        DdsScreenHost(screen = shown, move = move) { (shownPage, shownDetail, shownDemo) ->
+            when {
+                shownPage == Page.Motion && shownDetail != null -> InnerScreen("Item ${shownDetail + 1}", goBack) { MotionDetail(shownDetail) }
+                shownPage == Page.Layout && shownDemo != null -> LayoutDemoScreen(shownDemo, onBack = if (pinned) null else goBack)
+                else -> TabScreen(shownPage, largeText, onLargeText) {
+                    when (shownPage) {
+                        Page.Colors -> ColorsPage()
+                        Page.Type -> TypePage()
+                        Page.Parts -> PartsPage()
+                        Page.Motion -> MotionPage(onOpen = {
+                            move = DdsMove.Push
+                            detail = it
+                        })
+                        Page.Layout -> LayoutListBody(choose)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A tab's own screen: the mark, the tab's name, the text size switch, and the bottom tabs on a phone. */
+@Composable
+private fun TabScreen(page: Page, largeText: Boolean, onLargeText: (Boolean) -> Unit, content: @Composable () -> Unit) {
     DdsScaffold(
         topBar = {
             DdsTopBar(
-                title = if (detail != null) "Item ${detail!! + 1}" else page.title,
-                leading = {
-                    if (detail != null) {
-                        DdsIconButton(DdsIcons.ArrowLeft, contentDescription = "Back", onClick = goBack)
-                    } else {
-                        CatalogMark(DdsSpace.s24.dp, Modifier.ddsSplashTarget(priority = 0))
-                    }
-                },
+                title = page.title,
+                leading = { CatalogMark(DdsSpace.s24.dp, Modifier.ddsSplashTarget(priority = 0)) },
                 actions = {
-                    DdsButton(
-                        text = if (largeText) "Aa large" else "Aa",
+                    DdsIconButton(
+                        if (largeText) DdsIcons.Minus else DdsIcons.Plus,
+                        contentDescription = if (largeText) "Smaller text" else "Larger text",
                         onClick = { onLargeText(!largeText) },
-                        variant = DdsButtonVariant.Ghost,
-                        size = DdsSize.Sm,
                     )
                 },
             )
         },
-        navItems = Page.entries.map { DdsNavItem(it.title, it.icon) },
-        selectedIndex = page.ordinal,
-        onSelect = { index ->
-            if (index != page.ordinal || detail != null) {
-                move = DdsMove.Tab
-                detail = null
-                page = Page.entries[index]
-                trail.visit(index)
-            }
-        },
+        bottomTabs = true,
     ) { padding ->
-        // The screen before stays drawn underneath until the new one covers it.
-        DdsScreenHost(screen = page to detail, move = move, modifier = Modifier.padding(padding).fillMaxSize()) { (shownPage, shownDetail) ->
-            when {
-                shownPage == Page.Motion && shownDetail != null -> MotionDetail(shownDetail)
-                shownPage == Page.Colors -> ColorsPage()
-                shownPage == Page.Type -> TypePage()
-                shownPage == Page.Parts -> PartsPage()
-                else -> MotionPage(onOpen = {
-                    move = DdsMove.Push
-                    detail = it
-                })
-            }
-        }
+        Box(Modifier.fillMaxSize().padding(padding)) { content() }
+    }
+}
+
+/** A screen opened from a tab: the arrow back and its name; no bottom tabs. */
+@Composable
+private fun InnerScreen(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
+    DdsScaffold(topBar = { DdsTopBar(title, onBack = onBack) }) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding)) { content() }
     }
 }
