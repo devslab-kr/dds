@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,8 @@ import kr.devslab.dds.compose.component.DdsButtonVariant
 import kr.devslab.dds.compose.component.DdsBottomSheet
 import kr.devslab.dds.compose.component.DdsCard
 import kr.devslab.dds.compose.component.DdsMenu
+import kr.devslab.dds.compose.component.DdsMenuAlign
+import kr.devslab.dds.compose.component.DdsMenuDivider
 import kr.devslab.dds.compose.component.DdsMenuItem
 import kr.devslab.dds.compose.component.DdsSearchField
 import kr.devslab.dds.compose.component.DdsSelectField
@@ -86,6 +89,9 @@ import kr.devslab.dds.compose.motion.DdsPullRefresh
 import kr.devslab.dds.compose.motion.ddsAppear
 import kr.devslab.dds.compose.motion.ddsScreenContent
 import kr.devslab.dds.compose.motion.rememberReducedMotion
+import kr.devslab.dds.compose.theme.DdsBrand
+import kr.devslab.dds.compose.theme.DdsBrandColors
+import kr.devslab.dds.compose.theme.DdsContrastPair
 import kr.devslab.dds.compose.theme.DdsMono
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.compose.theme.contrastRatio
@@ -154,6 +160,12 @@ fun ColorsPage() {
             Swatch("bgBrandSubtle / textBrand", c.bgBrandSubtle, c.textBrand)
             Swatch("bgDefault / textBrand", c.bgDefault, c.textBrand)
         }
+        DdsSection(
+            "Product colors",
+            description = "A product's own brand and page (D-053). White on this orange is below 4.5:1: the product declares that pair.",
+        ) {
+            ProductColors()
+        }
         Block("Surfaces and text") {
             Swatch("bgDefault / textPrimary", c.bgDefault, c.textPrimary)
             Swatch("bgDefault / textSecondary", c.bgDefault, c.textSecondary)
@@ -183,6 +195,91 @@ fun ColorsPage() {
             style = DdsTheme.typography.caption.copy(fontFamily = DdsMono),
             color = c.textMuted,
         )
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Product colors — a brand and a page that are not the system's
+// ---------------------------------------------------------------------------
+
+private val Orange = Color(red = 1f, green = 0.416f, blue = 0.122f)
+private val OrangePressed = Color(red = 0.92f, green = 0.36f, blue = 0.08f)
+
+/**
+ * A product brand built in code, to show what a product may now decide.
+ *
+ * - White text on the orange is about 2.9:1. Each theme declares
+ *   [DdsContrastPair.TextOnBrand]; without that line [DdsBrand] rejects it.
+ * - Light: a warm paper page. The card stays the system's white.
+ * - Dark: a warm near-black page of its own. Left out, the system's dark page
+ *   would be used — a brand in code has no `res/values` to fall back to.
+ * - Nothing else is declared: brand text, body text and secondary text reach
+ *   4.5:1 on all three backgrounds in both themes, and are checked.
+ */
+private val PaperBrand = DdsBrand(
+    light = DdsBrandColors(
+        bgBrand = Orange,
+        bgBrandHover = OrangePressed,
+        bgBrandSubtle = Color(red = 1f, green = 0.94f, blue = 0.89f),
+        textBrand = Color(red = 0.70f, green = 0.25f, blue = 0f),
+        textOnBrand = Color.White,
+        bgDefault = Color(red = 0.98f, green = 0.96f, blue = 0.92f),
+        allow = setOf(DdsContrastPair.TextOnBrand),
+    ),
+    dark = DdsBrandColors(
+        bgBrand = Orange,
+        bgBrandHover = OrangePressed,
+        bgBrandSubtle = Color(red = 0.25f, green = 0.12f, blue = 0.04f),
+        textBrand = Color(red = 1f, green = 0.62f, blue = 0.36f),
+        textOnBrand = Color.White,
+        bgDefault = Color(red = 0.07f, green = 0.06f, blue = 0.05f),
+        allow = setOf(DdsContrastPair.TextOnBrand),
+    ),
+)
+
+@Composable
+private fun ProductColors() {
+    // The catalog can pin its theme, so follow the theme shown, not the system setting.
+    val dark = DdsTheme.colors.bgDefault.luminance() < 0.5f
+    var menu by remember { mutableStateOf(false) }
+    DdsTheme(darkTheme = dark, brand = PaperBrand, largeText = DdsTheme.largeText) {
+        val c = DdsTheme.colors
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.medium)
+                .background(c.bgDefault)
+                .border(DdsBorder.hairline.dp, c.borderDefault, MaterialTheme.shapes.medium)
+                .padding(DdsSpace.s16.dp),
+            verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("이번 달 정산", Modifier.weight(1f), style = DdsTheme.typography.title3, color = c.textPrimary)
+                // The menu's end sits on this button's end, so it opens inward from the page's edge.
+                Box {
+                    DdsIconButton(DdsIcons.MoreHorizontal, contentDescription = "More", onClick = { menu = true })
+                    DdsMenu(menu, { menu = false }, align = DdsMenuAlign.End) {
+                        DdsMenuItem("수정", onClick = { menu = false }, icon = DdsIcons.Edit)
+                        DdsMenuItem("내보내기", onClick = { menu = false }, icon = DdsIcons.Download)
+                        DdsMenuDivider()
+                        DdsMenuItem("삭제", onClick = { menu = false }, icon = DdsIcons.Trash, danger = true)
+                    }
+                }
+            }
+            DdsCard(Modifier.fillMaxWidth()) {
+                DdsValueRow("공급가액", "1,121,818원")
+                DdsValueRow("정산 금액", "1,225,000원", emphasized = true, divider = false)
+            }
+            // On the page itself: the secondary button is a card-colored face, not a hole in the paper.
+            Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
+                DdsButton("저장", onClick = {}, modifier = Modifier.weight(1f))
+                DdsButton("취소", onClick = {}, modifier = Modifier.weight(1f), variant = DdsButtonVariant.Secondary)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp), verticalAlignment = Alignment.CenterVertically) {
+                DdsButton("건너뛰기", onClick = {}, modifier = Modifier.weight(1f), variant = DdsButtonVariant.Plain)
+                DdsButton("더 보기".keepWords(), onClick = {}, modifier = Modifier.weight(1f), variant = DdsButtonVariant.Ghost)
+            }
+        }
     }
 }
 
