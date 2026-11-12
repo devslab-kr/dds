@@ -36,12 +36,15 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.icons.DdsIcon
+import kr.devslab.dds.compose.layout.DdsTestTags
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsBorder
@@ -103,7 +106,8 @@ public class DdsNavItem(public val label: String, public val icon: ImageVector)
  *
  * The selected tab changes three things at once — the pale brand pill behind
  * the icon, the brand color, and a heavier label — never the color alone. A
- * label stays on one line and is cut with an ellipsis at large font sizes.
+ * label takes up to two lines, centered, and the bar grows to hold them at
+ * large font sizes; a longer label is cut with an ellipsis after the second line.
  */
 @Composable
 public fun DdsBottomBar(
@@ -113,7 +117,7 @@ public fun DdsBottomBar(
     modifier: Modifier = Modifier,
 ) {
     val colors = DdsTheme.colors
-    Column(modifier) {
+    Column(modifier.testTag(DdsTestTags.BottomTabs)) {
         DdsDivider()
         NavigationBar(containerColor = colors.bgDefault, tonalElevation = 0.dp) {
             items.forEachIndexed { index, item ->
@@ -136,7 +140,11 @@ public fun DdsBottomBar(
     }
 }
 
-/** The same destinations as a rail at the start edge, for a window 600dp wide or more. */
+/**
+ * The same destinations as a rail at the start edge, for a window 600dp wide or more.
+ * The rail is [DdsBar.rail] wide whatever the font size; a label takes up to two
+ * lines, and the items scroll when they are taller than the rail.
+ */
 @Composable
 public fun DdsNavRail(
     items: List<DdsNavItem>,
@@ -146,22 +154,29 @@ public fun DdsNavRail(
 ) {
     val colors = DdsTheme.colors
     Row(modifier.fillMaxHeight()) {
-        NavigationRail(containerColor = colors.bgDefault) {
-            items.forEachIndexed { index, item ->
-                val selected = index == selectedIndex
-                NavigationRailItem(
-                    selected = selected,
-                    onClick = { onSelect(index) },
-                    icon = { DdsIcon(item.icon, contentDescription = null) },
-                    label = { NavLabel(item.label, selected) },
-                    colors = NavigationRailItemDefaults.colors(
-                        selectedIconColor = colors.textBrand,
-                        selectedTextColor = colors.textBrand,
-                        indicatorColor = colors.bgBrandSubtle,
-                        unselectedIconColor = colors.textSecondary,
-                        unselectedTextColor = colors.textSecondary,
-                    ),
-                )
+        NavigationRail(Modifier.testTag(DdsTestTags.Rail).width(DdsBar.rail.dp), containerColor = colors.bgDefault) {
+            // The items scroll when there are more than the rail is tall: at large text each one is taller.
+            Column(
+                Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(DdsSpace.s4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                items.forEachIndexed { index, item ->
+                    val selected = index == selectedIndex
+                    NavigationRailItem(
+                        selected = selected,
+                        onClick = { onSelect(index) },
+                        icon = { DdsIcon(item.icon, contentDescription = null) },
+                        label = { NavLabel(item.label, selected) },
+                        colors = NavigationRailItemDefaults.colors(
+                            selectedIconColor = colors.textBrand,
+                            selectedTextColor = colors.textBrand,
+                            indicatorColor = colors.bgBrandSubtle,
+                            unselectedIconColor = colors.textSecondary,
+                            unselectedTextColor = colors.textSecondary,
+                        ),
+                    )
+                }
             }
         }
         Box(Modifier.fillMaxHeight().width(DdsBorder.hairline.dp).background(colors.borderDefault))
@@ -173,8 +188,9 @@ private fun NavLabel(text: String, selected: Boolean) {
     Text(
         text,
         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-        maxLines = 1,
-        softWrap = false,
+        textAlign = TextAlign.Center,
+        maxLines = 2,
+        softWrap = true,
         overflow = TextOverflow.Ellipsis,
     )
 }
