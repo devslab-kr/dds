@@ -1128,6 +1128,10 @@ for (window in listOf(DpSize(475.dp, 751.dp), DpSize(704.dp, 933.dp), DpSize(933
 check.assertSameLines()
 ```
 
+Force the size around `DdsAppFrame`. A part drawn with no frame around it (`ddsFrame()` falls back to
+the window) takes its gutter from the device's real window, which `ForcedSize` does not change; in such a
+test provide `LocalDdsFrame` yourself. JeongsanNow met this in its own tests.
+
 `look` fails, naming the screen, the measured numbers in dp and the DDS part that gives
 the right result, unless:
 

@@ -22,10 +22,7 @@ dependencies {
 }
 ```
 
-**0.6.0 is the version on Maven Central.** 0.7.0 (the screen frame, guide §13, and the
-`dds-compose-testing` artifact) is built but not on Maven Central yet: it waits for
-JeongsanNow's check on its phone. To use it now, build it into the local repository (below),
-then:
+0.7.0 adds the screen frame (guide §13) and the `dds-compose-testing` artifact:
 
 ```kotlin
 dependencies {

@@ -89,7 +89,7 @@ dark), the menu loses its shadow, and brand text is newly checked on the subtle 
 
 ## D-052 — 화면 틀: 창 폭이 메뉴를 정하고, 본문은 한 기둥에 선다 (2026-11-12)
 
-**상태.** 만들었다. 아직 배포 전(안드로이드 0.7.0, 브랜치 `feat/android-screen-frame`). 정산나우가 로컬 빌드로 옮겨 실물 폰의 창 세 가지에서 확인한 뒤에 배포한다. 설계 문서: `docs/superpowers/specs/2026-11-12-dds-android-screen-frame-design.ko.md`(설계와 달라진 것은 그 문서의 "달라진 것").
+**상태.** 배포했다(안드로이드 0.7.0, #147, `android-v0.7.0`, 2026-11-13). 정산나우가 로컬 빌드로 옮겨 배포 전에 확인했다. 앱의 모든 화면을 DDS 부품으로 옮기고, 475×751·704×933·933×704에서 밝은·어두운 화면으로(475×751은 글자 200%도) `DdsFrameCheck`와 `assertSameLines`로 쟀다 — 1dp 넘게 어긋난 시작선이 없었다. 펼친 폰의 전체 연결 테스트에서 DDS 탓의 실패는 없었다. 거기서도 확인하지 못한 것: 폰을 실제로 가로로 돌린 것, TalkBack, 접힌 폰의 전체 테스트. 설계 문서: `docs/superpowers/specs/2026-11-12-dds-android-screen-frame-design.ko.md`(설계와 달라진 것은 그 문서의 "달라진 것").
 
 **문제.** 정산나우에서 소유자가 펼친 폰으로 찾았다. 화면마다 본문 시작선이 달랐고(펼친 가로에서 187,
 147, 127, 끝에서 끝까지), 왼쪽 레일은 탭 화면에만 있었으며, 상단 줄은 화면 왼쪽 끝에서 본문은 가운데에서
