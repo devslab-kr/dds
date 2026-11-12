@@ -1,29 +1,62 @@
 package kr.devslab.dds.compose
 
+import androidx.compose.foundation.clickable
+import androidx.core.graphics.Insets
+import androidx.core.view.WindowInsetsCompat
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.DeviceConfigurationOverride
 import androidx.compose.ui.test.FontScale
+import androidx.compose.ui.test.ForcedSize
+import androidx.compose.ui.test.LayoutDirection
+import androidx.compose.ui.test.WindowInsets
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.component.DdsBottomBar
 import kr.devslab.dds.compose.component.DdsNavItem
 import kr.devslab.dds.compose.component.DdsNavRail
+import kr.devslab.dds.compose.component.DdsScaffold
 import kr.devslab.dds.compose.icons.DdsIcons
+import kr.devslab.dds.compose.layout.DdsAppFrame
+import kr.devslab.dds.compose.layout.DdsFrame
 import kr.devslab.dds.compose.layout.DdsTestTags
+import kr.devslab.dds.compose.layout.DdsWindowWidth
+import kr.devslab.dds.compose.layout.ddsFrame
+import kr.devslab.dds.compose.layout.ddsWindowWidth
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBar
+import kr.devslab.dds.tokens.DdsBorder
+import kr.devslab.dds.tokens.DdsScreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -107,5 +140,221 @@ class FrameOnDeviceTest {
         shown(scale = 2f) { Box(Modifier.height(600.dp)) { DdsNavRail(items(long, "홈"), 0, {}) } }
         val bounds = rule.onNodeWithTag(DdsTestTags.Rail).getUnclippedBoundsInRoot()
         assertEquals(DdsBar.rail.dp, bounds.right - bounds.left)
+    }
+
+    // ---- the frame: what is drawn at each width ----
+
+    private val four = items("홈", "거래처", "주문", "설정")
+
+    /** What a screen inside the frame sees from [ddsFrame]. */
+    private var seen: DdsFrame? = null
+
+    /**
+     * The frame with four destinations around one screen under a forced window [size]. The screen is a
+     * [DdsScaffold] drawing the bottom tabs when [topLevel]; its body is the box tagged `screen-body`.
+     * [override] wraps the frame in another device override (layout direction, insets).
+     */
+    private fun frame(
+        size: DpSize,
+        navigation: Boolean = true,
+        list: Boolean = false,
+        topLevel: Boolean = true,
+        override: @Composable (@Composable () -> Unit) -> Unit = { it() },
+    ) {
+        rule.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                override {
+                    DdsTheme { FrameUnderTest(navigation, list, topLevel) }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun FrameUnderTest(navigation: Boolean, list: Boolean, topLevel: Boolean) {
+        DdsAppFrame(
+            navItems = four,
+            selectedIndex = 0,
+            onSelect = {},
+            modifier = Modifier.testTag("frame"),
+            navigation = navigation,
+            list = if (list) ({ Box(Modifier.fillMaxSize().testTag("list-body")) { Text("목록") } }) else null,
+        ) {
+            DdsScaffold(topBar = {}, bottomTabs = topLevel) { padding ->
+                seen = ddsFrame()
+                Box(Modifier.fillMaxSize().padding(padding).testTag("screen-body")) { Text("화면") }
+            }
+        }
+    }
+
+    private fun bounds(tag: String) = rule.onNodeWithTag(tag).getUnclippedBoundsInRoot()
+
+    private fun assertNear(message: String, expected: Dp, actual: Dp) =
+        assertEquals(message, expected.value, actual.value, 0.6f)
+
+    @Test
+    fun aNarrowWindowHasBottomTabsOnATopLevelScreenOnly() {
+        frame(DpSize(475.dp, 751.dp), list = true, topLevel = true)
+        rule.onNodeWithTag(DdsTestTags.BottomTabs).assertExists()
+        rule.onNodeWithTag(DdsTestTags.Rail).assertDoesNotExist()
+        rule.onNodeWithTag(DdsTestTags.ListPane).assertDoesNotExist()
+        println("FRAME-MEASURE 475x751 tabs=${bounds(DdsTestTags.BottomTabs)} body=${bounds("screen-body")}")
+    }
+
+    @Test
+    fun aNarrowWindowHasNoTabsOnADeeperScreen() {
+        frame(DpSize(475.dp, 751.dp), topLevel = false)
+        rule.onNodeWithTag(DdsTestTags.BottomTabs).assertDoesNotExist()
+        rule.onNodeWithTag(DdsTestTags.Rail).assertDoesNotExist()
+    }
+
+    @Test
+    fun aMediumWindowHasTheRailAndNoList() {
+        frame(DpSize(704.dp, 933.dp), list = true)
+        rule.onNodeWithTag(DdsTestTags.Rail).assertExists()
+        rule.onNodeWithTag(DdsTestTags.ListPane).assertDoesNotExist()
+        rule.onNodeWithTag(DdsTestTags.BottomTabs).assertDoesNotExist()
+        println("FRAME-MEASURE 704x933 rail=${bounds(DdsTestTags.Rail)} body=${bounds("screen-body")}")
+    }
+
+    @Test
+    fun aWideWindowHasTheRailAndTheListBesideIt() {
+        frame(DpSize(933.dp, 704.dp), list = true)
+        val rail = bounds(DdsTestTags.Rail)
+        val list = bounds(DdsTestTags.ListPane)
+        val body = bounds("screen-body")
+        println("FRAME-MEASURE 933x704 rail=${rail.left}..${rail.right} list=${list.left}..${list.right} body.left=${body.left}")
+        assertNear("rail starts at the window edge", 0.dp, rail.left)
+        assertNear("rail width", DdsBar.rail.dp, rail.right - rail.left)
+        assertNear("the list starts where the rail's row ends", rail.right + DdsBorder.hairline.dp, list.left)
+        assertNear("list width", DdsScreen.listPane.dp, list.right - list.left)
+        assertNear("a hairline follows the list, then the content", list.right + DdsBorder.hairline.dp, body.left)
+    }
+
+    private fun assertNothingIsDrawnWithNavigationOff(size: DpSize) {
+        frame(size, navigation = false, list = true, topLevel = false)
+        rule.onNodeWithTag(DdsTestTags.Rail).assertDoesNotExist()
+        rule.onNodeWithTag(DdsTestTags.ListPane).assertDoesNotExist()
+        rule.onNodeWithTag(DdsTestTags.BottomTabs).assertDoesNotExist()
+        rule.onNodeWithTag("screen-body").assertExists()
+    }
+
+    @Test
+    fun withNavigationOffNothingIsDrawnWhenNarrow() = assertNothingIsDrawnWithNavigationOff(DpSize(475.dp, 751.dp))
+
+    @Test
+    fun withNavigationOffNothingIsDrawnWhenMedium() = assertNothingIsDrawnWithNavigationOff(DpSize(704.dp, 933.dp))
+
+    @Test
+    fun withNavigationOffNothingIsDrawnWhenWide() = assertNothingIsDrawnWithNavigationOff(DpSize(933.dp, 704.dp))
+
+    @Test
+    fun aScreenReadsWhatTheFrameDrew() {
+        frame(DpSize(933.dp, 704.dp), list = true)
+        assertEquals(DdsFrame(DdsWindowWidth.Expanded, rail = true, listPinned = true), seen)
+    }
+
+    @Test
+    fun outsideAFrameAScreenReadsOnlyTheWindowWidth() {
+        var outside: DdsFrame? = null
+        var expectedWidth: DdsWindowWidth? = null
+        rule.setContent {
+            DdsTheme {
+                outside = ddsFrame()
+                val density = LocalDensity.current
+                expectedWidth = ddsWindowWidth(with(density) { LocalWindowInfo.current.containerSize.width.toDp() })
+            }
+        }
+        assertEquals(DdsFrame(width = expectedWidth!!), outside)
+    }
+
+    @Test
+    fun whatAScreenHoldsSurvivesTheWindowChangingWidth() {
+        var size by mutableStateOf(DpSize(475.dp, 751.dp))
+        var scrollIndex = -1
+        rule.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                DdsTheme {
+                    DdsAppFrame(four, 0, {}, list = { Text("목록") }) {
+                        DdsScaffold(topBar = {}, bottomTabs = true) { padding ->
+                            var count by rememberSaveable { mutableIntStateOf(0) }
+                            val state = rememberLazyListState()
+                            scrollIndex = state.firstVisibleItemIndex
+                            Column(Modifier.padding(padding)) {
+                                Text("count $count", Modifier.testTag("count").clickable { count++ })
+                                LazyColumn(Modifier.testTag("lazy"), state = state) {
+                                    items(60) { Text("줄 $it", Modifier.height(40.dp)) }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        rule.onNodeWithTag("count").performClick()
+        rule.onNodeWithTag("count").performClick()
+        rule.onNodeWithTag("lazy").performScrollToIndex(20)
+        rule.waitForIdle()
+        assertEquals(20, scrollIndex)
+        rule.onNodeWithTag(DdsTestTags.Rail).assertDoesNotExist()
+        size = DpSize(933.dp, 704.dp)
+        rule.waitForIdle()
+        rule.onNodeWithTag(DdsTestTags.Rail).assertExists()
+        rule.onNodeWithTag(DdsTestTags.ListPane).assertExists()
+        rule.onNodeWithText("count 2").assertExists()
+        assertEquals("the scroll position", 20, scrollIndex)
+        size = DpSize(475.dp, 751.dp)
+        rule.waitForIdle()
+        rule.onNodeWithText("count 2").assertExists()
+        assertEquals("the scroll position after coming back", 20, scrollIndex)
+    }
+
+    @Test
+    fun inRightToLeftTheRailIsOnTheRight() {
+        frame(
+            DpSize(933.dp, 704.dp),
+            list = true,
+            override = { content ->
+                DeviceConfigurationOverride(DeviceConfigurationOverride.LayoutDirection(LayoutDirection.Rtl)) { content() }
+            },
+        )
+        val root = bounds("frame")
+        val rail = bounds(DdsTestTags.Rail)
+        val list = bounds(DdsTestTags.ListPane)
+        assertNear("rail ends at the right edge", root.right, rail.right)
+        assertTrue("the list is left of the rail", list.right <= rail.left)
+        assertTrue("the body is left of the list", bounds("screen-body").right <= list.left)
+    }
+
+    private fun withCutout(left: Dp = 0.dp, right: Dp = 0.dp): @Composable (@Composable () -> Unit) -> Unit = { content ->
+        val density = LocalDensity.current
+        val cutout = with(density) { Insets.of(left.roundToPx(), 0, right.roundToPx(), 0) }
+        val insets = WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.displayCutout(), cutout).build()
+        DeviceConfigurationOverride(DeviceConfigurationOverride.WindowInsets(insets)) { content() }
+    }
+
+    @Test
+    fun aCutoutAtTheStartIsKeptClearByTheRail() {
+        frame(DpSize(933.dp, 704.dp), list = true, override = withCutout(left = 40.dp))
+        val item = rule.onNodeWithText("거래처", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        assertTrue("the rail's items start after the cutout: ${item.left}", item.left >= 40.dp)
+        assertNear("the rail keeps its width", DdsBar.rail.dp, bounds(DdsTestTags.Rail).let { it.right - it.left })
+    }
+
+    @Test
+    fun aCutoutAtTheEndIsKeptClearByTheContent() {
+        frame(DpSize(933.dp, 704.dp), list = true, override = withCutout(right = 40.dp))
+        val root = bounds("frame")
+        val body = bounds("screen-body")
+        assertTrue("the content ends before the cutout: ${body.right} of ${root.right}", body.right <= root.right - 40.dp + 0.6.dp)
+    }
+
+    @Test
+    fun withNavigationOffTheContentClearsBothCutouts() {
+        frame(DpSize(933.dp, 704.dp), navigation = false, topLevel = false, override = withCutout(left = 40.dp, right = 40.dp))
+        val root = bounds("frame")
+        val body = bounds("screen-body")
+        assertTrue("clears the start cutout: ${body.left}", body.left >= 40.dp - 0.6.dp)
+        assertTrue("clears the end cutout: ${body.right}", body.right <= root.right - 40.dp + 0.6.dp)
     }
 }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +31,7 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -45,6 +48,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.compose.icons.DdsIcon
 import kr.devslab.dds.compose.layout.DdsTestTags
+import kr.devslab.dds.compose.layout.DdsWindowWidth
+import kr.devslab.dds.compose.layout.LocalFrameNav
+import kr.devslab.dds.compose.layout.ddsFrame
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBar
 import kr.devslab.dds.tokens.DdsBorder
@@ -231,6 +237,40 @@ public fun DdsScaffold(
             }
         }
     }
+}
+
+/**
+ * One screen of an app that sits inside [kr.devslab.dds.compose.layout.DdsAppFrame]: its top
+ * bar, and when [bottomTabs] is set, the bottom tabs.
+ *
+ * The tabs are drawn here, inside the screen, so that a screen sliding in over this one covers
+ * the tab row with it. They are drawn only on a narrow window (under 600dp), where the frame has
+ * no rail, and only when a frame supplied the destinations. Set [bottomTabs] on top-level
+ * screens and leave it off on detail screens.
+ *
+ * The frame keeps the screen clear of a display cutout at the sides, so this does not add
+ * horizontal insets of its own.
+ *
+ * @param content the body of the screen; apply the given padding to it
+ */
+@Composable
+public fun DdsScaffold(
+    topBar: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    bottomTabs: Boolean = false,
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    val nav = LocalFrameNav.current
+    val showTabs = bottomTabs && nav != null && ddsFrame().width == DdsWindowWidth.Compact
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = topBar,
+        bottomBar = { if (showTabs && nav != null) DdsBottomBar(nav.items, nav.selectedIndex, nav.onSelect) },
+        containerColor = DdsTheme.colors.bgDefault,
+        contentColor = DdsTheme.colors.textPrimary,
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Vertical),
+        content = content,
+    )
 }
 
 /**
