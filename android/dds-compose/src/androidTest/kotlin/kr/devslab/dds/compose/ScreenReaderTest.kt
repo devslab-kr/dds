@@ -28,6 +28,11 @@ import androidx.compose.ui.test.SemanticsMatcher.Companion.expectValue
 import androidx.compose.ui.test.SemanticsMatcher.Companion.keyIsDefined
 import androidx.compose.ui.test.SemanticsMatcher.Companion.keyNotDefined
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
@@ -48,6 +53,10 @@ import kr.devslab.dds.compose.component.DdsButtonVariant
 import kr.devslab.dds.compose.component.DdsCheckbox
 import kr.devslab.dds.compose.component.DdsChip
 import kr.devslab.dds.compose.component.DdsListRow
+import kr.devslab.dds.compose.component.DdsMenu
+import kr.devslab.dds.compose.component.DdsMenuAlign
+import kr.devslab.dds.compose.component.DdsMenuDivider
+import kr.devslab.dds.compose.component.DdsMenuItem
 import kr.devslab.dds.compose.component.DdsNotice
 import kr.devslab.dds.compose.component.DdsSearchField
 import kr.devslab.dds.compose.component.DdsSelectField
@@ -308,6 +317,40 @@ class ScreenReaderTest {
         rule.mainClock.autoAdvance = true
         rule.waitForIdle()
         assertEquals(2 * third, underlineStart(row))
+    }
+
+    // --- menu -----------------------------------------------------------------------
+
+    @Test
+    fun theDividerIsNotReadAsAnItem() {
+        show {
+            Box {
+                DdsMenu(expanded = true, onDismissRequest = {}, modifier = Modifier.testTag("menu")) {
+                    DdsMenuItem("수정", onClick = {})
+                    DdsMenuDivider()
+                    DdsMenuItem("삭제", onClick = {}, danger = true)
+                }
+            }
+        }
+        // Two stops, both actions: the line between them is only something to see.
+        rule.onNodeWithTag("menu").onChildren().assertCountEquals(2).assertAll(hasClickAction())
+        rule.onNodeWithTag("menu").onChildren()[0].assert(hasText("수정"))
+        rule.onNodeWithTag("menu").onChildren()[1].assert(hasText("삭제"))
+    }
+
+    @Test
+    fun anEndAlignedMenuIsReadTheSameWay() {
+        show {
+            Box {
+                DdsMenu(expanded = true, onDismissRequest = {}, modifier = Modifier.testTag("menu"), align = DdsMenuAlign.End) {
+                    DdsMenuItem("수정", onClick = {})
+                    DdsMenuDivider()
+                    DdsMenuItem("삭제", onClick = {}, danger = true)
+                }
+            }
+        }
+        // Nothing that lines the menu up is a stop of its own.
+        rule.onNodeWithTag("menu").onChildren().assertCountEquals(2).assertAll(hasClickAction())
     }
 
     // --- loading and moving -------------------------------------------------------
