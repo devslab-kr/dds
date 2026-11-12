@@ -1,5 +1,5 @@
-# Android release — publishes kr.devslab:dds-android-tokens and
-# kr.devslab:dds-compose to Maven Central.
+# Android release — publishes kr.devslab:dds-android-tokens,
+# kr.devslab:dds-compose and kr.devslab:dds-compose-testing to Maven Central.
 #
 # Triggered by a hand-pushed `android-v<version>` tag, and by nothing else.
 # The web packages release through Changesets on every push to main
@@ -50,7 +50,7 @@ jobs:
 
       - name: Build and test
         working-directory: android
-        run: ./gradlew testDebugUnitTest :dds-tokens:assembleRelease :dds-compose:assembleRelease --no-configuration-cache --stacktrace -PVERSION_NAME=${{ steps.ver.outputs.version }}
+        run: ./gradlew testDebugUnitTest :dds-tokens:assembleRelease :dds-compose:assembleRelease :dds-compose-testing:assembleRelease --no-configuration-cache --stacktrace -PVERSION_NAME=${{ steps.ver.outputs.version }}
 
       - name: Publish to Maven Central
         working-directory: android

@@ -61,4 +61,4 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
       - name: Unit tests, lint and release build
         working-directory: android
-        run: ./gradlew testDebugUnitTest :dds-tokens:lintRelease :dds-compose:lintRelease :dds-tokens:assembleRelease :dds-compose:assembleRelease :catalog:assembleDebug --stacktrace
+        run: ./gradlew testDebugUnitTest :dds-tokens:lintRelease :dds-compose:lintRelease :dds-compose-testing:lintRelease :dds-tokens:assembleRelease :dds-compose:assembleRelease :dds-compose-testing:assembleRelease :catalog:assembleDebug --stacktrace

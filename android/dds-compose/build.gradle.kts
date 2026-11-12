@@ -49,6 +49,9 @@ dependencies {
 
     testImplementation(libs.junit)
 
+    // The check apps run on their own screens, run here on ours. Tests only: it is not a
+    // dependency of the published dds-compose.
+    androidTestImplementation(project(":dds-compose-testing"))
     androidTestImplementation(libs.compose.ui.test.junit4)
     androidTestImplementation(libs.compose.ui.test.junit4.accessibility)
     androidTestImplementation(libs.androidx.test.runner)

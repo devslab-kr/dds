@@ -16,8 +16,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "dds-android"
 
-// Published: kr.devslab:dds-android-tokens, kr.devslab:dds-compose.
+// Published: kr.devslab:dds-android-tokens, kr.devslab:dds-compose, kr.devslab:dds-compose-testing.
 include(":dds-tokens")
 include(":dds-compose")
+include(":dds-compose-testing")
 // Not published: every value and helper on screen, for visual checks.
 include(":catalog")
