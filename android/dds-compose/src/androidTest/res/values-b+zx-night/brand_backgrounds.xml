@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- BrandResourcesTest, product C, dark theme: its own dark page. Without this
-     the paper page of values-b+zx would be the dark theme's page too (Android
-     falls back from values-night to values) and light text on it is rejected. -->
+<!-- BrandResourcesTest, product C, dark theme: its own dark page. Under this
+     stand-in locale the paper page of values-b+zx would otherwise be the dark
+     theme's page too, and light text on it is rejected. That is the stand-in,
+     not a real app: the locale qualifier outranks night, so values-b+zx beats
+     DDS's own values-night. In an app, res/values does not reach the dark
+     theme for a color DDS defines in values-night; the app writes it in
+     res/values-night, as here. -->
 <resources>
     <color name="dds_color_bg_default">@android:color/black</color>
 </resources>

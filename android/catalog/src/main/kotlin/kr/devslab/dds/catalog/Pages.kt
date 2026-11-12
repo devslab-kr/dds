@@ -206,13 +206,15 @@ private val Orange = Color(red = 1f, green = 0.416f, blue = 0.122f)
 private val OrangePressed = Color(red = 0.92f, green = 0.36f, blue = 0.08f)
 
 /**
- * A product brand built in code, to show what a product may now decide.
+ * A product brand built in code, to show what a product may now decide. It is
+ * written as float components because it stands in for a product's own brand
+ * file, the one place where a product writes its colors; the catalog has none.
  *
  * - White text on the orange is about 2.9:1. Each theme declares
  *   [DdsContrastPair.TextOnBrand]; without that line [DdsBrand] rejects it.
  * - Light: a warm paper page. The card stays the system's white.
  * - Dark: a warm near-black page of its own. Left out, the system's dark page
- *   would be used — a brand in code has no `res/values` to fall back to.
+ *   would be used: each theme's colors name their own backgrounds.
  * - Nothing else is declared: brand text, body text and secondary text reach
  *   4.5:1 on all three backgrounds in both themes, and are checked.
  */

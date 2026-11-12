@@ -188,17 +188,21 @@ public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBran
          * become each theme's [DdsBrandColors.allow]: the light theme reads
          * `res/values`, the dark theme `res/values-night`.
          *
-         * Android falls back from `values-night` to `values`, for these bools
-         * just as for the colors. A bool set to `true` only in `res/values`
-         * therefore applies to the dark theme too; to keep the dark theme
-         * checked, set it back to `false` in `res/values-night`.
+         * DDS defines these bools in `values` only, and Android falls back
+         * from `values-night` to `values`. A bool set to `true` only in
+         * `res/values` therefore applies to the dark theme too; to keep the
+         * dark theme checked, set it back to `false` in `res/values-night`.
+         *
+         * The colors are different. DDS ships a dark value of its own, in its
+         * `values-night`, for the three backgrounds, `dds_color_bg_brand_subtle`,
+         * `dds_color_text_brand` and `dds_color_border_focus`. An app's
+         * `res/values` replaces only the light value of those: in the dark
+         * theme DDS's dark value stays until the app defines the color in
+         * `res/values-night` as well. The three colors DDS defines once
+         * (`dds_color_bg_brand`, `dds_color_bg_brand_hover`,
+         * `dds_color_text_on_brand`) do reach both themes from `res/values`.
          *
          * Without overrides this equals [Default].
-         *
-         * The colors fall back the same way: a background set only in
-         * `res/values` is the dark theme's background too. A light page there
-         * fails the dark theme's text check; give the dark theme its own
-         * `dds_color_bg_*` in `res/values-night`.
          *
          * @throws IllegalArgumentException as [DdsBrand] does, if the colors
          * break a contrast rule and the bools do not declare that pair, or if
@@ -260,15 +264,15 @@ internal val DdsContrastPair.allowResourceName: String
 
 /**
  * One measurement: [foreground] on [fill], part of [pair], called [name] in the
- * message. [fillResource] is the color resource behind [fill] when it is one of
- * the three backgrounds a product may set, else null.
+ * message. [background] is set when [fill] is one of the three backgrounds a
+ * product may set.
  */
 private class ContrastCheck(
     val pair: DdsContrastPair,
     val name: String,
     val foreground: Color,
     val fill: Color,
-    val fillResource: String? = null,
+    val background: ProductBackground? = null,
 )
 
 /** One of the three backgrounds a product may set, as the checks and their messages see it. */
@@ -307,12 +311,12 @@ private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean) {
     val checks = buildList {
         add(ContrastCheck(DdsContrastPair.TextOnBrand, "textOnBrand on bgBrand", colors.textOnBrand, colors.bgBrand))
         for (background in backgrounds) {
-            val (name, fill, resource) = Triple(background.name, background.resolved, background.resource)
-            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textPrimary on $name", textPrimary, fill, resource))
-            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textSecondary on $name", textSecondary, fill, resource))
+            val (name, fill) = background.name to background.resolved
+            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textPrimary on $name", textPrimary, fill, background))
+            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textSecondary on $name", textSecondary, fill, background))
         }
         for (background in backgrounds) {
-            add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on ${background.name}", colors.textBrand, background.resolved, background.resource))
+            add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on ${background.name}", colors.textBrand, background.resolved, background))
         }
         add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on bgBrandSubtle", colors.textBrand, colors.bgBrandSubtle))
     }
@@ -329,15 +333,19 @@ private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean) {
             } else {
                 "res/values (a bool set there also covers the dark theme unless res/values-night sets it to false)"
             }
-            // The colors fall back the same way, and that is the usual cause in the dark theme:
-            // a light page set once in res/values, under the dark theme's light text.
-            val fallback = if (night && check.fillResource != null) {
-                "A background set only in res/values is the dark page too; " +
-                    "the usual fix is to define ${check.fillResource} in res/values-night. "
-            } else {
-                ""
+            // What to change instead of declaring, where one answer fits every brand that gets here.
+            val colorFolder = if (night) "res/values-night" else "res/values"
+            val fix = when {
+                // Brand text is the product's color in both themes, with a dark value of its own.
+                check.pair == DdsContrastPair.TextBrand ->
+                    "The color to change is dds_color_text_brand in $colorFolder, or textBrand in the $theme DdsBrandColors. "
+                // Dark body text is the system's light text, so the background under it is too light.
+                night && check.pair == DdsContrastPair.TextOnBackground && check.background != null ->
+                    "The dark theme needs a dark background here: define ${check.background.resource} in res/values-night, " +
+                        "or pass a dark ${check.background.field} to the dark DdsBrandColors. "
+                else -> ""
             }
-            "DdsBrand ($theme): ${check.name} is $measured. " + fallback +
+            "DdsBrand ($theme): ${check.name} is $measured. " + fix +
                 "To allow it in the $theme theme, set <bool name=\"${check.pair.allowResourceName}\">true</bool> " +
                 "in $folder or pass allow = setOf(DdsContrastPair.${check.pair.name}) to the $theme DdsBrandColors."
         }

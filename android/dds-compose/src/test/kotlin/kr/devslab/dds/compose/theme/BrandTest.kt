@@ -319,44 +319,90 @@ class BrandTest {
     }
 
     @Test
-    fun aDarkBackgroundRejectionFirstSaysWhereToDefineTheDarkBackground() {
+    fun aDarkBackgroundRejectionSaysToGiveTheDarkThemeADarkBackground() {
         val resources = listOf("dds_color_bg_default", "dds_color_bg_subtle", "dds_color_bg_elevated")
+        val fields = listOf("bgDefault", "bgSubtle", "bgElevated")
         for ((index, background) in backgrounds.withIndex()) {
             val (name, set) = background
-            val hint = "A background set only in res/values is the dark page too; " +
-                "the usual fix is to define ${resources[index]} in res/values-night. "
-            // Body text on a light background that fell through into the dark theme.
+            // Body text on a light background in the dark theme: the background is what to change.
             val body = assertThrows(IllegalArgumentException::class.java) {
                 DdsBrand(light = DdsBrand.Default.light, dark = set(DdsBrand.Default.dark, paper))
             }.message.orEmpty()
             assertTrue(body, body.startsWith("DdsBrand (dark): textPrimary on $name is "))
+            val hint = "The dark theme needs a dark background here: define ${resources[index]} in res/values-night, " +
+                "or pass a dark ${fields[index]} to the dark DdsBrandColors. "
             assertTrue(body, body.contains("below 4.5:1. $hint" + "To allow it in the dark theme, set <bool name=\"dds_allow_contrast_text_on_background\">"))
             assertTrue(body, body.endsWith("in res/values-night or pass allow = setOf(DdsContrastPair.TextOnBackground) to the dark DdsBrandColors."))
-            // Brand text on the same background, once body text is declared.
-            val brandText = assertThrows(IllegalArgumentException::class.java) {
-                DdsBrand(
-                    light = DdsBrand.Default.light,
-                    dark = set(DdsBrand.Default.dark, paper).copy(allow = setOf(DdsContrastPair.TextOnBackground)),
-                )
-            }.message.orEmpty()
-            assertTrue(brandText, brandText.startsWith("DdsBrand (dark): textBrand on $name is "))
-            assertTrue(brandText, brandText.contains("below 4.5:1. $hint" + "To allow it in the dark theme, set <bool name=\"dds_allow_contrast_text_brand\">"))
-            // The light theme reads res/values itself: nothing fell through, so no such advice.
+            // The light theme's body text fails on a dark background; no advice about the dark theme there.
             val light = assertThrows(IllegalArgumentException::class.java) {
                 DdsBrand(light = set(DdsBrand.Default.light, nearBlack), dark = DdsBrand.Default.dark)
             }.message.orEmpty()
-            assertTrue(light, !light.contains("is the dark page too"))
+            assertTrue(light, light.startsWith("DdsBrand (light): textPrimary on $name is "))
+            assertTrue(light, !light.contains("define dds_color_bg"))
+            assertTrue(light, !light.contains("needs a dark background"))
         }
-        // Pairs that have no page, subtle or card background under them say nothing about one.
-        val onBrand = assertThrows(IllegalArgumentException::class.java) {
-            DdsBrand(light = DdsBrand.Default.light, dark = whiteOnOrange(DdsBrand.Default.dark))
+    }
+
+    @Test
+    fun noRejectionClaimsThatAColorInValuesReachesTheDarkTheme() {
+        // DDS ships a dark value of its own for every background, so an app's res/values does not reach dark.
+        val all = buildList {
+            for ((_, set) in backgrounds) {
+                add(assertThrows(IllegalArgumentException::class.java) {
+                    DdsBrand(light = DdsBrand.Default.light, dark = set(DdsBrand.Default.dark, paper))
+                }.message.orEmpty())
+                add(assertThrows(IllegalArgumentException::class.java) {
+                    DdsBrand(
+                        light = DdsBrand.Default.light,
+                        dark = set(DdsBrand.Default.dark, paper).copy(allow = setOf(DdsContrastPair.TextOnBackground)),
+                    )
+                }.message.orEmpty())
+            }
+        }
+        for (message in all) {
+            assertTrue(message, !message.contains("is the dark page too"))
+            assertTrue(message, !message.contains("set only in res/values"))
+        }
+    }
+
+    @Test
+    fun aBrandTextRejectionNamesTheColorToChange() {
+        // Dark: brand text too dark for the dark page. The color has a dark value of its own.
+        val dark = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = DdsBrand.Default.light, dark = DdsBrand.Default.dark.copy(textBrand = DdsBrand.Default.light.textBrand))
         }.message.orEmpty()
-        assertTrue(onBrand, !onBrand.contains("is the dark page too"))
+        assertTrue(dark, dark.startsWith("DdsBrand (dark): textBrand on the page background (bgDefault) is "))
+        assertTrue(
+            dark,
+            dark.contains(
+                "below 4.5:1. The color to change is dds_color_text_brand in res/values-night, or textBrand in the dark DdsBrandColors. " +
+                    "To allow it in the dark theme, set <bool name=\"dds_allow_contrast_text_brand\">",
+            ),
+        )
+        assertTrue(dark, !dark.contains("needs a dark background"))
+        // Light: the same, in res/values.
+        val light = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = DdsBrand.Default.light.copy(textBrand = DdsBrand.Default.light.bgBrandHover), dark = DdsBrand.Default.dark)
+        }.message.orEmpty()
+        assertTrue(
+            light,
+            light.contains(
+                "below 4.5:1. The color to change is dds_color_text_brand in res/values, or textBrand in the light DdsBrandColors. " +
+                    "To allow it in the light theme, set <bool name=\"dds_allow_contrast_text_brand\">",
+            ),
+        )
+        // On the pale brand background too: it is the same color.
         val onPale = assertThrows(IllegalArgumentException::class.java) {
             DdsBrand(light = DdsBrand.Default.light, dark = DdsBrand.Default.dark.copy(bgBrandSubtle = DdsBrand.Default.dark.textBrand))
         }.message.orEmpty()
         assertTrue(onPale, onPale.startsWith("DdsBrand (dark): textBrand on bgBrandSubtle is "))
-        assertTrue(onPale, !onPale.contains("is the dark page too"))
+        assertTrue(onPale, onPale.contains("The color to change is dds_color_text_brand in res/values-night"))
+        // Text on the brand face gets neither hint.
+        val onBrand = assertThrows(IllegalArgumentException::class.java) {
+            DdsBrand(light = DdsBrand.Default.light, dark = whiteOnOrange(DdsBrand.Default.dark))
+        }.message.orEmpty()
+        assertTrue(onBrand, !onBrand.contains("The color to change"))
+        assertTrue(onBrand, !onBrand.contains("needs a dark background"))
     }
 
     @Test

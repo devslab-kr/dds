@@ -44,6 +44,15 @@ import org.junit.Test
  * `values-b+zx`, `values-b+zx-night`): a context for that locale sees them the
  * way an app sees its own `res/values` and `res/values-night`, and no other
  * test does.
+ *
+ * The stand-in is not exact. A locale qualifier outranks `night`, so a color in
+ * `values-b+zz` is read in the dark theme even when DDS defines that color in
+ * its own `values-night` (the three backgrounds, `dds_color_bg_brand_subtle`,
+ * `dds_color_text_brand`, `dds_color_border_focus`). In a real app the library's
+ * `values-night` wins there, and the app's `res/values` reaches the light theme
+ * only. These tests therefore do not show how an app's colors take precedence
+ * over the library's; that was not tested in a separate app. The bools are
+ * defined in `values` only, so for them the fallback shown here is the real one.
  */
 class BrandResourcesTest {
     @get:Rule
