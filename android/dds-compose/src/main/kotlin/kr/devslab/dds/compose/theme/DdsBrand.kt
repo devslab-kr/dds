@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import java.util.Locale
@@ -15,10 +16,11 @@ import kr.devslab.dds.tokens.DdsLightColors
 import kr.devslab.dds.tokens.R as TokensR
 
 /**
- * The brand slice: the six tokens a product may repaint — the same six, by
- * the same names, as the web `data-brand` convention (design-system §3.1,
- * D-012). Neutrals, status colors, type, spacing, radii and motion belong to
- * the system and cannot be replaced.
+ * What a product may repaint: the six brand tokens — the same six, by the same
+ * names, as the web `data-brand` convention (design-system §3.1, D-012) — and
+ * three backgrounds: the page, the subtle background and the card background
+ * (D-053). The other neutrals (text, borders, overlays), status colors, type,
+ * spacing, radii and motion belong to the system and cannot be replaced.
  *
  * A product names its own values; DDS does not derive them from one color.
  * Two have a default because a DDS rule already decides them:
@@ -30,6 +32,11 @@ import kr.devslab.dds.tokens.R as TokensR
  * @param textOnBrand text and icons on [bgBrand]. Defaults to the on-brand
  * rule: whichever of the system's dark text and white reads better on the fill
  * @param borderFocus focus ring. Defaults to the system's neutral ring
+ * @param bgDefault the page background. [Color.Unspecified], the default, means
+ * the system's value for this theme
+ * @param bgSubtle the quiet grouping background. [Color.Unspecified] means the system's
+ * @param bgElevated the background of cards, sheets, dialogs and menus.
+ * [Color.Unspecified] means the system's
  * @param allow the contrast pairs this product lets through in this theme even
  * though they are below [DdsMinTextContrast]. Empty by default: every pair is
  * checked. A pair named here is not checked at all — there is no lower limit —
@@ -43,6 +50,9 @@ public data class DdsBrandColors(
     val textBrand: Color,
     val textOnBrand: Color = onBrandFor(bgBrand),
     val borderFocus: Color = Color.Unspecified,
+    val bgDefault: Color = Color.Unspecified,
+    val bgSubtle: Color = Color.Unspecified,
+    val bgElevated: Color = Color.Unspecified,
     val allow: Set<DdsContrastPair> = emptySet(),
 )
 
@@ -58,12 +68,17 @@ public enum class DdsContrastPair {
     TextOnBrand,
 
     /**
-     * [DdsBrandColors.textBrand] on the page background and on
-     * [DdsBrandColors.bgBrandSubtle] — text buttons, links, selected tabs.
+     * [DdsBrandColors.textBrand] on the page background, the subtle background,
+     * the card background and [DdsBrandColors.bgBrandSubtle] — text buttons,
+     * links, selected tabs.
      */
     TextBrand,
 
-    /** Body and secondary text on the backgrounds a product may repaint. */
+    /**
+     * The system's body text and secondary text on the page background, the
+     * subtle background and the card background. The text colors are the
+     * system's, so this pair can only fail when a product repaints a background.
+     */
     TextOnBackground,
 }
 
@@ -81,11 +96,14 @@ public fun onBrandFor(fill: Color): Color =
  * There are two ways to supply one, and they give the same result:
  *
  * 1. **Resources (recommended).** Redefine the six `dds_color_*` brand colors
- *    in the app's own `res/values` and `res/values-night`. The splash theme,
- *    every XML drawable and — through [DdsTheme]'s default — Compose all pick
- *    them up from that one place.
+ *    — and, if the product has its own, `dds_color_bg_default`,
+ *    `dds_color_bg_subtle` and `dds_color_bg_elevated` — in the app's own
+ *    `res/values` and `res/values-night`. The splash theme, every XML drawable
+ *    and — through [DdsTheme]'s default — Compose all pick them up from that
+ *    one place.
  * 2. **Code.** Pass a [DdsBrand] to [DdsTheme]. XML resources are then not
- *    affected, so the splash would still show the default brand.
+ *    affected, so the splash would still show the default brand and the
+ *    default page background.
  *
  * "On-brand" is a rule, not a color: text on a filled brand face must reach
  * [DdsMinTextContrast]. A brand that breaks it is rejected here, where the
@@ -93,7 +111,14 @@ public fun onBrandFor(fill: Color): Color =
  *
  * The same goes for brand text: [DdsBrandColors.textBrand] is what Material
  * components draw text buttons, links and selected tabs with, so it must read
- * on the page and on the pale brand background.
+ * on the page, the subtle background, the card background and the pale brand
+ * background.
+ *
+ * And for the backgrounds a product repaints: the system's body text and
+ * secondary text must read on the page, the subtle background and the card
+ * background. A background left [Color.Unspecified] is the system's, which
+ * passes. The edge of a control (3:1, D-050) is not checked here; a product
+ * that moves a background far from the system's checks that itself.
  *
  * A product may declare an exception, pair by pair ([DdsContrastPair]) and
  * theme by theme: a pair named in a theme's [DdsBrandColors.allow] is not
@@ -101,16 +126,15 @@ public fun onBrandFor(fill: Color): Color =
  * unless it is named, and an exception declared for the light theme does not
  * cover the dark one. The rejection message says what to declare.
  *
- * @throws IllegalArgumentException if, in either theme, [DdsBrandColors.textOnBrand]
- * on [DdsBrandColors.bgBrand], or [DdsBrandColors.textBrand] on the page background
- * or on [DdsBrandColors.bgBrandSubtle], is below [DdsMinTextContrast] and that
- * theme's [DdsBrandColors.allow] does not name the pair
+ * @throws IllegalArgumentException if, in either theme, one of the pairs of
+ * [DdsContrastPair] is below [DdsMinTextContrast] and that theme's
+ * [DdsBrandColors.allow] does not name the pair
  */
 @Immutable
 public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBrandColors) {
     init {
-        requireBrandContrast(light, night = false, pageBackground = Color(DdsLightColors.bgDefault))
-        requireBrandContrast(dark, night = true, pageBackground = Color(DdsDarkColors.bgDefault))
+        requireBrandContrast(light, night = false)
+        requireBrandContrast(dark, night = true)
     }
 
     override fun equals(other: Any?): Boolean = other is DdsBrand && light == other.light && dark == other.dark
@@ -127,6 +151,9 @@ public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBran
                 textBrand = Color(DdsLightColors.textBrand),
                 textOnBrand = Color(DdsLightColors.textOnBrand),
                 borderFocus = Color(DdsLightColors.borderFocus),
+                bgDefault = Color(DdsLightColors.bgDefault),
+                bgSubtle = Color(DdsLightColors.bgSubtle),
+                bgElevated = Color(DdsLightColors.bgElevated),
             ),
             dark = DdsBrandColors(
                 bgBrand = Color(DdsDarkColors.bgBrand),
@@ -135,13 +162,18 @@ public class DdsBrand(public val light: DdsBrandColors, public val dark: DdsBran
                 textBrand = Color(DdsDarkColors.textBrand),
                 textOnBrand = Color(DdsDarkColors.textOnBrand),
                 borderFocus = Color(DdsDarkColors.borderFocus),
+                bgDefault = Color(DdsDarkColors.bgDefault),
+                bgSubtle = Color(DdsDarkColors.bgSubtle),
+                bgElevated = Color(DdsDarkColors.bgElevated),
             ),
         )
 
         /**
-         * Reads the brand from the six `dds_color_*` brand resources, for both
-         * themes at once — whatever the system setting is — so an app that
-         * pins its own theme still gets the right half.
+         * Reads the brand from the six `dds_color_*` brand resources and the
+         * three backgrounds (`dds_color_bg_default`, `dds_color_bg_subtle`,
+         * `dds_color_bg_elevated`), for both themes at once — whatever the
+         * system setting is — so an app that pins its own theme still gets the
+         * right half.
          *
          * The contrast exceptions are read from the same place. The bools
          * `dds_allow_contrast_text_on_brand`, `dds_allow_contrast_text_brand`
@@ -186,7 +218,10 @@ private fun readBrand(context: Context, night: Boolean): DdsBrandColors {
         textBrand = color(TokensR.color.dds_color_text_brand),
         textOnBrand = color(TokensR.color.dds_color_text_on_brand),
         borderFocus = color(TokensR.color.dds_color_border_focus),
-        allow = DdsContrastPair.entries.filterTo(mutableSetOf()) { themed.resources.getBoolean(it.allowResource) },
+        bgDefault = color(TokensR.color.dds_color_bg_default),
+        bgSubtle = color(TokensR.color.dds_color_bg_subtle),
+        bgElevated = color(TokensR.color.dds_color_bg_elevated),
+        allow = DdsContrastPair.entries.filter { themed.resources.getBoolean(it.allowResource) }.toSet(),
     )
 }
 
@@ -213,13 +248,39 @@ internal val DdsContrastPair.allowResourceName: String
 /** One measurement: [foreground] on [fill], part of [pair], called [name] in the message. */
 private class ContrastCheck(val pair: DdsContrastPair, val name: String, val foreground: Color, val fill: Color)
 
-private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean, pageBackground: Color) {
+/** The page background of [colors] in that theme: the product's if it named one, else the system's. */
+internal fun pageBackground(colors: DdsBrandColors, night: Boolean): Color =
+    colors.bgDefault.takeOrElse { Color(if (night) DdsDarkColors.bgDefault else DdsLightColors.bgDefault) }
+
+/** The subtle background of [colors] in that theme: the product's if it named one, else the system's. */
+internal fun subtleBackground(colors: DdsBrandColors, night: Boolean): Color =
+    colors.bgSubtle.takeOrElse { Color(if (night) DdsDarkColors.bgSubtle else DdsLightColors.bgSubtle) }
+
+/** The card background of [colors] in that theme: the product's if it named one, else the system's. */
+internal fun cardBackground(colors: DdsBrandColors, night: Boolean): Color =
+    colors.bgElevated.takeOrElse { Color(if (night) DdsDarkColors.bgElevated else DdsLightColors.bgElevated) }
+
+private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean) {
     val theme = if (night) "dark" else "light"
-    val checks = listOf(
-        ContrastCheck(DdsContrastPair.TextOnBrand, "textOnBrand on bgBrand", colors.textOnBrand, colors.bgBrand),
-        ContrastCheck(DdsContrastPair.TextBrand, "textBrand on the page background", colors.textBrand, pageBackground),
-        ContrastCheck(DdsContrastPair.TextBrand, "textBrand on bgBrandSubtle", colors.textBrand, colors.bgBrandSubtle),
+    val backgrounds = listOf(
+        "the page background (bgDefault)" to pageBackground(colors, night),
+        "the subtle background (bgSubtle)" to subtleBackground(colors, night),
+        "the card background (bgElevated)" to cardBackground(colors, night),
     )
+    // Body and secondary text are the system's; only the background under them can be a product's.
+    val textPrimary = Color(if (night) DdsDarkColors.textPrimary else DdsLightColors.textPrimary)
+    val textSecondary = Color(if (night) DdsDarkColors.textSecondary else DdsLightColors.textSecondary)
+    val checks = buildList {
+        add(ContrastCheck(DdsContrastPair.TextOnBrand, "textOnBrand on bgBrand", colors.textOnBrand, colors.bgBrand))
+        for ((name, background) in backgrounds) {
+            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textPrimary on $name", textPrimary, background))
+            add(ContrastCheck(DdsContrastPair.TextOnBackground, "textSecondary on $name", textSecondary, background))
+        }
+        for ((name, background) in backgrounds) {
+            add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on $name", colors.textBrand, background))
+        }
+        add(ContrastCheck(DdsContrastPair.TextBrand, "textBrand on bgBrandSubtle", colors.textBrand, colors.bgBrandSubtle))
+    }
     for (check in checks) {
         // A declared pair is not measured: the product has taken that decision, for this theme.
         if (check.pair in colors.allow) continue
@@ -227,7 +288,12 @@ private fun requireBrandContrast(colors: DdsBrandColors, night: Boolean, pageBac
         require(ratio >= DdsMinTextContrast) {
             // Locale.ROOT: this is a message for developers, the same on every machine.
             val measured = String.format(Locale.ROOT, "%.2f:1, below %.1f:1", ratio, DdsMinTextContrast)
-            val folder = if (night) "res/values-night" else "res/values"
+            // Android falls back from values-night to values, so a bool in the light folder speaks for both.
+            val folder = if (night) {
+                "res/values-night"
+            } else {
+                "res/values (a bool set there also covers the dark theme unless res/values-night sets it to false)"
+            }
             "DdsBrand ($theme): ${check.name} is $measured. " +
                 "To allow it in the $theme theme, set <bool name=\"${check.pair.allowResourceName}\">true</bool> " +
                 "in $folder or pass allow = setOf(DdsContrastPair.${check.pair.name}) to the $theme DdsBrandColors."

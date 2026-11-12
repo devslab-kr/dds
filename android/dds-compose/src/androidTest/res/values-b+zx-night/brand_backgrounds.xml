@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BrandResourcesTest, product C, dark theme: its own dark page. Without this
+     the paper page of values-b+zx would be the dark theme's page too (Android
+     falls back from values-night to values) and light text on it is rejected. -->
+<resources>
+    <color name="dds_color_bg_default">@android:color/black</color>
+</resources>

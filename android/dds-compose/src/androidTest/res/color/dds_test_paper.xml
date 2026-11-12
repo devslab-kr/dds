@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BrandResourcesTest: a warm paper page. The source check allows no typed
+     color values under android/, so this is a framework orange brought up to a
+     lightness of 97 out of 100 (lStar, API 31 and later): pale, warm, and not white. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@android:color/holo_orange_light" android:lStar="97" />
+</selector>
