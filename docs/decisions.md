@@ -19,14 +19,19 @@
 2. **옮겨 갈 때만 움직인다.** 처음 그릴 때, 같은 선택이 자리만 바뀔 때(회전, 글자 크기, 창 크기)는 움직이지 않고
    그 자리에 놓인다. 첫 프레임부터 고른 칸 위에 있다.
 3. **움직임 줄이기를 따른다.** 웹은 `prefers-reduced-motion`에서 0ms, 안드로이드는 기기의 애니메이션 끄기에서 바로.
-4. **웹은 스크립트가 잴 때까지 칸이 자기 면을 그린다.** 프레임워크 패키지가 트랙 안에 `.dds-segmented__indicator`
-   하나를 두고 고른 칸의 상자(`--left/--top/--width/--height`)를 넣는다. 재기 전에는 `hidden`이고, 그동안(서버 렌더의
-   첫 페인트, 스크립트 없는 HTML) 고른 칸이 지금처럼 자기 면을 그린다 — 아무것도 잃지 않는다. 재면
-   `:has()`로 칸의 면을 비우고 표시가 면이 된다. React·Solid는 Ark `SegmentGroup.Indicator`(Zag가 재고 바꿀 때만
-   움직인다), Vue는 같은 일을 하는 작은 함수(`useSegmentIndicator`)다.
+4. **웹은 잴 수 있을 때만 미끄러진다.** 트랙 안에 `.dds-segmented__indicator` 하나(`hidden`)를 두고, 브라우저에서
+   붙는 작은 함수 하나(`attachSegmentIndicator`, dds-react·dds-solid·dds-vue에 같은 파일 — 테스트가 셋이 같은지 본다)가
+   고른 칸의 상자(`--left/--top/--width/--height`)를 넣는다. 고른 칸이 바뀔 때만 위치 속성에 트랜지션을 걸고, 처음 놓을
+   때와 크기가 바뀔 때는 걸지 않는다. **`ResizeObserver`가 없으면(서버, jsdom 테스트, 오래된 브라우저) 아무것도 하지
+   않는다** — 표시는 숨은 채로, 고른 칸이 지금처럼 자기 면을 그린다. 미끄러짐만 없고 잃는 것은 없다. 재면 `:has()`로
+   칸의 면을 비우고 표시가 면이 된다. 서버와 클라이언트 첫 렌더가 같은 숨은 `span`이라 하이드레이션도 그대로다.
+   처음에는 Ark `SegmentGroup.Indicator`(Zag)를 썼다. Zag는 표시가 있으면 `ResizeObserver`를 조건 없이 쓰고
+   (`win.ResizeObserver is not a constructor` — CI의 Solid 하이드레이트 검사가 잡았다), 시작할 때와 값이 바뀔 때만 재서
+   나중에 붙이는 우회도 안 된다. 소비자의 jsdom 테스트에 폴리필을 요구하지 않으려고 직접 쟀다(소유자 지시: 테스트
+   쪽 폴리필로만 덮지 말 것).
 5. **안드로이드는 행 뒤의 손잡이(thumb) 하나.** 칸은 누름·hover·포커스만 그린다. 포커스 링은 손잡이의 선 위에 놓인다.
 
-**대안.** ① CSS 앵커 위치 지정(`anchor-name`) — 스크립트가 필요 없지만 Firefox가 아직 지원하지 않고, 앵커가
+**대안.** ⓪ Ark `SegmentGroup.Indicator` — 위 4번. ① CSS 앵커 위치 지정(`anchor-name`) — 스크립트가 필요 없지만 Firefox가 아직 지원하지 않고, 앵커가
 바뀔 때의 트랜지션이 브라우저마다 다르며, 한 페이지의 여러 컨트롤에 `anchor-scope`가 필요하다. ② 지금처럼 색만
 — 소유자가 미끄러지는 쪽을 골랐다. ③ 300ms(`slow`) — 탭 밑줄과 다른 속도가 된다.
 

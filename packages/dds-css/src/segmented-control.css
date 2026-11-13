@@ -132,7 +132,8 @@
  * framework packages render one .dds-segmented__indicator in the track and
  * set --left/--top/--width/--height to the chosen item's box; it is hidden
  * until measured. Until then — server-rendered first paint, plain HTML with
- * no script — the chosen item draws its own face (above), so nothing is lost.
+ * no script, a page with no ResizeObserver — the chosen item draws its own
+ * face (above), so nothing is lost.
  * The move takes motion.duration.base with the standard easing; only a change
  * of choice animates, never a resize. */
 .dds-segmented__indicator {
@@ -149,8 +150,11 @@
   background: var(--dds-color-bg-raised);
   box-shadow: var(--dds-elevation-1);
   pointer-events: none;
-  --transition-duration: var(--dds-motion-duration-base);
-  --transition-timing-function: var(--dds-motion-easing-standard);
+  /* The script names the properties only when the choice changes; a first
+   * placement and a resize set none, so they do not travel. */
+  transition-property: none;
+  transition-duration: var(--dds-motion-duration-base);
+  transition-timing-function: var(--dds-motion-easing-standard);
 }
 .dds-segmented__indicator[hidden] {
   display: none;
@@ -192,7 +196,7 @@
     transition: none;
   }
   .dds-segmented__indicator {
-    --transition-duration: 0ms;
+    transition-duration: 0ms;
   }
 }
 

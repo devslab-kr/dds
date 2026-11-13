@@ -26,6 +26,28 @@ const segment = (host: HTMLElement, value: string) =>
   radio(host, value).closest<HTMLElement>(".dds-segmented__item")!;
 
 describe("SegmentedControl", () => {
+  // The sliding face (D-055) needs ResizeObserver. Where there is none (a server, a test DOM, an
+  // old browser) the indicator stays hidden and the chosen item paints its own face.
+  it("without ResizeObserver it renders, chooses, and leaves the indicator hidden", async () => {
+    const saved = [window.ResizeObserver, globalThis.ResizeObserver];
+    // @ts-expect-error removed on purpose
+    delete window.ResizeObserver;
+    // @ts-expect-error removed on purpose
+    delete globalThis.ResizeObserver;
+    try {
+      const host = mount(() => <SegmentedControl label="보기" items={items} defaultValue="day" />);
+      const indicator = host.querySelector<HTMLElement>(".dds-segmented__track > .dds-segmented__indicator")!;
+      expect(indicator.hidden).toBe(true);
+      radio(host, "month").click();
+      await tick();
+      expect(segment(host, "month").getAttribute("data-state")).toBe("checked");
+      expect(indicator.hidden).toBe(true);
+    } finally {
+      window.ResizeObserver = saved[0]!;
+      globalThis.ResizeObserver = saved[1]!;
+    }
+  });
+
   it("is a labelled radio group whose segments are named by their text", () => {
     const host = mount(() => (
       <SegmentedControl label="보기" items={items} defaultValue="week" />

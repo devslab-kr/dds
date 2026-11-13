@@ -20,6 +20,60 @@ const choose = async (input: HTMLInputElement) => {
 };
 
 describe("SegmentedControl", () => {
+  // The sliding face (D-055) needs ResizeObserver. Where there is none (a server, a test DOM, an
+  // old browser) the indicator stays hidden and the chosen item paints its own face.
+  it("without ResizeObserver it renders, chooses, and leaves the indicator hidden", async () => {
+    const saved = [window.ResizeObserver, globalThis.ResizeObserver];
+    // @ts-expect-error removed on purpose
+    delete window.ResizeObserver;
+    // @ts-expect-error removed on purpose
+    delete globalThis.ResizeObserver;
+    try {
+      const { container: host } = render(<SegmentedControl label="보기" items={items} defaultValue="day" />);
+      const indicator = host.querySelector<HTMLElement>(".dds-segmented__track > .dds-segmented__indicator")!;
+      expect(indicator.hidden).toBe(true);
+      expect(indicator.getAttribute("aria-hidden")).toBe("true");
+      await choose(radio(host, "month"));
+      expect(segment(host, "month").getAttribute("data-state")).toBe("checked");
+      expect(indicator.hidden).toBe(true);
+    } finally {
+      window.ResizeObserver = saved[0]!;
+      globalThis.ResizeObserver = saved[1]!;
+    }
+  });
+
+  it("with ResizeObserver it places the indicator on the chosen item and slides it only on a change", async () => {
+    class Observer { observe() {} unobserve() {} disconnect() {} }
+    const saved = window.ResizeObserver;
+    window.ResizeObserver = Observer as unknown as typeof ResizeObserver;
+    // jsdom lays nothing out: give every item a box, wider for a later one.
+    const proto = HTMLElement.prototype;
+    const descriptors = ["offsetLeft", "offsetTop", "offsetWidth", "offsetHeight"].map((key) => [key, Object.getOwnPropertyDescriptor(proto, key)] as const);
+    const index = (el: HTMLElement) => Array.from(el.parentElement?.children ?? []).indexOf(el);
+    Object.defineProperty(proto, "offsetLeft", { configurable: true, get() { return 40 * index(this); } });
+    Object.defineProperty(proto, "offsetTop", { configurable: true, get() { return 2; } });
+    Object.defineProperty(proto, "offsetWidth", { configurable: true, get() { return 36; } });
+    Object.defineProperty(proto, "offsetHeight", { configurable: true, get() { return 34; } });
+    try {
+      const { container: host } = render(<SegmentedControl label="보기" items={items} defaultValue="day" />);
+      await tick();
+      const indicator = host.querySelector<HTMLElement>(".dds-segmented__indicator")!;
+      expect(indicator.hidden).toBe(false);
+      expect(indicator.style.getPropertyValue("--left")).toBe(`${segment(host, "day").offsetLeft}px`);
+      expect(indicator.style.getPropertyValue("--width")).toBe("36px");
+      expect(indicator.style.transitionProperty).toBe(""); // the first placement does not travel: the CSS says none
+      await choose(radio(host, "month"));
+      expect(indicator.style.getPropertyValue("--left")).toBe(`${segment(host, "month").offsetLeft}px`);
+      expect(indicator.style.transitionProperty).toBe("left, top, width, height");
+    } finally {
+      for (const [key, descriptor] of descriptors) {
+        if (descriptor) Object.defineProperty(proto, key, descriptor);
+        else delete (proto as unknown as Record<string, unknown>)[key];
+      }
+      window.ResizeObserver = saved;
+    }
+  });
+
   it("is a labelled radio group whose segments are named by their text", () => {
     const { container: host } = render(
       <SegmentedControl label="보기" items={items} defaultValue="week" />,
