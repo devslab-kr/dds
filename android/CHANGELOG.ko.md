@@ -5,6 +5,17 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 다음 버전 (미출시)
+
+**새로 생긴 것**
+
+- **`DdsSegmentedControl`, `DdsSegment`** — 몇 개 안 되는 보기 중 하나를 고르는 부품. 웹 SegmentedControl의 터치
+  크기 그대로다: `bg.subtle` 트랙 + 1dp `border.strong` 선 + 둥글기 8, 안쪽과 칸 사이 2dp, 고른 칸은 `bg.default` 면 +
+  1dp 선 + 1단계 그림자 + 굵기 600. 트랙 50dp(터치 48 + 선), 칸의 면 44dp, 큰 글자 모드는 터치 56. 내용 폭(기본)은 굵은
+  폭을 늘 잡아 두어 골라도 이웃이 움직이지 않고, 넘치면 트랙 안에서 넘긴다. `fullWidth`는 폭을 똑같이 나누고 긴 라벨은
+  말줄임표. 라디오 그룹으로 읽힌다. `label`/`contentDescription`, `error`(선 색 + 문장 + 낭독), `readOnly`, `enabled`, 칸별
+  `enabled`. 가이드 §12. 첫 소비자는 Qooroo의 명함 종류 토글이다 — 앱의 사본 `DdsStyleSegmented`를 이것으로 바꾼다.
+
 ## 0.7.0 — 2026-11-13
 
 화면 틀(D-052). 정산나우가 펼친 폰에서 찾았다. 화면마다 시작선이 달랐고(187, 147, 127dp, 또는 끝에서

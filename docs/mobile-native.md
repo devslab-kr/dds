@@ -795,6 +795,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 17 | Back and leaving the app | back to the screen, then the previous tab; ask before leaving; two presses within 600ms ask | §2.3.1. JeongsanNow's behavior |
 | 18 | Motion on a tab switch | the new tab appears over the one before, 150ms; nothing slides (0.5.0, D-051). Nothing with `DdsScreenMotion` alone | §2.3. Over an emptied page the same fade read as a flicker on a device (0.3.0) |
 | 19 | Whether a screen fades on push and pop | the content: no, opaque from the first frame, it only slides. The screen: yes, 100ms over the screen before, or the one returned to (0.5.0, D-051) | §2.3, rules 18 and 20. Fading in over nothing showed an empty content area on a device (0.3.0) |
+| 20 | The shadow under the chosen segment's face | as on the web, level 1 (`DdsElevation.level1`) | No. 5 (no card shadow) is the rule for cards and menus. The segment is left as the web draws it; in the dark theme the 1dp edge sets it apart. The next version's `DdsSegmentedControl` |
 
 **Where each item stands (2026-11-10).**
 
@@ -806,6 +807,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
   dialog". These are not confirmed rules until the owner says so.
 - **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components); 17 (0.3.0,
   from the owner's own words while using JeongsanNow on a phone — the numbers are proposals).
+  20 (the next version's segmented control — the value is the web's, left as it is).
 - **Changed on the owner's word (2026-11-11, D-051):** 18 and 19. 0.3.0 and 0.4.0 had taken
   these fades out; the owner did not want movement to keep disappearing, so they are back,
   done the way that leaves no empty frame. The durations are the 0.2.0 ones.
@@ -916,6 +918,44 @@ Rules that came out of reading the captures (light, dark, 200% font, large text,
 The "Product colors" section on the Colors tab of `android/catalog` shows these on one
 screen (white on an orange face, a white card on a paper page, the four buttons, an
 end-aligned menu).
+
+**Added in the next version (not released yet)**
+
+| Component | What it settles | Web |
+| --- | --- | --- |
+| `DdsSegmentedControl`, `DdsSegment` | One choice among a few visible options (a view switch, a filter, a type such as Person / Business). The track is `bg.subtle` with a 1dp `border.strong` edge and radius 8, 2dp inside it and 2dp between segments. A segment has radius 4, the `label` type and `text.secondary`. The chosen one is a `bg.default` face with a 1dp `border.strong` edge, a level-1 shadow, `text.primary` and weight 600. One height, the touch height: the track is 50 = 48 of touch + the 1dp edge above and below, a segment's face is 44, and in large text mode the touch height is 56. Labels never wrap | SegmentedControl |
+
+- **Choosing moves nothing.** By default (content width) every label takes the width of its
+  bold form in every state, so choosing another segment never moves its neighbours. Too many
+  segments scroll sideways inside the track; the page is never pushed sideways.
+- **With `fullWidth = true` the track fills the width and the segments share it equally.**
+  A label longer than its share ends in an ellipsis and a screen reader still reads it whole.
+  No bold width is reserved, as on the web.
+- **The web's md 40 / sm 32 are pointer heights.** On a touch screen (`pointer: coarse`) the
+  web too makes both a 50 track with segments of at least 44. Android is a touch screen, so
+  there is no size argument. A segment's touch area is the whole height inside the track's
+  edge (48); its face sits 2dp in from that above and below (44). A content-width segment is
+  at least 44 wide too.
+- **A screen reader hears a radio group.** Each segment is a radio button that says whether it
+  is chosen. The unseen text that holds the bold width is not read. Without a visible `label`,
+  give the group a name with `contentDescription`.
+- **`error` is never the color alone.** The track's edge turns the danger color, a sentence
+  appears under the track and is spoken (the same line as `DdsTextField`'s). `readOnly` is not
+  greyed out: it can be focused and read but not changed. `enabled = false` draws the whole
+  track at 0.45; a segment turned off on its own (`DdsSegment(enabled = false)`) is drawn at
+  0.45 alone. A press is a pale tint on the face, not a ripple; a mouse over it shows the hover
+  tint as on the web. Focus (keyboard, D-pad) is a 2dp `border.focus` line inside the segment
+  that takes the place of the chosen face's edge.
+- **The chosen face keeps the web's shadow.** Cards and menus dropped theirs (§10 no. 5), but
+  this face uses the web's level-1 shadow. In the dark theme, where a shadow hardly shows, the
+  1dp edge sets the face apart. It is for the owner to settle (§10 no. 20).
+- `segments` must not be empty and their values must not repeat (either throws). A `selected`
+  that is none of the values chooses none. `onSelect` is not called for the segment already
+  chosen, nor while `readOnly`.
+- The first consumer is Qooroo's card-type toggle (Person / Business). Until this is released
+  it uses a copy in the app, `DdsStyleSegmented`, which this replaces. The "Segmented control"
+  section on the Parts tab of `android/catalog` shows full width, content width (with a
+  segment turned off), read-only, disabled and an error.
 
 Not yet built: date and time pickers. Use the Material3 ones under `DdsTheme`.
 

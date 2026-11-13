@@ -59,6 +59,8 @@ import kr.devslab.dds.compose.component.DdsMenuDivider
 import kr.devslab.dds.compose.component.DdsMenuItem
 import kr.devslab.dds.compose.component.DdsSearchField
 import kr.devslab.dds.compose.component.DdsSelectField
+import kr.devslab.dds.compose.component.DdsSegment
+import kr.devslab.dds.compose.component.DdsSegmentedControl
 import kr.devslab.dds.compose.component.DdsTabs
 import kr.devslab.dds.compose.component.DdsToastHost
 import kr.devslab.dds.compose.component.DdsValueRow
@@ -343,6 +345,8 @@ fun PartsPage() {
     var query by rememberSaveable { mutableStateOf("") }
     var bank by rememberSaveable { mutableStateOf<Int?>(null) }
     var view by rememberSaveable { mutableStateOf(0) }
+    var kind by rememberSaveable { mutableStateOf("person") }
+    var period by rememberSaveable { mutableStateOf("week") }
     var menu by remember { mutableStateOf(false) }
     var sheet by rememberSaveable { mutableStateOf(false) }
     val toasts = remember { SnackbarHostState() }
@@ -428,6 +432,22 @@ fun PartsPage() {
                     }
                 }
             }
+        }
+        DdsSection(
+            "Segmented control",
+            description = "One choice among a few. The chosen width is kept in every state, so nothing shifts.",
+        ) {
+            val kinds = listOf(DdsSegment("person", "개인"), DdsSegment("shop", "비즈니스"))
+            DdsSegmentedControl(kinds, kind, { kind = it }, label = "명함 종류", fullWidth = true)
+            DdsSegmentedControl(
+                listOf(DdsSegment("day", "일"), DdsSegment("week", "주"), DdsSegment("month", "월"), DdsSegment("year", "연", enabled = false)),
+                period,
+                { period = it },
+                contentDescription = "기간",
+            )
+            DdsSegmentedControl(kinds, "shop", {}, contentDescription = "읽기 전용", readOnly = true)
+            DdsSegmentedControl(kinds, "person", {}, contentDescription = "비활성", enabled = false)
+            DdsSegmentedControl(kinds, "", {}, label = "필수 선택", fullWidth = true, error = "종류를 고르세요")
         }
         DdsSection("Choices") {
             DdsCard {

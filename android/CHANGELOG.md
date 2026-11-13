@@ -5,6 +5,19 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## Next version (unreleased)
+
+**New**
+
+- **`DdsSegmentedControl`, `DdsSegment`** — one choice among a few visible options. The web SegmentedControl at its
+  touch size: a `bg.subtle` track with a 1dp `border.strong` edge and radius 8, 2dp inside and between segments, the
+  chosen one a `bg.default` face with a 1dp edge, a level-1 shadow and weight 600. The track is 50dp (48 of touch + the
+  edge), a face 44dp, and the touch height is 56 in large text mode. Content width (the default) always holds the bold
+  width, so choosing never moves a neighbour, and too many segments scroll inside the track; `fullWidth` shares the
+  width equally and ends a long label in an ellipsis. Read as a radio group. `label`/`contentDescription`, `error`
+  (edge color + a sentence + spoken), `readOnly`, `enabled`, and `enabled` per segment. Guide §12. The first consumer is
+  Qooroo's card-type toggle, whose in-app copy `DdsStyleSegmented` this replaces.
+
 ## 0.7.0 — 2026-11-13
 
 The screen frame (D-052), from JeongsanNow on an unfolded phone: screens started on
