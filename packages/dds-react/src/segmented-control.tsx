@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useRef } from "react";
 import { choiceWarningsEnabled } from "./choice-types";
 import { classes } from "./controls";
 import { useDirection, type Direction } from "./direction";
+import { attachSegmentIndicator } from "./segmented-indicator";
 
 export interface SegmentedControlItem {
   /** Nonempty ID, unique within the control. This is what callbacks and forms receive. */
@@ -63,6 +64,10 @@ export function SegmentedControl(props: SegmentedControlProps) {
   const direction = useDirection(root, props.dir);
   // Native form reset returns to the first rendered choice.
   const initialValue = useRef(props.value ?? props.defaultValue).current;
+  const track = useRef<HTMLDivElement | null>(null);
+  // The sliding face (D-055): measured in the browser only; until then, and wherever there is no
+  // ResizeObserver, the chosen item paints its own face.
+  useEffect(() => (track.current ? attachSegmentIndicator(track.current) : undefined), []);
   const { items, label } = props;
   const ariaLabel = props["aria-label"];
   const ariaLabelledby = props["aria-labelledby"];
@@ -120,7 +125,9 @@ export function SegmentedControl(props: SegmentedControlProps) {
           {label}
         </SegmentGroup.Label>
       ) : null}
-      <div className="dds-segmented__track">
+      <div ref={track} className="dds-segmented__track">
+        {/* The chosen face, sliding between choices (D-055). Hidden until measured. */}
+        <span className="dds-segmented__indicator" aria-hidden="true" hidden />
         {items.map((item) => (
           <SegmentGroup.Item
             key={item.value}

@@ -4,6 +4,27 @@ import { h, defineComponent, ref, nextTick, effectScope } from 'vue'
 import * as DDS from '../index'
 
 describe('native Vue control contracts', () => {
+  // The sliding face (D-055) needs ResizeObserver; without it the chosen item paints its own face.
+  it('without ResizeObserver the segmented control renders, chooses, and leaves its indicator hidden', async () => {
+    const saved = [window.ResizeObserver, globalThis.ResizeObserver]
+    // @ts-expect-error removed on purpose
+    delete window.ResizeObserver
+    // @ts-expect-error removed on purpose
+    delete globalThis.ResizeObserver
+    try {
+      const wrapper = mount(DDS.SegmentedControl, { attachTo: document.body, props: { label: '보기', modelValue: 'a', items: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }] } })
+      const indicator = wrapper.get('.dds-segmented__track > .dds-segmented__indicator')
+      expect(indicator.attributes('hidden')).toBeDefined()
+      await wrapper.get('[value="b"]').setValue(true)
+      expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['b'])
+      expect(indicator.attributes('hidden')).toBeDefined()
+      wrapper.unmount()
+    } finally {
+      window.ResizeObserver = saved[0]!
+      globalThis.ResizeObserver = saved[1]!
+    }
+  })
+
   it('updates checkbox through the native form control and respects disabled', async () => {
     const wrapper = mount(DDS.Checkbox, { props: { label: '선택', modelValue: false } })
     await wrapper.get('input').setValue(true)

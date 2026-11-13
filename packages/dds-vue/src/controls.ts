@@ -1,4 +1,5 @@
-import { computed, defineComponent, h, mergeProps, ref, useId, watchEffect, type PropType } from 'vue'
+import { computed, defineComponent, h, mergeProps, onBeforeUnmount, onMounted, ref, useId, watchEffect, type PropType, type Ref } from 'vue'
+import { attachSegmentIndicator } from './segmented-indicator'
 import { useModel } from './model'
 
 export type ControlSize = 'sm' | 'md' | 'lg'
@@ -46,12 +47,24 @@ export function validateSegmentedItems(items: readonly SegmentedControlItem[]) {
   const values = new Set<string>()
   for (const item of items) { if (!item.value || values.has(item.value)) throw new Error('DDS segmented control: values must be nonempty and unique'); values.add(item.value) }
 }
+/**
+ * The segmented control's sliding face (D-055): a hidden indicator in the track, placed and moved
+ * by the shared `attachSegmentIndicator` once mounted in a browser. Until then — and wherever there
+ * is no ResizeObserver — the chosen item paints its own face.
+ */
+function useSegmentIndicator(track: Ref<HTMLElement | undefined>) {
+  let stop: (() => void) | undefined
+  onMounted(() => { if (track.value) stop = attachSegmentIndicator(track.value) })
+  onBeforeUnmount(() => stop?.())
+  return () => h('span', { class: 'dds-segmented__indicator', 'aria-hidden': true, hidden: true })
+}
 function radioSet(name: string, segmented: boolean) {
   return defineComponent({ name, inheritAttrs: false,
     props: { label: { type: String, required: true }, items: { type: Array as PropType<readonly RadioOption[]>, default: () => [] }, options: Array as PropType<readonly RadioOption[]>, modelValue: String, defaultValue: { type: String, default: '' }, disabled: Boolean, readOnly: Boolean, required: Boolean, name: String, size: { type: String as PropType<'sm' | 'md'>, default: 'md' }, fullWidth: Boolean },
     emits: ['update:modelValue', 'change'],
     setup(p, { attrs, emit }) { const id = `dds-radio-${useId()}`; const value = useModel(() => p.modelValue, p.defaultValue, v => { emit('update:modelValue', v); emit('change', v) }); const items = computed(() => { const list = p.options ?? p.items; validateSegmentedItems(list); return list })
-      return () => h('div', mergeProps(attrs, { class: segmented ? 'dds-segmented' : 'dds-field', role: 'radiogroup', 'aria-labelledby': id, 'aria-required': p.required || undefined, 'data-size': p.size, 'data-full-width': p.fullWidth ? '' : undefined }), [h('span', { id, class: segmented ? 'dds-segmented__label' : 'dds-field__label' }, p.label), h('div', { class: segmented ? 'dds-segmented__track' : 'dds-radio-group' }, items.value.map(item => h('label', { key: item.value, class: segmented ? 'dds-segmented__item' : 'dds-check', 'data-state': value.value === item.value ? 'checked' : 'unchecked', 'data-disabled': p.disabled || item.disabled ? '' : undefined }, [h('input', { type: 'radio', class: segmented ? 'dds-visually-hidden' : 'dds-check__input', name: p.name ?? id, value: item.value, checked: value.value === item.value, disabled: p.disabled || item.disabled, required: p.required, onClick: (e: Event) => { if (p.readOnly) e.preventDefault() }, onChange: () => { if (!p.disabled && !p.readOnly && !item.disabled) value.value = item.value } }), h('span', { class: segmented ? 'dds-segmented__text' : undefined, 'data-text': item.label }, item.label)])))])
+      const track = ref<HTMLElement>(); const indicator = segmented ? useSegmentIndicator(track) : undefined
+      return () => h('div', mergeProps(attrs, { class: segmented ? 'dds-segmented' : 'dds-field', role: 'radiogroup', 'aria-labelledby': id, 'aria-required': p.required || undefined, 'data-size': p.size, 'data-full-width': p.fullWidth ? '' : undefined }), [h('span', { id, class: segmented ? 'dds-segmented__label' : 'dds-field__label' }, p.label), h('div', { ref: track, class: segmented ? 'dds-segmented__track' : 'dds-radio-group' }, [indicator?.(), ...items.value.map(item => h('label', { key: item.value, class: segmented ? 'dds-segmented__item' : 'dds-check', 'data-state': value.value === item.value ? 'checked' : 'unchecked', 'data-disabled': p.disabled || item.disabled ? '' : undefined }, [h('input', { type: 'radio', class: segmented ? 'dds-visually-hidden' : 'dds-check__input', name: p.name ?? id, value: item.value, checked: value.value === item.value, disabled: p.disabled || item.disabled, required: p.required, onClick: (e: Event) => { if (p.readOnly) e.preventDefault() }, onChange: () => { if (!p.disabled && !p.readOnly && !item.disabled) value.value = item.value } }), h('span', { class: segmented ? 'dds-segmented__text' : undefined, 'data-text': item.label }, item.label)]))])])
     }
   })
 }

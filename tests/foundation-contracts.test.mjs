@@ -443,3 +443,28 @@ test("bg.raised is lighter than bg.subtle and text reads on it, and the chosen s
   const segmented = await read("packages/dds-css/src/segmented-control.css");
   assert.match(segmented, /\.dds-segmented__item\[data-state="checked"\]\s*\{[^}]*background:\s*var\(--dds-color-bg-raised\)/);
 });
+
+test("the chosen segment's face slides on base motion and stops under reduced motion (D-055)", async () => {
+  const css = await read("packages/dds-css/src/segmented-control.css");
+  assert.match(css, /\.dds-segmented__indicator\s*\{[^}]*transition-duration:\s*var\(--dds-motion-duration-base\)/);
+  assert.match(css, /\.dds-segmented__indicator\s*\{[^}]*transition-timing-function:\s*var\(--dds-motion-easing-standard\)/);
+  assert.match(css, /prefers-reduced-motion: reduce\)\s*\{[^@]*\.dds-segmented__indicator\s*\{\s*transition-duration:\s*0ms/);
+  // Until measured, the chosen item keeps its own face; once placed, the indicator is the face.
+  assert.match(css, /\.dds-segmented__indicator\[hidden\]\s*\{\s*display:\s*none/);
+  assert.match(css, /:has\(> \.dds-segmented__indicator:not\(\[hidden\]\)\)\s*\.dds-segmented__item\[data-state="checked"\]\s*\{[^}]*background:\s*transparent/);
+  // One measuring function, the same file in all three frameworks, and it does nothing without
+  // ResizeObserver (a server, a test DOM, an old browser): the chosen item then paints its own face.
+  const copies = await Promise.all(["dds-react", "dds-solid", "dds-vue"].map((pkg) => read(`packages/${pkg}/src/segmented-indicator.ts`)));
+  assert.equal(copies[1], copies[0], "dds-solid's segmented-indicator.ts differs from dds-react's");
+  assert.equal(copies[2], copies[0], "dds-vue's segmented-indicator.ts differs from dds-react's");
+  assert.match(copies[0], /typeof view\.ResizeObserver !== "function" \|\| !indicator\) return \(\) => \{\};/);
+  for (const file of ["packages/dds-react/src/segmented-control.tsx", "packages/dds-solid/src/segmented-control.tsx"]) {
+    const source = await read(file);
+    assert.match(source, /<span class(Name)?="dds-segmented__indicator" aria-hidden="true" hidden \/>/, file);
+    assert.match(source, /attachSegmentIndicator\(/, file);
+    assert.doesNotMatch(source, /SegmentGroup\.Indicator/, `${file}: Ark's indicator needs ResizeObserver, unguarded`);
+  }
+  const vue = await read("packages/dds-vue/src/controls.ts");
+  assert.match(vue, /class: 'dds-segmented__indicator', 'aria-hidden': true, hidden: true/);
+  assert.match(vue, /attachSegmentIndicator\(/);
+});

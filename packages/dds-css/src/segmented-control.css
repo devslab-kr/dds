@@ -29,6 +29,8 @@
 }
 
 .dds-segmented__track {
+  /* The sliding indicator is placed against the track. */
+  position: relative;
   display: inline-flex;
   align-items: stretch;
   align-self: flex-start;
@@ -57,6 +59,8 @@
 
 .dds-segmented__item {
   position: relative;
+  /* Above the sliding indicator. */
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -124,6 +128,44 @@
   font-weight: 600;
 }
 
+/* The chosen face slides from the old choice to the new one (D-055). The
+ * framework packages render one .dds-segmented__indicator in the track and
+ * set --left/--top/--width/--height to the chosen item's box; it is hidden
+ * until measured. Until then — server-rendered first paint, plain HTML with
+ * no script, a page with no ResizeObserver — the chosen item draws its own
+ * face (above), so nothing is lost.
+ * The move takes motion.duration.base with the standard easing; only a change
+ * of choice animates, never a resize. */
+.dds-segmented__indicator {
+  position: absolute;
+  /* Physical on purpose: the measured offset is from the track's left edge in
+   * either writing direction. */
+  left: var(--left);
+  top: var(--top);
+  width: var(--width);
+  height: var(--height);
+  box-sizing: border-box;
+  border: 1px solid var(--dds-color-border-strong);
+  border-radius: var(--dds-radius-sm);
+  background: var(--dds-color-bg-raised);
+  box-shadow: var(--dds-elevation-1);
+  pointer-events: none;
+  /* The script names the properties only when the choice changes; a first
+   * placement and a resize set none, so they do not travel. */
+  transition-property: none;
+  transition-duration: var(--dds-motion-duration-base);
+  transition-timing-function: var(--dds-motion-easing-standard);
+}
+.dds-segmented__indicator[hidden] {
+  display: none;
+}
+.dds-segmented__track:has(> .dds-segmented__indicator:not([hidden]))
+  .dds-segmented__item[data-state="checked"] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
 .dds-segmented__item[data-focus-visible] {
   outline: var(--dds-space-2) solid var(--dds-color-border-focus);
   outline-offset: calc(var(--dds-space-2) * -1);
@@ -152,6 +194,9 @@
 @media (prefers-reduced-motion: reduce) {
   .dds-segmented__item {
     transition: none;
+  }
+  .dds-segmented__indicator {
+    transition-duration: 0ms;
   }
 }
 

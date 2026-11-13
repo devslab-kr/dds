@@ -1,8 +1,9 @@
 import { SegmentGroup } from "@ark-ui/solid/segment-group";
-import { createEffect, createUniqueId, For, Show } from "solid-js";
+import { createEffect, createUniqueId, For, onCleanup, onMount, Show } from "solid-js";
 import { useDirection, type Direction } from "./direction";
 import { choiceWarningsEnabled } from "./choice-types";
 import { classes } from "./utils";
+import { attachSegmentIndicator } from "./segmented-indicator";
 
 export interface SegmentedControlItem {
   /** Nonempty ID, unique within the control. This is what callbacks and forms receive. */
@@ -62,6 +63,12 @@ export function SegmentedControl(props: SegmentedControlProps) {
   let root: HTMLDivElement | undefined;
   const direction = useDirection(() => root, () => props.dir);
   const initialValue = props.value ?? props.defaultValue;
+  let track: HTMLDivElement | undefined;
+  // The sliding face (D-055): measured in the browser only; until then, and wherever there is
+  // no ResizeObserver, the chosen item paints its own face.
+  onMount(() => {
+    if (track) onCleanup(attachSegmentIndicator(track));
+  });
   createEffect(() => validateSegmentedItems(props.items));
   createEffect(() => {
     if (
@@ -112,7 +119,9 @@ export function SegmentedControl(props: SegmentedControlProps) {
           {props.label}
         </SegmentGroup.Label>
       </Show>
-      <div class="dds-segmented__track">
+      <div ref={track} class="dds-segmented__track">
+        {/* The chosen face, sliding between choices (D-055). Hidden until measured. */}
+        <span class="dds-segmented__indicator" aria-hidden="true" hidden />
         <For each={props.items}>
           {(item) => (
             <SegmentGroup.Item
