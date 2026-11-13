@@ -6,6 +6,7 @@ object DdsLightColors {
     const val bgDefault: Long = 0xFFFFFFFF
     const val bgSubtle: Long = 0xFFFAFAFA
     const val bgElevated: Long = 0xFFFFFFFF
+    const val bgRaised: Long = 0xFFFFFFFF
     const val bgBrand: Long = 0xFF06B6D4
     const val bgBrandHover: Long = 0xFF22D3EE
     const val bgBrandSubtle: Long = 0xFFECFEFF
@@ -39,6 +40,7 @@ object DdsDarkColors {
     const val bgDefault: Long = 0xFF09090B
     const val bgSubtle: Long = 0xFF18181B
     const val bgElevated: Long = 0xFF18181B
+    const val bgRaised: Long = 0xFF27272A
     const val bgBrand: Long = 0xFF06B6D4
     const val bgBrandHover: Long = 0xFF22D3EE
     const val bgBrandSubtle: Long = 0xFF164E63

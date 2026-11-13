@@ -5,6 +5,20 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 0.8.1 — 2026-11-13
+
+**바뀐 것**
+
+- **어두운 화면에서 고른 세그먼트가 트랙보다 밝다(D-054).** 0.8.0의 고른 칸은 `bg.default`(`#09090B`)라 트랙
+  `bg.subtle`(`#18181B`)보다 어두웠고, 그림자는 어두운 화면에서 보이지 않아 구멍처럼 보였다(Qooroo 전체 화면 점검).
+  이제 새 토큰 `bg.raised`(`#27272A`, `zinc.800`)로 칠한다. 밝은 화면은 그대로 흰 면이다. 그림자는 1단계 그대로(소유자
+  결정, 가이드 §10의 20번 확정). 웹 SegmentedControl도 같이 바뀌었다.
+
+**새로 생긴 것**
+
+- **`DdsColors.bgRaised`, 토큰 `DdsLightColors.bgRaised` / `DdsDarkColors.bgRaised`, 리소스 `dds_color_bg_raised`** —
+  옅은 바탕 위로 올라온 면. 밝은 `#FFFFFF`, 어두운 `#27272A`. 제품이 정하는 바탕(D-053)이 아니라 시스템 값이다.
+
 ## 0.8.0 — 2026-11-13
 
 **새로 생긴 것**

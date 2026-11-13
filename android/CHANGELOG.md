@@ -5,6 +5,22 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.8.1 — 2026-11-13
+
+**Changed**
+
+- **In the dark theme the chosen segment is lighter than the track (D-054).** 0.8.0 painted it `bg.default` (`#09090B`),
+  darker than the `bg.subtle` track (`#18181B`), and the shadow does not show in dark, so it read as a hole (found in
+  Qooroo's full-screen review). It is now the new `bg.raised` token (`#27272A`, `zinc.800`). The light theme is unchanged,
+  a white face. The shadow stays at level 1 (the owner's decision; guide §10 no. 20 is settled). The web
+  SegmentedControl changed with it.
+
+**New**
+
+- **`DdsColors.bgRaised`, tokens `DdsLightColors.bgRaised` / `DdsDarkColors.bgRaised`, resource `dds_color_bg_raised`** —
+  a face raised above the quiet background. `#FFFFFF` in light, `#27272A` in dark. A system value, not one of the
+  backgrounds a product sets (D-053).
+
 ## 0.8.0 — 2026-11-13
 
 **New**

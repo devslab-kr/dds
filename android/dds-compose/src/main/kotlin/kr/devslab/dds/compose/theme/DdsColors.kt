@@ -27,6 +27,12 @@ public class DdsColors internal constructor(
     public val bgSubtle: Color,
     /** Cards, sheets, dialogs, menus. The product's, if its brand names one. */
     public val bgElevated: Color,
+    /**
+     * A face raised above [bgSubtle]: the chosen segment of a segmented control.
+     * White in light; in dark a step lighter than [bgSubtle] (where [bgDefault]
+     * would read as a hole). Always the system's: a brand does not set it.
+     */
+    public val bgRaised: Color,
     /** Filled brand face — the primary button. The same in light and dark. */
     public val bgBrand: Color,
     /** [bgBrand] while pressed. (The web calls it hover; touch has no hover.) */
@@ -80,6 +86,7 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
             bgDefault = pageBackground(brand.dark, night = true),
             bgSubtle = subtleBackground(brand.dark, night = true),
             bgElevated = cardBackground(brand.dark, night = true),
+            bgRaised = Color(DdsDarkColors.bgRaised),
             bgBrand = brand.dark.bgBrand,
             bgBrandHover = brand.dark.bgBrandHover,
             bgBrandSubtle = brand.dark.bgBrandSubtle,
@@ -112,6 +119,7 @@ internal fun ddsColors(dark: Boolean, brand: DdsBrand): DdsColors =
             bgDefault = pageBackground(brand.light, night = false),
             bgSubtle = subtleBackground(brand.light, night = false),
             bgElevated = cardBackground(brand.light, night = false),
+            bgRaised = Color(DdsLightColors.bgRaised),
             bgBrand = brand.light.bgBrand,
             bgBrandHover = brand.light.bgBrandHover,
             bgBrandSubtle = brand.light.bgBrandSubtle,

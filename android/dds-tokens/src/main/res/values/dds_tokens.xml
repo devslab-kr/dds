@@ -4,6 +4,7 @@
     <color name="dds_color_bg_default">#FFFFFFFF</color>
     <color name="dds_color_bg_subtle">#FFFAFAFA</color>
     <color name="dds_color_bg_elevated">#FFFFFFFF</color>
+    <color name="dds_color_bg_raised">#FFFFFFFF</color>
     <color name="dds_color_bg_brand">#FF06B6D4</color>
     <color name="dds_color_bg_brand_hover">#FF22D3EE</color>
     <color name="dds_color_bg_brand_subtle">#FFECFEFF</color>
