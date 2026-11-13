@@ -5,6 +5,14 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.9.1 — 2026-11-13
+
+**New**
+
+- **`DdsSegmentedControl(slideAnimationSpec = …)`, `DdsSegmentedDefaults.SlideAnimationSpec`** — an app sets how fast the
+  chosen face travels. The default is 0.9.0's 200ms `Standard`; only an app that wants another passes a `tween(…)` or any
+  spec. With animations off on the device the face moves at once, whatever is passed. Existing calls are unchanged.
+
 ## 0.9.0 — 2026-11-13
 
 **Changed**

@@ -904,7 +904,9 @@ Compose 벡터는 `dds-icons`의 SVG에서 **생성**한다(`node scripts/genera
 - **고른 면은 미끄러져 옮겨 간다(0.9.0, D-055).** 칸마다 면을 그리지 않고 행 뒤에 면 하나를 둔다. 다른 칸을
   고르면 200ms(`DdsMotion.Base`, `Standard` 곡선)에 걸쳐 그 칸으로 가며 폭도 따라 바뀐다 — `DdsTabs` 밑줄과 같다.
   처음 그릴 때와 회전·글자 크기로 자리만 바뀔 때는 움직이지 않는다. 기기에서 애니메이션을 끄면 바로 옮겨 간다.
-  웹도 같다.
+  웹도 같다. **속도는 앱이 정할 수 있다(0.9.1):** 기본값은 그대로 두고, 앱이
+  `slideAnimationSpec = tween(400, easing = DdsMotion.Standard)`처럼 넘기면 그 값으로 움직인다(기본값은
+  `DdsSegmentedDefaults.SlideAnimationSpec`). 기기에서 애니메이션을 껐으면 넘긴 값과 상관없이 바로 옮겨 간다.
 - **고른 칸은 트랙보다 밝은 면이다(0.8.1, D-054).** 카드·메뉴의 그림자는 뺐지만(§10의 5번) 이
   면은 웹 그대로 1단계 그림자를 쓴다. 어두운 화면에서는 그림자가 보이지 않으므로 면 자체가 트랙
   (`bg.subtle` `zinc.900`)보다 한 단계 밝은 `bg.raised`(`zinc.800`)다. 0.8.0은 `bg.default`

@@ -1,5 +1,8 @@
 package kr.devslab.dds.compose.component
 
+import androidx.compose.animation.core.tween
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
@@ -26,5 +29,18 @@ class SegmentedTest {
     @Test
     fun theSameLabelOnTwoValuesIsAllowed() {
         checkSegments(listOf(DdsSegment(1, "A"), DdsSegment(2, "A")))
+    }
+
+    @Test
+    fun theSlideAnAppPassesIsTheOneUsed() {
+        val slow = tween<Float>(600)
+        assertSame(slow, segmentSlide(slow, reducedMotion = false))
+        assertSame(DdsSegmentedDefaults.SlideAnimationSpec, segmentSlide(DdsSegmentedDefaults.SlideAnimationSpec, reducedMotion = false))
+    }
+
+    @Test
+    fun withAnimationsOffTheFaceMovesAtOnceWhateverTheAppPassed() {
+        assertNull(segmentSlide(tween(600), reducedMotion = true))
+        assertNull(segmentSlide(DdsSegmentedDefaults.SlideAnimationSpec, reducedMotion = true))
     }
 }

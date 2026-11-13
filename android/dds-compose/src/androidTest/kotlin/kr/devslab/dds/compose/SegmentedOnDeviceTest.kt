@@ -37,6 +37,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kr.devslab.dds.compose.component.DdsSegment
@@ -253,6 +255,33 @@ class SegmentedOnDeviceTest {
         val end = thumb()
         assertEquals("end start", to.left, end.left, 1f)
         assertEquals("end width", to.width, end.width, 1f)
+    }
+
+    @Test
+    fun anAppCanSlowTheSlideDown() {
+        assumeFalse("animations are turned off on this device", isReducedMotion(InstrumentationRegistry.getInstrumentation().targetContext))
+        var chosen by mutableStateOf("person")
+        show {
+            DdsSegmentedControl(
+                kinds,
+                chosen,
+                { chosen = it },
+                contentDescription = "종류",
+                fullWidth = true,
+                slideAnimationSpec = tween(1_000, easing = LinearEasing),
+            )
+        }
+        val from = segment("개인")
+        val to = segment("비즈니스")
+        rule.mainClock.autoAdvance = false
+        rule.onNodeWithText("비즈니스").performClick()
+        // Past the default 200ms, the app's 1s slide is still about a third of the way.
+        rule.mainClock.advanceTimeBy(350)
+        val midway = thumb()
+        assertTrue("still travelling at 350ms: $midway", midway.left > from.left + 1f && midway.left < to.left - 1f)
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        assertEquals("it ends on the new segment", to.left, thumb().left, 1f)
     }
 
     @Test
