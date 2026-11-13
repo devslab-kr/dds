@@ -22,12 +22,12 @@ dependencies {
 }
 ```
 
-0.7.0 adds the screen frame (guide §13) and the `dds-compose-testing` artifact:
+0.7.0 adds the screen frame (guide §13) and the `dds-compose-testing` artifact, and 0.8.0 `DdsSegmentedControl` (guide §12):
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.7.0")
-    androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
+    implementation("kr.devslab:dds-compose:0.8.0")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.8.0")
 }
 ```
 
