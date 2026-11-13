@@ -336,7 +336,7 @@ D-048. 가이드 [`mobile-native.ko.md`](mobile-native.ko.md), 설계
       (bring-into-view), 최소 줄 수(`minLines`). 그리고 단계 화면의 틀.
 - [x] **세그먼트 컨트롤(0.8.0, #149, 2026-11-13)** — `DdsSegmentedControl`·`DdsSegment`. Qooroo의 명함 종류 토글이
       웹 SegmentedControl 모양을 골라서(소유자) 그 웹 규칙을 터치 크기 그대로 옮겼다. 가이드 §12, 변경 기록 0.8.0.
-      고른 면은 0.8.1에서 `bg.raised`(어두운 `zinc.800`), 그림자 1단계로 확정(D-054, §10의 20번). 다음: Qooroo가 앱의 사본 `DdsStyleSegmented`를 이것으로 바꾼다.
+      고른 면은 0.8.1에서 `bg.raised`(어두운 `zinc.800`), 그림자 1단계로 확정(D-054, §10의 20번). 0.9.0에서 고른 면이 미끄러져 옮겨 간다(D-055, 웹 함께). 다음: Qooroo가 앱의 사본 `DdsStyleSegmented`를 이것으로 바꾼다.
 - [x] **화면 틀(0.7.0) — 배포했다(#147, `android-v0.7.0`, 2026-11-13).** 정산나우가 로컬 빌드로 옮겨 배포 전에 확인했다. 앱의 모든 화면을 DDS 부품으로 옮기고, 475×751·704×933·933×704에서 밝은·어두운 화면으로(475×751은 글자 200%도) `DdsFrameCheck`와 `assertSameLines`로 쟀다 — 1dp 넘게 어긋난 시작선이 없었다. 펼친 폰의 전체 연결 테스트에서 DDS 탓의 실패는 없었다. 거기서도 확인하지 못한 것: 폰을 실제로 가로로 돌린 것, TalkBack, 접힌 폰의 전체 테스트.
       `DdsAppFrame`, 새 `DdsScaffold`, `DdsBodyColumn`·`ddsBody`·`ddsBodyLines`, 본문 선에 서는 `DdsTopBar`
       (`onBack`, 두 줄 제목), `DdsCenteredColumn`·`DdsCenteredTitle`, `DdsPaneList`·`DdsPaneItem`, 새 꾸러미

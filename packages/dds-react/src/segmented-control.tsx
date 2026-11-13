@@ -121,6 +121,8 @@ export function SegmentedControl(props: SegmentedControlProps) {
         </SegmentGroup.Label>
       ) : null}
       <div className="dds-segmented__track">
+        {/* The chosen face, sliding between choices (D-055). Hidden until measured. */}
+        <SegmentGroup.Indicator className="dds-segmented__indicator" />
         {items.map((item) => (
           <SegmentGroup.Item
             key={item.value}

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { registerToastChecks } from './toast-checks'
+import { expectSlidingFace } from './segmented-slide'
 
 registerToastChecks('Vue', '/')
 test('Vue controls, owned overlays and native Community grid interactions', async ({ page }) => {
@@ -55,6 +56,11 @@ test('Vue controls, owned overlays and native Community grid interactions', asyn
   await expect(grid.getByRole('gridcell', { name: '100', exact: true })).toHaveCount(0)
   expect(errors).toEqual([])
 })
+test("Vue segmented control's chosen face slides to the new choice (D-055)", async ({ page }) => {
+  await page.goto('/')
+  await expectSlidingFace(page.getByRole('radiogroup', { name: '밀도', exact: true }), '촘촘하게')
+})
+
 test('Vue showcase is accessible and does not overflow at desktop widths', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('grid', { name: '샘플 거래처' })).toBeVisible()

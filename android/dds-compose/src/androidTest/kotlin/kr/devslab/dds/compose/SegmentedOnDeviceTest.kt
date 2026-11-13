@@ -41,6 +41,10 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kr.devslab.dds.compose.component.DdsSegment
 import kr.devslab.dds.compose.component.DdsSegmentedControl
+import kr.devslab.dds.compose.component.SEGMENT_THUMB_TAG
+import kr.devslab.dds.compose.motion.isReducedMotion
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assume.assumeFalse
 import kr.devslab.dds.compose.theme.DdsColors
 import kr.devslab.dds.compose.theme.DdsTheme
 import kr.devslab.dds.tokens.DdsBorder
@@ -199,6 +203,62 @@ class SegmentedOnDeviceTest {
         assertTrue("the track stays inside its 200dp", bounds("control").width <= px(200) + 1f)
         for (label in labels) assertEquals("$label is one line", 1, textLayout(label).lineCount)
         rule.onNode(keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange)).assertExists()
+    }
+
+    // --- the chosen face slides (D-055) ---------------------------------------------
+
+    private fun thumb(): Rect = rule.onNodeWithTag(SEGMENT_THUMB_TAG, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+
+    @Test
+    fun onTheFirstFrameTheFaceIsAlreadyOnTheChosenSegment() {
+        // The clock is held from the start, so this is the first frame, not a settled one.
+        rule.mainClock.autoAdvance = false
+        rule.setContent {
+            DdsTheme { Box(Modifier.width(360.dp)) { DdsSegmentedControl(kinds, "shop", {}, contentDescription = "종류", fullWidth = true) } }
+        }
+        rule.mainClock.advanceTimeByFrame()
+        val face = thumb()
+        val chosen = segment("비즈니스")
+        assertEquals("face start", chosen.left, face.left, 1f)
+        assertEquals("face end", chosen.right, face.right, 1f)
+        // 2dp in from the touch area above and below: the 44dp face.
+        assertPx("face height", DdsTouch.min - 2 * DdsSpace.s2, face.height)
+        rule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun choosingSlidesTheFaceAcrossAndItEndsOnTheNewSegment() {
+        assumeFalse("animations are turned off on this device", isReducedMotion(InstrumentationRegistry.getInstrumentation().targetContext))
+        var chosen by mutableStateOf("day")
+        val labels = listOf("일", "주", "월간 보기")
+        show {
+            DdsSegmentedControl(
+                listOf(DdsSegment("day", labels[0]), DdsSegment("week", labels[1]), DdsSegment("month", labels[2])),
+                chosen,
+                { chosen = it },
+                contentDescription = "기간",
+            )
+        }
+        val from = segment(labels[0])
+        val to = segment(labels[2])
+        rule.mainClock.autoAdvance = false
+        rule.onNodeWithText(labels[2]).performClick()
+        rule.mainClock.advanceTimeBy(100) // half of the 200ms move
+        val midway = thumb()
+        assertTrue("midway the face is past where it was: $midway", midway.left > from.left + 1f)
+        assertTrue("and short of where it goes: $midway", midway.left < to.left - 1f)
+        assertTrue("its width is between the two: $midway", midway.width > from.width + 1f && midway.width < to.width - 1f)
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        val end = thumb()
+        assertEquals("end start", to.left, end.left, 1f)
+        assertEquals("end width", to.width, end.width, 1f)
+    }
+
+    @Test
+    fun noChoiceDrawsNoFace() {
+        show { DdsSegmentedControl(kinds, "nothing", {}, contentDescription = "종류") }
+        rule.onNodeWithTag(SEGMENT_THUMB_TAG, useUnmergedTree = true).assertDoesNotExist()
     }
 
     // --- pixels ------------------------------------------------------------------

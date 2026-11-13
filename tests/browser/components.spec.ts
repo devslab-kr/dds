@@ -1,3 +1,4 @@
+import { expectSlidingFace } from "./segmented-slide";
 import { expect, test, type Locator } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -954,6 +955,9 @@ for (const [framework, port] of [
     await expect(long).toHaveAttribute("title", "보류 중인 요청 전체 보기");
     await page.getByRole("button", { name: "Submit number form" }).click();
     await expect(page.getByLabel("Number submission")).toHaveText("month|15000");
+  });
+  test("segmented control's chosen face slides to the new choice (D-055)", async ({ page }) => {
+    await expectSlidingFace(page.getByRole("radiogroup", { name: "View", exact: true }), "Month");
   });
   test("number input formats, steps, clamps on blur, ignores the wheel and submits the plain number", async ({ page }) => {
     const amount = page.getByRole("spinbutton", { name: "Amount", exact: true });

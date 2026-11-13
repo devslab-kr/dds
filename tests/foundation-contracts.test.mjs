@@ -443,3 +443,17 @@ test("bg.raised is lighter than bg.subtle and text reads on it, and the chosen s
   const segmented = await read("packages/dds-css/src/segmented-control.css");
   assert.match(segmented, /\.dds-segmented__item\[data-state="checked"\]\s*\{[^}]*background:\s*var\(--dds-color-bg-raised\)/);
 });
+
+test("the chosen segment's face slides on base motion and stops under reduced motion (D-055)", async () => {
+  const css = await read("packages/dds-css/src/segmented-control.css");
+  assert.match(css, /\.dds-segmented__indicator\s*\{[^}]*--transition-duration:\s*var\(--dds-motion-duration-base\)/);
+  assert.match(css, /\.dds-segmented__indicator\s*\{[^}]*--transition-timing-function:\s*var\(--dds-motion-easing-standard\)/);
+  assert.match(css, /prefers-reduced-motion: reduce\)\s*\{[^@]*\.dds-segmented__indicator\s*\{\s*--transition-duration:\s*0ms/);
+  // Until measured, the chosen item keeps its own face; once placed, the indicator is the face.
+  assert.match(css, /\.dds-segmented__indicator\[hidden\]\s*\{\s*display:\s*none/);
+  assert.match(css, /:has\(> \.dds-segmented__indicator:not\(\[hidden\]\)\)\s*\.dds-segmented__item\[data-state="checked"\]\s*\{[^}]*background:\s*transparent/);
+  for (const file of ["packages/dds-react/src/segmented-control.tsx", "packages/dds-solid/src/segmented-control.tsx"]) {
+    assert.match(await read(file), /<SegmentGroup\.Indicator class(Name)?="dds-segmented__indicator"/, file);
+  }
+  assert.match(await read("packages/dds-vue/src/controls.ts"), /class: 'dds-segmented__indicator'/);
+});

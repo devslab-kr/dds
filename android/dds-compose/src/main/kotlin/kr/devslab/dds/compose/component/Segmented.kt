@@ -29,6 +29,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.testTag
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
+import kr.devslab.dds.compose.motion.DdsMotion
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
@@ -72,6 +82,10 @@ public class DdsSegment<out T>(
  * - **Segment:** `radius.sm`, the `label` type, `text.secondary`. The chosen
  *   one is a `bg.raised` face with a 1dp `border.strong` line, a level-1
  *   shadow, `text.primary` and weight 600.
+ * - **Motion:** the chosen face slides to the new choice (200ms, standard
+ *   easing), growing or shrinking to its width; the label colors fade. With
+ *   animations off on the device it moves at once. The first frame already
+ *   shows it on the chosen segment.
  * - **Height:** one size, the web's touch height. The track is 50dp (48dp
  *   inside its line); each segment is 48dp of touch with a 44dp face and is
  *   at least 44dp wide. In large text mode the touch height is 56. The web's
@@ -131,6 +145,7 @@ public fun <T> DdsSegmentedControl(
         SegmentRow(
             fullWidth = fullWidth,
             touch = touch,
+            chosen = segments.indexOfFirst { it.value == selected },
             modifier = Modifier
                 .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier)
                 // Disabled dims the track as a whole (the web's `[data-disabled]` track).
@@ -171,10 +186,47 @@ public fun <T> DdsSegmentedControl(
  * The segments side by side with 2dp between them, all as tall as the tallest
  * and at least [touch] tall. With [fullWidth] the width is shared equally;
  * otherwise each is as wide as it wants (it sits inside a horizontal scroll).
+ *
+ * The chosen face is one thumb behind the segments, not a face on each (D-055):
+ * choosing another segment slides it there, growing or shrinking to that
+ * segment's width on the way, over [DdsMotion.Base] with the standard easing —
+ * the web's indicator and [DdsTabs]'s underline move the same way. The first
+ * layout, and a new place for the same choice (rotation, font size), put it
+ * there without travel. [chosen] is -1 when no segment is chosen: no thumb.
  */
 @Composable
-private fun SegmentRow(fullWidth: Boolean, touch: Int, modifier: Modifier, content: @Composable () -> Unit) {
-    Layout(content, modifier) { measurables, constraints ->
+private fun SegmentRow(fullWidth: Boolean, touch: Int, chosen: Int, modifier: Modifier, content: @Composable () -> Unit) {
+    // Where each segment starts and ends, in px from the start edge. Written when the row is
+    // placed; read when the choice changes, never while the row is measured.
+    var spans by remember { mutableStateOf<List<IntRange>>(emptyList()) }
+    val span = spans.getOrNull(chosen)
+    val thumbStart = remember { Animatable(0f) }
+    val thumbEnd = remember { Animatable(0f) }
+    var thumbFor by remember { mutableIntStateOf(-1) } // the segment the thumb last went to; -1 before the first layout
+    LaunchedEffect(span, chosen) {
+        span ?: return@LaunchedEffect
+        val start = span.first.toFloat()
+        val end = (span.last + 1).toFloat()
+        if (thumbFor == chosen || thumbFor == -1) {
+            thumbStart.snapTo(start)
+            thumbEnd.snapTo(end)
+        } else {
+            val slide = tween<Float>(DdsMotion.Base, easing = DdsMotion.Standard)
+            launch { thumbStart.animateTo(start, slide) }
+            launch { thumbEnd.animateTo(end, slide) }
+        }
+        thumbFor = chosen
+    }
+    val hasThumb = chosen >= 0
+    Layout(
+        content = {
+            if (hasThumb) SegmentThumb()
+            content()
+        },
+        modifier = modifier,
+    ) { all, constraints ->
+        val thumb = if (hasThumb) all.first() else null
+        val measurables = if (hasThumb) all.drop(1) else all
         val gap = DdsSpace.s2.dp.roundToPx()
         val gaps = gap * (measurables.size - 1).coerceAtLeast(0)
         val count = measurables.size.coerceAtLeast(1)
@@ -198,15 +250,48 @@ private fun SegmentRow(fullWidth: Boolean, touch: Int, modifier: Modifier, conte
             )
         }
         val width = cells.sumOf { it.width } + gaps
+        val placed = ArrayList<IntRange>(cells.size)
+        var edge = 0
+        for (cell in cells) {
+            placed += edge until edge + cell.width
+            edge += cell.width + gap
+        }
+        // The face sits 2dp in from the top and bottom of the touch area, as each segment's own did.
+        val inset = DdsSpace.s2.dp.roundToPx()
+        // Before the thumb has been sent anywhere it stands on the chosen segment: the first
+        // frame already has it, with no slide in from the start edge.
+        val target = placed.getOrNull(chosen)
+        val travelled = thumbFor != -1
+        val thumbX = if (travelled) thumbStart.value.roundToInt() else target?.first ?: 0
+        val thumbWidth = if (travelled) (thumbEnd.value - thumbStart.value).roundToInt() else target?.let { it.last + 1 - it.first } ?: 0
+        val thumbPlaceable = thumb?.measure(Constraints.fixed(thumbWidth.coerceAtLeast(0), (height - 2 * inset).coerceAtLeast(0)))
         layout(maxOf(width, constraints.minWidth), height) {
-            var x = 0
-            for (cell in cells) {
-                cell.placeRelative(x, 0)
-                x += cell.width + gap
-            }
+            thumbPlaceable?.placeRelative(thumbX, inset)
+            for ((index, cell) in cells.withIndex()) cell.placeRelative(placed[index].first, 0)
+            // Recorded here, not while measuring: this block runs only for a real layout, while
+            // the measuring above also answers intrinsic-size questions with stand-in sizes.
+            spans = placed // an equal list changes nothing, so this settles
         }
     }
 }
+
+/** The chosen face: `bg.raised` with a 1dp `border.strong` line and a level-1 shadow (D-054). */
+@Composable
+private fun SegmentThumb() {
+    val colors = DdsTheme.colors
+    val shape = RoundedCornerShape(DdsRadius.sm.dp)
+    Box(
+        Modifier
+            .testTag(SEGMENT_THUMB_TAG)
+            .shadow(DdsElevation.level1.dp, shape)
+            .clip(shape)
+            .background(colors.bgRaised)
+            .border(DdsBorder.hairline.dp, colors.borderStrong, shape),
+    )
+}
+
+/** The thumb's test tag, for this module's device tests. */
+internal const val SEGMENT_THUMB_TAG: String = "dds-segmented-thumb"
 
 @Composable
 private fun Segment(
@@ -231,19 +316,15 @@ private fun Segment(
     val active = enabled && !readOnly && !selected
     val face by colorChange(
         when {
-            selected -> colors.bgRaised
             active && pressed -> colors.overlayPressedTint
             active && hovered -> colors.overlayHoverTint
             else -> colors.overlayPressedTint.clear()
         },
     )
     val ink by colorChange(if (selected || (active && (pressed || hovered))) colors.textPrimary else colors.textSecondary)
-    // One edge at a time: the focus ring replaces the chosen face's line instead of doubling it.
-    val edge = when {
-        focused -> Modifier.border(DdsBorder.focus.dp, colors.borderFocus, shape)
-        selected -> Modifier.border(DdsBorder.hairline.dp, colors.borderStrong, shape)
-        else -> Modifier
-    }
+    // The chosen face is the thumb behind the row; a segment draws only press, hover and focus.
+    // The focus ring lies over the thumb's line on the chosen segment.
+    val edge = if (focused) Modifier.border(DdsBorder.focus.dp, colors.borderFocus, shape) else Modifier
     // The touch area is the whole height inside the track's line; the face sits 2dp in from it.
     val touchArea = if (readOnly) {
         Modifier
@@ -272,7 +353,6 @@ private fun Segment(
             Modifier
                 .fillMaxSize()
                 .widthIn(min = faceMin)
-                .then(if (selected) Modifier.shadow(DdsElevation.level1.dp, shape) else Modifier)
                 .clip(shape)
                 .background(face)
                 .then(edge)

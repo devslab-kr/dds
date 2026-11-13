@@ -5,6 +5,16 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.9.0 — 2026-11-13
+
+**Changed**
+
+- **The segmented control's chosen face slides (D-055).** In 0.8.x the old segment's face went and the new one's
+  appeared. Now one face sits behind the row; choosing another segment moves it there over 200ms (`DdsMotion.Base`,
+  `Standard`), its width following. The first layout, and a new place for the same choice (rotation, font size), put it
+  there without travel. With animations off on the device it moves at once. No API change. The web SegmentedControl
+  changed with it.
+
 ## 0.8.1 — 2026-11-13
 
 **Changed**

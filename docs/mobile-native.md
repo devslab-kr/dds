@@ -946,6 +946,11 @@ end-aligned menu).
   0.45 alone. A press is a pale tint on the face, not a ripple; a mouse over it shows the hover
   tint as on the web. Focus (keyboard, D-pad) is a 2dp `border.focus` line inside the segment
   that takes the place of the chosen face's edge.
+- **The chosen face slides (0.9.0, D-055).** One face sits behind the row instead of one on each
+  segment. Choosing another segment moves it there over 200ms (`DdsMotion.Base`, the `Standard`
+  easing), its width following — as `DdsTabs`'s underline moves. The first layout, and a new
+  place for the same choice (rotation, font size), put it there without travel. With animations
+  off on the device it moves at once. The web does the same.
 - **The chosen face is lighter than the track (0.8.1, D-054).** Cards and menus dropped their
   shadow (§10 no. 5), but this face keeps the web's level-1 shadow. In the dark theme, where the
   shadow does not show, the face itself is `bg.raised` (`zinc.800`), one step lighter than the
