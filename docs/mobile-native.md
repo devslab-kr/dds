@@ -654,6 +654,12 @@ Material3's `primary` is both a fill and a text color, where DDS has `bg.brand` 
 - Korean breaks only at spaces (`"…".keepWords()`) — the result of the web's `keep-all`.
 - Units are sp (the same numbers as the web's px and RN's pt), so the system font scale applies.
 - Mobile only: one typeface, Pretendard (§9); the Material3 slot mapping; large text mode (§10, item 7).
+- **A product can use its own typeface (0.9.2).** Pass it to `DdsTheme(fontFamily = …)` and DDS
+  components and Material text are all set in it. The default stays `DdsSans` (Pretendard); an app
+  that passes nothing sees no change. Only the family changes: sizes, line heights and weights stay
+  the table above. The app checks its family has the weights the table uses (400, 500, 600, 700)
+  and the scripts it shows. For another family per language, pass a different family when that
+  language is on. Qooroo is the first user (Pretendard Std Variable).
 
 ## 5. Spacing, radius, heights
 

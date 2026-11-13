@@ -8,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kr.devslab.dds.tokens.DdsTouch
 
@@ -29,16 +30,24 @@ import kr.devslab.dds.tokens.DdsTouch
  * DevsLab cyan on the system's backgrounds
  * @param largeText the app-offered large text mode: a stepped-up type scale
  * and a larger minimum touch target. It stacks with the system font scale.
+ * @param fontFamily the family every DDS style, and Material's type, is set in.
+ * [DdsSans] (Pretendard) by default; an app that bundles its own (another cut
+ * of Pretendard, a variable font) passes it here. Only the family changes:
+ * sizes, line heights and weights stay the DDS type scale. The app checks its
+ * family covers the weights the scale uses (400, 500, 600, 700) and the
+ * scripts it shows; to use another family for another language, pass a
+ * different family when that language is on
  */
 @Composable
 public fun DdsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     brand: DdsBrand = rememberDdsBrand(),
     largeText: Boolean = false,
+    fontFamily: FontFamily = DdsSans,
     content: @Composable () -> Unit,
 ) {
     val colors = remember(darkTheme, brand) { ddsColors(darkTheme, brand) }
-    val typography = remember(largeText) { ddsTypography(largeText) }
+    val typography = remember(largeText, fontFamily) { ddsTypography(largeText, fontFamily) }
     val colorScheme = remember(colors, darkTheme, brand) {
         ddsColorScheme(colors, darkTheme, inverseTextBrand = (if (darkTheme) brand.light else brand.dark).textBrand)
     }
