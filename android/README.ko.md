@@ -26,8 +26,8 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.9.1")
-    androidTestImplementation("kr.devslab:dds-compose-testing:0.9.1")
+    implementation("kr.devslab:dds-compose:0.9.2")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.9.2")
 }
 ```
 

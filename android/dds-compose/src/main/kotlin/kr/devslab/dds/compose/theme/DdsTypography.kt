@@ -65,8 +65,8 @@ public class DdsTypography internal constructor(
     public val caption: TextStyle,
 )
 
-private fun DdsTypeToken.style(): TextStyle = TextStyle(
-    fontFamily = DdsSans,
+private fun DdsTypeToken.style(family: FontFamily): TextStyle = TextStyle(
+    fontFamily = family,
     fontSize = fontSize.sp,
     lineHeight = lineHeight.sp,
     fontWeight = FontWeight(fontWeight),
@@ -77,28 +77,32 @@ private fun DdsTypeToken.style(): TextStyle = TextStyle(
     lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None),
 )
 
-internal fun ddsTypography(largeText: Boolean): DdsTypography =
+/**
+ * The eight styles in [family] ([DdsSans] unless the app passed its own to [DdsTheme]).
+ * Sizes, line heights and weights are the tokens' whatever the family.
+ */
+internal fun ddsTypography(largeText: Boolean, family: FontFamily = DdsSans): DdsTypography =
     if (largeText) {
         DdsTypography(
-            display = DdsLargeType.display.style(),
-            title1 = DdsLargeType.title1.style(),
-            title2 = DdsLargeType.title2.style(),
-            title3 = DdsLargeType.title3.style(),
-            body1 = DdsLargeType.body1.style(),
-            body2 = DdsLargeType.body2.style(),
-            label = DdsLargeType.label.style(),
-            caption = DdsLargeType.caption.style(),
+            display = DdsLargeType.display.style(family),
+            title1 = DdsLargeType.title1.style(family),
+            title2 = DdsLargeType.title2.style(family),
+            title3 = DdsLargeType.title3.style(family),
+            body1 = DdsLargeType.body1.style(family),
+            body2 = DdsLargeType.body2.style(family),
+            label = DdsLargeType.label.style(family),
+            caption = DdsLargeType.caption.style(family),
         )
     } else {
         DdsTypography(
-            display = DdsType.display.style(),
-            title1 = DdsType.title1.style(),
-            title2 = DdsType.title2.style(),
-            title3 = DdsType.title3.style(),
-            body1 = DdsType.body1.style(),
-            body2 = DdsType.body2.style(),
-            label = DdsType.label.style(),
-            caption = DdsType.caption.style(),
+            display = DdsType.display.style(family),
+            title1 = DdsType.title1.style(family),
+            title2 = DdsType.title2.style(family),
+            title3 = DdsType.title3.style(family),
+            body1 = DdsType.body1.style(family),
+            body2 = DdsType.body2.style(family),
+            label = DdsType.label.style(family),
+            caption = DdsType.caption.style(family),
         )
     }
 

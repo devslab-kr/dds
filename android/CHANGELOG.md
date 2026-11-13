@@ -5,6 +5,14 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.9.2 — 2026-11-13
+
+**New**
+
+- **`DdsTheme(fontFamily = …)`** — an app that passes its own family gets DDS components and Material text set in it.
+  The default is `DdsSans` (Pretendard), as today, so an app that passes nothing changes not one glyph. Only the family
+  changes; sizes, line heights and weights stay the DDS type scale. Guide §4.
+
 ## 0.9.1 — 2026-11-13
 
 **New**

@@ -5,6 +5,14 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 0.9.2 — 2026-11-13
+
+**새로 생긴 것**
+
+- **`DdsTheme(fontFamily = …)`** — 앱이 자기 글꼴을 넘기면 DDS 부품과 Material 글자가 모두 그 글꼴로 그려진다.
+  기본값은 `DdsSans`(Pretendard)로 지금과 같아서, 넘기지 않은 앱은 한 글자도 바뀌지 않는다. 크기·줄높이·굵기는 DDS
+  글자 표 그대로이고 글꼴만 바뀐다. 가이드 §4.
+
 ## 0.9.1 — 2026-11-13
 
 **새로 생긴 것**
