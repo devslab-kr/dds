@@ -950,7 +950,11 @@ end-aligned menu).
   segment. Choosing another segment moves it there over 200ms (`DdsMotion.Base`, the `Standard`
   easing), its width following — as `DdsTabs`'s underline moves. The first layout, and a new
   place for the same choice (rotation, font size), put it there without travel. With animations
-  off on the device it moves at once. The web does the same.
+  off on the device it moves at once. The web does the same. **An app can set the speed (0.9.1):**
+  the default stays, and an app that passes, say, `slideAnimationSpec = tween(400, easing =
+  DdsMotion.Standard)` gets that move instead (the default is
+  `DdsSegmentedDefaults.SlideAnimationSpec`). With animations off on the device the face still
+  moves at once, whatever is passed.
 - **The chosen face is lighter than the track (0.8.1, D-054).** Cards and menus dropped their
   shadow (§10 no. 5), but this face keeps the web's level-1 shadow. In the dark theme, where the
   shadow does not show, the face itself is `bg.raised` (`zinc.800`), one step lighter than the

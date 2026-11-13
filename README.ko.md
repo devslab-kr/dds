@@ -120,7 +120,7 @@ Source-Available License 1.0을 따른다. compatibility canary는 비공개·�
 때만 만든다 (명세 §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 인벤토리 (Core 6종 ✅ 2026-08-13, +13종 ✅ 2026-08-15) →
 AskLinq 적용 → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → 안드로이드 네이티브 값·테마·모션
-(0.6.0, 2026-11-12, Maven Central — 테마·모션·부품·아이콘). 0.7.0(2026-11-13, Maven Central)에서 화면 틀과 `dds-compose-testing` 꾸러미가 생겼다(D-052). 0.8.0(2026-11-13)에서 `DdsSegmentedControl`이 생겼고, 0.8.1에서 어두운 화면의 고른 칸이 밝아졌고(`bg.raised`, D-054), 0.9.0에서 고른 면이 미끄러져 옮겨 간다(D-055). RN·Ionic 패키지는 그 제품이 생길 때.
+(0.6.0, 2026-11-12, Maven Central — 테마·모션·부품·아이콘). 0.7.0(2026-11-13, Maven Central)에서 화면 틀과 `dds-compose-testing` 꾸러미가 생겼다(D-052). 0.8.0(2026-11-13)에서 `DdsSegmentedControl`이 생겼고, 0.8.1에서 어두운 화면의 고른 칸이 밝아졌고(`bg.raised`, D-054), 0.9.0에서 고른 면이 미끄러져 옮겨 가고(D-055), 0.9.1에서 앱이 그 속도를 정할 수 있다. RN·Ionic 패키지는 그 제품이 생길 때.
 
 ## 입력·선택·공유 달력 확장
 

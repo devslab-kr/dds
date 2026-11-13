@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import kr.devslab.dds.compose.motion.DdsMotion
+import kr.devslab.dds.compose.motion.rememberReducedMotion
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
@@ -83,8 +85,9 @@ public class DdsSegment<out T>(
  *   one is a `bg.raised` face with a 1dp `border.strong` line, a level-1
  *   shadow, `text.primary` and weight 600.
  * - **Motion:** the chosen face slides to the new choice (200ms, standard
- *   easing), growing or shrinking to its width; the label colors fade. With
- *   animations off on the device it moves at once. The first frame already
+ *   easing, unless the app passes its own [slideAnimationSpec]), growing or
+ *   shrinking to its width; the label colors fade. With animations off on the
+ *   device it moves at once, whatever spec is passed. The first frame already
  *   shows it on the chosen segment.
  * - **Height:** one size, the web's touch height. The track is 50dp (48dp
  *   inside its line); each segment is 48dp of touch with a 44dp face and is
@@ -115,6 +118,10 @@ public class DdsSegment<out T>(
  * @param enabled false greys out the whole control and ignores touches
  * @param readOnly shows the choice, can be focused and read, but cannot be
  * changed. Not greyed out
+ * @param slideAnimationSpec how the chosen face travels to a new choice: 200ms
+ * with the standard easing by default ([DdsSegmentedDefaults.SlideAnimationSpec]).
+ * An app may pass its own (a slower `tween`, say). With animations turned off on
+ * the device the face moves at once, whatever is passed here
  */
 @Composable
 public fun <T> DdsSegmentedControl(
@@ -128,6 +135,7 @@ public fun <T> DdsSegmentedControl(
     error: String? = null,
     enabled: Boolean = true,
     readOnly: Boolean = false,
+    slideAnimationSpec: AnimationSpec<Float> = DdsSegmentedDefaults.SlideAnimationSpec,
 ) {
     checkSegments(segments) // a handful of segments: cheap enough on every composition
     val colors = DdsTheme.colors
@@ -146,6 +154,7 @@ public fun <T> DdsSegmentedControl(
             fullWidth = fullWidth,
             touch = touch,
             chosen = segments.indexOfFirst { it.value == selected },
+            slide = segmentSlide(slideAnimationSpec, reducedMotion = rememberReducedMotion()),
             modifier = Modifier
                 .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier)
                 // Disabled dims the track as a whole (the web's `[data-disabled]` track).
@@ -188,14 +197,22 @@ public fun <T> DdsSegmentedControl(
  * otherwise each is as wide as it wants (it sits inside a horizontal scroll).
  *
  * The chosen face is one thumb behind the segments, not a face on each (D-055):
- * choosing another segment slides it there, growing or shrinking to that
- * segment's width on the way, over [DdsMotion.Base] with the standard easing —
- * the web's indicator and [DdsTabs]'s underline move the same way. The first
- * layout, and a new place for the same choice (rotation, font size), put it
- * there without travel. [chosen] is -1 when no segment is chosen: no thumb.
+ * choosing another segment slides it there by [slide], growing or shrinking to
+ * that segment's width on the way — by default over [DdsMotion.Base] with the
+ * standard easing, as the web's indicator and [DdsTabs]'s underline move. The
+ * first layout, and a new place for the same choice (rotation, font size), put
+ * it there without travel; so does a null [slide] (animations off). [chosen] is
+ * -1 when no segment is chosen: no thumb.
  */
 @Composable
-private fun SegmentRow(fullWidth: Boolean, touch: Int, chosen: Int, modifier: Modifier, content: @Composable () -> Unit) {
+private fun SegmentRow(
+    fullWidth: Boolean,
+    touch: Int,
+    chosen: Int,
+    slide: AnimationSpec<Float>?,
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
     // Where each segment starts and ends, in px from the start edge. Written when the row is
     // placed; read when the choice changes, never while the row is measured.
     var spans by remember { mutableStateOf<List<IntRange>>(emptyList()) }
@@ -207,11 +224,10 @@ private fun SegmentRow(fullWidth: Boolean, touch: Int, chosen: Int, modifier: Mo
         span ?: return@LaunchedEffect
         val start = span.first.toFloat()
         val end = (span.last + 1).toFloat()
-        if (thumbFor == chosen || thumbFor == -1) {
+        if (thumbFor == chosen || thumbFor == -1 || slide == null) {
             thumbStart.snapTo(start)
             thumbEnd.snapTo(end)
         } else {
-            val slide = tween<Float>(DdsMotion.Base, easing = DdsMotion.Standard)
             launch { thumbStart.animateTo(start, slide) }
             launch { thumbEnd.animateTo(end, slide) }
         }
@@ -378,6 +394,23 @@ private fun Segment(
         }
     }
 }
+
+/** The default values of [DdsSegmentedControl]. */
+public object DdsSegmentedDefaults {
+    /**
+     * How the chosen face travels to a new choice: [DdsMotion.Base] (200ms) with the
+     * [DdsMotion.Standard] easing — the same move as the web's indicator and [DdsTabs]'s
+     * underline (D-055).
+     */
+    public val SlideAnimationSpec: AnimationSpec<Float> = tween(DdsMotion.Base, easing = DdsMotion.Standard)
+}
+
+/**
+ * The slide the thumb uses, or null to move at once. Animations turned off on the device win
+ * over any spec an app passes: the face then moves at once.
+ */
+internal fun segmentSlide(spec: AnimationSpec<Float>, reducedMotion: Boolean): AnimationSpec<Float>? =
+    if (reducedMotion) null else spec
 
 internal fun checkSegments(segments: List<DdsSegment<*>>) {
     require(segments.isNotEmpty()) { "DdsSegmentedControl: segments must not be empty" }
