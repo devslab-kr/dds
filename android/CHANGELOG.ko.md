@@ -5,7 +5,7 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
-## 다음 버전 (미출시)
+## 0.8.0 — 2026-11-13
 
 **새로 생긴 것**
 

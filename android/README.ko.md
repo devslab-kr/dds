@@ -22,12 +22,12 @@ dependencies {
 }
 ```
 
-0.7.0에서 화면 틀(가이드 §13)과 `dds-compose-testing` 꾸러미가 생겼다.
+0.7.0에서 화면 틀(가이드 §13)과 `dds-compose-testing` 꾸러미가, 0.8.0에서 `DdsSegmentedControl`(가이드 §12)이 생겼다.
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.7.0")
-    androidTestImplementation("kr.devslab:dds-compose-testing:0.7.0")
+    implementation("kr.devslab:dds-compose:0.8.0")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.8.0")
 }
 ```
 

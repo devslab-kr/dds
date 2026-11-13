@@ -5,7 +5,7 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
-## Next version (unreleased)
+## 0.8.0 — 2026-11-13
 
 **New**
 

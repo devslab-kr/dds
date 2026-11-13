@@ -795,7 +795,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 17 | Back and leaving the app | back to the screen, then the previous tab; ask before leaving; two presses within 600ms ask | §2.3.1. JeongsanNow's behavior |
 | 18 | Motion on a tab switch | the new tab appears over the one before, 150ms; nothing slides (0.5.0, D-051). Nothing with `DdsScreenMotion` alone | §2.3. Over an emptied page the same fade read as a flicker on a device (0.3.0) |
 | 19 | Whether a screen fades on push and pop | the content: no, opaque from the first frame, it only slides. The screen: yes, 100ms over the screen before, or the one returned to (0.5.0, D-051) | §2.3, rules 18 and 20. Fading in over nothing showed an empty content area on a device (0.3.0) |
-| 20 | The shadow under the chosen segment's face | as on the web, level 1 (`DdsElevation.level1`) | No. 5 (no card shadow) is the rule for cards and menus. The segment is left as the web draws it; in the dark theme the 1dp edge sets it apart. The next version's `DdsSegmentedControl` |
+| 20 | The shadow under the chosen segment's face | as on the web, level 1 (`DdsElevation.level1`) | No. 5 (no card shadow) is the rule for cards and menus. The segment is left as the web draws it; in the dark theme the 1dp edge sets it apart. 0.8.0's `DdsSegmentedControl` |
 
 **Where each item stands (2026-11-10).**
 
@@ -807,7 +807,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
   dialog". These are not confirmed rules until the owner says so.
 - **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components); 17 (0.3.0,
   from the owner's own words while using JeongsanNow on a phone — the numbers are proposals).
-  20 (the next version's segmented control — the value is the web's, left as it is).
+  20 (0.8.0's segmented control — the value is the web's, left as it is).
 - **Changed on the owner's word (2026-11-11, D-051):** 18 and 19. 0.3.0 and 0.4.0 had taken
   these fades out; the owner did not want movement to keep disappearing, so they are back,
   done the way that leaves no empty frame. The durations are the 0.2.0 ones.
@@ -919,7 +919,7 @@ The "Product colors" section on the Colors tab of `android/catalog` shows these 
 screen (white on an orange face, a white card on a paper page, the four buttons, an
 end-aligned menu).
 
-**Added in the next version (not released yet)**
+**Added in 0.8.0**
 
 | Component | What it settles | Web |
 | --- | --- | --- |
@@ -952,8 +952,8 @@ end-aligned menu).
 - `segments` must not be empty and their values must not repeat (either throws). A `selected`
   that is none of the values chooses none. `onSelect` is not called for the segment already
   chosen, nor while `readOnly`.
-- The first consumer is Qooroo's card-type toggle (Person / Business). Until this is released
-  it uses a copy in the app, `DdsStyleSegmented`, which this replaces. The "Segmented control"
+- The first consumer is Qooroo's card-type toggle (Person / Business), whose copy in the app,
+  `DdsStyleSegmented`, this replaces. The "Segmented control"
   section on the Parts tab of `android/catalog` shows full width, content width (with a
   segment turned off), read-only, disabled and an error.
 
