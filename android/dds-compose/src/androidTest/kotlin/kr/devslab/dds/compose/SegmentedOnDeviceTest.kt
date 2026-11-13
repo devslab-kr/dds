@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PixelMap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -223,7 +224,7 @@ class SegmentedOnDeviceTest {
         // Read over the unchosen segment, clear of the chosen face's shadow.
         assertColor("the track between its line and the faces", colors.bgSubtle, pixels[other.center.x.toInt(), (2 * oneDp).toInt()])
         assertColor("an unchosen segment shows the track", colors.bgSubtle, pixels[(other.right - 6 * oneDp).toInt(), midY])
-        assertColor("the chosen face", colors.bgDefault, pixels[(chosen.left + 6 * oneDp).toInt(), midY])
+        assertColor("the chosen face", colors.bgRaised, pixels[(chosen.left + 6 * oneDp).toInt(), midY])
         assertColor("the chosen face's line", colors.borderStrong, pixels[(chosen.left + half).toInt(), midY])
     }
 
@@ -237,6 +238,18 @@ class SegmentedOnDeviceTest {
     fun theDarkThemeIsTheSameTokensDark() {
         show(dark = true) { DdsSegmentedControl(kinds, "person", {}, Modifier.testTag("control"), contentDescription = "종류", fullWidth = true) }
         assertDrawnWith(line = colors.borderStrong)
+    }
+
+    @Test
+    fun inTheDarkThemeTheChosenFaceIsLighterThanTheTrackNotAHole() {
+        show(dark = true) { DdsSegmentedControl(kinds, "person", {}, Modifier.testTag("control"), contentDescription = "종류", fullWidth = true) }
+        val pixels = control()
+        val chosen = inControl("개인")
+        val other = inControl("비즈니스")
+        val face = pixels[(chosen.left + 6 * oneDp).toInt(), chosen.center.y.toInt()]
+        val track = pixels[(other.right - 6 * oneDp).toInt(), other.center.y.toInt()]
+        assertTrue("face $face is lighter than track $track", face.luminance() > track.luminance())
+        assertTrue("and not the page's darker bgDefault", !close(face, colors.bgDefault))
     }
 
     @Test

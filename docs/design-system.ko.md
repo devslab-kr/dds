@@ -170,6 +170,7 @@
 | `color.bg.default` | `#ffffff` | `zinc.950` | 기본 화면 배경 |
 | `color.bg.subtle` | `zinc.50` | `zinc.900` | 섹션·카드 구분 배경 |
 | `color.bg.elevated` | `#ffffff` + elevation | `zinc.900` | 모달·팝오버·시트 |
+| `color.bg.raised` | `#ffffff` | `zinc.800` | 옅은 바탕 위로 올라온 면 — 세그먼트의 고른 칸. 다크에서 `bg.subtle`보다 한 단계 밝다 (D-054) |
 | `color.bg.brand` | `cyan.500` | `cyan.500` | 브랜드 강조 면 (주요 버튼 등) |
 | `color.bg.brand-hover` | `cyan.400` | `cyan.400` | 브랜드 면 hover (홈피 관용) |
 | `color.bg.brand-subtle` | `cyan.50` | `cyan.900` | 브랜드 옅은 배경 |

@@ -70,7 +70,7 @@ public class DdsSegment<out T>(
  * - **Track:** `bg.subtle`, a 1dp `border.strong` line, `radius.md`, 2dp inside
  *   it and 2dp between segments.
  * - **Segment:** `radius.sm`, the `label` type, `text.secondary`. The chosen
- *   one is a `bg.default` face with a 1dp `border.strong` line, a level-1
+ *   one is a `bg.raised` face with a 1dp `border.strong` line, a level-1
  *   shadow, `text.primary` and weight 600.
  * - **Height:** one size, the web's touch height. The track is 50dp (48dp
  *   inside its line); each segment is 48dp of touch with a 44dp face and is
@@ -231,7 +231,7 @@ private fun Segment(
     val active = enabled && !readOnly && !selected
     val face by colorChange(
         when {
-            selected -> colors.bgDefault
+            selected -> colors.bgRaised
             active && pressed -> colors.overlayPressedTint
             active && hovered -> colors.overlayHoverTint
             else -> colors.overlayPressedTint.clear()

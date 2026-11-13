@@ -795,7 +795,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
 | 17 | Back and leaving the app | back to the screen, then the previous tab; ask before leaving; two presses within 600ms ask | §2.3.1. JeongsanNow's behavior |
 | 18 | Motion on a tab switch | the new tab appears over the one before, 150ms; nothing slides (0.5.0, D-051). Nothing with `DdsScreenMotion` alone | §2.3. Over an emptied page the same fade read as a flicker on a device (0.3.0) |
 | 19 | Whether a screen fades on push and pop | the content: no, opaque from the first frame, it only slides. The screen: yes, 100ms over the screen before, or the one returned to (0.5.0, D-051) | §2.3, rules 18 and 20. Fading in over nothing showed an empty content area on a device (0.3.0) |
-| 20 | The shadow under the chosen segment's face | as on the web, level 1 (`DdsElevation.level1`) | No. 5 (no card shadow) is the rule for cards and menus. The segment is left as the web draws it; in the dark theme the 1dp edge sets it apart. 0.8.0's `DdsSegmentedControl` |
+| 20 | The shadow under the chosen segment's face | **Settled (2026-11-13, D-054):** level 1 as on the web, on a `bg.raised` face | No. 5 (no card shadow) is the rule for cards and menus. Level 2 spreads past the track's gap. In the dark theme the shadow does not show and the `bg.default` face was darker than the track, so it read as a hole → `bg.raised` (`zinc.800`), lighter than the track. 0.8.1, with the web |
 
 **Where each item stands (2026-11-10).**
 
@@ -807,7 +807,7 @@ in for now"; making them DDS rules is the owner's call. Once decided,
   dialog". These are not confirmed rules until the owner says so.
 - **Not yet put to the owner:** 14, 15, 16 (added with the 0.2.0 components); 17 (0.3.0,
   from the owner's own words while using JeongsanNow on a phone — the numbers are proposals).
-  20 (0.8.0's segmented control — the value is the web's, left as it is).
+- **Chosen by the owner (2026-11-13, D-054):** 20 — the chosen segment keeps a level-1 shadow on a `bg.raised` face.
 - **Changed on the owner's word (2026-11-11, D-051):** 18 and 19. 0.3.0 and 0.4.0 had taken
   these fades out; the owner did not want movement to keep disappearing, so they are back,
   done the way that leaves no empty frame. The durations are the 0.2.0 ones.
@@ -923,7 +923,7 @@ end-aligned menu).
 
 | Component | What it settles | Web |
 | --- | --- | --- |
-| `DdsSegmentedControl`, `DdsSegment` | One choice among a few visible options (a view switch, a filter, a type such as Person / Business). The track is `bg.subtle` with a 1dp `border.strong` edge and radius 8, 2dp inside it and 2dp between segments. A segment has radius 4, the `label` type and `text.secondary`. The chosen one is a `bg.default` face with a 1dp `border.strong` edge, a level-1 shadow, `text.primary` and weight 600. One height, the touch height: the track is 50 = 48 of touch + the 1dp edge above and below, a segment's face is 44, and in large text mode the touch height is 56. Labels never wrap | SegmentedControl |
+| `DdsSegmentedControl`, `DdsSegment` | One choice among a few visible options (a view switch, a filter, a type such as Person / Business). The track is `bg.subtle` with a 1dp `border.strong` edge and radius 8, 2dp inside it and 2dp between segments. A segment has radius 4, the `label` type and `text.secondary`. The chosen one is a `bg.raised` face (white in light, `zinc.800` in dark — from 0.8.1) with a 1dp `border.strong` edge, a level-1 shadow, `text.primary` and weight 600. One height, the touch height: the track is 50 = 48 of touch + the 1dp edge above and below, a segment's face is 44, and in large text mode the touch height is 56. Labels never wrap | SegmentedControl |
 
 - **Choosing moves nothing.** By default (content width) every label takes the width of its
   bold form in every state, so choosing another segment never moves its neighbours. Too many
@@ -946,9 +946,11 @@ end-aligned menu).
   0.45 alone. A press is a pale tint on the face, not a ripple; a mouse over it shows the hover
   tint as on the web. Focus (keyboard, D-pad) is a 2dp `border.focus` line inside the segment
   that takes the place of the chosen face's edge.
-- **The chosen face keeps the web's shadow.** Cards and menus dropped theirs (§10 no. 5), but
-  this face uses the web's level-1 shadow. In the dark theme, where a shadow hardly shows, the
-  1dp edge sets the face apart. It is for the owner to settle (§10 no. 20).
+- **The chosen face is lighter than the track (0.8.1, D-054).** Cards and menus dropped their
+  shadow (§10 no. 5), but this face keeps the web's level-1 shadow. In the dark theme, where the
+  shadow does not show, the face itself is `bg.raised` (`zinc.800`), one step lighter than the
+  track (`bg.subtle`, `zinc.900`). In 0.8.0 it was `bg.default` (`zinc.950`), darker than the
+  track, and read as a hole. The light theme is unchanged: a white face.
 - `segments` must not be empty and their values must not repeat (either throws). A `selected`
   that is none of the values chooses none. `onSelect` is not called for the segment already
   chosen, nor while `readOnly`.

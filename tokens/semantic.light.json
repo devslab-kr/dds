@@ -5,6 +5,7 @@
       "default": { "$value": "{palette.white}", "$type": "color" },
       "subtle": { "$value": "{palette.zinc.50}", "$type": "color" },
       "elevated": { "$value": "{palette.white}", "$type": "color" },
+      "raised": { "$value": "{palette.white}", "$type": "color" },
       "brand": { "$value": "{palette.cyan.500}", "$type": "color" },
       "brand-hover": { "$value": "{palette.cyan.400}", "$type": "color" },
       "brand-subtle": { "$value": "{palette.cyan.50}", "$type": "color" },

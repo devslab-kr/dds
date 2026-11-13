@@ -116,7 +116,9 @@
 
 .dds-segmented__item[data-state="checked"] {
   border-color: var(--dds-color-border-strong);
-  background: var(--dds-color-bg-default);
+  /* bg.raised, not bg.default: in dark, bg.default is darker than the track
+   * and the chosen face read as a hole (D-054). */
+  background: var(--dds-color-bg-raised);
   box-shadow: var(--dds-elevation-1);
   color: var(--dds-color-text-primary);
   font-weight: 600;

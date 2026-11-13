@@ -413,3 +413,33 @@ test("form controls draw their resting edge in border.control, not border.strong
   assert.match(segmented, /\.dds-segmented__track\s*\{[^}]*border:\s*1px solid var\(--dds-color-border-control, var\(--dds-color-border-strong\)\)/);
   assert.doesNotMatch(segmented, /var\(--dds-color-border-control\)/);
 });
+
+test("bg.raised is lighter than bg.subtle and text reads on it, and the chosen segment uses it (D-054)", async () => {
+  const palette = JSON.parse(await read("tokens/palette.json"));
+  const hex = (reference) => {
+    if (!reference.startsWith("{")) return reference;
+    let node = palette;
+    for (const segment of reference.slice(1, -1).split(".")) node = node[segment];
+    return node.$value;
+  };
+  const luminance = (value) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(value.slice(i, i + 2), 16) / 255)
+      .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a, b) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  for (const theme of ["light", "dark"]) {
+    const { bg, text } = JSON.parse(await read(`tokens/semantic.${theme}.json`)).color;
+    const raised = hex(bg.raised.$value);
+    assert.ok(luminance(raised) > luminance(hex(bg.subtle.$value)), `${theme} bg.raised must be lighter than bg.subtle`);
+    for (const name of ["primary", "secondary"]) {
+      const ratio = contrast(hex(text[name].$value), raised);
+      assert.ok(ratio >= 4.5, `${theme} text.${name} on bg.raised is ${ratio.toFixed(2)}:1`);
+    }
+  }
+  const segmented = await read("packages/dds-css/src/segmented-control.css");
+  assert.match(segmented, /\.dds-segmented__item\[data-state="checked"\]\s*\{[^}]*background:\s*var\(--dds-color-bg-raised\)/);
+});

@@ -178,6 +178,7 @@ toggle**; both mappings are first-class from day one.
 | `color.bg.default` | `#ffffff` | `zinc.950` | base screen background |
 | `color.bg.subtle` | `zinc.50` | `zinc.900` | section/card separation |
 | `color.bg.elevated` | `#ffffff` + elevation | `zinc.900` | modals, popovers, sheets |
+| `color.bg.raised` | `#ffffff` | `zinc.800` | a face raised above the quiet background — the chosen segment. In dark one step lighter than `bg.subtle` (D-054) |
 | `color.bg.brand` | `cyan.500` | `cyan.500` | brand surfaces (primary buttons etc.) |
 | `color.bg.brand-hover` | `cyan.400` | `cyan.400` | brand surface hover (homepage idiom) |
 | `color.bg.brand-subtle` | `cyan.50` | `cyan.900` | soft brand backgrounds |

@@ -2,6 +2,7 @@ package kr.devslab.dds.compose.theme
 
 import androidx.compose.material3.contentColorFor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import kr.devslab.dds.tokens.DdsDarkColors
 import kr.devslab.dds.tokens.DdsLightColors
 import org.junit.Assert.assertEquals
@@ -126,6 +127,23 @@ class ColorSchemeTest {
                 assertTrue("$name $label is %.2f:1".format(ratio), ratio >= DdsMinTextContrast)
             }
         }
+    }
+
+    /**
+     * The chosen segment's face (D-054): lighter than the track it sits on in both themes, so
+     * it reads as raised, never as a hole; and the label on it reads.
+     */
+    @Test
+    fun aRaisedFaceIsLighterThanTheSubtleTrackAndCarriesText() {
+        for ((c, name) in listOf(light to "light", dark to "dark")) {
+            assertTrue("$name bgRaised is lighter than bgSubtle", c.bgRaised.luminance() > c.bgSubtle.luminance())
+            for ((text, label) in listOf(c.textPrimary to "textPrimary", c.textSecondary to "textSecondary")) {
+                val ratio = contrastRatio(text, c.bgRaised)
+                assertTrue("$name $label on bgRaised is %.2f:1".format(ratio), ratio >= DdsMinTextContrast)
+            }
+        }
+        assertEquals("dark: zinc.800", Color(DdsDarkColors.bgRaised), dark.bgRaised)
+        assertEquals("light: the white of bg.default, as before", light.bgDefault, light.bgRaised)
     }
 
     /** A warm paper page: light enough for every system text color. */
