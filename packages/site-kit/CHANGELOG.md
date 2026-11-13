@@ -1,5 +1,13 @@
 # @devslab/site-kit
 
+## 0.35.0
+
+### Patch Changes
+
+- Updated dependencies [b77822f]
+  - @devslab/dds-solid@0.35.0
+  - @devslab/dds-icons@0.35.0
+
 ## 0.34.0
 
 ### Patch Changes
