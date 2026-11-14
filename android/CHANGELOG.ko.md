@@ -5,6 +5,14 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 0.10.0 — 2026-11-15
+
+**새로 생긴 것**
+
+- **`DdsSocialSignIn`**은 앱이 선택한 로그인 방법 중 처음 세 개를 보여주고 나머지는 시트에 담는다.
+  웹 DDS Auth와 제공자 ID 17개를 공유하며 로고 13개를 제공한다. 앱에서 로고를 지정하고 인증과 세션을 처리한다.
+  사용법은 [소셜 로그인 선택 UI](README.ko.md#소셜-로그인-선택-ui)에 있다.
+
 ## 0.9.2 — 2026-11-13
 
 **새로 생긴 것**

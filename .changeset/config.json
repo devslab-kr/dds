@@ -23,6 +23,7 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
+    "@devslab-kr/dds-auth",
     "@devslab/compatibility-canary",
     "@devslab/react-canary"
   ]

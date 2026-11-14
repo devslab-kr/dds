@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -61,6 +63,29 @@ public fun DdsBottomSheet(
     title: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    DdsBottomSheetSurface(onDismissRequest, modifier) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = DdsSpace.s16.dp)) {
+            if (title != null) {
+                WordsText(
+                    title,
+                    Modifier.padding(horizontal = DdsSpace.s16.dp).padding(bottom = DdsSpace.s8.dp).semantics { heading() },
+                    style = DdsTheme.typography.title3,
+                    color = DdsTheme.colors.textPrimary,
+                )
+            }
+            content()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun DdsBottomSheetSurface(
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    contentWindowInsets: @Composable () -> WindowInsets = { BottomSheetDefaults.windowInsets },
+    content: @Composable ColumnScope.() -> Unit,
+) {
     val colors = DdsTheme.colors
     val handleWord = stringResource(R.string.dds_a11y_sheet_handle)
     ModalBottomSheet(
@@ -72,6 +97,7 @@ public fun DdsBottomSheet(
         contentColor = colors.textPrimary,
         tonalElevation = 0.dp,
         scrimColor = colors.overlayDim,
+        contentWindowInsets = contentWindowInsets,
         dragHandle = {
             Box(
                 Modifier
@@ -85,19 +111,8 @@ public fun DdsBottomSheet(
                     .semantics { contentDescription = handleWord },
             )
         },
-    ) {
-        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = DdsSpace.s16.dp)) {
-            if (title != null) {
-                WordsText(
-                    title,
-                    Modifier.padding(horizontal = DdsSpace.s16.dp).padding(bottom = DdsSpace.s8.dp).semantics { heading() },
-                    style = DdsTheme.typography.title3,
-                    color = colors.textPrimary,
-                )
-            }
-            content()
-        }
-    }
+        content = content,
+    )
 }
 
 /** Which edge of its button a [DdsMenu] lines up with. */

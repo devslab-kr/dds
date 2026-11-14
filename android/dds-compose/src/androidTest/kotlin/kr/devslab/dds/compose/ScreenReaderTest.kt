@@ -35,6 +35,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasContentDescription
@@ -65,6 +66,9 @@ import kr.devslab.dds.compose.layout.DdsCenteredColumn
 import kr.devslab.dds.compose.layout.DdsCenteredTitle
 import kr.devslab.dds.compose.component.DdsSearchField
 import kr.devslab.dds.compose.component.DdsSelectField
+import kr.devslab.dds.compose.component.DdsSignInMethod
+import kr.devslab.dds.compose.component.DdsSocialProvider
+import kr.devslab.dds.compose.component.DdsSocialSignIn
 import kr.devslab.dds.compose.component.DdsTabs
 import kr.devslab.dds.compose.component.DdsTextField
 import kr.devslab.dds.compose.component.DdsTone
@@ -94,6 +98,36 @@ class ScreenReaderTest {
     private fun word(id: Int): String = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
     private fun show(content: @Composable () -> Unit) = rule.setContent { DdsTheme { content() } }
+
+    @Test
+    fun additionalSignInMethodsKeepTheirLabelsAndCannotRestartPendingAuth() {
+        var selected: DdsSocialProvider? by mutableStateOf(null)
+        val attempts = mutableListOf<DdsSocialProvider>()
+        show {
+            DdsSocialSignIn(
+                methods = listOf(
+                    DdsSignInMethod(DdsSocialProvider.Google, "Google로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Kakao, "카카오 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Naver, "네이버 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Discord, "Discord로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Zoom, "Zoom으로 로그인", enabled = false),
+                ),
+                pending = selected,
+                moreLabel = "다른 로그인 방법",
+                closeLabel = "선택 닫기",
+                onSelect = { attempts.add(it); selected = it },
+            )
+        }
+        rule.onNodeWithText("Discord로 로그인").assertDoesNotExist()
+        rule.onNodeWithText("다른 로그인 방법").performClick()
+        rule.onNode(hasText("다른 로그인 방법") and keyIsDefined(SemanticsProperties.Heading)).assertExists()
+        rule.onNodeWithText("Zoom으로 로그인").assertIsNotEnabled()
+        rule.onNodeWithText("Discord로 로그인").performClick().performClick()
+        rule.runOnIdle { assertEquals(listOf(DdsSocialProvider.Discord), attempts) }
+        rule.onNodeWithContentDescription("선택 닫기").performClick()
+        rule.onNodeWithText("Discord로 로그인").assertDoesNotExist()
+        rule.onNodeWithText("다른 로그인 방법").assertIsNotEnabled()
+    }
 
     // --- text field ---------------------------------------------------------
 

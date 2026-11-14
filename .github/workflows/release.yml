@@ -11,8 +11,8 @@
 #
 #   2. No unconsumed changesets (the release PR was just merged, or a
 #      version was bumped by hand) → the action runs `pnpm release`, which
-#      is `changeset publish`: every package whose version is not yet on
-#      npm is published, and a git tag per package is pushed. Versions
+#      runs `changeset publish` for the public npm packages. New versions
+#      are published, and a git tag per package is pushed. Versions
 #      already on npm are skipped, so re-runs are safe.
 #
 # The publish only happens after the full verification gate below — the
@@ -75,6 +75,9 @@ jobs:
       - run: pnpm run verify:react:test
       - run: pnpm run verify:react:browser
       - run: pnpm run verify:react:release
+      - run: pnpm run verify:auth:test
+      - run: pnpm run verify:auth:browser
+      - run: pnpm run verify:auth:release
       - run: pnpm run verify:table-react:test
       - run: pnpm run verify:table-react:browser
       - run: pnpm run verify:table-react:release

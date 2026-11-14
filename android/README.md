@@ -26,8 +26,8 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.9.2")
-    androidTestImplementation("kr.devslab:dds-compose-testing:0.9.2")
+    implementation("kr.devslab:dds-compose:0.10.0")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.10.0")
 }
 ```
 
@@ -71,6 +71,28 @@ Until the packages are on Maven Central, install them from the local repository:
 // consumer settings.gradle.kts, first in the repository list
 mavenLocal { content { includeGroup("kr.devslab") } }
 ```
+
+## Social sign-in options
+
+Pass the app's supported methods to `DdsSocialSignIn` in display order. It shows the first three and offers the remaining methods in a sheet. Each method takes a localized label. DDS draws the bundled brand mark by default, and `DdsSignInMethod.icon` accepts app-provided artwork. `onSelect` provides the public provider ID through the selected `DdsSocialProvider`.
+
+```kotlin
+DdsSocialSignIn(
+    methods = listOf(
+        DdsSignInMethod(DdsSocialProvider.Google, "Continue with Google"),
+        DdsSignInMethod(DdsSocialProvider.Kakao, "Continue with Kakao"),
+        DdsSignInMethod(DdsSocialProvider.Naver, "Continue with Naver"),
+        DdsSignInMethod(DdsSocialProvider.Discord, "Continue with Discord"),
+    ),
+    onSelect = { provider -> startSignIn(provider.id) },
+)
+```
+
+The host controls availability and progress. Its auth layer configures OAuth, links identities, and stores sessions. The public provider IDs match the web [`dds-auth`](../packages/dds-auth/README.md) catalog.
+
+The bundled assets cover Google, Kakao, Naver, LINE, Microsoft, LinkedIn, GitHub, Discord, Figma, Notion, X, Slack, and Zoom. GitLab uses text by default. Apps can supply approved artwork or a dedicated provider button for Apple, Facebook, and WeChat.
+
+Android uses the original full Naver green icon from `NAVER_login_KR/NAVER_login_Light_KR_green_icon_H56.png`. SVG marks from Kakao, Microsoft, GitHub, and Slack are rasterized with their original colors. The dark variants keep the original GitHub and Kakao marks on a white backing and use X’s white artwork. For the official sources and original checksums, see the [shared provider asset provenance](../packages/dds-auth/assets/provenance.json).
 
 ## Changing a value
 

@@ -26,8 +26,8 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.9.2")
-    androidTestImplementation("kr.devslab:dds-compose-testing:0.9.2")
+    implementation("kr.devslab:dds-compose:0.10.0")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.10.0")
 }
 ```
 
@@ -71,6 +71,28 @@ Maven Central에 올라가기 전에는 로컬 저장소에서 받는다.
 // 받는 쪽 settings.gradle.kts, 저장소 목록 맨 앞
 mavenLocal { content { includeGroup("kr.devslab") } }
 ```
+
+## 소셜 로그인 선택 UI
+
+`DdsSocialSignIn`은 앱이 연결한 제공자를 전달받아 순서대로 표시한다. 처음 세 수단은 화면에 표시하고 나머지는 ‘다른 로그인 방법’ 시트에서 고를 수 있다. 앱은 각 버튼의 현지화된 문구를 지정한다. DDS가 제공자 로고를 표시하며 `DdsSignInMethod.icon`으로 앱의 에셋을 지정할 수 있다. 인증을 시작할 때 `onSelect`에서 선택한 제공자 ID를 받는다.
+
+```kotlin
+DdsSocialSignIn(
+    methods = listOf(
+        DdsSignInMethod(DdsSocialProvider.Google, "Google로 계속하기"),
+        DdsSignInMethod(DdsSocialProvider.Kakao, "카카오 로그인"),
+        DdsSignInMethod(DdsSocialProvider.Naver, "네이버 로그인"),
+        DdsSignInMethod(DdsSocialProvider.Discord, "Discord로 로그인"),
+    ),
+    onSelect = { provider -> startSignIn(provider.id) },
+)
+```
+
+어떤 로그인 수단을 제공할지와 진행 상태는 호출 앱이 정한다. OAuth 설정, 계정 연결, 세션 저장은 해당 앱의 인증 계층이 처리한다. Android 컴포넌트의 공개 제공자 ID는 웹의 [`dds-auth`](../packages/dds-auth/README.ko.md) 카탈로그와 같다.
+
+Google, 카카오, 네이버, LINE, Microsoft, LinkedIn, GitHub, Discord, Figma, Notion, X, Slack, Zoom 로고를 함께 제공한다. GitLab은 기본으로 글자로 표시한다. Apple, Facebook, WeChat은 앱에서 해당 제공자의 승인된 에셋이나 전용 버튼을 사용할 수 있다.
+
+Android의 네이버 아이콘은 공식 배포본 `NAVER_login_KR/NAVER_login_Light_KR_green_icon_H56.png` 원본이다. 카카오, Microsoft, GitHub, Slack의 SVG는 원래 색을 유지한 채 PNG로 변환했다. 어두운 테마에서는 GitHub와 카카오 원본에 흰 배경을 받치고 X는 공식 흰색 로고를 사용한다. 공식 출처와 원본 체크섬은 [공통 제공자 에셋 출처 기록](../packages/dds-auth/assets/provenance.json)에서 확인할 수 있다.
 
 ## 값을 바꿀 때
 

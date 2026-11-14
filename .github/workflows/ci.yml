@@ -59,6 +59,9 @@ jobs:
       - run: pnpm run verify:react:test
       - run: pnpm run verify:react:browser
       - run: pnpm run verify:react:release
+      - run: pnpm run verify:auth:test
+      - run: pnpm run verify:auth:browser
+      - run: pnpm run verify:auth:release
       - run: pnpm run verify:table-react:test
       - run: pnpm run verify:table-react:browser
       - run: pnpm run verify:table-react:release

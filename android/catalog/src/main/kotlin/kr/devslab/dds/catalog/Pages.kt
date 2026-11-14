@@ -59,6 +59,9 @@ import kr.devslab.dds.compose.component.DdsMenuDivider
 import kr.devslab.dds.compose.component.DdsMenuItem
 import kr.devslab.dds.compose.component.DdsSearchField
 import kr.devslab.dds.compose.component.DdsSelectField
+import kr.devslab.dds.compose.component.DdsSignInMethod
+import kr.devslab.dds.compose.component.DdsSocialProvider
+import kr.devslab.dds.compose.component.DdsSocialSignIn
 import kr.devslab.dds.compose.component.DdsSegment
 import kr.devslab.dds.compose.component.DdsSegmentedControl
 import kr.devslab.dds.compose.component.DdsTabs
@@ -349,9 +352,36 @@ fun PartsPage() {
     var period by rememberSaveable { mutableStateOf("week") }
     var menu by remember { mutableStateOf(false) }
     var sheet by rememberSaveable { mutableStateOf(false) }
+    var lastSignInMethod by rememberSaveable { mutableStateOf<String?>(null) }
     val toasts = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     PageBody {
+        DdsSection("Sign-in methods", description = "An app chooses the providers, their order and their labels.") {
+            DdsSocialSignIn(
+                methods = listOf(
+                    DdsSignInMethod(DdsSocialProvider.Google, "Google로 계속하기"),
+                    DdsSignInMethod(DdsSocialProvider.Kakao, "카카오 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Naver, "네이버 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Line, "LINE으로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Microsoft, "Microsoft로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.LinkedIn, "LinkedIn으로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Apple, "Apple로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Facebook, "Facebook으로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.GitHub, "GitHub로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.GitLab, "GitLab으로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Discord, "Discord로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Figma, "Figma로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Notion, "Notion으로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.X, "X로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Slack, "Slack으로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.Zoom, "Zoom으로 로그인"),
+                    DdsSignInMethod(DdsSocialProvider.WeChat, "WeChat으로 로그인"),
+                ),
+                onSelect = { lastSignInMethod = it.id },
+                gutter = 0.dp,
+            )
+            lastSignInMethod?.let { Text("Selected provider: $it", style = DdsTheme.typography.body2) }
+        }
         DdsSection("Buttons", description = "One height (48). Loading keeps the size.") {
             DdsCard {
                 Column(verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp)) {
