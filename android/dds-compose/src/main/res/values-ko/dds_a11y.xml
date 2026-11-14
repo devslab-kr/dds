@@ -7,4 +7,6 @@
     <string name="dds_a11y_loading">불러오는 중</string>
     <string name="dds_a11y_sheet_handle">시트 손잡이</string>
     <string name="dds_a11y_back">뒤로</string>
+    <string name="dds_auth_more_methods">다른 로그인 방법</string>
+    <string name="dds_auth_close_methods">닫기</string>
 </resources>

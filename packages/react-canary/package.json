@@ -9,6 +9,7 @@
     "dev": "vite --host 127.0.0.1 --port 5276 --strictPort"
   },
   "dependencies": {
+    "@devslab-kr/dds-auth": "workspace:*",
     "@devslab/dds-react": "workspace:*",
     "@devslab/dds-table-react": "workspace:*",
     "react": "19.3.0",

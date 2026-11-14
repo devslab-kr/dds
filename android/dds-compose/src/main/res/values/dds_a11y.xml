@@ -9,4 +9,6 @@
     <string name="dds_a11y_loading">Loading</string>
     <string name="dds_a11y_sheet_handle">Drag handle</string>
     <string name="dds_a11y_back">Back</string>
+    <string name="dds_auth_more_methods">Other sign-in methods</string>
+    <string name="dds_auth_close_methods">Close</string>
 </resources>

@@ -1,0 +1,14 @@
+{
+  "name": "dds-auth-packed-consumer",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@devslab/dds-react": "0.29.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "jsdom": "30.0.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}

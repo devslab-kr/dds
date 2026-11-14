@@ -1,0 +1,65 @@
+html,
+body,
+#root {
+  margin: 0;
+  min-block-size: 100%;
+}
+.login-demo {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  align-content: center;
+  gap: var(--dds-space-48);
+  min-block-size: 100dvh;
+  padding: var(--dds-space-32);
+  background: var(--dds-color-bg-subtle);
+  color: var(--dds-color-text-primary);
+  font-family: var(--dds-font-family-sans);
+}
+.login-demo__controls {
+  min-inline-size: 0;
+}
+.login-demo__controls h1 {
+  margin: 0;
+  font-size: var(--dds-typo-title-2-font-size);
+  line-height: var(--dds-typo-title-2-line-height);
+}
+.login-demo__controls p,
+.login-demo__legal-text {
+  color: var(--dds-color-text-secondary);
+  font-size: var(--dds-typo-body-2-font-size);
+  line-height: var(--dds-typo-body-2-line-height);
+}
+.login-demo__controls label {
+  display: block;
+  margin-block: var(--dds-space-24) var(--dds-space-8);
+}
+.login-demo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dds-space-8);
+  margin-block: var(--dds-space-16);
+}
+.login-demo__controls output {
+  overflow-wrap: anywhere;
+}
+.login-demo__surface {
+  min-inline-size: 0;
+  max-inline-size: 28rem;
+  margin-inline: auto;
+  background: var(--dds-color-bg-default);
+  border-radius: var(--dds-radius-lg);
+}
+.login-demo__legal-text {
+  padding: 0 var(--dds-space-24) var(--dds-space-16);
+}
+@media (max-width: 48rem) {
+  .login-demo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--dds-space-24);
+    padding: var(--dds-space-16);
+  }
+  .login-demo__surface {
+    margin-inline: 0;
+  }
+}
