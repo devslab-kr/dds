@@ -79,6 +79,22 @@ public class DdsSignInMethod(
 )
 
 /**
+ * Allows a host to use its own controls with the DDS sign-in layout and order.
+ *
+ * [expanded] and [onExpandedChange] control the sheet. It also stays open while an additional
+ * method is pending. [method] receives the row's pending, enabled and sheet placement states.
+ * [more] runs inside the centered main column. [sheet] receives the measured main column width
+ * and the full-width list of additional methods. Omit a slot to render the DDS default.
+ */
+public class DdsSocialSignInCustomization(
+    public val expanded: Boolean,
+    public val onExpandedChange: (Boolean) -> Unit,
+    public val method: (@Composable (DdsSignInMethod, pending: Boolean, enabled: Boolean, inSheet: Boolean, onClick: () -> Unit) -> Unit)? = null,
+    public val more: (@Composable (enabled: Boolean, onClick: () -> Unit) -> Unit)? = null,
+    public val sheet: (@Composable (buttonWidth: Dp, onDismiss: () -> Unit, content: @Composable () -> Unit) -> Unit)? = null,
+)
+
+/**
  * Shows the app's [methods] in order. The first three appear inline and the rest open in a sheet.
  * An empty list shows nothing. The first entry for each provider wins if the list contains duplicates.
  *
@@ -100,6 +116,35 @@ public fun DdsSocialSignIn(
     closeLabel: String = stringResource(R.string.dds_auth_close_methods),
     gutter: Dp = ddsFrame().width.gutter,
 ) {
+    SocialSignIn(methods, onSelect, modifier, pending, moreLabel, closeLabel, gutter, customization = null)
+}
+
+/** Uses [customization] to integrate application-specific sign-in controls and recovery content. */
+@Composable
+public fun DdsSocialSignIn(
+    methods: List<DdsSignInMethod>,
+    onSelect: (DdsSocialProvider) -> Unit,
+    customization: DdsSocialSignInCustomization,
+    modifier: Modifier = Modifier,
+    pending: DdsSocialProvider? = null,
+    moreLabel: String = stringResource(R.string.dds_auth_more_methods),
+    closeLabel: String = stringResource(R.string.dds_auth_close_methods),
+    gutter: Dp = ddsFrame().width.gutter,
+) {
+    SocialSignIn(methods, onSelect, modifier, pending, moreLabel, closeLabel, gutter, customization)
+}
+
+@Composable
+private fun SocialSignIn(
+    methods: List<DdsSignInMethod>,
+    onSelect: (DdsSocialProvider) -> Unit,
+    modifier: Modifier,
+    pending: DdsSocialProvider?,
+    moreLabel: String,
+    closeLabel: String,
+    gutter: Dp,
+    customization: DdsSocialSignInCustomization?,
+) {
     if (methods.isEmpty()) return
 
     val ordered = methods.distinctBy { it.provider }
@@ -115,13 +160,30 @@ public fun DdsSocialSignIn(
             verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            primary.forEach { SignInButton(it, pending, onSelect) }
+            primary.forEach { SignInMethod(it, pending, inSheet = false, onSelect, customization?.method) }
             if (additional.isNotEmpty()) {
-                var showMore by rememberSaveable { mutableStateOf(false) }
-                DdsButton(moreLabel, onClick = { showMore = true }, enabled = pending == null, variant = DdsButtonVariant.Plain)
-                if (showMore) {
-                    SignInSheet(moreLabel, closeLabel, buttonWidth, gutter, onDismiss = { showMore = false }) {
-                        additional.forEach { SignInButton(it, pending, onSelect) }
+                val localExpanded = if (customization == null) rememberSaveable { mutableStateOf(false) } else null
+                val expanded = localExpanded?.value ?: (customization?.expanded == true || additional.any { it.provider == pending })
+                val updateExpanded = customization?.onExpandedChange ?: { value -> localExpanded?.value = value }
+                val open = { if (pending == null) updateExpanded(true) }
+                val more = customization?.more
+                if (more == null) {
+                    DdsButton(moreLabel, onClick = open, enabled = pending == null, variant = DdsButtonVariant.Plain)
+                } else {
+                    more(pending == null, open)
+                }
+                if (expanded) {
+                    val dismiss = { updateExpanded(false) }
+                    val sheet = customization?.sheet
+                    val content: @Composable () -> Unit = {
+                        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp)) {
+                            additional.forEach { SignInMethod(it, pending, inSheet = true, onSelect, customization?.method) }
+                        }
+                    }
+                    if (sheet == null) {
+                        SignInSheet(moreLabel, closeLabel, buttonWidth, gutter, dismiss, content)
+                    } else {
+                        sheet(buttonWidth, dismiss, content)
                     }
                 }
             }
@@ -130,13 +192,28 @@ public fun DdsSocialSignIn(
 }
 
 @Composable
-private fun SignInButton(method: DdsSignInMethod, pending: DdsSocialProvider?, onSelect: (DdsSocialProvider) -> Unit) {
+private fun SignInMethod(
+    method: DdsSignInMethod,
+    pending: DdsSocialProvider?,
+    inSheet: Boolean,
+    onSelect: (DdsSocialProvider) -> Unit,
+    render: (@Composable (DdsSignInMethod, Boolean, Boolean, Boolean, () -> Unit) -> Unit)?,
+) {
+    val loading = pending == method.provider
+    val enabled = method.enabled && (pending == null || loading)
+    val onClick = { if (enabled && pending == null) onSelect(method.provider) }
+    if (render == null) SignInButton(method, loading, enabled, onClick)
+    else render(method, loading, enabled, inSheet, onClick)
+}
+
+@Composable
+private fun SignInButton(method: DdsSignInMethod, loading: Boolean, enabled: Boolean, onClick: () -> Unit) {
     DdsButton(
-        onClick = { onSelect(method.provider) },
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         variant = DdsButtonVariant.Secondary,
-        enabled = method.enabled && (pending == null || pending == method.provider),
-        loading = pending == method.provider,
+        enabled = enabled,
+        loading = loading,
     ) {
         Row(
             Modifier.fillMaxWidth(),
@@ -147,8 +224,7 @@ private fun SignInButton(method: DdsSignInMethod, pending: DdsSocialProvider?, o
                 if (method.icon != null) {
                     method.icon.invoke()
                 } else {
-                    val mark = signedInMark(method.provider)
-                    if (mark != null) Image(painterResource(mark), contentDescription = null, modifier = Modifier.size(DdsIcon.sm.dp))
+                    DdsSocialProviderIcon(method.provider)
                 }
             }
             WordsText(method.label, Modifier.weight(1f), textAlign = TextAlign.Start)
@@ -156,8 +232,15 @@ private fun SignInButton(method: DdsSignInMethod, pending: DdsSocialProvider?, o
     }
 }
 
+/** Draws the bundled decorative mark, if available. The calling control provides its accessible label. */
 @Composable
-private fun signedInMark(provider: DdsSocialProvider): Int? {
+public fun DdsSocialProviderIcon(provider: DdsSocialProvider, modifier: Modifier = Modifier) {
+    val mark = signInMark(provider) ?: return
+    Image(painterResource(mark), contentDescription = null, modifier = modifier.size(DdsIcon.sm.dp))
+}
+
+@Composable
+private fun signInMark(provider: DdsSocialProvider): Int? {
     // DDS allows an app to force its theme independently of the device configuration.
     val darkSurface = DdsTheme.colors.bgElevated.luminance() < DdsTheme.colors.textPrimary.luminance()
     return when (provider) {
@@ -211,11 +294,10 @@ private fun SignInSheet(
                 }
                 DdsIconButton(DdsIcons.Close, closeLabel, onClick = onDismiss)
             }
-            Column(
+            Box(
                 Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())
                     .padding(start = gutter, end = gutter, top = DdsSpace.s8.dp, bottom = DdsSpace.s16.dp)
                     .widthIn(max = buttonWidth).fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(DdsSpace.s12.dp),
             ) {
                 content()
             }

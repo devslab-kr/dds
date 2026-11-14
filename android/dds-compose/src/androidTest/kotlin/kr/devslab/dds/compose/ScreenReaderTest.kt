@@ -69,6 +69,7 @@ import kr.devslab.dds.compose.component.DdsSelectField
 import kr.devslab.dds.compose.component.DdsSignInMethod
 import kr.devslab.dds.compose.component.DdsSocialProvider
 import kr.devslab.dds.compose.component.DdsSocialSignIn
+import kr.devslab.dds.compose.component.DdsSocialSignInCustomization
 import kr.devslab.dds.compose.component.DdsTabs
 import kr.devslab.dds.compose.component.DdsTextField
 import kr.devslab.dds.compose.component.DdsTone
@@ -127,6 +128,57 @@ class ScreenReaderTest {
         rule.onNodeWithContentDescription("선택 닫기").performClick()
         rule.onNodeWithText("Discord로 로그인").assertDoesNotExist()
         rule.onNodeWithText("다른 로그인 방법").assertIsNotEnabled()
+    }
+
+    @Test
+    fun customSignInMethodsKeepTheirOrderAndStayVisibleWhilePending() {
+        var expanded by mutableStateOf(false)
+        var pending by mutableStateOf<DdsSocialProvider?>(null)
+        val attempts = mutableListOf<DdsSocialProvider>()
+        show {
+            DdsSocialSignIn(
+                methods = listOf(
+                    DdsSignInMethod(DdsSocialProvider.Naver, "Naver"),
+                    DdsSignInMethod(DdsSocialProvider.Google, "Google"),
+                    DdsSignInMethod(DdsSocialProvider.Kakao, "Kakao"),
+                    DdsSignInMethod(DdsSocialProvider.Line, "LINE"),
+                    DdsSignInMethod(DdsSocialProvider.Slack, "Slack", enabled = false),
+                ),
+                onSelect = { attempts.add(it); pending = it },
+                pending = pending,
+                customization = DdsSocialSignInCustomization(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                    method = { method, loading, enabled, inSheet, select ->
+                        val placement = if (inSheet) "Additional" else "Main"
+                        val label = if (loading) "Signing in with ${method.label}" else method.label
+                        DdsButton("$placement: $label", onClick = select, enabled = enabled)
+                    },
+                    more = { enabled, open -> DdsButton("More methods", onClick = open, enabled = enabled) },
+                    sheet = { _, dismiss, methods ->
+                        Column {
+                            methods()
+                            DdsButton("Close methods", onClick = dismiss)
+                        }
+                    },
+                ),
+            )
+        }
+        rule.onNodeWithText("Main: Kakao").assertExists()
+        rule.onNodeWithText("Additional: LINE").assertDoesNotExist()
+        rule.onNodeWithText("More methods").performClick()
+        rule.onNodeWithText("Additional: Slack").assertIsNotEnabled()
+        rule.onNodeWithText("Additional: LINE").performClick()
+        rule.onNodeWithText("Main: Naver").assertIsNotEnabled()
+        rule.onNodeWithText("More methods").assertIsNotEnabled()
+        rule.onNodeWithText("Additional: Signing in with LINE").performClick()
+        rule.onNodeWithText("Close methods").performClick()
+        rule.onNodeWithText("Additional: Signing in with LINE").assertExists()
+        rule.runOnIdle {
+            assertEquals(listOf(DdsSocialProvider.Line), attempts)
+            pending = null
+        }
+        rule.onNodeWithText("Additional: LINE").assertDoesNotExist()
     }
 
     // --- text field ---------------------------------------------------------

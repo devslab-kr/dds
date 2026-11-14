@@ -5,6 +5,10 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 0.10.1 — 2026-11-15
+
+- `DdsSocialSignIn`에 시트 상태를 제어하고 로그인 버튼, ‘다른 로그인 방법’ 버튼, 시트를 앱에서 구성할 수 있는 오버로드를 추가했다. 앱 자체 버튼은 `DdsSocialProviderIcon`으로 DDS의 로그인 제공자 로고를 그릴 수 있다.
+
 ## 0.10.0 — 2026-11-15
 
 **새로 생긴 것**

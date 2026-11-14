@@ -5,6 +5,10 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.10.1 — 2026-11-15
+
+- Added controlled sheet state and optional button, overflow trigger, and sheet slots to `DdsSocialSignIn` through a compatible overload. `DdsSocialProviderIcon` renders the bundled mark for custom buttons.
+
 ## 0.10.0 — 2026-11-15
 
 **New**

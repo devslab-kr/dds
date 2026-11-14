@@ -26,8 +26,8 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.10.0")
-    androidTestImplementation("kr.devslab:dds-compose-testing:0.10.0")
+    implementation("kr.devslab:dds-compose:0.10.1")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.10.1")
 }
 ```
 
@@ -89,6 +89,8 @@ DdsSocialSignIn(
 ```
 
 The host controls availability and progress. Its auth layer configures OAuth, links identities, and stores sessions. The public provider IDs match the web [`dds-auth`](../packages/dds-auth/README.md) catalog.
+
+In 0.10.1, the `DdsSocialSignInCustomization` overload lets the host control sheet visibility and supply its own method controls, overflow trigger, or sheet with retry content. DDS still arranges the first three methods and the remaining list in order. The `method` slot receives `pending`, `enabled`, and `inSheet`, plus the guarded selection callback. A custom `sheet` can apply the supplied button width to its content so the rows line up with the main column. Custom buttons can use `DdsSocialProviderIcon` to draw the bundled marks.
 
 The bundled assets cover Google, Kakao, Naver, LINE, Microsoft, LinkedIn, GitHub, Discord, Figma, Notion, X, Slack, and Zoom. GitLab uses text by default. Apps can supply approved artwork or a dedicated provider button for Apple, Facebook, and WeChat.
 
