@@ -124,7 +124,7 @@ Priorities live in [`docs/backlog.md`](docs/backlog.md). Packages are created
 only when a consumer exists (spec §8):
 `@devslab/dds-tokens` (✅ 2026-08-13) → `dds-css` v1 inventory (Core 6 ✅ 2026-08-13, +13 ✅ 2026-08-15) →
 AskLinq adoption → `dds-icons` (✅ 2026-08-15) → `dds-solid` + `site-kit` → native Android values, theme and motion
-(0.6.0, 2026-11-12, on Maven Central — theme, motion, components, icons). 0.7.0 (2026-11-13, on Maven Central) adds the screen frame and the `dds-compose-testing` artifact (D-052). 0.8.0 (2026-11-13) adds `DdsSegmentedControl`, 0.8.1 its lighter chosen face in dark (`bg.raised`, D-054), 0.9.0 makes that face slide between choices (D-055), 0.9.1 lets an app set the slide speed, and 0.9.2 lets an app pass its own typeface to `DdsTheme`. RN and Ionic packages only when such a product exists.
+(0.6.0, 2026-11-12, on Maven Central — theme, motion, components, icons). 0.7.0 (2026-11-13, on Maven Central) adds the screen frame and the `dds-compose-testing` artifact (D-052). 0.8.0 (2026-11-13) adds `DdsSegmentedControl`, 0.8.1 its lighter chosen face in dark (`bg.raised`, D-054), 0.9.0 makes that face slide between choices (D-055), 0.9.1 lets an app set the slide speed, and 0.9.2 lets an app pass its own typeface to `DdsTheme`. 0.10.0 adds `DdsSocialSignIn` with selectable providers and their marks. RN and Ionic packages only when such a product exists.
 
 ## Input, choice and shared calendar additions
 

@@ -5,6 +5,14 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.10.0 — 2026-11-15
+
+**New**
+
+- **`DdsSocialSignIn`** shows the app's first three sign-in methods and puts the rest in a sheet.
+  The 17 provider IDs match DDS Auth on the web. DDS ships 13 marks and accepts app-provided artwork.
+  The app handles authentication and sessions. See [Social sign-in options](README.md#social-sign-in-options).
+
 ## 0.9.2 — 2026-11-13
 
 **New**
