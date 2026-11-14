@@ -26,8 +26,8 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("kr.devslab:dds-compose:0.10.0")
-    androidTestImplementation("kr.devslab:dds-compose-testing:0.10.0")
+    implementation("kr.devslab:dds-compose:0.10.1")
+    androidTestImplementation("kr.devslab:dds-compose-testing:0.10.1")
 }
 ```
 
@@ -89,6 +89,8 @@ DdsSocialSignIn(
 ```
 
 어떤 로그인 수단을 제공할지와 진행 상태는 호출 앱이 정한다. OAuth 설정, 계정 연결, 세션 저장은 해당 앱의 인증 계층이 처리한다. Android 컴포넌트의 공개 제공자 ID는 웹의 [`dds-auth`](../packages/dds-auth/README.ko.md) 카탈로그와 같다.
+
+0.10.1부터 `DdsSocialSignInCustomization`을 넘기면 앱이 시트를 열고 닫거나 버튼, ‘다른 로그인 방법’ 동작, 오류 재시도 영역을 직접 구성할 수 있다. 처음 세 방법과 나머지 목록의 배치는 DDS가 맡는다. `method` 슬롯은 진행 상태, 활성 여부, 시트 배치 여부와 선택 동작을 받는다. `sheet` 슬롯은 받은 폭으로 본문을 배치해 기본 화면과 버튼을 맞출 수 있다. 사용자 지정 버튼에서 `DdsSocialProviderIcon`으로 DDS 로고를 그릴 수 있다.
 
 Google, 카카오, 네이버, LINE, Microsoft, LinkedIn, GitHub, Discord, Figma, Notion, X, Slack, Zoom 로고를 함께 제공한다. GitLab은 기본으로 글자로 표시한다. Apple, Facebook, WeChat은 앱에서 해당 제공자의 승인된 에셋이나 전용 버튼을 사용할 수 있다.
 
