@@ -161,7 +161,11 @@ for (const [framework, port] of [
       await page.getByRole("button", { name: "Submit choice form" }).click();
       await expect(control).toBeFocused();
       await page.keyboard.press("ArrowDown");
+      const listbox = page.getByRole("listbox");
+      // Focus moves from the trigger to the listbox on a subsequent frame.
+      await expect(listbox).toBeFocused();
       await page.keyboard.press("End");
+      await expectActiveOption(listbox, "Option 00002");
       await page.keyboard.press("Enter");
       expect(
         await form.evaluate((element) =>
