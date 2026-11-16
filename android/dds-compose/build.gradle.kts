@@ -45,6 +45,8 @@ dependencies {
     api(libs.compose.animation)
     api(libs.compose.material3)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.jvm.okhttp)
+    implementation(libs.kotlinx.serialization.json)
     api(libs.activity.compose)
 
     testImplementation(libs.junit)
