@@ -46,6 +46,25 @@ class CatalogRepositoryTest {
     }
 
     @Test
+    fun doesNotRevalidateAgainstAnEditionThatCouldNotBeCached() {
+        val directory = files.newFolder()
+        val brokenFolder = directory.resolve(APP)
+        assertTrue(brokenFolder.createNewFile())
+        val etags = mutableListOf<String?>()
+        val repository = CatalogRepository(APP, directory, BASE_URL) { _, etag ->
+            etags += etag
+            CatalogRepository.Download(catalog("fr", "Updated"), "\"new\"")
+        }
+
+        assertEquals("Updated", repository.refresh("fr")?.string("heading"))
+        assertNull(repository.cached("fr"))
+        assertTrue(brokenFolder.delete())
+        assertEquals("Updated", repository.refresh("fr")?.string("heading"))
+        assertEquals("Updated", repository.cached("fr")?.string("heading"))
+        assertEquals(listOf(null, null), etags)
+    }
+
+    @Test
     fun onlyAcceptsCanonicalLocaleTags() {
         listOf("fr", "zh-Hans", "en-CA", "sr-Latn-RS", "es-419", "fil").forEach {
             assertTrue(it, isCanonicalCatalogLocale(it))

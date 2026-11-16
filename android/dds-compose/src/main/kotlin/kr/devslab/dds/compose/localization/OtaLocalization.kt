@@ -107,7 +107,7 @@ public class OtaLocalization(
         val name = current?.let { resourceName(resources, id) }
         if (current != null && name != null) {
             TranslationCatalog.format(
-                current.string(name), bundled, Locale.forLanguageTag(current.locale), *args,
+                current.string(name), bundled, formatLocale(resources, current), *args,
             )?.let { return it }
         }
         return if (args.isEmpty()) bundled else resources.getString(id, *args)
@@ -124,7 +124,7 @@ public class OtaLocalization(
         val current = catalog?.takeIf { it.locale == selectedLocale(resources) }
         val name = current?.let { resourceName(resources, id) }
         if (current != null && name != null) {
-            val locale = Locale.forLanguageTag(current.locale)
+            val locale = formatLocale(resources, current)
             val category = PluralRules.forLocale(locale).select(quantity.toDouble())
             TranslationCatalog.format(current.plural(name, category), bundled, locale, *args)
                 ?.let { return it }
@@ -136,6 +136,9 @@ public class OtaLocalization(
         if (resources.getResourcePackageName(id) !in resourcePackages) return null
         return resources.getResourceEntryName(id).takeIf(allowResource)
     }
+
+    private fun formatLocale(resources: Resources, catalog: TranslationCatalog): Locale =
+        resources.configuration.locales[0] ?: Locale.forLanguageTag(catalog.locale)
 
     private fun publish(request: Request, catalog: TranslationCatalog?) {
         synchronized(requestLock) {

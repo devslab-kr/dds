@@ -53,8 +53,9 @@ internal class CatalogRepository(
         val url = baseUrl.resolve("$locale.json").toASCIIString()
         val result = download(url, etags[locale]) ?: return null
         val catalog = TranslationCatalog.parse(result.bytes, app, locale) ?: return null
-        result.etag?.let { etags[locale] = it } ?: etags.remove(locale)
-        save(file, result.bytes)
+        if (save(file, result.bytes)) {
+            result.etag?.let { etags[locale] = it } ?: etags.remove(locale)
+        }
         return catalog
     }
 
@@ -63,7 +64,7 @@ internal class CatalogRepository(
         return File(directory, "$app/$locale.json")
     }
 
-    private fun save(file: File, bytes: ByteArray) {
+    private fun save(file: File, bytes: ByteArray): Boolean =
         try {
             val parent = checkNotNull(file.parentFile).toPath()
             Files.createDirectories(parent)
@@ -74,10 +75,11 @@ internal class CatalogRepository(
             } finally {
                 Files.deleteIfExists(pending)
             }
+            true
         } catch (_: IOException) {
             // A disk error leaves the previous catalog available.
+            false
         }
-    }
 
     internal data class Download(val bytes: ByteArray, val etag: String?)
 
