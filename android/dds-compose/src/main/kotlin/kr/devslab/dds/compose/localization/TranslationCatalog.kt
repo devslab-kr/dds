@@ -24,7 +24,7 @@ internal class TranslationCatalog private constructor(
         internal const val MAX_BYTES = 256 * 1024
         private const val MAX_TRANSLATION_LENGTH = 2_000
         private val formatToken = Regex("""%%|%[1-9][0-9]*\$[a-zA-Z]|%""")
-        private val namedToken = Regex("""\{[A-Za-z][A-Za-z0-9_]*}""")
+        private val namedToken = Regex("""\{[A-Za-z][A-Za-z0-9_]*\}""")
 
         internal fun parse(bytes: ByteArray, app: String, locale: String): TranslationCatalog? {
             if (bytes.size > MAX_BYTES) return null
