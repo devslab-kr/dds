@@ -73,7 +73,7 @@
     "prettier-plugin-svelte": "4.1.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "solid-js": "1.9.15",
+    "solid-js": "1.9.19",
     "storybook": "10.5.7",
     "svelte": "5.57.2",
     "typescript": "7.0.2",

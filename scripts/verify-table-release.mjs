@@ -86,7 +86,7 @@ try {
   }
   publishDryRun(tableTarball, packageRoot);
   await writeFile(join(temp, "package.json"), JSON.stringify({ private: true, type: "module" }), "utf8");
-  run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.15", "jsdom@30.0.1"], temp);
+  run(["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs, "solid-js@1.9.19", "jsdom@30.0.1"], temp);
   const installedRoot = join(temp, "node_modules", "@devslab", "dds-table-solid");
   const manifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
   assert.equal(manifest.name, "@devslab/dds-table-solid");
@@ -101,7 +101,7 @@ try {
   for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts", "LICENSE"]) {
     await access(join(installedRoot, path));
   }
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
+  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
   const ssrScript = join(temp, "consumer-ssr.mjs");
   await writeFile(ssrScript, `
 import { generateHydrationScript, renderToString } from "solid-js/web";

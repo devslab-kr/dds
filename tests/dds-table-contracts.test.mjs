@@ -11,7 +11,7 @@ test("dds-table-solid pins TanStack exactly and ships the worker condition", asy
   assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
   assert.equal(manifest.publishConfig.access, "public");
   assert.equal(manifest.dependencies["@tanstack/solid-table"], "9.2.4");
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
+  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
   assert.equal(manifest.exports["."].worker, "./dist/server.js");
   assert.equal(manifest.exports["."].browser, "./dist/index.js");
   assert.ok(

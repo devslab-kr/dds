@@ -13,7 +13,7 @@ function fixture(version = '0.21.0') {
   const manifest = {
     name: '@devslab/site-kit', version, type: 'module',
     dependencies: { '@devslab/dds-solid': version, 'custom-vendor-only': '2.3.4' },
-    peerDependencies: { 'solid-js': '1.9.15', react: '^18.0.0' },
+    peerDependencies: { 'solid-js': '1.9.19', react: '^18.0.0' },
     peerDependenciesMeta: { react: { optional: true } },
     exports: { '.': './src/core/index.mjs', './react-chrome': { import: './dist/react-chrome.js', types: './dist/react-chrome.d.ts' }, './fonts.css': './fonts.css', './fonts/*': './fonts/*' },
     files: ['dist', 'fonts', 'src/core', 'fonts.css'], sideEffects: ['./fonts.css'],
