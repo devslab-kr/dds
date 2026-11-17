@@ -1,5 +1,13 @@
 # @devslab/dds-vue
 
+## 0.35.1
+
+### Patch Changes
+
+- @devslab/dds-tokens@0.35.1
+- @devslab/dds-css@0.35.1
+- @devslab/dds-icons@0.35.1
+
 ## 0.35.0
 
 ### Minor Changes
