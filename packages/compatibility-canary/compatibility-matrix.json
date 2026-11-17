@@ -3,7 +3,7 @@
   "status": "registry-and-runtime-verified",
   "verifiedAt": "2026-09-13T02:34:08.531Z",
   "runtime": {
-    "solid-js": "1.9.15",
+    "solid-js": "1.9.19",
     "@tanstack/solid-start": "1.168.47",
     "@tanstack/solid-router": "1.170.30",
     "@tanstack/solid-query": "5.102.8",

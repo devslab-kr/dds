@@ -148,14 +148,14 @@
     "@zag-js/focus-trap": "1.45.0"
   },
   "peerDependencies": {
-    "solid-js": "1.9.15"
+    "solid-js": "1.9.19"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "6.9.1",
     "@types/node": "26.3.0",
     "axe-core": "4.13.0",
     "jsdom": "30.0.1",
-    "solid-js": "1.9.15",
+    "solid-js": "1.9.19",
     "typescript": "7.0.2",
     "vite": "8.2.1",
     "vite-plugin-solid": "2.11.14",

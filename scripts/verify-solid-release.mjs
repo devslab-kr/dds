@@ -138,7 +138,7 @@ try {
       "--no-audit",
       "--no-fund",
       ...tarballs,
-      "solid-js@1.9.15",
+      "solid-js@1.9.19",
       "jsdom@30.0.1",
     ],
     temp,
@@ -160,7 +160,7 @@ try {
   ]) {
     await access(join(installedRoot, path));
   }
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.15");
+  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
   const ssrScript = join(temp, "consumer-ssr.mjs");
   await writeFile(
     ssrScript,

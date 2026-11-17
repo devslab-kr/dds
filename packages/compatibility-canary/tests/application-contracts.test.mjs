@@ -21,8 +21,8 @@ test("actual TanStack application sources carry every canary contract", async ()
   const manifest = JSON.parse(manifestText);
   const matrix = JSON.parse(matrixText);
 
-  assert.equal(manifest.dependencies["solid-js"], "1.9.15");
-  assert.equal(matrix.runtime["solid-js"], "1.9.15");
+  assert.equal(manifest.dependencies["solid-js"], "1.9.19");
+  assert.equal(matrix.runtime["solid-js"], "1.9.19");
 
   const head = rootRoute.slice(rootRoute.indexOf("<head>"), rootRoute.indexOf("</head>") + 7);
   assert.match(head, /<HydrationScript\s*\/>/);
