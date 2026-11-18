@@ -5,6 +5,24 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.11.1 — 2026-11-18
+
+**Fixed**
+
+- **`DdsBodyColumn` scrolls from anywhere in its area.** On a wide window (an unfolded phone, a tablet) the column sits in
+  the middle with room at each side, and only the column itself scrolled: a drag that started in that room did nothing.
+  Now the whole area scrolls and the column keeps its width, place, padding and `DdsTestTags.Body` tag. A short body is
+  still as tall as the area, so a weighted spacer in it fills what is left. The scrolling node is now the area, not the
+  tagged column.
+- **The sign-in sheet's list scrolls across the sheet's whole width**, not only under its narrower buttons.
+
+## 0.11.0 — 2026-11-16
+
+**New**
+
+- **OTA localization** — `OtaLocalization`, `ProvideOtaLocalization`, `localizedString` and `localizedPlural` let apps
+  share translation catalogs updated over the air. See [OTA localization](README.md#ota-localization).
+
 ## 0.10.1 — 2026-11-15
 
 - Added controlled sheet state and optional button, overflow trigger, and sheet slots to `DdsSocialSignIn` through a compatible overload. `DdsSocialProviderIcon` renders the bundled mark for custom buttons.
