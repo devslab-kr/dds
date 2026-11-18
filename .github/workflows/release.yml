@@ -16,8 +16,22 @@
 #      already on npm are skipped, so re-runs are safe.
 #
 # The publish only happens after the full verification gate below — the
-# same gates CI runs — so a red main never reaches npm. Publishing uses the
-# repository `NPM_TOKEN` secret with npm provenance (`id-token: write`).
+# same gates CI runs — so a red main never reaches npm.
+#
+# Publishing uses npm trusted publishing only: `id-token: write` lets npm
+# exchange this job's OIDC token for a short-lived publish credential, per
+# package, against the Trusted Publisher each package declares on npmjs.com
+# (`devslab-kr/dds`, `release.yml`, no environment). Provenance is attached
+# the same way. There is deliberately no npm token here. Until 0.35.1 the job
+# also passed `NPM_TOKEN`, and npm quietly fell back to it for the six
+# packages that had no Trusted Publisher yet — they shipped under a personal
+# account and nothing failed. Without a token, a package whose Trusted
+# Publisher is missing or wrong fails the publish instead.
+#
+# setup-node gets no `registry-url` for the same reason: that option writes an
+# `.npmrc` whose auth line reads `${NODE_AUTH_TOKEN}`, which every step then
+# warned about. npm's default registry is already registry.npmjs.org, and each
+# package's `publishConfig.registry` names it as well.
 #
 # Before 2026-09-03 this workflow ran only on a hand-pushed `dds-v*` tag;
 # two release commits (0.4.0, 0.4.1) sat on main for days without a tag and
@@ -47,8 +61,6 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
-          scope: "@devslab"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
@@ -105,7 +117,6 @@ jobs:
           title: "chore: release dds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
       - name: Summarise what was published
         if: steps.changesets.outputs.published == 'true'
