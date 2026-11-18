@@ -94,6 +94,8 @@ public class DdsSocialSignInCustomization(
     public val sheet: (@Composable (buttonWidth: Dp, onDismiss: () -> Unit, content: @Composable () -> Unit) -> Unit)? = null,
 )
 
+private const val DefaultPrimarySignInLimit = 3
+
 /**
  * Shows the app's [methods] in order. The first three appear inline and the rest open in a sheet.
  * An empty list shows nothing. The first entry for each provider wins if the list contains duplicates.
@@ -116,7 +118,7 @@ public fun DdsSocialSignIn(
     closeLabel: String = stringResource(R.string.dds_auth_close_methods),
     gutter: Dp = ddsFrame().width.gutter,
 ) {
-    SocialSignIn(methods, onSelect, modifier, pending, moreLabel, closeLabel, gutter, customization = null)
+    DdsSocialSignIn(methods, onSelect, DefaultPrimarySignInLimit, modifier, pending, moreLabel, closeLabel, gutter)
 }
 
 /** Uses [customization] to integrate application-specific sign-in controls and recovery content. */
@@ -131,25 +133,28 @@ public fun DdsSocialSignIn(
     closeLabel: String = stringResource(R.string.dds_auth_close_methods),
     gutter: Dp = ddsFrame().width.gutter,
 ) {
-    SocialSignIn(methods, onSelect, modifier, pending, moreLabel, closeLabel, gutter, customization)
+    DdsSocialSignIn(methods, onSelect, DefaultPrimarySignInLimit, modifier, pending, moreLabel, closeLabel, gutter, customization)
 }
 
+/** Shows up to [primaryLimit] methods inline and the remaining methods in a sheet. The limit must be positive. */
 @Composable
-private fun SocialSignIn(
+public fun DdsSocialSignIn(
     methods: List<DdsSignInMethod>,
     onSelect: (DdsSocialProvider) -> Unit,
-    modifier: Modifier,
-    pending: DdsSocialProvider?,
-    moreLabel: String,
-    closeLabel: String,
-    gutter: Dp,
-    customization: DdsSocialSignInCustomization?,
+    primaryLimit: Int,
+    modifier: Modifier = Modifier,
+    pending: DdsSocialProvider? = null,
+    moreLabel: String = stringResource(R.string.dds_auth_more_methods),
+    closeLabel: String = stringResource(R.string.dds_auth_close_methods),
+    gutter: Dp = ddsFrame().width.gutter,
+    customization: DdsSocialSignInCustomization? = null,
 ) {
+    require(primaryLimit > 0) { "primaryLimit must be positive" }
     if (methods.isEmpty()) return
 
     val ordered = methods.distinctBy { it.provider }
-    val primary = ordered.take(3)
-    val additional = ordered.drop(3)
+    val primary = ordered.take(primaryLimit)
+    val additional = ordered.drop(primaryLimit)
     BoxWithConstraints(
         modifier.fillMaxWidth().padding(horizontal = gutter),
         contentAlignment = Alignment.TopCenter,

@@ -5,6 +5,13 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.12.0 — 2026-11-19
+
+**New**
+
+- **`DdsSocialSignIn(primaryLimit = …)`** chooses how many methods show inline; the rest stay in the sheet. Three remains
+  the default for the existing overloads, and a limit below one is rejected.
+
 ## 0.11.1 — 2026-11-18
 
 **Fixed**
