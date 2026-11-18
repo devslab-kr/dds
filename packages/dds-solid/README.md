@@ -9,6 +9,8 @@ uncontrolled (`defaultValue`/`defaultOpen`/`defaultChecked`) forms. Dialog owns
 focus trap/return and Escape/outside dismissal; Tabs implements the WAI-ARIA
 keyboard model; ToastProvider owns lifecycle timers; Tooltip requires a render
 prop so `aria-describedby` is always attached to the actual trigger.
+Pass a localized `closeLabel` to Dialog for a close (X) button in the top inline-end corner; a custom `frame`
+receives it as `parts.close`.
 
 Pass a localized `dismissLabel` to `ToastProvider` when toasts need a manual
 dismiss control. Omitting it preserves the existing provider API while leaving

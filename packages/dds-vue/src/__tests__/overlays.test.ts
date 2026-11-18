@@ -20,6 +20,20 @@ it('gives a dialog an accessible title and emits close on Escape', async () => {
   expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false])
   wrapper.unmount()
 })
+it('puts a labelled close button in the corner only when closeLabel is set', async () => {
+  const plain = mount(DDS.Dialog, { attachTo: document.body, props: { open: true, title: '확인' }, slots: { default: () => h('button', '저장') } })
+  await new Promise(r => setTimeout(r, 70))
+  expect(document.querySelector('.dds-dialog__close')).toBeNull()
+  plain.unmount()
+  const wrapper = mount(DDS.Dialog, { attachTo: document.body, props: { open: true, title: '확인', closeLabel: '닫기' }, slots: { default: () => h('button', '저장') } })
+  await new Promise(r => setTimeout(r, 70))
+  const close = document.querySelector<HTMLButtonElement>('.dds-dialog__close')!
+  expect(close.getAttribute('aria-label')).toBe('닫기')
+  close.click()
+  await new Promise(r => setTimeout(r, 30))
+  expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false])
+  wrapper.unmount()
+})
 it('shows independent toast providers and clears through their own context', async () => {
   let api!: ReturnType<typeof DDS.useToast>
   const Child = defineComponent({ setup() { api = DDS.useToast(); return () => h('button', { onClick: () => api.show({ message: '저장됨', duration: 0 }) }, '알림') } })

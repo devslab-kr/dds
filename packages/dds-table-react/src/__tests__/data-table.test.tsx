@@ -5,7 +5,7 @@ import { renderToString } from "react-dom/server";
 import { act } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DataTable, ddsGridTheme } from "../index";
+import { actionColumn, DataTable, ddsGridTheme } from "../index";
 
 afterEach(cleanup);
 describe("DDS grid integration", () => {
@@ -69,5 +69,14 @@ describe("DDS grid integration", () => {
     await waitFor(() => expect(instance?.api).toBeDefined());
     view.unmount();
     expect(cleanupRef).toHaveBeenCalledOnce();
+  });
+});
+
+describe("actionColumn", () => {
+  it("pins row actions to the end, keeps them out of sorting and resizing, and keeps caller classes", () => {
+    const column = actionColumn<{ id: string }>("Actions", { cellClass: "extra", width: 120 });
+    expect(column).toMatchObject({ headerName: "Actions", pinned: "right", lockPinned: true, sortable: false, resizable: false, suppressMovable: true, width: 120 });
+    expect(column.cellClass).toEqual(["dds-data-grid__actions", "extra"]);
+    expect(column.headerClass).toEqual(["dds-data-grid__actions-header"]);
   });
 });

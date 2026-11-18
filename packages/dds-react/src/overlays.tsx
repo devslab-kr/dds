@@ -8,7 +8,10 @@ import { Dialog as ArkDialog } from "@ark-ui/react/dialog";
 import { Tooltip as ArkTooltip } from "@ark-ui/react/tooltip";
 import { Portal } from "@ark-ui/react/portal";
 import { classes } from "./controls";
+import { Icon } from "./icon";
 export interface DialogFrameParts {
+  /** The corner close button when closeLabel is set, else null. */
+  close: ReactNode;
   title: ReactNode;
   description: ReactNode;
   children: ReactNode;
@@ -33,6 +36,8 @@ export interface DialogProps
   finalFocus?: () => HTMLElement | null | undefined;
   frame?: (parts: DialogFrameParts) => ReactNode;
   unstyled?: boolean;
+  /** Accessible name of a close (X) button in the top inline-end corner. Omit for no button. */
+  closeLabel?: string;
 }
 export const Dialog = forwardRef<HTMLDivElement, DialogProps>(function Dialog(
   {
@@ -50,11 +55,20 @@ export const Dialog = forwardRef<HTMLDivElement, DialogProps>(function Dialog(
     finalFocus,
     frame,
     unstyled,
+    closeLabel,
     ...rest
   },
   ref
 ) {
   const parts: DialogFrameParts = {
+    close: closeLabel ? (
+      <ArkDialog.CloseTrigger
+        aria-label={closeLabel}
+        className={unstyled ? undefined : "dds-iconbtn dds-iconbtn--sm dds-dialog__close"}
+      >
+        <Icon name="close" size={20} />
+      </ArkDialog.CloseTrigger>
+    ) : null,
     title: (
       <ArkDialog.Title className={unstyled ? undefined : "dds-dialog__title"}>
         {title}
@@ -94,6 +108,7 @@ export const Dialog = forwardRef<HTMLDivElement, DialogProps>(function Dialog(
           frame(parts)
         ) : (
           <>
+            {parts.close}
             {parts.title}
             {parts.description}
             {children}

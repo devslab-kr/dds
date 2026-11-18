@@ -11,7 +11,7 @@ Native Vue counterparts now cover the existing DDS React/Solid component invento
 | Navigation and overlays | Tabs, TabList, Tab, TabPanel, Dialog, Tooltip, DropdownMenu, Popover, ToastProvider/useToast, ConsoleShell |
 | Helpers | usePendingAction/createPendingAction, createStatusPill, date/month/time validation |
 
-Values use `v-model`/`update:modelValue`; dialogs use `v-model:open`. Content uses Vue slots rather than React render props. Compound DropdownMenu and Popover components retain Ark Vue's native props/events. ConsoleShell uses default content, `actions`, and `foot` slots. Field's default slot exposes `{ control }` for native input attributes. IconButton requires `label`.
+Values use `v-model`/`update:modelValue`; dialogs use `v-model:open`. Dialog takes `closeLabel` for a close (X) button in the top inline-end corner. Content uses Vue slots rather than React render props. Compound DropdownMenu and Popover components retain Ark Vue's native props/events. ConsoleShell uses default content, `actions`, and `foot` slots. Field's default slot exposes `{ control }` for native input attributes. IconButton requires `label`.
 
 NumberInput is `number | null`; choices persist string IDs; ranges are `{start,end}` ISO dates; MonthPicker persists YYYY-MM; TimePicker persists HH:MM. Typed invalid drafts remain visible and block native form submission. Disabled/readonly controls never commit user changes. Async actions return Vue refs (`current.value`, `busy.value`) and abort when replaced/reset/disposed.
 

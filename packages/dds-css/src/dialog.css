@@ -4,7 +4,12 @@
  * Behavior contract (spec §5): closes on outside tap and Esc; focus is
  * trapped while open and returns to the opener on close — that is the
  * opener JS's job, this file only owns the look. Label the panel with
- * aria-labelledby pointing at the title. */
+ * aria-labelledby pointing at the title.
+ * Close: an optional .dds-dialog__close icon button sits in the top inline-end
+ * corner (house rule: the corner X plus text actions at the bottom); the title
+ * keeps clear of it. Actions keep one step of space from whatever comes before
+ * them — free children too, not only the description (whose margin collapses
+ * into this one). */
 
 .dds-dialog-overlay {
   position: fixed;
@@ -25,6 +30,7 @@
   padding: var(--dds-space-20);
   width: 100%;
   max-width: 400px; /* layout default, not a token — override per product */
+  position: relative;
 }
 
 /* native <dialog> resets */
@@ -55,4 +61,15 @@ dialog.dds-dialog::backdrop {
   display: flex;
   justify-content: flex-end;
   gap: var(--dds-space-8);
+  margin-block-start: var(--dds-space-16);
+}
+
+.dds-dialog__close {
+  position: absolute;
+  inset-block-start: var(--dds-space-12);
+  inset-inline-end: var(--dds-space-12);
+}
+
+.dds-dialog:has(> .dds-dialog__close) .dds-dialog__title {
+  padding-inline-end: var(--dds-space-32);
 }

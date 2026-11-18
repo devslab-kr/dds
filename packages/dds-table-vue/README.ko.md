@@ -6,7 +6,7 @@ AG Grid Community 36.2.0의 네이티브 Vue 3 어댑터입니다. DDS 공통 �
 - `label`: 영역과 그리드의 접근성 이름이며 변경을 반영합니다. `@grid-ready`와 `gridProps.onGridReady`는 각각 한 번 호출됩니다. 준비 후 컴포넌트 ref의 `api`/`getApi()`로 `GridApi<T>`를 얻습니다.
 - `gridProps`: DDS가 소유하는 `rowData`/`columnDefs`를 제외한 네이티브 `GridOptions<T>`와 로컬 `modules`를 받습니다. 기본 `AllCommunityModule`이며 전역 등록이나 Enterprise 모듈은 없습니다. 커스텀 모듈 집합은 기능별 모듈과 접근성 이름용 `RenderApiModule`을 포함해야 합니다.
 - 정렬·열 크기 조절은 기본 활성, 최소 열 너비 120px입니다. 필터·편집·행 선택은 네이티브 옵션으로 켭니다. 그리드 문구는 `localeText`로 번역합니다.
-- `density`: 기본 comfortable은 행 40px/헤더 44px, dense는 32px/36px입니다. 네이티브 높이 옵션이 우선합니다. 기본 전체 높이 480px이며 컴포넌트 `style`로 변경합니다. 나머지 DOM 속성은 바깥 영역에 전달됩니다. 좁은 화면은 최소 열 너비와 내부 가로 스크롤을 유지합니다.
+- `density`: 기본 comfortable은 행 40px/헤더 44px, dense는 32px/36px입니다. 네이티브 높이 옵션이 우선합니다. 기본 전체 높이 480px이며 컴포넌트 `style`로 변경합니다. 나머지 DOM 속성은 바깥 영역에 전달됩니다. 좁은 화면은 최소 열 너비와 내부 가로 스크롤을 유지합니다. 셀 내용은 행의 가운데 줄에 맞춰집니다. `actionColumn(label, column?)`은 끝쪽에 고정되고 정렬·크기 조절·이동이 꺼진 행 동작 열을 만들며, `label`은 화면 낭독기에만 읽힙니다.
 - `styles.css`를 한 번 가져오세요. DDS 토큰/코어가 포함됩니다. `ddsGridTheme`는 `[data-theme="dark"]`를 포함한 공통 변수를 따르며 `gridProps.theme` 또는 `withParams`로 확장합니다. 기본 테마와 레거시 AG Grid CSS를 함께 로드하지 마세요.
 - SSR/첫 hydration은 이름이 있는 busy 영역과 `placeholder` 슬롯만 렌더링합니다. 마운트 후 그리드를 만듭니다. 서버용 데이터 요약이 필요하면 별도 제공하세요. `loading`은 네이티브 로딩 오버레이와 영역 상태에 반영됩니다.
 

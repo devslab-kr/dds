@@ -5,6 +5,7 @@ import { ariaHidden } from "@zag-js/aria-hidden";
 import { createEffect, createMemo, createSignal, createUniqueId, onCleanup, Show, type JSX } from "solid-js";
 import { Dynamic, isServer, Portal } from "solid-js/web";
 import { classes } from "./utils";
+import { Icon } from "./icon";
 
 export const focusable = [
   "a[href]", "button:not([disabled])", "input:not([disabled])",
@@ -41,9 +42,13 @@ export interface DialogProps {
   additionalFocusContainers?: () => readonly (HTMLElement | null | undefined)[];
   /** Customize the inner layout using DDS-owned, already labelled title/description nodes. */
   frame?: (parts: DialogFrameParts) => JSX.Element;
+  /** Accessible name of a close (X) button in the top inline-end corner. Omit for no button. */
+  closeLabel?: string;
 }
 
 export interface DialogFrameParts {
+  /** The corner close button when closeLabel is set, else undefined. */
+  close: JSX.Element;
   title: JSX.Element;
   description: JSX.Element;
   children: JSX.Element;
@@ -123,12 +128,13 @@ export function Dialog(props: DialogProps) {
       role={props.role ?? "dialog"} aria-modal="true" aria-describedby={props.description ? `${id()}-description` : undefined}>
       {(() => {
         const parts: DialogFrameParts = {
+          get close() { return props.closeLabel ? <ArkDialog.CloseTrigger class={cls("dds-iconbtn dds-iconbtn--sm dds-dialog__close")} aria-label={props.closeLabel}><Icon name="close" size={20} /></ArkDialog.CloseTrigger> : undefined; },
           get title() { return <ArkDialog.Title class={cls("dds-dialog__title", props.titleClass)}>{props.title}</ArkDialog.Title>; },
           get description() { return props.description && <ArkDialog.Description class={cls("dds-dialog__body", props.descriptionClass)}>{props.description}</ArkDialog.Description>; },
           get children() { return props.children; },
           get actions() { return props.actions && <div class={cls("dds-dialog__actions", props.actionsClass)}>{props.actions}</div>; },
         };
-        return props.frame ? props.frame(parts) : <>{parts.title}{parts.description}{parts.children}{parts.actions}</>;
+        return props.frame ? props.frame(parts) : <>{parts.close}{parts.title}{parts.description}{parts.children}{parts.actions}</>;
       })()}
     </ArkDialog.Content>
   </ArkDialog.Positioner>;
