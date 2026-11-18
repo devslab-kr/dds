@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@devslab/dds-react": "0.29.2",
+    "@devslab/dds-react": "0.35.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "jsdom": "30.0.1",

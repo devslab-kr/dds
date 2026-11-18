@@ -5,6 +5,23 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 0.11.1 — 2026-11-18
+
+**고침**
+
+- **`DdsBodyColumn`이 영역 어디서 끌어도 스크롤된다.** 넓은 창(펼친 폴드, 태블릿)에서는 본문 칸이 가운데 서고 양옆에
+  여백이 남는데, 지금까지는 칸 자체만 스크롤돼서 여백에서 시작한 끌기는 아무 일도 하지 않았다. 이제 영역 전체가
+  스크롤되고, 칸의 폭·위치·안쪽 여백·`DdsTestTags.Body` 태그는 그대로다. 짧은 본문도 여전히 영역만큼 높아서 가중치
+  Spacer가 남은 자리를 채운다. 스크롤하는 노드가 태그 달린 칸이 아니라 영역으로 바뀌었다.
+- **로그인 시트의 목록이 시트 전체 폭에서 스크롤된다.** 좁은 버튼 아래에서만 되던 것을 고쳤다.
+
+## 0.11.0 — 2026-11-16
+
+**새 기능**
+
+- **OTA 번역** — `OtaLocalization`, `ProvideOtaLocalization`, `localizedString`, `localizedPlural`로 앱들이 무선으로
+  갱신되는 번역 카탈로그를 함께 쓴다. [README](README.md#ota-localization) 참고.
+
 ## 0.10.1 — 2026-11-15
 
 - `DdsSocialSignIn`에 시트 상태를 제어하고 로그인 버튼, ‘다른 로그인 방법’ 버튼, 시트를 앱에서 구성할 수 있는 오버로드를 추가했다. 앱 자체 버튼은 `DdsSocialProviderIcon`으로 DDS의 로그인 제공자 로고를 그릴 수 있다.

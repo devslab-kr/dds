@@ -294,12 +294,18 @@ private fun SignInSheet(
                 }
                 DdsIconButton(DdsIcons.Close, closeLabel, onClick = onDismiss)
             }
+            // The sheet's whole width scrolls, so a drag beside the narrower buttons moves them too.
             Box(
-                Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())
-                    .padding(start = gutter, end = gutter, top = DdsSpace.s8.dp, bottom = DdsSpace.s16.dp)
-                    .widthIn(max = buttonWidth).fillMaxWidth(),
+                Modifier.weight(1f, fill = false).fillMaxWidth().verticalScroll(rememberScrollState()),
+                contentAlignment = Alignment.TopCenter,
             ) {
-                content()
+                Box(
+                    Modifier
+                        .padding(start = gutter, end = gutter, top = DdsSpace.s8.dp, bottom = DdsSpace.s16.dp)
+                        .widthIn(max = buttonWidth).fillMaxWidth(),
+                ) {
+                    content()
+                }
             }
         }
     }

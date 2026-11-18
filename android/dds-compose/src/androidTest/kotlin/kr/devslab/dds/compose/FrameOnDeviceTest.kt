@@ -97,6 +97,9 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import kr.devslab.dds.compose.layout.ddsBody
+import androidx.compose.foundation.ScrollState
+import androidx.compose.ui.test.swipe
+import androidx.compose.foundation.layout.Spacer
 import kr.devslab.dds.compose.testing.DdsFrameCheck
 import kr.devslab.dds.compose.testing.DdsScreenKind
 import kr.devslab.dds.compose.theme.DdsBrand
@@ -524,6 +527,49 @@ class FrameOnDeviceTest {
 
     @Test
     fun theTextInTheBodyStartsOnTheWideGutterBesideAList() = assertTextStartsOnTheGutter(DpSize(933.dp, 704.dp), list = true)
+
+    /**
+     * A wide window leaves room at each side of the body column. A drag that starts there moves the
+     * body as one that starts on its text does: the whole area the column is centered in scrolls,
+     * not only the column.
+     */
+    @Test
+    fun aDragInTheRoomBesideTheBodyScrollsIt() {
+        val scroll = ScrollState(0)
+        shown {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(DpSize(933.dp, 704.dp))) {
+                DdsBodyColumn(scroll = scroll) {
+                    repeat(40) { Text("줄 $it", Modifier.height(48.dp)) }
+                }
+            }
+        }
+        val body = bounds(DdsTestTags.Body)
+        assertTrue("the window leaves room beside the body: $body", body.left > 48.dp)
+        rule.onRoot().performTouchInput {
+            val x = with(density) { (body.left / 2).toPx() }
+            swipe(Offset(x, height * 0.8f), Offset(x, height * 0.2f), durationMillis = 300)
+        }
+        rule.waitForIdle()
+        assertTrue("a drag beside the body scrolled it (${scroll.value})", scroll.value > 0)
+    }
+
+    /** A screen can still push its last block to the bottom of a short body with a weighted spacer. */
+    @Test
+    fun aWeightedSpacerInTheBodyFillsTheRoomLeft() {
+        shown {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(DpSize(933.dp, 704.dp))) {
+                DdsBodyColumn {
+                    Text("위")
+                    Spacer(Modifier.weight(1f))
+                    Text("아래", Modifier.testTag("bottom-text"))
+                }
+            }
+        }
+        val body = bounds(DdsTestTags.Body)
+        val bottom = bounds("bottom-text")
+        val gutter = DdsScreen.gutterWide.dp
+        assertNear("the last block sits on the body's bottom gutter", body.bottom - gutter, bottom.bottom)
+    }
 
     private fun assertABarOnTheBodysLinesLinesUpWithTheText(size: DpSize, list: Boolean) {
         frame(size, list = list, body = { padding ->
