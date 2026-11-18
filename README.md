@@ -114,9 +114,11 @@ lists ship as `@devslab/dds-icons/direction-policy.json`.
 
 All distributable DDS packages use `@devslab/*` on the public npm registry under the
 DevsLab Source-Available License 1.0. The compatibility canary remains private and
-unpublished. Releases use npm provenance and GitHub OIDC trusted publishing;
-the workflow also accepts a configured `NPM_TOKEN` when needed. Local npm login
-and manually pushed release tags are not required for the standard workflow.
+unpublished. Releases use npm provenance and GitHub OIDC trusted publishing only;
+the workflow holds no npm token. Every public package declares the same Trusted
+Publisher on npmjs.com (`devslab-kr/dds`, workflow `release.yml`, no
+environment), and a package without one fails to publish. Local npm login and
+manually pushed release tags are not required for the standard workflow.
 
 ## Roadmap
 

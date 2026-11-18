@@ -51,8 +51,21 @@ test("workspace exposes deterministic foundation and release verification", asyn
   // arguments, and changesets rejects them.
   assert.equal(root.scripts["version-packages"], "changeset version && pnpm install --lockfile-only");
   assert.match(workflow, /^\s*version: pnpm version-packages\s*$/m);
-  assert.match(workflow, /registry-url:\s*https:\/\/registry\.npmjs\.org/);
+  // Trusted publishing only. With a token present, npm falls back to it when a
+  // package's Trusted Publisher is missing, and the release still goes green —
+  // 0.35.1 shipped six packages that way. No token means that case fails.
   assert.match(workflow, /id-token:\s*write/);
+  assert.doesNotMatch(workflow, /^[^#]*(NPM_TOKEN|NODE_AUTH_TOKEN|_authToken)/m);
+  // `registry-url` makes setup-node write an `.npmrc` that reads
+  // `${NODE_AUTH_TOKEN}`; the registry comes from each package instead.
+  assert.doesNotMatch(workflow, /^\s*registry-url:/m);
+  for (const name of config.fixed[0]) {
+    const dir = name.replace("@devslab/", "");
+    const manifest = await json(`packages/${dir}/package.json`);
+    assert.equal(manifest.name, name);
+    assert.equal(manifest.publishConfig?.registry, "https://registry.npmjs.org", `${name} must publish to public npm`);
+    assert.equal(manifest.publishConfig?.provenance, true, `${name} must publish with provenance`);
+  }
   assert.match(workflow, /npm publish|changeset publish|pnpm release/);
 });
 

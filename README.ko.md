@@ -110,9 +110,11 @@ mirror/유지 목록은 `@devslab/dds-icons/direction-policy.json`으로 함께 
 
 배포 가능한 DDS 패키지는 모두 공개 npm의 `@devslab/*`를 사용하며 DevsLab
 Source-Available License 1.0을 따른다. compatibility canary는 비공개·미배포로
-유지한다. 릴리스는 npm provenance와 GitHub OIDC trusted publishing을 사용하며,
-필요하면 설정된 `NPM_TOKEN`도 사용할 수 있다. 표준 흐름에는 로컬 npm 로그인이나
-수동 릴리스 태그 푸시가 필요하지 않다.
+유지한다. 릴리스는 npm provenance와 GitHub OIDC trusted publishing만 사용하며,
+워크플로에는 npm 토큰이 없다. 공개 패키지는 모두 npmjs.com에 같은 Trusted
+Publisher(`devslab-kr/dds`, 워크플로 `release.yml`, environment 없음)를 등록하며,
+등록이 없는 패키지는 배포에 실패한다. 표준 흐름에는 로컬 npm 로그인이나 수동
+릴리스 태그 푸시가 필요하지 않다.
 
 ## 로드맵
 

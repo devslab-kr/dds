@@ -1747,6 +1747,15 @@ Source-Available License 1.0을 적용한다. 이는 OSI 오픈소스가 아니�
 릴리스는 npm provenance와 `NPM_TOKEN`을 사용한다. 이 결정은 D-014의 비공개
 GitHub Packages 배포 결정을 대체한다.
 
+**개정 (2026-11-18).** 릴리스 인증은 npm trusted publishing(GitHub OIDC)만
+사용하고, 워크플로에서 `NPM_TOKEN`을 뺐다. 토큰이 함께 있으면 npm은 Trusted
+Publisher가 없는 패키지에서 조용히 토큰으로 배포한다. 0.35.1에서 6개
+패키지(dds-react·dds-svelte·dds-table-react·dds-table-solid·dds-table-vue·
+dds-vue)가 그렇게 개인 계정으로 나갔고 릴리스는 초록이었다. 12개 모두에 같은
+Trusted Publisher(`devslab-kr/dds`, `release.yml`, environment 없음)를 등록한
+뒤 토큰을 제거했으므로, 이제 등록이 빠진 패키지는 배포가 실패한다.
+`tests/foundation-contracts.test.mjs`가 워크플로에 토큰이 없음을 고정한다.
+
 **근거.** 소비와 검증은 공개적으로 단순화하면서, DDS 자체와 브랜드 자산의
 변형·재상품화를 허용하지 않는다.
 
