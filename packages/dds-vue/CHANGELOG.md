@@ -1,5 +1,18 @@
 # @devslab/dds-vue
 
+## 0.36.0
+
+### Minor Changes
+
+- ab136bf: Dialog takes an optional `closeLabel`: a close (X) icon button in the top inline-end corner, named by that label (React and Solid also pass it to `frame` as `parts.close`). Dialog actions now keep one step of space from free content above them; after a description the gap is unchanged. Data grids (React, Vue) center every cell on the row's middle line, including cells that render badges or buttons, and export `actionColumn(label, column?)` for a trailing row-actions column pinned to the end edge.
+
+### Patch Changes
+
+- Updated dependencies [ab136bf]
+  - @devslab/dds-css@0.36.0
+  - @devslab/dds-tokens@0.36.0
+  - @devslab/dds-icons@0.36.0
+
 ## 0.35.1
 
 ### Patch Changes

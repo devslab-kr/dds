@@ -1,5 +1,11 @@
 # @devslab/dds-table
 
+## 0.36.0
+
+### Patch Changes
+
+- @devslab/dds-table-solid@0.36.0
+
 ## 0.35.1
 
 ### Patch Changes
