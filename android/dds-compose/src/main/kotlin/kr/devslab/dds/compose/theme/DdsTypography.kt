@@ -1,5 +1,6 @@
 package kr.devslab.dds.compose.theme
 
+import java.text.BreakIterator
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -134,28 +135,53 @@ internal val LocalDdsTypography = staticCompositionLocalOf<DdsTypography> {
 
 /**
  * Android breaks Korean between any two syllables. This joins the characters
- * of each word so a line breaks only at spaces — the same result as the web's
- * `word-break: keep-all`.
+ * of each Korean word so a line breaks only at spaces — the same result as the
+ * web's `word-break: keep-all`.
  *
- * Use it for short Korean UI text (titles, buttons, notices). Do not use it
- * on a string with no spaces that may be longer than the line: it could then
+ * Only a word that contains Hangul is joined, and the joiner goes between
+ * whole characters as a reader sees them (a letter keeps its combining marks):
+ * - Devanagari, Thai and Arabic shape a letter together with its neighbours,
+ *   and a joiner between them draws the marks apart on dotted circles;
+ * - Japanese and Chinese have no spaces, so joining every character would
+ *   leave the line no break point at all;
+ * - a Latin or Cyrillic word already breaks only at its spaces.
+ *
+ * Use it for short UI text (titles, buttons, notices). Do not use it on a
+ * Korean string with no spaces that may be longer than the line: it could then
  * not wrap at all.
  */
 public fun String.keepWords(): String {
-    if (isEmpty()) return this
+    if (isEmpty() || none(::isHangul)) return this
     val out = StringBuilder(length * 2)
-    var i = 0
-    while (i < length) {
-        // Step by code point, so an emoji or a rare ideograph (a surrogate pair) is never split.
-        val codePoint = codePointAt(i)
-        val next = i + Character.charCount(codePoint)
-        out.appendCodePoint(codePoint)
-        if (next < length && !Character.isWhitespace(codePoint) && !Character.isWhitespace(codePointAt(next))) {
-            out.append(WORD_JOINER)
-        }
-        i = next
+    var wordStart = 0
+    while (wordStart < length) {
+        var wordEnd = wordStart
+        while (wordEnd < length && !Character.isWhitespace(this[wordEnd])) wordEnd++
+        if (wordEnd > wordStart) out.appendWord(substring(wordStart, wordEnd))
+        while (wordEnd < length && Character.isWhitespace(this[wordEnd])) out.append(this[wordEnd++])
+        wordStart = wordEnd
     }
     return out.toString()
+}
+
+private fun isHangul(char: Char): Boolean = Character.UnicodeScript.of(char.code) == Character.UnicodeScript.HANGUL
+
+/** [word] (no whitespace in it), with a joiner between its characters when it is a Korean word. */
+private fun StringBuilder.appendWord(word: String) {
+    if (word.none(::isHangul)) {
+        append(word)
+        return
+    }
+    // By grapheme cluster, so a surrogate pair, a letter with its combining marks and decomposed Hangul stay whole.
+    val clusters = BreakIterator.getCharacterInstance().apply { setText(word) }
+    var start = clusters.first()
+    var end = clusters.next()
+    while (end != BreakIterator.DONE) {
+        if (start > 0) append(WORD_JOINER)
+        append(word, start, end)
+        start = end
+        end = clusters.next()
+    }
 }
 
 /** U+2060 WORD JOINER: invisible, zero width, forbids a line break on either side. */

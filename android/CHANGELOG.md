@@ -5,6 +5,17 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose` and (from 0.7.0) `kr.devslab:dds-compose-testing` share one version,
 separate from the web packages (D-048). Releases are cut by an `android-v<version>` tag.
 
+## 0.12.1 — 2026-11-19
+
+**Fixed**
+
+- **`keepWords()` joins Korean words only.** It put a word joiner between every two characters of every word, whatever
+  the script. In Hindi (and Thai) that drew each vowel sign apart from its consonant, on a dotted circle; in Japanese
+  and Chinese, which have no spaces, it left a line no break point, so a long label broke wherever it ran out of room
+  (送/る). Now only a word that contains Hangul is joined, and the joiner goes between whole characters (a letter keeps
+  its combining marks). Korean text wraps as before. Every DDS component that draws wrapping text uses this function,
+  so buttons, tabs, fields and banners are fixed with it.
+
 ## 0.12.0 — 2026-11-19
 
 **New**

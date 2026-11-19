@@ -453,4 +453,32 @@ class BrandTest {
         val emoji = String(Character.toChars(0x1F600))
         assertEquals("확$j$emoji", "확$emoji".keepWords())
     }
+
+    @Test
+    fun keepWordsJoinsLatinDigitsAndPunctuationToTheKoreanWordTheyBelongTo() {
+        val j = 0x2060.toChar()
+        assertEquals("Q${j}R${j}로 보${j}내${j}기", "QR로 보내기".keepWords())
+        assertEquals("5${j}명${j}까${j}지", "5명까지".keepWords())
+        assertEquals("괜${j}찮${j}아${j}.", "괜찮아.".keepWords())
+    }
+
+    @Test
+    fun keepWordsLeavesTextWithoutHangulAsItIs() {
+        // Devanagari, Thai and Arabic shape a letter with the marks and letters next to it: a joiner between them
+        // draws the marks apart on dotted circles. Japanese and Chinese have no spaces, so joining every character
+        // would leave no break point at all. Latin words already break only at spaces.
+        for (text in listOf("मेरे कार्ड", "นามบัตรของฉัน", "بطاقاتي", "連絡先ファイルを送る (Quick Share)", "收到的名片", "My cards", "Мои визитки")) {
+            assertEquals(text, text.keepWords())
+        }
+    }
+
+    @Test
+    fun keepWordsNeverSeparatesALetterFromItsCombiningMark() {
+        val j = 0x2060.toChar()
+        // Decomposed Hangul (conjoining jamo) and a combining accent stay with their base.
+        val decomposed = java.text.Normalizer.normalize("한글", java.text.Normalizer.Form.NFD)
+        val parts = java.text.Normalizer.normalize("한", java.text.Normalizer.Form.NFD) to java.text.Normalizer.normalize("글", java.text.Normalizer.Form.NFD)
+        assertEquals(parts.first + j + parts.second, decomposed.keepWords())
+        assertEquals("카${j}페${j}é", "카페é".keepWords())
+    }
 }
