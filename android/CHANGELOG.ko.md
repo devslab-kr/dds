@@ -5,6 +5,13 @@
 `kr.devslab:dds-android-tokens`, `kr.devslab:dds-compose`, 그리고 0.7.0부터 `kr.devslab:dds-compose-testing`은 한 버전을 쓰고, 웹 패키지와는
 버전이 따로다(D-048). 릴리스는 `android-v<버전>` 태그로 낸다.
 
+## 0.12.0 — 2026-11-19
+
+**새 기능**
+
+- **`DdsSocialSignIn(primaryLimit = …)`** — 화면에 바로 보일 로그인 수단 개수를 정한다. 나머지는 시트에 남는다. 기존
+  호출의 기본값은 그대로 3이고, 1보다 작은 값은 거부한다.
+
 ## 0.11.1 — 2026-11-18
 
 **고침**

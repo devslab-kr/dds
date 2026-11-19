@@ -74,7 +74,7 @@ mavenLocal { content { includeGroup("kr.devslab") } }
 
 ## 소셜 로그인 선택 UI
 
-`DdsSocialSignIn`은 앱이 연결한 제공자를 전달받아 순서대로 표시한다. 처음 세 수단은 화면에 표시하고 나머지는 ‘다른 로그인 방법’ 시트에서 고를 수 있다. 앱은 각 버튼의 현지화된 문구를 지정한다. DDS가 제공자 로고를 표시하며 `DdsSignInMethod.icon`으로 앱의 에셋을 지정할 수 있다. 인증을 시작할 때 `onSelect`에서 선택한 제공자 ID를 받는다.
+`DdsSocialSignIn`은 앱이 연결한 제공자를 전달받아 순서대로 표시한다. 처음 세 수단은 화면에 표시하고 나머지는 ‘다른 로그인 방법’ 시트에서 고를 수 있다. 화면에 보일 개수를 바꾸려면 `primaryLimit`(1 이상)을 넘긴다. 앱은 각 버튼의 현지화된 문구를 지정한다. DDS가 제공자 로고를 표시하며 `DdsSignInMethod.icon`으로 앱의 에셋을 지정할 수 있다. 인증을 시작할 때 `onSelect`에서 선택한 제공자 ID를 받는다.
 
 ```kotlin
 DdsSocialSignIn(

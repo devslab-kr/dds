@@ -142,9 +142,11 @@ class ScreenReaderTest {
                     DdsSignInMethod(DdsSocialProvider.Google, "Google"),
                     DdsSignInMethod(DdsSocialProvider.Kakao, "Kakao"),
                     DdsSignInMethod(DdsSocialProvider.Line, "LINE"),
+                    DdsSignInMethod(DdsSocialProvider.Microsoft, "Microsoft"),
                     DdsSignInMethod(DdsSocialProvider.Slack, "Slack", enabled = false),
                 ),
                 onSelect = { attempts.add(it); pending = it },
+                primaryLimit = 4,
                 pending = pending,
                 customization = DdsSocialSignInCustomization(
                     expanded = expanded,
@@ -164,21 +166,21 @@ class ScreenReaderTest {
                 ),
             )
         }
-        rule.onNodeWithText("Main: Kakao").assertExists()
-        rule.onNodeWithText("Additional: LINE").assertDoesNotExist()
+        rule.onNodeWithText("Main: LINE").assertExists()
+        rule.onNodeWithText("Additional: Microsoft").assertDoesNotExist()
         rule.onNodeWithText("More methods").performClick()
         rule.onNodeWithText("Additional: Slack").assertIsNotEnabled()
-        rule.onNodeWithText("Additional: LINE").performClick()
+        rule.onNodeWithText("Additional: Microsoft").performClick()
         rule.onNodeWithText("Main: Naver").assertIsNotEnabled()
         rule.onNodeWithText("More methods").assertIsNotEnabled()
-        rule.onNodeWithText("Additional: Signing in with LINE").performClick()
+        rule.onNodeWithText("Additional: Signing in with Microsoft").performClick()
         rule.onNodeWithText("Close methods").performClick()
-        rule.onNodeWithText("Additional: Signing in with LINE").assertExists()
+        rule.onNodeWithText("Additional: Signing in with Microsoft").assertExists()
         rule.runOnIdle {
-            assertEquals(listOf(DdsSocialProvider.Line), attempts)
+            assertEquals(listOf(DdsSocialProvider.Microsoft), attempts)
             pending = null
         }
-        rule.onNodeWithText("Additional: LINE").assertDoesNotExist()
+        rule.onNodeWithText("Additional: Microsoft").assertDoesNotExist()
     }
 
     // --- text field ---------------------------------------------------------

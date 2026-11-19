@@ -74,7 +74,7 @@ mavenLocal { content { includeGroup("kr.devslab") } }
 
 ## Social sign-in options
 
-Pass the app's supported methods to `DdsSocialSignIn` in display order. It shows the first three and offers the remaining methods in a sheet. Each method takes a localized label. DDS draws the bundled brand mark by default, and `DdsSignInMethod.icon` accepts app-provided artwork. `onSelect` provides the public provider ID through the selected `DdsSocialProvider`.
+Pass the app's supported methods to `DdsSocialSignIn` in display order. It shows the first three and offers the remaining methods in a sheet. Pass `primaryLimit` to show a different number inline (it must be positive). Each method takes a localized label. DDS draws the bundled brand mark by default, and `DdsSignInMethod.icon` accepts app-provided artwork. `onSelect` provides the public provider ID through the selected `DdsSocialProvider`.
 
 ```kotlin
 DdsSocialSignIn(
