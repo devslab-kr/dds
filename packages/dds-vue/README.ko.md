@@ -11,7 +11,7 @@ Vue 3용 DDS 공통 컴포넌트입니다. 달력 동작은 Ark UI Vue, 디자�
 | 탐색·오버레이 | Tabs, TabList, Tab, TabPanel, Dialog, Tooltip, DropdownMenu, Popover, ToastProvider/useToast, ConsoleShell |
 | 도우미 | usePendingAction/createPendingAction, createStatusPill, 날짜·월·시간 검증 |
 
-값은 v-model/update:modelValue, 대화상자 열림은 v-model:open으로 연결합니다. React render prop 대신 Vue slot을 사용합니다. DropdownMenu/Popover의 compound 부품은 Ark Vue의 기본 props/events를 따릅니다. ConsoleShell은 기본 내용·actions·foot 슬롯, Field는 `{ control }` 기본 슬롯을 제공합니다. IconButton에는 label이 필요합니다.
+값은 v-model/update:modelValue, 대화상자 열림은 v-model:open으로 연결합니다. Dialog에 `closeLabel`을 주면 오른쪽 위(인라인 끝) 모서리에 닫기(X) 버튼이 생깁니다. React render prop 대신 Vue slot을 사용합니다. DropdownMenu/Popover의 compound 부품은 Ark Vue의 기본 props/events를 따릅니다. ConsoleShell은 기본 내용·actions·foot 슬롯, Field는 `{ control }` 기본 슬롯을 제공합니다. IconButton에는 label이 필요합니다.
 
 NumberInput은 number/null, 선택기는 문자열 ID, 기간은 `{start,end}` ISO 날짜, MonthPicker는 YYYY-MM, TimePicker는 HH:MM을 저장합니다. 잘못된 초안은 그대로 보여주고 native form 제출을 차단합니다. disabled/readonly에서 사용자 변경을 확정하지 않습니다. 비동기 도우미는 current.value/busy.value를 제공하며 교체·초기화·scope 종료 시 AbortSignal을 취소합니다.
 

@@ -13,6 +13,23 @@
   outline: 2px solid var(--dds-color-border-focus);
   outline-offset: -2px;
 }
+/* Cells: plain text is centred by the row's line height; a cell that renders
+ * elements (badges, buttons, avatars) is a flex row centred the same way, so
+ * every cell in a row shares one middle line. Text keeps its ellipsis. */
+.dds-data-grid .ag-cell { align-content: center; }
+.dds-data-grid .ag-cell:has(> *) { display: flex; align-items: center; }
+.dds-data-grid .ag-cell:has(> *) > * { min-inline-size: 0; }
+.dds-data-grid .ag-cell.dds-data-grid__actions { justify-content: flex-end; }
+/* actionColumn(): its header names the column for screen readers only — the
+ * .dds-visually-hidden declarations, on the AG Grid text node that cannot take the class. */
+.dds-data-grid .dds-data-grid__actions-header .ag-header-cell-text {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 @media (prefers-reduced-motion: reduce) {
   .dds-data-grid *, .dds-data-grid *::before, .dds-data-grid *::after {
     animation-duration: 0.01ms !important;

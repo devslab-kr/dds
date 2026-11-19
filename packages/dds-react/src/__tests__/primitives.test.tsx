@@ -205,6 +205,27 @@ it("associates the dialog description", async () => {
   ).toHaveAccessibleDescription("변경 안내");
 });
 
+it("puts a labelled close button in the corner only when closeLabel is set", async () => {
+  const change = vi.fn();
+  const view = render(
+    <Dialog defaultOpen title="설정" onOpenChange={change}>
+      <Button>완료</Button>
+    </Dialog>,
+  );
+  await screen.findByRole("dialog", { name: "설정" });
+  expect(screen.queryByRole("button", { name: "닫기" })).toBeNull();
+  view.unmount();
+  render(
+    <Dialog defaultOpen title="설정" closeLabel="닫기" onOpenChange={change}>
+      <Button>완료</Button>
+    </Dialog>,
+  );
+  const close = await screen.findByRole("button", { name: "닫기" });
+  expect(close).toHaveClass("dds-dialog__close");
+  await userEvent.click(close);
+  await waitFor(() => expect(change).toHaveBeenLastCalledWith(false));
+});
+
 it("does not reuse toast IDs when provider duration changes", async () => {
   const ids: string[] = [];
   function Demo() {

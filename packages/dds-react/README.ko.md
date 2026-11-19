@@ -19,7 +19,7 @@ Button, IconButton, Field, Checkbox, Radio, Select, Switch, RadioGroup, Dialog, 
 
 React DOM 속성(`className`, `htmlFor`, `onChange`)과 객체/콜백 ref를 사용합니다. Button은 기본 `type="button"`이고, loading 중에는 눌리지 않으며 이름과 크기를 그대로 유지합니다. 라벨은 지우지 않고 숨기며 스피너를 그 위에 그리므로(D-043) 진행 중에도 라벨은 바꾸지 마세요. Checkbox/Radio/Switch는 `checked`, `defaultChecked`, `onCheckedChange(boolean)`을 지원하고, Select는 네이티브 value/onChange를 사용합니다. RadioGroup은 label/options와 value/defaultValue/onValueChange(string)을 받습니다. Tabs는 Ark 옵션과 onValueChange(string)을 지원합니다.
 
-Dialog는 기본적으로 portal을 사용하며 Ark가 중첩 모달, 포커스 복원, Escape, 스크롤 잠금을 관리합니다. `portal={false}`로 SSR 열린 콘텐츠를 인라인 렌더링할 수 있습니다. `contentProps`, `actions`, `frame`, `initialFocus`, `finalFocus`, `unstyled`와 Ark root 옵션을 제공합니다. Solid의 커스텀 additionalFocusContainers는 모방하지 않습니다. 고급 구성은 ArkDialog/ArkTabs/ArkTooltip/ArkRadioGroup/ArkCheckbox/ArkSwitch/ArkField/ArkToast 네임스페이스를 사용하세요.
+Dialog는 기본적으로 portal을 사용하며 Ark가 중첩 모달, 포커스 복원, Escape, 스크롤 잠금을 관리합니다. `portal={false}`로 SSR 열린 콘텐츠를 인라인 렌더링할 수 있습니다. `contentProps`, `actions`, `frame`, `initialFocus`, `finalFocus`, `unstyled`와 Ark root 옵션을 제공합니다. `closeLabel`을 주면 오른쪽 위(인라인 끝) 모서리에 그 이름의 닫기(X) 버튼이 생기고, `frame`은 이를 `parts.close`로 받습니다. 버튼 줄은 위 내용과 한 단계 간격을 둡니다. Solid의 커스텀 additionalFocusContainers는 모방하지 않습니다. 고급 구성은 ArkDialog/ArkTabs/ArkTooltip/ArkRadioGroup/ArkCheckbox/ArkSwitch/ArkField/ArkToast 네임스페이스를 사용하세요.
 
 Tooltip은 하나의 포커스 가능한 요소 또는 trigger props를 받는 render 함수를 사용합니다. ToastProvider의 regionLabel/dismissLabel은 호출자가 지정합니다. dismissLabel이 없으면 닫기 버튼이 없습니다. useToast는 show/loading/update/promise/dismiss/clear를 반환하며 duration 0은 유지됩니다. 언마운트 때 알림을 정리합니다. React·Solid·Vue의 동일한 계약은 [Toast 가이드](../../docs/toast.ko.md)를 참고하세요.
 

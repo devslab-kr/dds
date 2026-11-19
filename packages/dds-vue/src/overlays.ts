@@ -4,6 +4,7 @@ import { Popover as ArkPopover } from '@ark-ui/vue/popover'
 import { Menu as ArkMenu } from '@ark-ui/vue/menu'
 import { defineComponent, h, mergeProps, onMounted, ref, Teleport, type Component, type PropType } from 'vue'
 import { useModel } from './model'
+import Icon from './Icon.vue'
 
 /** Resolve the nearest modal after mount, preserving modal isolation and SSR. */
 export const OwnedPortal = defineComponent({
@@ -22,10 +23,10 @@ function floatingContent(name: string, positioner: Component, content: Component
   })
 }
 export const Dialog = defineComponent({ name: 'DdsDialog', inheritAttrs: false,
-  props: { open: { type: Boolean, default: undefined }, defaultOpen: Boolean, title: { type: String, required: true }, description: String, closeOnOutside: { type: Boolean, default: true }, portal: { type: Boolean, default: true }, initialFocus: Function as PropType<() => HTMLElement | null>, finalFocus: Function as PropType<() => HTMLElement | null> },
+  props: { open: { type: Boolean, default: undefined }, defaultOpen: Boolean, title: { type: String, required: true }, description: String, closeOnOutside: { type: Boolean, default: true }, portal: { type: Boolean, default: true }, initialFocus: Function as PropType<() => HTMLElement | null>, finalFocus: Function as PropType<() => HTMLElement | null>, closeLabel: String },
   emits: ['update:open', 'openChange'],
   setup(p, { attrs, slots, emit }) { const open = useModel(() => p.open, p.defaultOpen, v => { emit('update:open', v); emit('openChange', v) })
-    return () => h(ArkDialog.Root, { open: open.value, 'onUpdate:open': (v: boolean) => open.value = v, closeOnInteractOutside: p.closeOnOutside, initialFocusEl: p.initialFocus, finalFocusEl: p.finalFocus, lazyMount: true, unmountOnExit: true }, { default: () => [slots.trigger ? h(ArkDialog.Trigger, { asChild: true }, slots.trigger) : null, h(OwnedPortal, { disabled: !p.portal }, { default: () => h(ArkDialog.Positioner, { class: 'dds-dialog-overlay' }, { default: () => h(ArkDialog.Content, mergeProps(attrs, { class: 'dds-dialog', 'aria-describedby': p.description ? undefined : null }), { default: () => [h(ArkDialog.Title, { class: 'dds-dialog__title' }, () => p.title), p.description && h(ArkDialog.Description, { class: 'dds-dialog__body' }, () => p.description), slots.default?.(), slots.actions && h('div', { class: 'dds-dialog__actions' }, slots.actions())] }) }) })] })
+    return () => h(ArkDialog.Root, { open: open.value, 'onUpdate:open': (v: boolean) => open.value = v, closeOnInteractOutside: p.closeOnOutside, initialFocusEl: p.initialFocus, finalFocusEl: p.finalFocus, lazyMount: true, unmountOnExit: true }, { default: () => [slots.trigger ? h(ArkDialog.Trigger, { asChild: true }, slots.trigger) : null, h(OwnedPortal, { disabled: !p.portal }, { default: () => h(ArkDialog.Positioner, { class: 'dds-dialog-overlay' }, { default: () => h(ArkDialog.Content, mergeProps(attrs, { class: 'dds-dialog', 'aria-describedby': p.description ? undefined : null }), { default: () => [p.closeLabel && h(ArkDialog.CloseTrigger, { class: 'dds-iconbtn dds-iconbtn--sm dds-dialog__close', 'aria-label': p.closeLabel }, () => h(Icon, { name: 'close' })), h(ArkDialog.Title, { class: 'dds-dialog__title' }, () => p.title), p.description && h(ArkDialog.Description, { class: 'dds-dialog__body' }, () => p.description), slots.default?.(), slots.actions && h('div', { class: 'dds-dialog__actions' }, slots.actions())] }) }) })] })
   }
 })
 export const Tooltip = defineComponent({ name: 'DdsTooltip', inheritAttrs: false, props: { content: { type: String, required: true } },

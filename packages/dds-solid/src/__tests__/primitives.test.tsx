@@ -490,6 +490,25 @@ describe("keyboard lifecycle", () => {
     expect(host.querySelector("input")).toBe(input);
     expect(mounts).toBe(1);
   });
+  it("puts a labelled close button in the corner only when closeLabel is set", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    let opened = () => true;
+    dispose = render(() => {
+      const [isOpen, setOpen] = createSignal(true);
+      opened = isOpen;
+      return <>
+        <Dialog defaultOpen title="No close"><button>Inside</button></Dialog>
+        <Dialog open={isOpen()} onOpenChange={setOpen} title="Confirm" closeLabel="Close"><button>Inside</button></Dialog>
+      </>;
+    }, host);
+    await Promise.resolve();
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>(".dds-dialog__close")];
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]!.getAttribute("aria-label")).toBe("Close");
+    buttons[0]!.click();
+    await Promise.resolve();
+    expect(opened()).toBe(false);
+  });
   it("closes Dialog on Escape and returns focus", async () => {
     const host = document.body.appendChild(document.createElement("div"));
     const opener = document.body.appendChild(document.createElement("button"));
