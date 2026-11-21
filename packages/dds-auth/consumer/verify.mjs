@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
-import { readFile, access, rm } from "node:fs/promises";
+import { readFile, access, mkdir, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// A reusable, tracked fixture; no mkdtemp, scratch project or worktree is created.
 const consumer = dirname(fileURLToPath(import.meta.url));
-const root = resolve(consumer, "..");
+const packages = resolve(consumer, "../..");
+const packDirectory = join(consumer, ".verify-tarballs");
 const nodeModules = join(dirname(process.execPath), "node_modules");
 function run(command, args, cwd = consumer) {
   const result = spawnSync(command, args, {
@@ -28,24 +28,34 @@ const npm = (args) =>
       ? [join(nodeModules, "npm/bin/npm-cli.js"), ...args]
       : args,
   );
-const manifest = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
-const tarball = join(
-  consumer,
-  `${manifest.name.replace(/^@/, "").replace("/", "-")}-${manifest.version}.tgz`,
-);
-run(
-  process.platform === "win32" ? process.execPath : "pnpm",
+const pnpmPrefix =
   process.platform === "win32"
-    ? [
-        join(nodeModules, "corepack/dist/pnpm.js"),
-        "pack",
-        "--pack-destination",
-        consumer,
-      ]
-    : ["pack", "--pack-destination", consumer],
-  root,
-);
+    ? [join(nodeModules, "corepack/dist/pnpm.js")]
+    : [];
+
+// Acquire the tracked fixture exclusively before touching its shared node_modules.
+await mkdir(packDirectory);
 try {
+  const candidates = [];
+  for (const directory of [
+    "dds-tokens",
+    "dds-css",
+    "dds-icons",
+    "dds-react",
+    "dds-auth",
+  ]) {
+    const packageRoot = join(packages, directory);
+    const { name, version } = JSON.parse(
+      await readFile(join(packageRoot, "package.json"), "utf8"),
+    );
+    run(
+      process.platform === "win32" ? process.execPath : "pnpm",
+      [...pnpmPrefix, "pack", "--pack-destination", packDirectory],
+      packageRoot,
+    );
+    const filename = `${name.replace(/^@/, "").replace("/", "-")}-${version}.tgz`;
+    candidates.push({ name, version, tarball: join(packDirectory, filename) });
+  }
   npm([
     "install",
     "--ignore-scripts",
@@ -53,8 +63,18 @@ try {
     "--no-fund",
     "--no-save",
     "--package-lock=false",
-    tarball,
+    ...candidates.map(({ tarball }) => tarball),
   ]);
+  for (const { name, version } of candidates) {
+    const path = join(consumer, "node_modules", name, "package.json");
+    const packed = JSON.parse(await readFile(path, "utf8"));
+    assert.equal(packed.name, name);
+    assert.equal(
+      packed.version,
+      version,
+      `Expected the packed candidate for ${name}`,
+    );
+  }
   const installed = join(consumer, "node_modules/@devslab-kr/dds-auth");
   assert.ok(
     installed.startsWith(`${consumer}/`) ||
@@ -89,8 +109,6 @@ try {
   const packed = JSON.parse(
     await readFile(join(installed, "package.json"), "utf8"),
   );
-  assert.equal(packed.name, "@devslab-kr/dds-auth");
-  assert.equal(packed.version, manifest.version);
   assert.equal(
     packed.dependencies,
     undefined,
@@ -113,6 +131,5 @@ try {
   ]);
   run(process.execPath, ["runtime.mjs"]);
 } finally {
-  // This exact tarball is produced by this invocation; the permanent fixture and dependencies remain reusable.
-  await rm(tarball, { force: true });
+  await rm(packDirectory, { recursive: true, force: true });
 }

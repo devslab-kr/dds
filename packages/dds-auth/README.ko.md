@@ -77,4 +77,4 @@ Next.js 앱의 서버 조회/변경은 TanStack Query, 업무 입력·동의 폼
 
 ## 검증
 
-패키지 `test`/`check`/`build`는 계약과 실제 사용자 동작을 검사합니다. `verify:consumer`는 추적되는 consumer fixture 안에 pack/install하고 공개 DDS 0.29.2 고정 소비, 타입, Node/worker import, 브라우저 없는 SSR, hydration DOM 유지와 오류 동작을 확인합니다. 임시 프로젝트를 만들지 않습니다. Playwright `playwright.auth.config.ts`는 `/login.html`의 명시적 어댑터 시뮬레이션에서 키보드·복구·로딩·설정 누락·반응형·양 테마·긴 문구·공식 자산·axe를 검사합니다. 실제 제공자 로그인이나 운영 콘솔 준비 완료 검증과 구분합니다.
+패키지 `test`/`check`/`build`는 계약과 실제 사용자 동작을 검사합니다. 저장소 루트에서 `pnpm verify:auth:release`를 실행하면 Auth, DDS React와 그 DDS 의존성을 함께 빌드해 tarball로 만듭니다. 저장소의 `consumer` 테스트 앱은 이 tarball을 설치해 타입, Node/worker import, 브라우저 없는 SSR, hydration DOM 유지와 오류 동작을 확인합니다. Playwright `playwright.auth.config.ts`는 `/login.html`의 명시적 어댑터 시뮬레이션에서 키보드·복구·로딩·설정 누락·반응형·양 테마·긴 문구·공식 자산·axe를 검사합니다. 실제 제공자 로그인이나 운영 콘솔 준비 완료 검증과 구분합니다.

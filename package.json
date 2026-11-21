@@ -47,7 +47,7 @@
     "verify:components": "node --test tests/component-entries.test.mjs && playwright test --config playwright.components.config.ts",
     "verify:auth:test": "pnpm --filter @devslab/dds-react... run build && pnpm --filter @devslab-kr/dds-auth run check && pnpm --filter @devslab-kr/dds-auth run test",
     "verify:auth:browser": "pnpm --filter @devslab-kr/dds-auth run build && playwright test --config playwright.auth.config.ts",
-    "verify:auth:release": "pnpm --filter @devslab-kr/dds-auth run build && pnpm --filter @devslab-kr/dds-auth run verify:consumer",
+    "verify:auth:release": "pnpm --filter @devslab-kr/dds-auth... run build && pnpm --filter @devslab-kr/dds-auth run verify:consumer",
     "verify:vue:test": "pnpm --filter @devslab/dds-vue run check && pnpm --filter @devslab/dds-vue run test",
     "verify:vue:release": "pnpm --filter @devslab/dds-vue run build && node scripts/verify-vue-release.mjs",
     "verify:table-vue:test": "pnpm --filter @devslab/dds-table-vue run check && pnpm --filter @devslab/dds-table-vue run test",
