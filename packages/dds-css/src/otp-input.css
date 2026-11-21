@@ -44,8 +44,8 @@
 .dds-otp-input:has(input[aria-invalid="true"]) > span { border-color: var(--dds-color-status-danger); }
 .dds-otp-input:focus-within > [data-active] {
   position: relative;
-  outline: 2px solid var(--dds-color-border-focus);
-  outline-offset: 2px;
+  outline: var(--dds-space-2) solid var(--dds-color-border-focus);
+  outline-offset: calc(var(--dds-space-2) * -1);
 }
 .dds-otp-input:focus-within > [data-caret]::after {
   content: "";
