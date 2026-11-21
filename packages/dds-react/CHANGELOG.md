@@ -1,5 +1,14 @@
 # @devslab/dds-react
 
+## 0.37.1
+
+### Patch Changes
+
+- fad76df: Ship English and Korean guides for toast notifications, input controls, and layouts with the React package so consumers can read the documentation for their installed version.
+  - @devslab/dds-tokens@0.37.1
+  - @devslab/dds-css@0.37.1
+  - @devslab/dds-icons@0.37.1
+
 ## 0.37.0
 
 ### Minor Changes

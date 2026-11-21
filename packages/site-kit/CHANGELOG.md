@@ -1,5 +1,12 @@
 # @devslab/site-kit
 
+## 0.37.1
+
+### Patch Changes
+
+- @devslab/dds-icons@0.37.1
+- @devslab/dds-solid@0.37.1
+
 ## 0.37.0
 
 ### Patch Changes

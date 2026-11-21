@@ -1,5 +1,12 @@
 # @devslab/dds-table-react
 
+## 0.37.1
+
+### Patch Changes
+
+- @devslab/dds-tokens@0.37.1
+- @devslab/dds-css@0.37.1
+
 ## 0.37.0
 
 ### Patch Changes
