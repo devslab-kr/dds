@@ -1,0 +1,69 @@
+.dds-otp-input {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 2.4ch);
+  gap: .6ch;
+  inline-size: max-content;
+  max-inline-size: 100%;
+  color: var(--dds-color-text-primary);
+  font: 600 clamp(1rem, 5vw, 1.5rem)/1 ui-monospace, monospace;
+}
+.dds-otp-input > span {
+  box-sizing: border-box;
+  block-size: 2.75rem;
+  border: 1px solid var(--dds-color-border-control, var(--dds-color-border-strong));
+  border-radius: var(--dds-radius-sm);
+  background: var(--dds-color-bg-default);
+}
+.dds-otp-input > .dds-otp-input__control {
+  position: absolute;
+  inset: 0 auto 0 0;
+  box-sizing: border-box;
+  inline-size: calc(100% + 2ch);
+  max-inline-size: none;
+  block-size: 100%;
+  clip-path: inset(0 2ch 0 0);
+  appearance: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  padding: 0 0 0 .7ch;
+  background: transparent;
+  color: inherit;
+  caret-color: transparent;
+  font: inherit;
+  letter-spacing: 2ch;
+  text-align: start;
+  direction: ltr;
+}
+.dds-otp-input[data-disabled] { color: var(--dds-color-text-muted); }
+.dds-otp-input:has(input[aria-invalid="true"]) > span { border-color: var(--dds-color-status-danger); }
+.dds-otp-input:focus-within > [data-active] {
+  position: relative;
+  outline: 2px solid var(--dds-color-border-focus);
+  outline-offset: 2px;
+}
+.dds-otp-input:focus-within > [data-caret]::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  inline-size: 2px;
+  block-size: 1em;
+  background: currentColor;
+  pointer-events: none;
+}
+.dds-otp-input:focus-within > [data-caret="before"]::after { left: .4ch; }
+.dds-otp-input:focus-within > [data-caret="after"]::after { left: 1.9ch; }
+@keyframes dds-otp-caret-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .dds-otp-input:focus-within > [data-caret]::after { animation: dds-otp-caret-blink 1s step-end infinite; }
+}
+@media (forced-colors: active) {
+  .dds-otp-input:focus-within > [data-active] { outline-color: Highlight; }
+  .dds-otp-input:focus-within > [data-caret]::after { background: CanvasText; forced-color-adjust: none; }
+}

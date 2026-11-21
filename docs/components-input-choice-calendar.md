@@ -31,6 +31,19 @@ labelPlacement is outside (default), inside (floating on focus/value/autofill), 
 
 Use value/onValueChange for controlled inputs, or defaultValue for uncontrolled inputs. Clear sends one empty-string notification, returns focus, and does not submit the form. Clearing required inputs makes them invalid. Disabled/readOnly inputs cannot be cleared. Native form reset is respected, including prevented resets and parent-owned controlled values. A composing Enter is not treated as a search submission.
 
+## Six-digit codes in React
+
+Import `OtpInput` from `@devslab/dds-react/otp-input` or the package root. Supply a label and keep the six-digit value in form state. The ref, name and ARIA attributes reach the native input, which supports keyboard selection, paste and one-time-code autofill.
+
+```tsx
+<Field label="Authentication code">
+  {control => <OtpInput {...control} name="otp" required autoFocus
+    value={code} onValueChange={setCode} />}
+</Field>
+```
+
+For automatic verification, pass `onComplete={verifyCode}`. Each edit that completes a changed code calls the handler once. An explicit confirmation button can submit the form when the handler is omitted.
+
 ## Selecting values
 
 Select keeps its existing native-select behavior. SelectPicker provides a custom non-searchable single-value selector. Combobox combines query entry and selection; it is not a free-text storage control.

@@ -5,6 +5,7 @@ export default defineConfig({
       entry: {
         index: "src/index.ts",
         input: "src/input.tsx",
+        "otp-input": "src/otp-input.tsx",
         combobox: "src/combobox.tsx",
         "select-picker": "src/select-picker.tsx",
         "dropdown-menu": "src/dropdown-menu.tsx",

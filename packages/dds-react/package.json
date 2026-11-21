@@ -36,6 +36,11 @@
       "default": "./dist/index.js"
     },
     "./styles.css": "./styles.css",
+    "./otp-input": {
+      "types": "./dist/otp-input.d.ts",
+      "import": "./dist/otp-input.js",
+      "default": "./dist/otp-input.js"
+    },
     "./input": {
       "types": "./dist/input.d.ts",
       "import": "./dist/input.js",
