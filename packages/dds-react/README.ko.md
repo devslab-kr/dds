@@ -1,5 +1,7 @@
 # DDS React
 
+아래 사용 가이드 링크는 설치한 버전의 `dist/docs/` 파일을 엽니다. 저장소에서 읽을 때는 [Toast](https://github.com/devslab-kr/dds/blob/HEAD/docs/toast.ko.md), [입력·선택 컨트롤](https://github.com/devslab-kr/dds/blob/HEAD/docs/components-input-choice-calendar.ko.md), [레이아웃](https://github.com/devslab-kr/dds/blob/HEAD/docs/layouts.ko.md) 원문을 참고하세요.
+
 Ark UI 5.39.3과 DDS 토큰·CSS·아이콘을 사용하는 React 접근성 컴포넌트입니다. React/React DOM 18.3 또는 19를 peer dependency로 사용합니다.
 
 ```tsx
@@ -21,7 +23,7 @@ React DOM 속성(`className`, `htmlFor`, `onChange`)과 객체/콜백 ref를 사
 
 Dialog는 기본적으로 portal을 사용하며 Ark가 중첩 모달, 포커스 복원, Escape, 스크롤 잠금을 관리합니다. `portal={false}`로 SSR 열린 콘텐츠를 인라인 렌더링할 수 있습니다. `contentProps`, `actions`, `frame`, `initialFocus`, `finalFocus`, `unstyled`와 Ark root 옵션을 제공합니다. `closeLabel`을 주면 오른쪽 위(인라인 끝) 모서리에 그 이름의 닫기(X) 버튼이 생기고, `frame`은 이를 `parts.close`로 받습니다. 버튼 줄은 위 내용과 한 단계 간격을 둡니다. Solid의 커스텀 additionalFocusContainers는 모방하지 않습니다. 고급 구성은 ArkDialog/ArkTabs/ArkTooltip/ArkRadioGroup/ArkCheckbox/ArkSwitch/ArkField/ArkToast 네임스페이스를 사용하세요.
 
-Tooltip은 하나의 포커스 가능한 요소 또는 trigger props를 받는 render 함수를 사용합니다. ToastProvider의 regionLabel/dismissLabel은 호출자가 지정합니다. dismissLabel이 없으면 닫기 버튼이 없습니다. useToast는 show/loading/update/promise/dismiss/clear를 반환하며 duration 0은 유지됩니다. 언마운트 때 알림을 정리합니다. React·Solid·Vue의 동일한 계약은 [Toast 가이드](../../docs/toast.ko.md)를 참고하세요.
+Tooltip은 하나의 포커스 가능한 요소 또는 trigger props를 받는 render 함수를 사용합니다. ToastProvider의 regionLabel/dismissLabel은 호출자가 지정합니다. dismissLabel이 없으면 닫기 버튼이 없습니다. useToast는 show/loading/update/promise/dismiss/clear를 반환하며 duration 0은 유지됩니다. 언마운트 때 알림을 정리합니다. React·Solid·Vue의 동일한 계약은 [Toast 가이드](./dist/docs/toast.ko.md)를 참고하세요.
 
 ```tsx
 const toast = useToast(); // ToastProvider 내부
@@ -100,8 +102,7 @@ validity callback은 최초 mount, 의미 있는 입력·제약·외부 값 변�
 
 Input/InputGroup은 검색 전용이 아닌 일반 입력 기반이며 라벨 배치·내용 지우기를 지원합니다. Combobox/SelectPicker는 가상화를, DropdownMenu/Popover는 접근 가능한 팝업을, Calendar/DatePicker/DateRangePicker/MonthPicker는 공유 달력을 제공합니다.
 
-상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/date-range-picker`, `/month-picker`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
-상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.ko.md)를 참고하세요.
+상세 import: `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`. 기존 루트 import와 `styles.css`는 유지합니다. [공통 사용 가이드](./dist/docs/components-input-choice-calendar.ko.md)를 참고하세요.
 
 ## 선택형 콘솔 메뉴 그룹
 
@@ -120,4 +121,4 @@ ID 생략 시 `group-<index>`를 사용하므로 순서 변경·상태 보관에
 
 ## 공통 업무 화면
 
-Layout·LeftNav·TopNav는 공통 간격과 타이포 규격을 사용합니다. [조립 방법과 수치](../../docs/layouts.ko.md)를 참고하세요.
+Layout·LeftNav·TopNav는 공통 간격과 타이포 규격을 사용합니다. [조립 방법과 수치](./dist/docs/layouts.ko.md)를 참고하세요.

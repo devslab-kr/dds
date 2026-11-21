@@ -138,6 +138,30 @@ try {
   const manifest = JSON.parse(
     await readFile(join(installed, "package.json"), "utf8"),
   );
+  if (mode === "react") {
+    for (const suffix of [".md", ".ko.md"]) {
+      const readme = await readFile(join(installed, `README${suffix}`), "utf8");
+      const links = Array.from(
+        readme.matchAll(/\]\(\.\/([^)\s#]+\.md)(?:#[^)\s]*)?\)/g),
+        (match) => match[1],
+      );
+      for (const topic of [
+        "toast",
+        "components-input-choice-calendar",
+        "layouts",
+      ]) {
+        const filename = topic + suffix;
+        const link = links.find((path) => basename(path) === filename);
+        assert.ok(link, `Packed README${suffix} must link to ${filename}`);
+        const guide = await readFile(join(installed, link), "utf8");
+        assert.equal(
+          guide,
+          await readFile(join(workspace, "docs", filename), "utf8"),
+          `Packed ${filename} must match the guide for this release`,
+        );
+      }
+    }
+  }
   for (const path of [
     "dist/index.js",
     "dist/index.d.ts",

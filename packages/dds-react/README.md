@@ -1,5 +1,7 @@
 # DDS React
 
+The usage guides linked below ship in `dist/docs/` and match the installed package version. When browsing the repository, see the source guides for [toast](https://github.com/devslab-kr/dds/blob/HEAD/docs/toast.md), [input and selection controls](https://github.com/devslab-kr/dds/blob/HEAD/docs/components-input-choice-calendar.md), and [layouts](https://github.com/devslab-kr/dds/blob/HEAD/docs/layouts.md).
+
 Accessible React primitives using Ark UI 5.39.3 and shared DDS tokens, CSS and icons. React and React DOM are peers (18.3 or 19). Import CSS once in the application:
 
 ```tsx
@@ -25,7 +27,7 @@ Native DOM attributes use React spelling (`className`, `htmlFor`, `onChange`). D
 
 Tabs extends Ark root options, with `onValueChange(string)`; parts accept normal Ark DOM props including `asChild`. Dialog accepts Ark root options with `onOpenChange(boolean)`, `closeOnOutside`, `initialFocus`, `finalFocus`, `contentProps`, `actions`, `frame(parts)` and `unstyled`. Pass `closeLabel` to add a close (X) button in the top inline-end corner, named by that label; `frame` receives it as `parts.close`. Actions keep one step of space from the content above them. Dialog portals by default; use `portal={false}` for inline markup, including open SSR content. Ark owns nested modal isolation, focus, Escape handling and scroll locking. Additional focus containers from the Solid package are not emulated; use Ark `persistentElements` and `modal`/`trapFocus` according to application needs.
 
-Tooltip accepts one element child (Ark `asChild`) or a render function receiving native button trigger props. Use a focusable trigger and preserve the supplied events. `ToastProvider` accepts optional caller `regionLabel` and `dismissLabel` (string or record-to-string function); without `dismissLabel` it renders no close button. `useToast()` returns `show`, `loading`, `update`, `promise`, `dismiss`, and `clear`; duration 0 persists. Providers clear their notifications on unmount. The [Toast guide](../../docs/toast.md) covers the identical React/Solid/Vue contract.
+Tooltip accepts one element child (Ark `asChild`) or a render function receiving native button trigger props. Use a focusable trigger and preserve the supplied events. `ToastProvider` accepts optional caller `regionLabel` and `dismissLabel` (string or record-to-string function); without `dismissLabel` it renders no close button. `useToast()` returns `show`, `loading`, `update`, `promise`, `dismiss`, and `clear`; duration 0 persists. Providers clear their notifications on unmount. The [Toast guide](./dist/docs/toast.md) covers the identical React/Solid/Vue contract.
 
 ```tsx
 const toast = useToast(); // inside ToastProvider
@@ -134,8 +136,7 @@ Delayed controlled echoes matching an outstanding local emission acknowledge tha
 
 Input/InputGroup are general-purpose native inputs, not search-only, with label placement and clear actions. Combobox/SelectPicker support fixed-row virtualization; DropdownMenu/Popover provide accessible overlays; Calendar/DatePicker/DateRangePicker/MonthPicker share a calendar view.
 
-Use explicit subpaths `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/date-range-picker`, `/month-picker`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).
-Use explicit subpaths `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](https://github.com/devslab-kr/dds/blob/main/docs/components-input-choice-calendar.md).
+Use explicit subpaths `@devslab/dds-react/input`, `/combobox`, `/select-picker`, `/dropdown-menu`, `/popover`, `/calendar`, `/date-picker`, `/time-picker`, `/date-range-picker`, `/month-picker`, `/segmented-control`, `/number-input`, or the existing root exports. Keep importing `styles.css` once. See the [common usage guide](./dist/docs/components-input-choice-calendar.md).
 
 ## Optional console navigation groups
 
@@ -165,4 +166,4 @@ the desktop rail and mobile drawer.
 
 ## Shared application layouts
 
-Layout, LeftNav and TopNav use the common geometry and typography rules. See [composition and exact dimensions](../../docs/layouts.md).
+Layout, LeftNav and TopNav use the common geometry and typography rules. See [composition and exact dimensions](./dist/docs/layouts.md).
