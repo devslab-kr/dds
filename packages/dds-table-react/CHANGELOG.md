@@ -1,5 +1,13 @@
 # @devslab/dds-table-react
 
+## 0.37.0
+
+### Patch Changes
+
+- Updated dependencies [7db979d]
+  - @devslab/dds-css@0.37.0
+  - @devslab/dds-tokens@0.37.0
+
 ## 0.36.0
 
 ### Minor Changes

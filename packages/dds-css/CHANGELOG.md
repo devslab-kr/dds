@@ -1,5 +1,11 @@
 # @devslab/dds-css
 
+## 0.37.0
+
+### Minor Changes
+
+- 7db979d: Add a controlled six-digit OTP input with native selection and autofill, an active-cell caret, and an optional completion callback.
+
 ## 0.36.0
 
 ### Minor Changes
