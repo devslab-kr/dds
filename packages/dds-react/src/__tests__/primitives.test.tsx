@@ -1,6 +1,7 @@
 import { createRef, StrictMode, useEffect, useState } from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { checkPattern } from "@ui-sdk/core/testing";
 import { describe, it, expect, vi } from "vitest";
 import {
   Button,
@@ -63,8 +64,8 @@ describe("React DDS behavior", () => {
     await userEvent.click(screen.getByRole("checkbox"));
     expect(screen.getByRole("checkbox")).not.toBeChecked();
   });
-  it("delegates tab keyboard selection and panel visibility to Ark", async () => {
-    render(
+  it("follows the accessible tabs pattern and displays the panel selected with the keyboard", async () => {
+    const { container } = render(
       <Tabs defaultValue="a">
         <TabList aria-label="영역">
           <Tab value="a">첫째</Tab>
@@ -83,6 +84,7 @@ describe("React DDS behavior", () => {
       ),
     );
     expect(screen.getByRole("tabpanel")).toHaveTextContent("둘 내용");
+    await checkPattern(container, "tabs");
   });
   it("uses Ark radio roving focus", async () => {
     render(

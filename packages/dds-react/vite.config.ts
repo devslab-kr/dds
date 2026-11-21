@@ -1,5 +1,31 @@
+import { readFile } from "node:fs/promises";
 import { defineConfig } from "vite";
+
 export default defineConfig({
+  plugins: [
+    {
+      name: "dds-react-usage-guides",
+      async generateBundle() {
+        for (const topic of [
+          "toast",
+          "components-input-choice-calendar",
+          "layouts",
+        ]) {
+          for (const suffix of [".md", ".ko.md"]) {
+            const filename = topic + suffix;
+            const source = await readFile(
+              new URL(`../../docs/${filename}`, import.meta.url),
+            );
+            this.emitFile({
+              type: "asset",
+              fileName: `docs/${filename}`,
+              source,
+            });
+          }
+        }
+      },
+    },
+  ],
   build: {
     lib: {
       entry: {
