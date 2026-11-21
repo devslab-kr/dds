@@ -7,7 +7,7 @@ const read=async path=>JSON.parse(await readFile(new URL(`../${path}`,import.met
 const paths=['input','combobox','select-picker','dropdown-menu','popover','calendar','date-picker','time-picker','date-range-picker','month-picker','segmented-control','number-input'];
 for(const framework of ['solid','react']) test(`${framework} component subpaths ship declarations and runtime modules`,async()=>{
  const manifest=await read(`packages/dds-${framework}/package.json`);
- for(const subpath of paths){
+ for(const subpath of framework==='react'?[...paths,'otp-input']:paths){
   const entry=manifest.exports[`./${subpath}`];
   assert.ok(entry,`${subpath} is a documented public entry`);
   const outputs=new Set(Object.values(entry));

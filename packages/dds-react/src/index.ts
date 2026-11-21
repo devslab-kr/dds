@@ -25,6 +25,7 @@ export * from "./status-pill";
 export * from "./pending-action";
 
 export * from "./input";
+export * from "./otp-input";
 export * from "./combobox";
 export * from "./select-picker";
 export * from "./dropdown-menu";

@@ -20,6 +20,7 @@ export const FILES = [
   "iconbutton.css",
   "textfield.css",
   "input.css",
+  "otp-input.css",
   "textarea.css",
   "select.css",
   "choice.css",

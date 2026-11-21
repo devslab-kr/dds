@@ -32,6 +32,19 @@ labelPlacement는 outside(기본), inside(값·포커스가 있으면 위로 올
 
 value/onValueChange는 제어 모드, defaultValue는 비제어 모드다. 제어 모드에서는 부모가 값을 갱신한다. clear는 값을 한 번 비우고 입력창으로 포커스를 돌려주며 폼을 제출하지 않는다. 필수 입력도 지울 수 있지만 빈 상태는 invalid다. disabled/readOnly에서는 지우기 버튼이 표시되지 않는다. InputGroup의 start/end는 아이콘·단위·버튼 배치만 담당한다. Field render-prop의 id/ARIA를 Input에 전달할 수 있다. input을 Field와 연결했을 때 추가 label을 이중으로 만들지 않는다.
 
+## React의 6자리 인증 코드
+
+`@devslab/dds-react/otp-input` 또는 패키지 루트에서 `OtpInput`을 가져온다. 레이블을 지정하고 여섯 자리 값은 폼에서 관리한다. ref와 name, ARIA 속성은 키보드 선택, 붙여넣기, 일회용 코드 자동 완성을 지원하는 네이티브 입력에 전달된다.
+
+```tsx
+<Field label="인증 코드">
+  {control => <OtpInput {...control} name="otp" required autoFocus
+    value={code} onValueChange={setCode} />}
+</Field>
+```
+
+자동 확인이 필요한 폼은 `onComplete={verifyCode}`를 전달한다. 입력값을 편집해 여섯 자리를 새로 완성할 때마다 한 번 호출된다. 확인 버튼을 눌러 제출하는 폼에서는 이 콜백을 생략한다.
+
 ## Select와 SelectPicker, Combobox
 
 - Select: 기존 네이티브 select. OS 선택 UI와 기존 API를 유지한다.
