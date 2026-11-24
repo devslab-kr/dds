@@ -39,7 +39,7 @@
     "@devslab/dds-table-solid": "workspace:0.37.1"
   },
   "peerDependencies": {
-    "solid-js": "1.9.19"
+    "solid-js": "^1.9.19"
   },
   "devDependencies": {
     "@types/node": "26.3.0",

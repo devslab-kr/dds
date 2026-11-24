@@ -10,7 +10,7 @@ test("dds-solid is a public exact-version package with stable exports", async ()
   assert.equal(manifest.name, "@devslab/dds-solid");
   assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
   assert.equal(manifest.publishConfig.access, "public");
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
+  assert.equal(manifest.peerDependencies["solid-js"], "^1.9.19");
   assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies["@types/node"], "26.3.0");
