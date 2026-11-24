@@ -160,7 +160,7 @@ try {
   ]) {
     await access(join(installedRoot, path));
   }
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
+  assert.equal(manifest.peerDependencies["solid-js"], "^1.9.19");
   const ssrScript = join(temp, "consumer-ssr.mjs");
   await writeFile(
     ssrScript,

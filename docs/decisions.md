@@ -5,6 +5,26 @@
 
 ---
 
+## D-056 — Solid·TanStack 피어는 같은 메이저 안에서 열어 둔다 (2026-11-24)
+
+**문제.** `dds-solid`·`dds-table`·`dds-table-solid`·`site-kit`이 `solid-js`를 정확히 `1.9.19`로, site-kit이 선택
+피어 `@tanstack/solid-router`·`@tanstack/solid-start`를 정확한 버전으로 요구했다. 정확한 피어는 제품이 Solid나
+TanStack의 보안 패치를 받으려면 DDS 릴리스를 기다리게 만든다. 실제로 devlab.kr이 벤더링한 site-kit tgz는
+`solid-js 1.9.15`를 정확히 요구해 취약한 `seroval 1.5.6`이 lockfile에 남았다(Dependabot). 정확한 고정의 이유는 기록에
+없었다.
+
+**결정.** 피어는 같은 메이저 안의 캐럿 범위로 둔다: `solid-js ^1.9.19`, `@tanstack/solid-router ^1.170.30`,
+`@tanstack/solid-start ^1.168.47`. 하한은 지금 검증한 버전이다. devDependencies와 릴리스 검증 스크립트가 설치하는
+버전은 정확한 하한 그대로라, DDS는 계속 하한에서 빌드·테스트한다. 계약 테스트는 범위 문자열을 확인한다.
+
+**트레이드오프.** 하한보다 새 패치·마이너와의 조합은 DDS CI가 직접 돌려 보지 않는다. Solid 1.x 안의 하이드레이션
+호환과 TanStack 1.x 안의 API 호환에 기댄다.
+
+**재검토 조건.** 상한 버전에서 하이드레이션 불일치나 어댑터 깨짐이 재현되면, 그 버전을 범위에서 빼거나
+릴리스 검증에 상한 조합을 추가한다.
+
+---
+
 ## D-055 — 세그먼트의 고른 면은 미끄러져 옮겨 간다 (2026-11-13)
 
 **문제.** 세그먼트 컨트롤은 다른 칸을 고르면 이전 칸의 면이 사라지고 새 칸의 면이 나타났다(색만 100ms에

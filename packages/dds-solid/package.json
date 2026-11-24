@@ -148,7 +148,7 @@
     "@zag-js/focus-trap": "1.45.0"
   },
   "peerDependencies": {
-    "solid-js": "1.9.19"
+    "solid-js": "^1.9.19"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "6.9.1",

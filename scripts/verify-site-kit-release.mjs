@@ -248,7 +248,7 @@ try {
   }
   assert.equal(manifest.publishConfig.access, "public");
   assert.equal(manifest.license, "SEE LICENSE IN LICENSE");
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
+  assert.equal(manifest.peerDependencies["solid-js"], "^1.9.19");
   // Neither framework is forced on a product that renders with the other.
   assert.equal(manifest.peerDependenciesMeta["solid-js"]?.optional, true);
   assert.equal(manifest.peerDependenciesMeta.react?.optional, true);

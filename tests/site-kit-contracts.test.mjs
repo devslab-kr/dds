@@ -26,7 +26,7 @@ test("site-kit exposes runtime-neutral, Solid, TanStack, and stylesheet boundari
   assert.match(manifest.scripts.build, /vite build --config vite\.server\.config\.ts/);
   assert.match(await read("packages/site-kit/vite.server.config.ts"), /solid\.server\.js/);
   assert.match(await read("packages/site-kit/vitest.config.ts"), /@devslab\/dds-solid/);
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
+  assert.equal(manifest.peerDependencies["solid-js"], "^1.9.19");
   assert.equal(manifest.peerDependencies["@solidjs/web"], undefined);
   assert.equal(manifest.devDependencies["@types/node"], "26.3.0");
   assert.equal(manifest.devDependencies.typescript, "7.0.2");

@@ -101,7 +101,7 @@ try {
   for (const path of ["dist/index.js", "dist/server.js", "dist/index.d.ts", "LICENSE"]) {
     await access(join(installedRoot, path));
   }
-  assert.equal(manifest.peerDependencies["solid-js"], "1.9.19");
+  assert.equal(manifest.peerDependencies["solid-js"], "^1.9.19");
   const ssrScript = join(temp, "consumer-ssr.mjs");
   await writeFile(ssrScript, `
 import { generateHydrationScript, renderToString } from "solid-js/web";
