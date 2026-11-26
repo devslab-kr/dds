@@ -1,5 +1,12 @@
 # @devslab/dds-svelte
 
+## 0.37.2
+
+### Patch Changes
+
+- @devslab/dds-tokens@0.37.2
+- @devslab/dds-css@0.37.2
+
 ## 0.37.1
 
 ### Patch Changes

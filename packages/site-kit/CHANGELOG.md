@@ -1,5 +1,14 @@
 # @devslab/site-kit
 
+## 0.37.2
+
+### Patch Changes
+
+- 403ef33: Accept any compatible `solid-js` 1.x release (`^1.9.19`) instead of exactly 1.9.19, and let site-kit's optional TanStack Solid router and start peers float within their major (`^1.170.30`, `^1.168.47`). Products can now take Solid and TanStack security patches without waiting for a DDS release. DDS still builds and tests against the floor versions.
+- Updated dependencies [403ef33]
+  - @devslab/dds-solid@0.37.2
+  - @devslab/dds-icons@0.37.2
+
 ## 0.37.1
 
 ### Patch Changes
