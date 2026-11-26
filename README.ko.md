@@ -6,6 +6,8 @@
 웹과 모바일이 공유하는 프레임워크 중립적 토큰·컴포넌트·규칙 세트다.
 코어는 토큰 + CSS 이고 React · Vue · Ionic · React Native 는 소비자다.
 
+새 프로젝트의 랜딩과 앱 문구는 [한국어 UX 라이팅과 타이포그래피](docs/korean-writing.ko.md)를 기준으로 검토한다.
+
 ## 설치
 
 DDS 패키지는 **공개 npm 레지스트리**(`registry.npmjs.org`)에

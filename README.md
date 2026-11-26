@@ -7,6 +7,8 @@ future apps): one framework-neutral set of tokens, components, and rules
 shared by web and mobile. The core is tokens + CSS; React, Vue, Ionic, and
 React Native are consumers.
 
+For Korean-language products, see the [Korean UX writing and typography guide](docs/korean-writing.ko.md).
+
 ## Installation
 
 DDS packages are published on the **public npm registry** (`registry.npmjs.org`)
